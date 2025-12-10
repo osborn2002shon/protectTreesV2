@@ -1,0 +1,44 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="mp_login.master.cs" Inherits="protectTreesV2._mp.mp_login" %>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>受保護樹木管理系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Noto+Serif+TC:wght@200..900&display=swap" rel="stylesheet">
+    <script src="_js/bootstrap.bundle.js"></script>
+    <script src="_js/jquery-3.7.1.js"></script>
+    <link href="_css/bootstrap.css" rel="stylesheet" />
+    <link href="_css/fontawesome-all.css" rel="stylesheet" />
+    <link href="_css/mp_login.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-icon">
+                    <img src="_img/logo.png" />
+                </div>
+                <h1 class="system-title">受保護樹木管理系統</h1>
+                <p class="system-subtitle">Protected Trees Management System</p>
+            </div>            
+            <div class="login-body">
+                <div class="pageTitle">
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder_title" runat="server"></asp:ContentPlaceHolder>
+                </div>
+                <form id="loginForm" runat="server">
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder_body" runat="server"></asp:ContentPlaceHolder>
+                </form>
+                <div style="font-size:0.85rem;text-align:center;margin-top:10px">
+                    Copyright © 2025 Forestry and Nature Conservation Agency<br />
+                    (02)2351-5441
+                </div>
+            </div>
+        </div>
+    </div>
+    <asp:ContentPlaceHolder ID="ContentPlaceHolder_jsBottom" runat="server"></asp:ContentPlaceHolder>
+</body>
+</html>

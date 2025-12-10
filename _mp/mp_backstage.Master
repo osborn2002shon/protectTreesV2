@@ -1,0 +1,123 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="mp_backstage.master.cs" Inherits="protectTreesV2._mp.mp_backstage" %>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>受保護樹木管理系統</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+    <script src="../../_js/bootstrap.bundle.js"></script>
+    <script src="../../_js/jquery-3.7.1.js"></script>
+    <link href="../_css/bootstrap.css" rel="stylesheet" />
+    <link href="../_css/fontawesome-all.css" rel="stylesheet" />
+    <link href="../_css/mp_default.css" rel="stylesheet" />
+    <link href="../_css/control.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager_main" runat="server"></asp:ScriptManager>
+        <div class="layout-container">
+            <!-- 側邊欄 -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <img src="../../_img/logo.png" />
+                    </div>
+                    <h4 class="sidebar-title">受保護樹木管理系統</h4>
+                    <p class="sidebar-subtitle">Protected Trees Management System</p>
+                    <button type="button" class="mobile-close-btn" id="mobileCloseBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+               <nav class="nav flex-column">
+                    <div class="nav-section">
+                        <%= menuStr_def %>
+                    </div>
+                </nav>
+               <%--<div class="mt-2 text-center">
+                   <a class="link" href="../../_doc/study_20251125.pdf" target="_blank"><i class="fa-solid fa-download me-1"></i>授課簡報251125</a>
+               </div>
+               <div class="mt-2 text-center">
+                   <a class="link" href="../../_doc/study_20251125.zip" target="_blank"><i class="fa-solid fa-download me-1"></i>授課影片251125</a>
+               </div>--%>
+            </div>
+
+            <!-- 主要內容區域 -->
+            <div class="main-content" id="mainContent">
+                <!-- 頂部導航欄 -->
+                <nav class="navbar navbar-expand-lg top-navbar">
+                    <div class="container-fluid">
+                        <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">
+                            <i class="fas fa-bars"></i>
+                        </button>
+
+                        <span class="navbar-brand">受保護樹木管理系統</span>
+
+                        <div class="user-info">
+                            <asp:LinkButton ID="LinkButton_userName" runat="server" CssClass="user-name" PostBackUrl="~/pages/System/MyAccount.aspx" Text="">
+                            </asp:LinkButton>
+                            <asp:LinkButton ID="LinkButton_logout" runat="server" CssClass="btn btn-logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>登出
+                            </asp:LinkButton>                           
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- 路徑導航 -->
+                <div class="breadcrumb-container">
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder_path" runat="server"></asp:ContentPlaceHolder>
+                </div>
+
+                <!-- 內容區域 -->
+                <div class="content-area fade-in">
+                    <h1 class="page-title">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder_title" runat="server"></asp:ContentPlaceHolder>
+                    </h1>
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder_content" runat="server"></asp:ContentPlaceHolder>
+                </div>
+
+                <!-- Footer -->
+                <footer class="footer">
+                    <p class="mb-0">Copyright © 2025 Forestry and Nature Conservation Agency<br />
+                        農業部林業及自然保育署(02)2351-5441 || 大武科技(02)2781-5085</p>
+                </footer>
+            </div>
+        </div>
+
+        <div class="modal fade" id="divMSG" tabindex="-1" role="dialog" aria-labelledby="divMSGTitle" aria-hidden="true" '<%= modalStatic %>'>
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title" id="divMSGTitle">
+                            <asp:ContentPlaceHolder id="ContentPlaceHolder_msg_title" runat="server"></asp:ContentPlaceHolder>
+                        </div>
+                        <asp:Panel ID="Panel_closeModal_img" runat="server">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </asp:Panel>
+                    </div>
+                    <div class="modal-body">
+                        <asp:ContentPlaceHolder id="ContentPlaceHolder_msg_content" runat="server"></asp:ContentPlaceHolder>
+                    </div>
+                    <div class="modal-footer">
+                        <asp:ContentPlaceHolder id="ContentPlaceHolder_msg_btn" runat="server"></asp:ContentPlaceHolder>
+                        <asp:Panel ID="Panel_closeModal" runat="server">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="modalButton_Close">關閉</button>
+                        </asp:Panel>
+                    </div>
+                </div>
+            </div>
+        </div>   
+
+        <!-- Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+       
+        <!-- 回到頂部按鈕 -->
+        <button class="back-to-top" id="backToTop">
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+        <script type="text/javascript" src="../../_js/mp_default.js"></script>
+    </form>    
+</body>
+</html>
