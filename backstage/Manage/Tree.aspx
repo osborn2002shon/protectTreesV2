@@ -64,7 +64,7 @@
     }
 
     .modal-dialog-custom {
-        background-color: #000;
+        background-color: #fff;
         border-radius: 8px;
         max-width: 520px;
         width: 100%;

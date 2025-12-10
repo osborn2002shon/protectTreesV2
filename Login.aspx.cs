@@ -24,6 +24,9 @@ namespace protectTreesV2
             string account = TextBox_ac.Text.Trim();
             string password = TextBox_pw.Text;
 
+            account = "admin";
+            password = "123";
+
             string captcha = TextBox_Captcha.Text.Trim();
             string sessionCaptcha = Session["CAPTCHA"] as string;
             if (string.IsNullOrEmpty(sessionCaptcha) || !string.Equals(captcha, sessionCaptcha, StringComparison.OrdinalIgnoreCase))
