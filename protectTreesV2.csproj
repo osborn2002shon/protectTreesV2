@@ -69,7 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="backstage\Manage\Tree.aspx" />
+    <Content Include="backstage\Manage\TreeView.aspx" />
     <Content Include="backstage\sample\test.aspx" />
+    <Content Include="backstage\tree\detail.aspx" />
+    <Content Include="backstage\tree\edit.aspx" />
+    <Content Include="backstage\tree\edit_photos.aspx" />
+    <Content Include="backstage\tree\query.aspx" />
     <Content Include="bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll" />
     <Content Include="bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml" />
     <Content Include="bin\Newtonsoft.Json.dll" />
@@ -156,12 +161,47 @@
     <Compile Include="backstage\Manage\Tree.aspx.designer.cs">
       <DependentUpon>Tree.aspx</DependentUpon>
     </Compile>
+    <Compile Include="backstage\Manage\TreeView.aspx.cs">
+      <DependentUpon>TreeView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\Manage\TreeView.aspx.designer.cs">
+      <DependentUpon>TreeView.aspx</DependentUpon>
+    </Compile>
     <Compile Include="backstage\sample\test.aspx.cs">
       <DependentUpon>test.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="backstage\sample\test.aspx.designer.cs">
       <DependentUpon>test.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\tree\detail.aspx.cs">
+      <DependentUpon>detail.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\tree\detail.aspx.designer.cs">
+      <DependentUpon>detail.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\tree\edit.aspx.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\tree\edit.aspx.designer.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\tree\edit_photos.aspx.cs">
+      <DependentUpon>edit_photos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\tree\edit_photos.aspx.designer.cs">
+      <DependentUpon>edit_photos.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\tree\query.aspx.cs">
+      <DependentUpon>query.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\tree\query.aspx.designer.cs">
+      <DependentUpon>query.aspx</DependentUpon>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
