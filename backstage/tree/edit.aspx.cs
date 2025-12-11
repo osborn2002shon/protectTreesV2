@@ -47,15 +47,10 @@ namespace protectTreesV2.backstage.tree
 
             ddlLandOwnership.Items.Clear();
             ddlLandOwnership.Items.Add(new ListItem("請選擇", string.Empty));
-            using (var da = new DataAccess.MS_SQL())
-            {
-                const string sql = "SELECT itemText FROM List_LandOwnership ORDER BY sort";
-                var dt = da.GetDataTable(sql);
-                foreach (DataRow row in dt.Rows)
-                {
-                    ddlLandOwnership.Items.Add(new ListItem(row["itemText"].ToString(), row["itemText"].ToString()));
-                }
-            }
+            ddlLandOwnership.Items.Add(new ListItem("國有"));
+            ddlLandOwnership.Items.Add(new ListItem("公有"));
+            ddlLandOwnership.Items.Add(new ListItem("私有"));
+            ddlLandOwnership.Items.Add(new ListItem("其他"));
 
             cblRecognition.Items.Clear();
             foreach (var item in TreeService.GetRecognitionCriteria())
@@ -227,8 +222,8 @@ namespace protectTreesV2.backstage.tree
             {
                 record.SystemTreeNo = TreeService.GenerateSystemTreeNo(record.CityID, record.AreaID, record.AnnouncementDate ?? record.SurveyDate ?? DateTime.Today);
             }
-
-            var user = User.UserService.GetCurrentUser();
+            
+            var user = protectTreesV2.User.UserService.GetCurrentUser();
             int accountId = user?.userID ?? 0;
 
             if (record.TreeID > 0)

@@ -71,7 +71,7 @@
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="btnCoordinateTool" Text="座標轉換" />
-                            <asp:Button ID="btnCoordinateTool" runat="server" Text="轉換" CausesValidation="false" />
+                            <asp:Button ID="btnCoordinateTool" runat="server" Text="座標轉換" CausesValidation="false" />
                         </div>
                     </div>
                     <div class="row">

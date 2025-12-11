@@ -68,8 +68,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="backstage\Manage\Tree.aspx" />
-    <Content Include="backstage\Manage\TreeView.aspx" />
     <Content Include="backstage\sample\test.aspx" />
     <Content Include="backstage\tree\detail.aspx" />
     <Content Include="backstage\tree\edit.aspx" />
@@ -120,6 +118,7 @@
     <Content Include="bin\roslyn\vbc.exe" />
     <Content Include="bin\roslyn\VBCSCompiler.exe" />
     <Content Include="Login.aspx" />
+    <Content Include="SQL\Schema.sql" />
     <Content Include="Web.config" />
     <Content Include="_css\bootstrap-icons.css" />
     <Content Include="_css\bootstrap-table.css" />
@@ -154,20 +153,6 @@
     <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\TreeCatalog.cs" />
     <Compile Include="App_Code\User.cs" />
-    <Compile Include="backstage\Manage\Tree.aspx.cs">
-      <DependentUpon>Tree.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\Manage\Tree.aspx.designer.cs">
-      <DependentUpon>Tree.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\Manage\TreeView.aspx.cs">
-      <DependentUpon>TreeView.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\Manage\TreeView.aspx.designer.cs">
-      <DependentUpon>TreeView.aspx</DependentUpon>
-    </Compile>
     <Compile Include="backstage\sample\test.aspx.cs">
       <DependentUpon>test.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -300,6 +285,7 @@
     <Folder Include="backstage\system\" />
     <Folder Include="obj\" />
     <Folder Include="pages\" />
+    <Folder Include="SPEC\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

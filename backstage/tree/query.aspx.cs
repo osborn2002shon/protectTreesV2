@@ -132,20 +132,22 @@ namespace protectTreesV2.backstage.tree
         {
             if (string.IsNullOrWhiteSpace(expression)) return source.ToList();
 
-            Func<TreeRecord, object> keySelector = expression switch
+            Func<TreeRecord, object> keySelector;
+
+            switch (expression)
             {
-                "SystemTreeNo" => r => r.SystemTreeNo,
-                "AgencyTreeNo" => r => r.AgencyTreeNo,
-                "AgencyJurisdictionCode" => r => r.AgencyJurisdictionCode,
-                "CityName" => r => r.CityName,
-                "AreaName" => r => r.AreaName,
-                "SpeciesDisplayName" => r => r.SpeciesDisplayName,
-                "SurveyDate" => r => r.SurveyDate,
-                "AnnouncementDate" => r => r.AnnouncementDate,
-                "Status" => r => r.Status,
-                "EditStatus" => r => r.EditStatus,
-                _ => r => r.SystemTreeNo
-            };
+                case "SystemTreeNo": keySelector = r => r.SystemTreeNo; break;
+                case "AgencyTreeNo": keySelector = r => r.AgencyTreeNo; break;
+                case "AgencyJurisdictionCode": keySelector = r => r.AgencyJurisdictionCode; break;
+                case "CityName": keySelector = r => r.CityName; break;
+                case "AreaName": keySelector = r => r.AreaName; break;
+                case "SpeciesDisplayName": keySelector = r => r.SpeciesDisplayName; break;
+                case "SurveyDate": keySelector = r => r.SurveyDate; break;
+                case "AnnouncementDate": keySelector = r => r.AnnouncementDate; break;
+                case "Status": keySelector = r => r.Status; break;
+                case "EditStatus": keySelector = r => r.EditStatus; break;
+                default: keySelector = r => r.SystemTreeNo; break;
+            }
 
             return string.Equals(direction, "DESC", StringComparison.OrdinalIgnoreCase)
                 ? source.OrderByDescending(keySelector).ToList()
@@ -290,7 +292,7 @@ namespace protectTreesV2.backstage.tree
                 announcement = dt;
             }
 
-            var user = User.UserService.GetCurrentUser();
+            var user = protectTreesV2.User.UserService.GetCurrentUser();
             int accountId = user?.userID ?? 0;
 
             TreeService.BulkUpdateStatus(selected, status, announcement, accountId);

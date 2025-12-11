@@ -90,7 +90,7 @@ namespace protectTreesV2.User {
         }
     }
 
-    public static class UserService
+    public class UserService
     {
         private const string SESSION_KEY = "CurrentUser";
         public const string PasswordPolicyDescription = "密碼需包含至少一個大寫字母、一個小寫字母及一個數字。";
