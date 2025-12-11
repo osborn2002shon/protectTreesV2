@@ -20,6 +20,14 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
+        private int LogPageIndex
+        {
+            get => ViewState[nameof(LogPageIndex)] as int? ?? 0;
+            set => ViewState[nameof(LogPageIndex)] = value;
+        }
+
+        private const int LogsPageSize = 5;
+
         private void BindDropdowns()
         {
             ddlCity.Items.Clear();
@@ -100,6 +108,8 @@ namespace protectTreesV2.backstage.tree
                     {
                         item.Selected = tree.RecognitionCriteria.Contains(item.Value);
                     }
+
+                    BindLogs(tree.TreeID);
                 }
             }
         }
@@ -243,6 +253,51 @@ namespace protectTreesV2.backstage.tree
         protected void btnCancel_Click(object sender, EventArgs e)
         {
             Response.Redirect("query.aspx");
+        }
+
+        private void BindLogs(int treeId)
+        {
+            var logs = TreeService.GetTreeLogs(treeId);
+            pnlLogs.Visible = true;
+            lblLogEmpty.Visible = logs.Count == 0;
+            rptLogs.Visible = logs.Count > 0;
+
+            if (logs.Count == 0)
+            {
+                lnkLogPrev.Enabled = false;
+                lnkLogNext.Enabled = false;
+                lblLogPageInfo.Text = "0/0";
+                return;
+            }
+
+            int totalPages = (int)Math.Ceiling(logs.Count / (double)LogsPageSize);
+            LogPageIndex = Math.Max(0, Math.Min(LogPageIndex, totalPages - 1));
+
+            var pagedLogs = logs.Skip(LogPageIndex * LogsPageSize).Take(LogsPageSize).ToList();
+            rptLogs.DataSource = pagedLogs;
+            rptLogs.DataBind();
+
+            lnkLogPrev.Enabled = LogPageIndex > 0;
+            lnkLogNext.Enabled = LogPageIndex < totalPages - 1;
+            lblLogPageInfo.Text = string.Format("{0}/{1}", LogPageIndex + 1, totalPages);
+        }
+
+        protected void lnkLogPrev_Click(object sender, EventArgs e)
+        {
+            if (LogPageIndex > 0 && int.TryParse(hfTreeID.Value, out int treeId))
+            {
+                LogPageIndex--;
+                BindLogs(treeId);
+            }
+        }
+
+        protected void lnkLogNext_Click(object sender, EventArgs e)
+        {
+            if (int.TryParse(hfTreeID.Value, out int treeId))
+            {
+                LogPageIndex++;
+                BindLogs(treeId);
+            }
         }
     }
 }
