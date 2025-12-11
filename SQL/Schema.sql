@@ -6,122 +6,122 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_HealthRecord](
-        [healthID] [int] IDENTITY(1,1) NOT NULL,
-        [treeID] [int] NOT NULL,
-        [surveyDate] [date] NOT NULL,
-        [surveyor] [nvarchar](100) NULL,
-        [dataStatus] [tinyint] NOT NULL CONSTRAINT [DF_Tree_HealthRecord_dataStatus] DEFAULT ((0)),
-        [memo] [nvarchar](max) NULL,
-        [treeSignStatus] [tinyint] NULL,
-        [latitude] [decimal](10, 6) NULL,
-        [longitude] [decimal](10, 6) NULL,
-        [treeHeight] [decimal](8, 2) NULL,
-        [canopyArea] [decimal](8, 2) NULL,
-        [girth100] [decimal](8, 2) NULL,
-        [diameter100] [decimal](8, 2) NULL,
-        [girth130] [decimal](8, 2) NULL,
-        [diameter130] [decimal](8, 2) NULL,
-        [measureNote] [nvarchar](200) NULL,
-        [majorDiseaseBrownRoot] [bit] NULL,
-        [majorDiseaseGanoderma] [bit] NULL,
-        [majorDiseaseWoodDecayFungus] [bit] NULL,
-        [majorDiseaseCanker] [bit] NULL,
-        [majorDiseaseOther] [bit] NULL,
-        [majorDiseaseOtherNote] [nvarchar](200) NULL,
-        [majorPestRootTunnel] [bit] NULL,
-        [majorPestRootChew] [bit] NULL,
-        [majorPestRootLive] [bit] NULL,
-        [majorPestBaseTunnel] [bit] NULL,
-        [majorPestBaseChew] [bit] NULL,
-        [majorPestBaseLive] [bit] NULL,
-        [majorPestTrunkTunnel] [bit] NULL,
-        [majorPestTrunkChew] [bit] NULL,
-        [majorPestTrunkLive] [bit] NULL,
-        [majorPestBranchTunnel] [bit] NULL,
-        [majorPestBranchChew] [bit] NULL,
-        [majorPestBranchLive] [bit] NULL,
-        [majorPestCrownTunnel] [bit] NULL,
-        [majorPestCrownChew] [bit] NULL,
-        [majorPestCrownLive] [bit] NULL,
-        [majorPestOtherTunnel] [bit] NULL,
-        [majorPestOtherChew] [bit] NULL,
-        [majorPestOtherLive] [bit] NULL,
-        [generalPestRoot] [nvarchar](200) NULL,
-        [generalPestBase] [nvarchar](200) NULL,
-        [generalPestTrunk] [nvarchar](200) NULL,
-        [generalPestBranch] [nvarchar](200) NULL,
-        [generalPestCrown] [nvarchar](200) NULL,
-        [generalPestOther] [nvarchar](200) NULL,
-        [generalDiseaseRoot] [nvarchar](200) NULL,
-        [generalDiseaseBase] [nvarchar](200) NULL,
-        [generalDiseaseTrunk] [nvarchar](200) NULL,
-        [generalDiseaseBranch] [nvarchar](200) NULL,
-        [generalDiseaseCrown] [nvarchar](200) NULL,
-        [generalDiseaseOther] [nvarchar](200) NULL,
-        [pestOtherNote] [nvarchar](200) NULL,
-        [rootDecayPercent] [decimal](5, 2) NULL,
-        [rootCavityMaxDiameter] [decimal](6, 2) NULL,
-        [rootWoundMaxDiameter] [decimal](6, 2) NULL,
-        [rootMechanicalDamage] [bit] NULL,
-        [rootMowingInjury] [bit] NULL,
-        [rootInjury] [bit] NULL,
-        [rootGirdling] [bit] NULL,
-        [rootOtherNote] [nvarchar](200) NULL,
-        [baseDecayPercent] [decimal](5, 2) NULL,
-        [baseCavityMaxDiameter] [decimal](6, 2) NULL,
-        [baseWoundMaxDiameter] [decimal](6, 2) NULL,
-        [baseMechanicalDamage] [bit] NULL,
-        [baseMowingInjury] [bit] NULL,
-        [baseOtherNote] [nvarchar](200) NULL,
-        [trunkDecayPercent] [decimal](5, 2) NULL,
-        [trunkCavityMaxDiameter] [decimal](6, 2) NULL,
-        [trunkWoundMaxDiameter] [decimal](6, 2) NULL,
-        [trunkMechanicalDamage] [bit] NULL,
-        [trunkIncludedBark] [bit] NULL,
-        [trunkOtherNote] [nvarchar](200) NULL,
-        [branchDecayPercent] [decimal](5, 2) NULL,
-        [branchCavityMaxDiameter] [decimal](6, 2) NULL,
-        [branchWoundMaxDiameter] [decimal](6, 2) NULL,
-        [branchMechanicalDamage] [bit] NULL,
-        [branchIncludedBark] [bit] NULL,
-        [branchDrooping] [bit] NULL,
-        [branchOtherNote] [nvarchar](200) NULL,
-        [crownLeafCoveragePercent] [decimal](5, 2) NULL,
-        [crownDeadBranchPercent] [decimal](5, 2) NULL,
-        [crownHangingBranch] [bit] NULL,
-        [crownOtherNote] [nvarchar](200) NULL,
-        [pruningWrongDamage] [nvarchar](50) NULL,
-        [pruningWoundHealing] [bit] NULL,
-        [pruningEpiphyte] [bit] NULL,
-        [pruningParasite] [bit] NULL,
-        [pruningVine] [bit] NULL,
-        [pruningOtherNote] [nvarchar](200) NULL,
-        [supportCount] [int] NULL,
-        [supportEmbedded] [bit] NULL,
-        [supportOtherNote] [nvarchar](200) NULL,
-        [siteCementPercent] [decimal](5, 2) NULL,
-        [siteAsphaltPercent] [decimal](5, 2) NULL,
-        [sitePlanter] [bit] NULL,
-        [siteRecreationFacility] [bit] NULL,
-        [siteDebrisStack] [bit] NULL,
-        [siteBetweenBuildings] [bit] NULL,
-        [siteSoilCompaction] [bit] NULL,
-        [siteOverburiedSoil] [bit] NULL,
-        [siteOtherNote] [nvarchar](200) NULL,
-        [soilPh] [decimal](5, 2) NULL,
-        [soilOrganicMatter] [decimal](6, 2) NULL,
-        [soilEc] [decimal](6, 2) NULL,
-        [managementStatus] [nvarchar](max) NULL,
-        [priority] [nvarchar](50) NULL,
-        [treatmentDescription] [nvarchar](max) NULL,
-        [sourceUnit] [nvarchar](200) NULL,
-        [sourceUnitID] [int] NULL,
-        [insertAccountID] [int] NOT NULL,
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_HealthRecord_insertDateTime] DEFAULT (GETDATE()),
-        [updateAccountID] [int] NULL,
-        [updateDateTime] [datetime] NULL,
-        [removeDateTime] [datetime] NULL,
-        [removeAccountID] [int] NULL,
+        [healthID] [int] IDENTITY(1,1) NOT NULL, -- 健康檢測紀錄主鍵
+        [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
+        [surveyDate] [date] NOT NULL, -- 調查日期
+        [surveyor] [nvarchar](100) NULL, -- 調查人員姓名
+        [dataStatus] [tinyint] NOT NULL CONSTRAINT [DF_Tree_HealthRecord_dataStatus] DEFAULT ((0)), -- 資料狀態代碼
+        [memo] [nvarchar](max) NULL, -- 備註說明
+        [treeSignStatus] [tinyint] NULL, -- 樹牌設置狀態
+        [latitude] [decimal](10, 6) NULL, -- 緯度
+        [longitude] [decimal](10, 6) NULL, -- 經度
+        [treeHeight] [decimal](8, 2) NULL, -- 樹高(公尺)
+        [canopyArea] [decimal](8, 2) NULL, -- 樹冠投影面積(平方公尺)
+        [girth100] [decimal](8, 2) NULL, -- 離地100公分處樹圍(公分)
+        [diameter100] [decimal](8, 2) NULL, -- 離地100公分處直徑(公分)
+        [girth130] [decimal](8, 2) NULL, -- 離地130公分處樹圍(公分)
+        [diameter130] [decimal](8, 2) NULL, -- 離地130公分處直徑(公分)
+        [measureNote] [nvarchar](200) NULL, -- 量測備註
+        [majorDiseaseBrownRoot] [bit] NULL, -- 主要病害-褐根病
+        [majorDiseaseGanoderma] [bit] NULL, -- 主要病害-菇類/靈芝感染
+        [majorDiseaseWoodDecayFungus] [bit] NULL, -- 主要病害-木腐菌
+        [majorDiseaseCanker] [bit] NULL, -- 主要病害-潰瘍病
+        [majorDiseaseOther] [bit] NULL, -- 主要病害-其他
+        [majorDiseaseOtherNote] [nvarchar](200) NULL, -- 其他主要病害說明
+        [majorPestRootTunnel] [bit] NULL, -- 主要害蟲-根部穿鑿
+        [majorPestRootChew] [bit] NULL, -- 主要害蟲-根部啃食
+        [majorPestRootLive] [bit] NULL, -- 主要害蟲-根部活蟲
+        [majorPestBaseTunnel] [bit] NULL, -- 主要害蟲-基部穿鑿
+        [majorPestBaseChew] [bit] NULL, -- 主要害蟲-基部啃食
+        [majorPestBaseLive] [bit] NULL, -- 主要害蟲-基部活蟲
+        [majorPestTrunkTunnel] [bit] NULL, -- 主要害蟲-樹幹穿鑿
+        [majorPestTrunkChew] [bit] NULL, -- 主要害蟲-樹幹啃食
+        [majorPestTrunkLive] [bit] NULL, -- 主要害蟲-樹幹活蟲
+        [majorPestBranchTunnel] [bit] NULL, -- 主要害蟲-枝條穿鑿
+        [majorPestBranchChew] [bit] NULL, -- 主要害蟲-枝條啃食
+        [majorPestBranchLive] [bit] NULL, -- 主要害蟲-枝條活蟲
+        [majorPestCrownTunnel] [bit] NULL, -- 主要害蟲-樹冠穿鑿
+        [majorPestCrownChew] [bit] NULL, -- 主要害蟲-樹冠啃食
+        [majorPestCrownLive] [bit] NULL, -- 主要害蟲-樹冠活蟲
+        [majorPestOtherTunnel] [bit] NULL, -- 主要害蟲-其他部位穿鑿
+        [majorPestOtherChew] [bit] NULL, -- 主要害蟲-其他部位啃食
+        [majorPestOtherLive] [bit] NULL, -- 主要害蟲-其他部位活蟲
+        [generalPestRoot] [nvarchar](200) NULL, -- 一般害蟲-根部情形
+        [generalPestBase] [nvarchar](200) NULL, -- 一般害蟲-基部情形
+        [generalPestTrunk] [nvarchar](200) NULL, -- 一般害蟲-樹幹情形
+        [generalPestBranch] [nvarchar](200) NULL, -- 一般害蟲-枝條情形
+        [generalPestCrown] [nvarchar](200) NULL, -- 一般害蟲-樹冠情形
+        [generalPestOther] [nvarchar](200) NULL, -- 一般害蟲-其他情形
+        [generalDiseaseRoot] [nvarchar](200) NULL, -- 一般病害-根部情形
+        [generalDiseaseBase] [nvarchar](200) NULL, -- 一般病害-基部情形
+        [generalDiseaseTrunk] [nvarchar](200) NULL, -- 一般病害-樹幹情形
+        [generalDiseaseBranch] [nvarchar](200) NULL, -- 一般病害-枝條情形
+        [generalDiseaseCrown] [nvarchar](200) NULL, -- 一般病害-樹冠情形
+        [generalDiseaseOther] [nvarchar](200) NULL, -- 一般病害-其他情形
+        [pestOtherNote] [nvarchar](200) NULL, -- 其他病蟲害補充說明
+        [rootDecayPercent] [decimal](5, 2) NULL, -- 根部腐朽比例(%)
+        [rootCavityMaxDiameter] [decimal](6, 2) NULL, -- 根部空洞最大直徑(公分)
+        [rootWoundMaxDiameter] [decimal](6, 2) NULL, -- 根部傷口最大直徑(公分)
+        [rootMechanicalDamage] [bit] NULL, -- 根部機械損傷
+        [rootMowingInjury] [bit] NULL, -- 根部除草機傷害
+        [rootInjury] [bit] NULL, -- 根部受損
+        [rootGirdling] [bit] NULL, -- 根部纏勒情形
+        [rootOtherNote] [nvarchar](200) NULL, -- 根部其他說明
+        [baseDecayPercent] [decimal](5, 2) NULL, -- 基部腐朽比例(%)
+        [baseCavityMaxDiameter] [decimal](6, 2) NULL, -- 基部空洞最大直徑(公分)
+        [baseWoundMaxDiameter] [decimal](6, 2) NULL, -- 基部傷口最大直徑(公分)
+        [baseMechanicalDamage] [bit] NULL, -- 基部機械損傷
+        [baseMowingInjury] [bit] NULL, -- 基部除草機傷害
+        [baseOtherNote] [nvarchar](200) NULL, -- 基部其他說明
+        [trunkDecayPercent] [decimal](5, 2) NULL, -- 樹幹腐朽比例(%)
+        [trunkCavityMaxDiameter] [decimal](6, 2) NULL, -- 樹幹空洞最大直徑(公分)
+        [trunkWoundMaxDiameter] [decimal](6, 2) NULL, -- 樹幹傷口最大直徑(公分)
+        [trunkMechanicalDamage] [bit] NULL, -- 樹幹機械損傷
+        [trunkIncludedBark] [bit] NULL, -- 樹幹夾皮
+        [trunkOtherNote] [nvarchar](200) NULL, -- 樹幹其他說明
+        [branchDecayPercent] [decimal](5, 2) NULL, -- 枝條腐朽比例(%)
+        [branchCavityMaxDiameter] [decimal](6, 2) NULL, -- 枝條空洞最大直徑(公分)
+        [branchWoundMaxDiameter] [decimal](6, 2) NULL, -- 枝條傷口最大直徑(公分)
+        [branchMechanicalDamage] [bit] NULL, -- 枝條機械損傷
+        [branchIncludedBark] [bit] NULL, -- 枝條夾皮
+        [branchDrooping] [bit] NULL, -- 枝條垂落
+        [branchOtherNote] [nvarchar](200) NULL, -- 枝條其他說明
+        [crownLeafCoveragePercent] [decimal](5, 2) NULL, -- 樹冠葉片覆蓋率(%)
+        [crownDeadBranchPercent] [decimal](5, 2) NULL, -- 樹冠枯枝比例(%)
+        [crownHangingBranch] [bit] NULL, -- 樹冠掛枝
+        [crownOtherNote] [nvarchar](200) NULL, -- 樹冠其他說明
+        [pruningWrongDamage] [nvarchar](50) NULL, -- 修剪不當損傷描述
+        [pruningWoundHealing] [bit] NULL, -- 修剪傷口癒合狀況
+        [pruningEpiphyte] [bit] NULL, -- 樹幹附生植物
+        [pruningParasite] [bit] NULL, -- 寄生植物情形
+        [pruningVine] [bit] NULL, -- 蔓藤纏繞情形
+        [pruningOtherNote] [nvarchar](200) NULL, -- 修剪相關其他說明
+        [supportCount] [int] NULL, -- 支撐設施數量
+        [supportEmbedded] [bit] NULL, -- 支撐設施嵌入樹幹
+        [supportOtherNote] [nvarchar](200) NULL, -- 支撐設施其他說明
+        [siteCementPercent] [decimal](5, 2) NULL, -- 棲地水泥覆蓋率(%)
+        [siteAsphaltPercent] [decimal](5, 2) NULL, -- 棲地柏油覆蓋率(%)
+        [sitePlanter] [bit] NULL, -- 是否在花台內
+        [siteRecreationFacility] [bit] NULL, -- 周邊是否有遊憩設施
+        [siteDebrisStack] [bit] NULL, -- 是否堆置雜物
+        [siteBetweenBuildings] [bit] NULL, -- 是否位於建物間
+        [siteSoilCompaction] [bit] NULL, -- 土壤壓實情形
+        [siteOverburiedSoil] [bit] NULL, -- 覆土過高情形
+        [siteOtherNote] [nvarchar](200) NULL, -- 棲地其他說明
+        [soilPh] [decimal](5, 2) NULL, -- 土壤pH值
+        [soilOrganicMatter] [decimal](6, 2) NULL, -- 土壤有機質含量
+        [soilEc] [decimal](6, 2) NULL, -- 土壤電導度
+        [managementStatus] [nvarchar](max) NULL, -- 管理狀態說明
+        [priority] [nvarchar](50) NULL, -- 處置優先順序
+        [treatmentDescription] [nvarchar](max) NULL, -- 處置或維護建議
+        [sourceUnit] [nvarchar](200) NULL, -- 資料來源單位名稱
+        [sourceUnitID] [int] NULL, -- 資料來源單位代碼
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_HealthRecord_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [updateAccountID] [int] NULL, -- 最後更新者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [removeDateTime] [datetime] NULL, -- 移除時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
  CONSTRAINT [PK_Tree_HealthRecord] PRIMARY KEY CLUSTERED
 (
         [healthID] ASC
@@ -139,16 +139,16 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_HealthPhoto](
-        [photoID] [int] IDENTITY(1,1) NOT NULL,
-        [healthID] [int] NOT NULL,
-        [fileName] [nvarchar](260) NOT NULL,
-        [filePath] [nvarchar](500) NOT NULL,
-        [fileSize] [int] NULL,
-        [caption] [nvarchar](200) NULL,
-        [insertAccountID] [int] NOT NULL,
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_HealthPhoto_insertDateTime] DEFAULT (GETDATE()),
-        [removeDateTime] [datetime] NULL,
-        [removeAccountID] [int] NULL,
+        [photoID] [int] IDENTITY(1,1) NOT NULL, -- 照片主鍵編號
+        [healthID] [int] NOT NULL, -- 健康檢測紀錄主鍵
+        [fileName] [nvarchar](260) NOT NULL, -- 檔案名稱
+        [filePath] [nvarchar](500) NOT NULL, -- 檔案儲存路徑
+        [fileSize] [int] NULL, -- 檔案大小(位元組)
+        [caption] [nvarchar](200) NULL, -- 照片或附件說明文字
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_HealthPhoto_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [removeDateTime] [datetime] NULL, -- 移除時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
  CONSTRAINT [PK_Tree_HealthPhoto] PRIMARY KEY CLUSTERED
 (
         [photoID] ASC
@@ -166,16 +166,16 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_HealthAttachment](
-        [attachmentID] [int] IDENTITY(1,1) NOT NULL,
-        [healthID] [int] NOT NULL,
-        [fileName] [nvarchar](260) NOT NULL,
-        [filePath] [nvarchar](500) NOT NULL,
-        [fileSize] [int] NULL,
-        [description] [nvarchar](200) NULL,
-        [insertAccountID] [int] NOT NULL,
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_HealthAttachment_insertDateTime] DEFAULT (GETDATE()),
-        [removeDateTime] [datetime] NULL,
-        [removeAccountID] [int] NULL,
+        [attachmentID] [int] IDENTITY(1,1) NOT NULL, -- 附件主鍵編號
+        [healthID] [int] NOT NULL, -- 健康檢測紀錄主鍵
+        [fileName] [nvarchar](260) NOT NULL, -- 檔案名稱
+        [filePath] [nvarchar](500) NOT NULL, -- 檔案儲存路徑
+        [fileSize] [int] NULL, -- 檔案大小(位元組)
+        [description] [nvarchar](200) NULL, -- 附件描述
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_HealthAttachment_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [removeDateTime] [datetime] NULL, -- 移除時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
  CONSTRAINT [PK_Tree_HealthAttachment] PRIMARY KEY CLUSTERED
 (
         [attachmentID] ASC
@@ -193,15 +193,15 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[System_Menu](
-	[menuID] [int] IDENTITY(1,1) NOT NULL,
-	[groupName] [nvarchar](50) NOT NULL,
-	[menuName] [nvarchar](50) NOT NULL,
-	[menuURL] [nvarchar](max) NOT NULL,
-	[orderBy_group] [int] NOT NULL,
-	[orderBy_menu] [int] NOT NULL,
-	[isActive] [bit] NOT NULL,
-	[isShow] [bit] NULL,
-	[memo] [nvarchar](max) NULL,
+	[menuID] [int] IDENTITY(1,1) NOT NULL, -- 選單項目主鍵
+	[groupName] [nvarchar](50) NOT NULL, -- 選單群組名稱
+	[menuName] [nvarchar](50) NOT NULL, -- 選單名稱
+	[menuURL] [nvarchar](max) NOT NULL, -- 選單連結網址
+	[orderBy_group] [int] NOT NULL, -- 群組排序序號
+	[orderBy_menu] [int] NOT NULL, -- 選單排序序號
+	[isActive] [bit] NOT NULL, -- 是否啟用
+	[isShow] [bit] NULL, -- 是否顯示於前端
+	[memo] [nvarchar](max) NULL, -- 備註說明
  CONSTRAINT [PK_System_Menu] PRIMARY KEY CLUSTERED 
 (
 	[menuID] ASC
@@ -214,8 +214,8 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[System_MenuAu](
-	[auTypeID] [int] NOT NULL,
-	[menuID] [int] NOT NULL
+	[auTypeID] [int] NOT NULL, -- 權限類型ID
+	[menuID] [int] NOT NULL -- 選單項目主鍵
 ) ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[System_Taiwan]    Script Date: 2025/8/19 下午 07:16:49 ******/
@@ -224,12 +224,12 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[System_Taiwan](
-        [twID] [int] IDENTITY(1,1) NOT NULL,
-        [cityID] [int] NOT NULL,
-        [city] [nvarchar](50) NOT NULL,
-        [area] [nvarchar](50) NOT NULL,
-        [cityCode] [nvarchar](20) NULL,
-        [areaCode] [nvarchar](20) NULL,
+        [twID] [int] IDENTITY(1,1) NOT NULL, -- 行政區資料主鍵
+        [cityID] [int] NOT NULL, -- 城市代碼
+        [city] [nvarchar](50) NOT NULL, -- 城市名稱
+        [area] [nvarchar](50) NOT NULL, -- 區域名稱
+        [cityCode] [nvarchar](20) NULL, -- 郵遞區號或市代碼
+        [areaCode] [nvarchar](20) NULL, -- 區代碼
 CONSTRAINT [PK_System_Taiwan] PRIMARY KEY CLUSTERED
 (
         [twID] ASC
@@ -242,9 +242,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[System_UserAuType](
-	[auTypeID] [int] IDENTITY(1,1) NOT NULL,
-	[auTypeName] [nvarchar](50) NOT NULL,
-	[memo] [nvarchar](max) NULL,
+	[auTypeID] [int] IDENTITY(1,1) NOT NULL, -- 權限類型ID
+	[auTypeName] [nvarchar](50) NOT NULL, -- 權限類型名稱
+	[memo] [nvarchar](max) NULL, -- 備註說明
  CONSTRAINT [PK_Sys_AuType] PRIMARY KEY CLUSTERED 
 (
 	[auTypeID] ASC
@@ -257,9 +257,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[System_UserUnit](
-        [unitID] [int] IDENTITY(1,1) NOT NULL,
-        [unitName] [nvarchar](100) NOT NULL,
-        [auTypeID] [int] NOT NULL,
+        [unitID] [int] IDENTITY(1,1) NOT NULL, -- 單位主鍵
+        [unitName] [nvarchar](100) NOT NULL, -- 單位名稱
+        [auTypeID] [int] NOT NULL, -- 權限類型ID
  CONSTRAINT [PK_System_UserUnit] PRIMARY KEY CLUSTERED
 (
         [unitID] ASC
@@ -273,24 +273,24 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[User_Account](
-	[accountID] [int] IDENTITY(1,1) NOT NULL,
-	[auTypeID] [int] NOT NULL,
-	[account] [nvarchar](50) NOT NULL,
-	[password] [nvarchar](max) NULL,
-	[name] [nvarchar](50) NOT NULL,
-	[email] [nvarchar](max) NULL,
-	[unit] [nvarchar](max) NULL,
-	[mobile] [nvarchar](max) NULL,
-	[memo] [nvarchar](max) NULL,
-	[isActive] [bit] NOT NULL,
-	[insertDateTime] [datetime] NOT NULL,
-	[insertAccountID] [int] NOT NULL,
-	[updateDateTime] [datetime] NULL,
-	[updateAccountID] [int] NULL,
-	[removeDateTime] [datetime] NULL,
-	[removeAccountID] [int] NULL,
-	[lastUpdatePWDateTime] [datetime] NULL,
-	[SSOToken] [varchar](max) NULL,
+	[accountID] [int] IDENTITY(1,1) NOT NULL, -- 帳號主鍵編號
+	[auTypeID] [int] NOT NULL, -- 權限類型ID
+	[account] [nvarchar](50) NOT NULL, -- 登入帳號
+	[password] [nvarchar](max) NULL, -- 密碼雜湊值
+	[name] [nvarchar](50) NOT NULL, -- 使用者姓名
+	[email] [nvarchar](max) NULL, -- 電子郵件
+	[unit] [nvarchar](max) NULL, -- 隸屬單位名稱
+	[mobile] [nvarchar](max) NULL, -- 行動電話
+	[memo] [nvarchar](max) NULL, -- 備註說明
+	[isActive] [bit] NOT NULL, -- 是否啟用
+	[insertDateTime] [datetime] NOT NULL, -- 建立時間
+	[insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+	[updateDateTime] [datetime] NULL, -- 最後更新時間
+	[updateAccountID] [int] NULL, -- 最後更新者帳號ID
+	[removeDateTime] [datetime] NULL, -- 移除時間
+	[removeAccountID] [int] NULL, -- 移除者帳號ID
+	[lastUpdatePWDateTime] [datetime] NULL, -- 最後修改密碼時間
+	[SSOToken] [varchar](max) NULL, -- 單一登入Token
  CONSTRAINT [PK_System_UserAccountInfo] PRIMARY KEY CLUSTERED 
 (
 	[accountID] ASC
@@ -303,13 +303,13 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[User_Log](
-	[logID] [int] IDENTITY(1,1) NOT NULL,
-	[accountID] [int] NOT NULL,
-	[logDateTime] [datetime] NULL,
-	[IP] [nvarchar](max) NOT NULL,
-	[logItem] [nvarchar](50) NOT NULL,
-	[logType] [nvarchar](50) NOT NULL,
-	[memo] [nvarchar](max) NOT NULL,
+	[logID] [int] IDENTITY(1,1) NOT NULL, -- 操作紀錄主鍵
+	[accountID] [int] NOT NULL, -- 帳號主鍵編號
+	[logDateTime] [datetime] NULL, -- 紀錄時間
+	[IP] [nvarchar](max) NOT NULL, -- 操作IP位址
+	[logItem] [nvarchar](50) NOT NULL, -- 紀錄項目
+	[logType] [nvarchar](50) NOT NULL, -- 紀錄類型
+	[memo] [nvarchar](max) NOT NULL, -- 備註說明
  CONSTRAINT [PK_System_UserLog] PRIMARY KEY CLUSTERED 
 (
 	[logID] ASC
@@ -322,12 +322,12 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[User_MailVerify](
-	[verifyID] [int] IDENTITY(1,1) NOT NULL,
-	[accountID] [int] NOT NULL,
-        [verifyMail] [varchar](50) NULL,
-        [verfiyCode] [varchar](50) NULL,
-        [verifyType] [varchar](50) NULL,
-        [expireDateTime] [datetime] NOT NULL,
+	[verifyID] [int] IDENTITY(1,1) NOT NULL, -- 驗證資料主鍵
+	[accountID] [int] NOT NULL, -- 帳號主鍵編號
+        [verifyMail] [varchar](50) NULL, -- 驗證電子郵件
+        [verfiyCode] [varchar](50) NULL, -- 驗證碼
+        [verifyType] [varchar](50) NULL, -- 驗證類型
+        [expireDateTime] [datetime] NOT NULL, -- 驗證碼到期時間
  CONSTRAINT [PK_User_MailVerify] PRIMARY KEY CLUSTERED 
 (
 	[verifyID] ASC
@@ -340,9 +340,9 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[User_PasswordHistory](
-        [userID] [int] NOT NULL,
-        [password] [varchar](max) NOT NULL,
-        [setPasswordTime] [datetime] NOT NULL
+        [userID] [int] NOT NULL, -- 使用者主鍵
+        [password] [varchar](max) NOT NULL, -- 密碼雜湊值
+        [setPasswordTime] [datetime] NOT NULL -- 設定密碼時間
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
@@ -352,18 +352,18 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_Species](
-        [speciesID] [int] IDENTITY(1,1) NOT NULL,
-        [commonName] [nvarchar](100) NOT NULL,
-        [scientificName] [nvarchar](200) NULL,
-        [aliasName] [nvarchar](200) NULL,
-        [isNative] [bit] NOT NULL CONSTRAINT [DF_Tree_Species_isNative] DEFAULT ((0)),
-        [isActive] [bit] NOT NULL CONSTRAINT [DF_Tree_Species_isActive] DEFAULT ((1)),
-        [orderBy] [int] NULL,
-        [memo] [nvarchar](max) NULL,
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_Species_insertDateTime] DEFAULT (GETDATE()),
-        [insertAccountID] [int] NOT NULL,
-        [updateDateTime] [datetime] NULL,
-        [updateAccountID] [int] NULL
+        [speciesID] [int] IDENTITY(1,1) NOT NULL, -- 樹種主鍵
+        [commonName] [nvarchar](100) NOT NULL, -- 樹種俗名
+        [scientificName] [nvarchar](200) NULL, -- 樹種學名
+        [aliasName] [nvarchar](200) NULL, -- 樹種別名
+        [isNative] [bit] NOT NULL CONSTRAINT [DF_Tree_Species_isNative] DEFAULT ((0)), -- 是否原生種
+        [isActive] [bit] NOT NULL CONSTRAINT [DF_Tree_Species_isActive] DEFAULT ((1)), -- 是否啟用
+        [orderBy] [int] NULL, -- 排序序號
+        [memo] [nvarchar](max) NULL, -- 備註說明
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_Species_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [updateAccountID] [int] NULL -- 最後更新者帳號ID
  CONSTRAINT [PK_Tree_Species] PRIMARY KEY CLUSTERED
 (
         [speciesID] ASC
@@ -377,15 +377,15 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_RecognitionCriterion](
-        [criterionCode] [nvarchar](50) NOT NULL,
-        [criterionName] [nvarchar](200) NOT NULL,
-        [orderNo] [int] NOT NULL,
-        [isActive] [bit] NOT NULL CONSTRAINT [DF_Tree_RecognitionCriterion_isActive] DEFAULT ((1)),
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecognitionCriterion_insertDateTime] DEFAULT (GETDATE()),
-        [insertAccountID] [int] NOT NULL,
-        [updateDateTime] [datetime] NULL,
-        [updateAccountID] [int] NULL,
-        [memo] [nvarchar](max) NULL,
+        [criterionCode] [nvarchar](50) NOT NULL, -- 認定基準代碼
+        [criterionName] [nvarchar](200) NOT NULL, -- 認定基準名稱
+        [orderNo] [int] NOT NULL, -- 顯示排序序號
+        [isActive] [bit] NOT NULL CONSTRAINT [DF_Tree_RecognitionCriterion_isActive] DEFAULT ((1)), -- 是否啟用
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecognitionCriterion_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [updateAccountID] [int] NULL, -- 最後更新者帳號ID
+        [memo] [nvarchar](max) NULL, -- 備註說明
  CONSTRAINT [PK_Tree_RecognitionCriterion] PRIMARY KEY CLUSTERED
 (
         [criterionCode] ASC
@@ -399,60 +399,60 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_Record](
-        [treeID] [int] IDENTITY(1,1) NOT NULL,
-        [systemTreeNo] [nvarchar](50) NULL,
-        [agencyTreeNo] [nvarchar](50) NULL,
-        [agencyJurisdictionCode] [nvarchar](50) NULL,
-        [cityID] [int] NULL,
-        [cityName] [nvarchar](50) NULL,
-        [areaID] [int] NULL,
-        [areaName] [nvarchar](50) NULL,
-        [speciesID] [int] NULL,
-        [speciesCommonName] [nvarchar](100) NULL,
-        [speciesScientificName] [nvarchar](200) NULL,
-        [manager] [nvarchar](100) NULL,
-        [managerContact] [nvarchar](100) NULL,
-        [surveyDate] [datetime] NULL,
-        [surveyor] [nvarchar](100) NULL,
-        [announcementDate] [datetime] NULL,
-        [isAnnounced] [bit] NOT NULL CONSTRAINT [DF_Tree_Record_isAnnounced] DEFAULT ((0)),
-        [treeStatus] [nvarchar](20) NOT NULL CONSTRAINT [DF_Tree_Record_treeStatus] DEFAULT (N'其他'),
-        [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)),
-        [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)),
-        [site] [nvarchar](200) NULL,
-        [latitude] [decimal](10, 6) NULL,
-        [longitude] [decimal](10, 6) NULL,
-        [landOwnership] [nvarchar](100) NULL,
-        [landOwnershipNote] [nvarchar](max) NULL,
-        [facilityDescription] [nvarchar](max) NULL,
-        [memo] [nvarchar](max) NULL,
-        [keywords] [nvarchar](200) NULL,
-        [recognitionCriteria] [nvarchar](max) NULL,
-        [recognitionNote] [nvarchar](max) NULL,
-        [culturalHistoryIntro] [nvarchar](max) NULL,
-        [estimatedPlantingYear] [nvarchar](50) NULL,
-        [estimatedAgeNote] [nvarchar](max) NULL,
-        [groupGrowthInfo] [nvarchar](max) NULL,
-        [treeHeight] [decimal](10, 2) NULL,
-        [breastHeightDiameter] [decimal](10, 2) NULL,
-        [breastHeightCircumference] [decimal](10, 2) NULL,
-        [canopyProjectionArea] [decimal](10, 2) NULL,
-        [healthCondition] [nvarchar](max) NULL,
-        [hasEpiphyte] [bit] NULL,
-        [epiphyteDescription] [nvarchar](max) NULL,
-        [hasParasite] [bit] NULL,
-        [parasiteDescription] [nvarchar](max) NULL,
-        [hasClimbingPlant] [bit] NULL,
-        [climbingPlantDescription] [nvarchar](max) NULL,
-        [surveyOtherNote] [nvarchar](max) NULL,
-        [sourceUnit] [nvarchar](100) NULL,
-        [sourceUnitID] [int] NULL,
-        [insertAccountID] [int] NOT NULL,
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_Record_insertDateTime] DEFAULT (GETDATE()),
-        [updateAccountID] [int] NULL,
-        [updateDateTime] [datetime] NULL,
-        [removeAccountID] [int] NULL,
-        [removeDateTime] [datetime] NULL,
+        [treeID] [int] IDENTITY(1,1) NOT NULL, -- 對應樹木基本資料編號
+        [systemTreeNo] [nvarchar](50) NULL, -- 系統樹木編號
+        [agencyTreeNo] [nvarchar](50) NULL, -- 主管機關樹木編號
+        [agencyJurisdictionCode] [nvarchar](50) NULL, -- 主管機關轄區代碼
+        [cityID] [int] NULL, -- 城市代碼
+        [cityName] [nvarchar](50) NULL, -- 城市名稱(冗餘欄位)
+        [areaID] [int] NULL, -- 區域代碼
+        [areaName] [nvarchar](50) NULL, -- 區域名稱(冗餘欄位)
+        [speciesID] [int] NULL, -- 樹種主鍵
+        [speciesCommonName] [nvarchar](100) NULL, -- 樹種俗名(冗餘欄位)
+        [speciesScientificName] [nvarchar](200) NULL, -- 樹種學名(冗餘欄位)
+        [manager] [nvarchar](100) NULL, -- 管理單位
+        [managerContact] [nvarchar](100) NULL, -- 管理單位聯絡人
+        [surveyDate] [datetime] NULL, -- 調查日期
+        [surveyor] [nvarchar](100) NULL, -- 調查人員姓名
+        [announcementDate] [datetime] NULL, -- 公告日期
+        [isAnnounced] [bit] NOT NULL CONSTRAINT [DF_Tree_Record_isAnnounced] DEFAULT ((0)), -- 是否完成公告
+        [treeStatus] [nvarchar](20) NOT NULL CONSTRAINT [DF_Tree_Record_treeStatus] DEFAULT (N'其他'), -- 樹木狀態
+        [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 資料編輯狀態
+        [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 同株數量
+        [site] [nvarchar](200) NULL, -- 所在位置描述
+        [latitude] [decimal](10, 6) NULL, -- 緯度
+        [longitude] [decimal](10, 6) NULL, -- 經度
+        [landOwnership] [nvarchar](100) NULL, -- 土地權屬
+        [landOwnershipNote] [nvarchar](max) NULL, -- 土地權屬備註
+        [facilityDescription] [nvarchar](max) NULL, -- 周邊設施描述
+        [memo] [nvarchar](max) NULL, -- 備註說明
+        [keywords] [nvarchar](200) NULL, -- 關鍵字
+        [recognitionCriteria] [nvarchar](max) NULL, -- 認定基準清單
+        [recognitionNote] [nvarchar](max) NULL, -- 認定補充說明
+        [culturalHistoryIntro] [nvarchar](max) NULL, -- 人文歷史簡介
+        [estimatedPlantingYear] [nvarchar](50) NULL, -- 推估栽植年代
+        [estimatedAgeNote] [nvarchar](max) NULL, -- 樹齡估計備註
+        [groupGrowthInfo] [nvarchar](max) NULL, -- 群聚生長說明
+        [treeHeight] [decimal](10, 2) NULL, -- 樹高(公尺)
+        [breastHeightDiameter] [decimal](10, 2) NULL, -- 胸高直徑(公分)
+        [breastHeightCircumference] [decimal](10, 2) NULL, -- 胸高樹圍(公分)
+        [canopyProjectionArea] [decimal](10, 2) NULL, -- 樹冠投影面積(平方公尺)
+        [healthCondition] [nvarchar](max) NULL, -- 健康狀態描述
+        [hasEpiphyte] [bit] NULL, -- 是否有附生植物
+        [epiphyteDescription] [nvarchar](max) NULL, -- 附生植物描述
+        [hasParasite] [bit] NULL, -- 是否有寄生植物
+        [parasiteDescription] [nvarchar](max) NULL, -- 寄生植物描述
+        [hasClimbingPlant] [bit] NULL, -- 是否有攀藤植物
+        [climbingPlantDescription] [nvarchar](max) NULL, -- 攀藤植物描述
+        [surveyOtherNote] [nvarchar](max) NULL, -- 調查其他補充
+        [sourceUnit] [nvarchar](100) NULL, -- 資料來源單位名稱
+        [sourceUnitID] [int] NULL, -- 資料來源單位代碼
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_Record_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [updateAccountID] [int] NULL, -- 最後更新者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
+        [removeDateTime] [datetime] NULL, -- 移除時間
  CONSTRAINT [PK_Tree_Record] PRIMARY KEY CLUSTERED
 (
         [treeID] ASC
@@ -466,18 +466,18 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_RecordPhoto](
-        [photoID] [int] IDENTITY(1,1) NOT NULL,
-        [treeID] [int] NOT NULL,
-        [fileName] [nvarchar](255) NOT NULL,
-        [filePath] [nvarchar](500) NOT NULL,
-        [caption] [nvarchar](200) NULL,
-        [isCover] [bit] NOT NULL CONSTRAINT [DF_Tree_RecordPhoto_isCover] DEFAULT ((0)),
-        [insertAccountID] [int] NOT NULL,
-        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecordPhoto_insertDateTime] DEFAULT (GETDATE()),
-        [updateAccountID] [int] NULL,
-        [updateDateTime] [datetime] NULL,
-        [removeAccountID] [int] NULL,
-        [removeDateTime] [datetime] NULL,
+        [photoID] [int] IDENTITY(1,1) NOT NULL, -- 照片主鍵編號
+        [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
+        [fileName] [nvarchar](255) NOT NULL, -- 檔案名稱
+        [filePath] [nvarchar](500) NOT NULL, -- 檔案儲存路徑
+        [caption] [nvarchar](200) NULL, -- 照片或附件說明文字
+        [isCover] [bit] NOT NULL CONSTRAINT [DF_Tree_RecordPhoto_isCover] DEFAULT ((0)), -- 是否為封面照片
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecordPhoto_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [updateAccountID] [int] NULL, -- 最後更新者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
+        [removeDateTime] [datetime] NULL, -- 移除時間
  CONSTRAINT [PK_Tree_RecordPhoto] PRIMARY KEY CLUSTERED
 (
         [photoID] ASC
@@ -491,16 +491,16 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_RecordLog](
-        [logID] [int] IDENTITY(1,1) NOT NULL,
-        [treeID] [int] NOT NULL,
-        [actionType] [nvarchar](50) NOT NULL,
-        [memo] [nvarchar](max) NULL,
-        [ipAddress] [nvarchar](50) NULL,
-        [accountID] [int] NULL,
-        [account] [nvarchar](50) NULL,
-        [accountName] [nvarchar](100) NULL,
-        [accountUnit] [nvarchar](100) NULL,
-        [logDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecordLog_logDateTime] DEFAULT (GETDATE()),
+        [logID] [int] IDENTITY(1,1) NOT NULL, -- 操作紀錄主鍵
+        [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
+        [actionType] [nvarchar](50) NOT NULL, -- 操作類型
+        [memo] [nvarchar](max) NULL, -- 備註說明
+        [ipAddress] [nvarchar](50) NULL, -- 操作IP位址
+        [accountID] [int] NULL, -- 帳號主鍵編號
+        [account] [nvarchar](50) NULL, -- 登入帳號
+        [accountName] [nvarchar](100) NULL, -- 操作人姓名
+        [accountUnit] [nvarchar](100) NULL, -- 操作人單位
+        [logDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecordLog_logDateTime] DEFAULT (GETDATE()), -- 紀錄時間
  CONSTRAINT [PK_Tree_RecordLog] PRIMARY KEY CLUSTERED
 (
         [logID] ASC
