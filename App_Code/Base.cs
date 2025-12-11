@@ -13,6 +13,17 @@ namespace protectTreesV2.Base
 {
     public class BasePage : System.Web.UI.Page
     {
+        public string setTreeID
+        {
+            get
+            {
+                return Session["setTreeID"] != null ? Session["setTreeID"].ToString() : string.Empty;
+            }
+            set
+            {
+                Session["setTreeID"] = value;
+            }
+        }
         public List<ListItem> GetCities()
         {
             using (var da = new DataAccess.MS_SQL())
