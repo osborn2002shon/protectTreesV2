@@ -71,7 +71,7 @@
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="btnCoordinateTool" Text="座標轉換" />
-                            <asp:Button ID="btnCoordinateTool" runat="server" Text="座標轉換" CausesValidation="false" />
+                            <asp:Button ID="btnCoordinateTool" runat="server" Text="座標轉換" CausesValidation="false" OnClientClick="openCoordinateModal(); return false;" />
                         </div>
                     </div>
                     <div class="row">
@@ -153,6 +153,34 @@
             </div>
         </ContentTemplate>
     </asp:UpdatePanel>
+
+    <div class="modal fade" id="coordinateModal" tabindex="-1" aria-labelledby="coordinateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="coordinateModalLabel">座標轉換</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="twd97X">97座標 X（東向）</label>
+                        <input type="number" class="form-control" id="twd97X" placeholder="例如：303000" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="twd97Y">97座標 Y（北向）</label>
+                        <input type="number" class="form-control" id="twd97Y" placeholder="例如：2765000" />
+                    </div>
+                    <div class="alert alert-secondary" role="alert">
+                        請輸入TWD97二度分帶(121E)平面座標，系統會轉換為WGS84經緯度並填入表單。
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" onclick="convertCoordinate();">轉換並填入</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">
 </asp:Content>
@@ -160,3 +188,80 @@
 </asp:Content>
 <asp:Content ID="Content7" ContentPlaceHolderID="ContentPlaceHolder_msg_btn" runat="server">
 </asp:Content>
+
+<script type="text/javascript">
+    const latitudeInputId = '<%= txtLatitude.ClientID %>';
+    const longitudeInputId = '<%= txtLongitude.ClientID %>';
+
+    function openCoordinateModal() {
+        const modalElement = document.getElementById('coordinateModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modal.show();
+    }
+
+    function convertCoordinate() {
+        const xInput = document.getElementById('twd97X');
+        const yInput = document.getElementById('twd97Y');
+        const x = parseFloat(xInput.value);
+        const y = parseFloat(yInput.value);
+
+        if (isNaN(x) || isNaN(y)) {
+            alert('請輸入有效的97座標數值');
+            return;
+        }
+
+        const result = twd97ToWgs84(x, y);
+        document.getElementById(latitudeInputId).value = result.lat.toFixed(6);
+        document.getElementById(longitudeInputId).value = result.lon.toFixed(6);
+
+        const modalElement = document.getElementById('coordinateModal');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        modal.hide();
+    }
+
+    function twd97ToWgs84(x, y) {
+        const a = 6378137.0;
+        const b = 6356752.314245;
+        const lon0 = 121 * Math.PI / 180;
+        const k0 = 0.9999;
+        const dx = 250000;
+        const dy = 0;
+
+        const e = Math.sqrt(1 - Math.pow(b, 2) / Math.pow(a, 2));
+        const e2 = Math.pow(e, 2) / (1 - Math.pow(e, 2));
+
+        const xAdjusted = x - dx;
+        const yAdjusted = y - dy;
+
+        const M = yAdjusted / k0;
+        const mu = M / (a * (1.0 - Math.pow(e, 2) / 4.0 - 3 * Math.pow(e, 4) / 64.0 - 5 * Math.pow(e, 6) / 256.0));
+
+        const e1 = (1.0 - Math.sqrt(1.0 - Math.pow(e, 2))) / (1.0 + Math.sqrt(1.0 - Math.pow(e, 2)));
+
+        const J1 = (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32.0);
+        const J2 = (21 * Math.pow(e1, 2) / 16 - 55 * Math.pow(e1, 4) / 32.0);
+        const J3 = (151 * Math.pow(e1, 3) / 96.0);
+        const J4 = (1097 * Math.pow(e1, 4) / 512.0);
+
+        const fp = mu + J1 * Math.sin(2 * mu) + J2 * Math.sin(4 * mu) + J3 * Math.sin(6 * mu) + J4 * Math.sin(8 * mu);
+
+        const sinFp = Math.sin(fp);
+        const cosFp = Math.cos(fp);
+        const tanFp = Math.tan(fp);
+
+        const C1 = e2 * Math.pow(cosFp, 2);
+        const T1 = Math.pow(tanFp, 2);
+        const R1 = a * (1 - Math.pow(e, 2)) / Math.pow(1 - Math.pow(e, 2) * Math.pow(sinFp, 2), 1.5);
+        const N1 = a / Math.sqrt(1 - Math.pow(e, 2) * Math.pow(sinFp, 2));
+        const D = xAdjusted / (N1 * k0);
+
+        const lat = fp - (N1 * tanFp / R1) * (Math.pow(D, 2) / 2 - (5 + 3 * T1 + 10 * C1 - 4 * Math.pow(C1, 2) - 9 * e2) * Math.pow(D, 4) / 24 + (61 + 90 * T1 + 298 * C1 + 45 * Math.pow(T1, 2) - 3 * Math.pow(C1, 2) - 252 * e2) * Math.pow(D, 6) / 720);
+
+        const lon = lon0 + (D - (1 + 2 * T1 + C1) * Math.pow(D, 3) / 6 + (5 - 2 * C1 + 28 * T1 - 3 * Math.pow(C1, 2) + 8 * e2 + 24 * Math.pow(T1, 2)) * Math.pow(D, 5) / 120) / cosFp;
+
+        return {
+            lat: lat * 180 / Math.PI,
+            lon: lon * 180 / Math.PI
+        };
+    }
+</script>
