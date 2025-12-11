@@ -400,51 +400,42 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Tree_Record](
         [treeID] [int] IDENTITY(1,1) NOT NULL, -- 對應樹木基本資料編號
-        [systemTreeNo] [nvarchar](50) NULL, -- 系統樹木編號
+        [systemTreeNo] [nvarchar](50) NULL, -- 系統樹籍編號
         [agencyTreeNo] [nvarchar](50) NULL, -- 主管機關樹木編號
         [agencyJurisdictionCode] [nvarchar](50) NULL, -- 主管機關轄區代碼
         [cityID] [int] NULL, -- 城市代碼
-        [cityName] [nvarchar](50) NULL, -- 城市名稱(冗餘欄位)
         [areaID] [int] NULL, -- 區域代碼
-        [areaName] [nvarchar](50) NULL, -- 區域名稱(冗餘欄位)
         [speciesID] [int] NULL, -- 樹種主鍵
-        [speciesCommonName] [nvarchar](100) NULL, -- 樹種俗名(冗餘欄位)
-        [speciesScientificName] [nvarchar](200) NULL, -- 樹種學名(冗餘欄位)
-        [manager] [nvarchar](100) NULL, -- 管理單位
-        [managerContact] [nvarchar](100) NULL, -- 管理單位聯絡人
+        [manager] [nvarchar](100) NULL, -- 管理人員 
+        [managerContact] [nvarchar](100) NULL, -- 管理人聯絡電話
         [surveyDate] [datetime] NULL, -- 調查日期
-        [surveyor] [nvarchar](100) NULL, -- 調查人員姓名
-        [announcementDate] [datetime] NULL, -- 公告日期
-        [isAnnounced] [bit] NOT NULL CONSTRAINT [DF_Tree_Record_isAnnounced] DEFAULT ((0)), -- 是否完成公告
-        [treeStatus] [nvarchar](20) NOT NULL CONSTRAINT [DF_Tree_Record_treeStatus] DEFAULT (N'其他'), -- 樹木狀態
-        [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 資料編輯狀態
-        [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 同株數量
-        [site] [nvarchar](200) NULL, -- 所在位置描述
-        [latitude] [decimal](10, 6) NULL, -- 緯度
-        [longitude] [decimal](10, 6) NULL, -- 經度
-        [landOwnership] [nvarchar](100) NULL, -- 土地權屬
+        [surveyor] [nvarchar](100) NULL, -- 調查人員
+        [announcementDate] [datetime] NULL, -- 公告日期（已公告列管才會有公告日期）
+        [isAnnounced] [bit] NOT NULL CONSTRAINT [DF_Tree_Record_isAnnounced] DEFAULT ((0)), -- 是否已公告列管（樹籍狀態為已公告列管才為1）
+        [treeStatus] [nvarchar](20) NOT NULL CONSTRAINT [DF_Tree_Record_treeStatus] DEFAULT (N'其他'), -- 樹籍狀態（已公告列管／符合標準／其他）
+        [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 編輯狀態（草稿／完稿）
+        [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 叢生株數
+        [site] [nvarchar](200) NULL, -- 坐落地點
+        [latitude] [decimal](10, 6) NULL, -- 座標(WGS84)：緯度(N)
+        [longitude] [decimal](10, 6) NULL, -- 座標(WGS84)：經度(E)
+        [landOwnership] [nvarchar](100) NULL, -- 土地權屬（國有／公有／私有／無資料）
         [landOwnershipNote] [nvarchar](max) NULL, -- 土地權屬備註
-        [facilityDescription] [nvarchar](max) NULL, -- 周邊設施描述
-        [memo] [nvarchar](max) NULL, -- 備註說明
-        [keywords] [nvarchar](200) NULL, -- 關鍵字
-        [recognitionCriteria] [nvarchar](max) NULL, -- 認定基準清單
-        [recognitionNote] [nvarchar](max) NULL, -- 認定補充說明
-        [culturalHistoryIntro] [nvarchar](max) NULL, -- 人文歷史簡介
-        [estimatedPlantingYear] [nvarchar](50) NULL, -- 推估栽植年代
-        [estimatedAgeNote] [nvarchar](max) NULL, -- 樹齡估計備註
-        [groupGrowthInfo] [nvarchar](max) NULL, -- 群聚生長說明
+        [facilityDescription] [nvarchar](max) NULL, -- 管理設施描述
+        [recognitionCriteria] [nvarchar](max) NULL, -- 受保護認定理由（存放[Tree_RecognitionCriterion].[criterionCode]，使用逗號分隔多筆）
+        [recognitionNote] [nvarchar](max) NULL, -- 認定理由備註說明
+        [culturalHistoryIntro] [nvarchar](max) NULL, -- 文化歷史價值介紹
+        [estimatedPlantingYear] [nvarchar](50) NULL, -- 推估種植年間
+        [estimatedAgeNote] [nvarchar](max) NULL, -- 推估樹齡備註
+        [groupGrowthInfo] [nvarchar](max) NULL, -- 群生竹木或行道樹生長資訊
         [treeHeight] [decimal](10, 2) NULL, -- 樹高(公尺)
         [breastHeightDiameter] [decimal](10, 2) NULL, -- 胸高直徑(公分)
         [breastHeightCircumference] [decimal](10, 2) NULL, -- 胸高樹圍(公分)
         [canopyProjectionArea] [decimal](10, 2) NULL, -- 樹冠投影面積(平方公尺)
-        [healthCondition] [nvarchar](max) NULL, -- 健康狀態描述
-        [hasEpiphyte] [bit] NULL, -- 是否有附生植物
-        [epiphyteDescription] [nvarchar](max) NULL, -- 附生植物描述
-        [hasParasite] [bit] NULL, -- 是否有寄生植物
-        [parasiteDescription] [nvarchar](max) NULL, -- 寄生植物描述
-        [hasClimbingPlant] [bit] NULL, -- 是否有攀藤植物
-        [climbingPlantDescription] [nvarchar](max) NULL, -- 攀藤植物描述
-        [surveyOtherNote] [nvarchar](max) NULL, -- 調查其他補充
+        [healthCondition] [nvarchar](max) NULL, -- 樹木健康及生育地概況
+        [epiphyteDescription] [nvarchar](max) NULL, -- 附生植物概況
+        [parasiteDescription] [nvarchar](max) NULL, -- 寄生植物概況
+        [climbingPlantDescription] [nvarchar](max) NULL, -- 纏勒植物概況
+        [surveyOtherNote] [nvarchar](max) NULL, -- 其他備註
         [sourceUnit] [nvarchar](100) NULL, -- 資料來源單位名稱
         [sourceUnitID] [int] NULL, -- 資料來源單位代碼
         [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
