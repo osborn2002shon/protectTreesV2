@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <自動產生>
 //     這段程式碼是由工具產生的。
 //
@@ -13,5 +13,19 @@ namespace protectTreesV2.backstage.tree
 
     public partial class edit_photos
     {
+
+        protected global::System.Web.UI.UpdatePanel UpdatePanel1;
+
+        protected global::System.Web.UI.WebControls.HiddenField hfTreeID;
+
+        protected global::System.Web.UI.WebControls.Label lblTreeInfo;
+
+        protected global::System.Web.UI.WebControls.FileUpload fuPhotos;
+
+        protected global::System.Web.UI.WebControls.Button btnUpload;
+
+        protected global::System.Web.UI.WebControls.Button btnBack;
+
+        protected global::System.Web.UI.WebControls.Repeater rptPhotos;
     }
 }

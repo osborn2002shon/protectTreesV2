@@ -2,11 +2,134 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
+    樹籍管理 / 樹籍資料查詢
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
+    樹籍資料查詢
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
-
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <div class="row">
+                <div class="col">
+                    <h4>查詢條件</h4>
+                    <div>
+                        <div class="row">
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" />
+                                <asp:DropDownList ID="ddlCity" runat="server" AutoPostBack="true" OnSelectedIndexChanged="ddlCity_SelectedIndexChanged" />
+                                <asp:DropDownList ID="ddlArea" runat="server" />
+                            </div>
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="ddlEditStatus" Text="編輯狀態" />
+                                <asp:DropDownList ID="ddlEditStatus" runat="server" />
+                            </div>
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="ddlTreeStatus" Text="樹籍狀態" />
+                                <asp:DropDownList ID="ddlTreeStatus" runat="server" />
+                            </div>
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種" />
+                                <asp:DropDownList ID="ddlSpecies" runat="server" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="txtSurveyStart" Text="調查日期起迄" />
+                                <asp:TextBox ID="txtSurveyStart" runat="server" TextMode="Date" />
+                                至
+                                <asp:TextBox ID="txtSurveyEnd" runat="server" TextMode="Date" />
+                            </div>
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="txtAnnouncementStart" Text="公告日期起迄" />
+                                <asp:TextBox ID="txtAnnouncementStart" runat="server" TextMode="Date" />
+                                至
+                                <asp:TextBox ID="txtAnnouncementEnd" runat="server" TextMode="Date" />
+                            </div>
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="txtKeyword" Text="關鍵字" />
+                                <asp:TextBox ID="txtKeyword" runat="server" />
+                            </div>
+                            <div class="col">
+                                <asp:Label runat="server" AssociatedControlID="txtSourceUnit" Text="資料來源單位" />
+                                <asp:TextBox ID="txtSourceUnit" runat="server" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <asp:Button ID="btnSearch" runat="server" Text="查詢" OnClick="btnSearch_Click" />
+                                <asp:Button ID="btnReset" runat="server" Text="清除條件" OnClick="btnReset_Click" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col">
+                    <asp:Label ID="lblCount" runat="server" />
+                    <asp:Button ID="btnExport" runat="server" Text="下載列表" OnClick="btnExport_Click" />
+                    <asp:Button ID="btnAdd" runat="server" Text="新增樹籍" OnClick="btnAdd_Click" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div>
+                        <asp:Label runat="server" AssociatedControlID="ddlBulkStatus" Text="批次設定樹籍狀態" />
+                        <asp:DropDownList ID="ddlBulkStatus" runat="server" />
+                        <asp:Label runat="server" AssociatedControlID="txtBulkAnnouncement" Text="公告日期" />
+                        <asp:TextBox ID="txtBulkAnnouncement" runat="server" TextMode="Date" />
+                        <asp:Button ID="btnApplyStatus" runat="server" Text="套用" OnClick="btnApplyStatus_Click" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <asp:GridView ID="gvTrees" runat="server" AutoGenerateColumns="false" AllowSorting="true" OnSorting="gvTrees_Sorting" OnRowCommand="gvTrees_RowCommand">
+                        <Columns>
+                            <asp:TemplateField HeaderText="選取">
+                                <HeaderTemplate>
+                                    <asp:CheckBox ID="chkSelectAll" runat="server" OnClientClick="toggleSelectAll(this); return false;" />
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="chkSelect" runat="server" />
+                                    <asp:HiddenField ID="hfTreeId" runat="server" Value='<%# Eval("TreeID") %>' />
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:BoundField DataField="SystemTreeNo" HeaderText="系統樹籍編號" SortExpression="SystemTreeNo" />
+                            <asp:BoundField DataField="AgencyTreeNo" HeaderText="樹木編號" SortExpression="AgencyTreeNo" />
+                            <asp:BoundField DataField="AgencyJurisdictionCode" HeaderText="管轄編碼" SortExpression="AgencyJurisdictionCode" />
+                            <asp:BoundField DataField="CityName" HeaderText="縣市" SortExpression="CityName" />
+                            <asp:BoundField DataField="AreaName" HeaderText="鄉鎮" SortExpression="AreaName" />
+                            <asp:BoundField DataField="SpeciesDisplayName" HeaderText="樹種" SortExpression="SpeciesDisplayName" />
+                            <asp:BoundField DataField="SurveyDate" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" SortExpression="SurveyDate" />
+                            <asp:BoundField DataField="AnnouncementDisplay" HeaderText="公告日期" SortExpression="AnnouncementDate" />
+                            <asp:BoundField DataField="StatusText" HeaderText="樹籍狀態" SortExpression="Status" />
+                            <asp:BoundField DataField="EditStatusText" HeaderText="編輯狀態" SortExpression="EditStatus" />
+                            <asp:TemplateField HeaderText="操作">
+                                <ItemTemplate>
+                                    <asp:LinkButton ID="lnkEdit" runat="server" CommandName="EditTree" CommandArgument='<%# Eval("TreeID") %>' Text="編輯" />
+                                    <asp:LinkButton ID="lnkView" runat="server" CommandName="ViewTree" CommandArgument='<%# Eval("TreeID") %>' Text="檢視" Visible='<%# ((int)Eval("EditStatus") == 1) %>' />
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                        </Columns>
+                    </asp:GridView>
+                </div>
+            </div>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <script type="text/javascript">
+        function toggleSelectAll(master) {
+            var grid = document.getElementById('<%= gvTrees.ClientID %>');
+            if (!grid) return;
+            var inputs = grid.getElementsByTagName('input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type === 'checkbox' && inputs[i].id.indexOf('chkSelect') > -1) {
+                    inputs[i].checked = master.checked;
+                }
+            }
+        }
+    </script>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">
 </asp:Content>
