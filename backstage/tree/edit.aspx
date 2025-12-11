@@ -59,15 +59,15 @@
                     <div class="row">
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="叢生株數" />
-                            <asp:TextBox ID="txtTreeCount" runat="server" />
+                            <asp:TextBox ID="txtTreeCount" runat="server" TextMode="Number" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" />
-                            <asp:TextBox ID="txtLatitude" runat="server" />
+                            <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" />
-                            <asp:TextBox ID="txtLongitude" runat="server" />
+                            <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="btnCoordinateTool" Text="座標轉換" />
@@ -111,19 +111,19 @@
                     <div class="row">
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtTreeHeight" Text="樹高" />
-                            <asp:TextBox ID="txtTreeHeight" runat="server" />
+                            <asp:TextBox ID="txtTreeHeight" runat="server" TextMode="Number" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtBreastHeightDiameter" Text="胸高直徑" />
-                            <asp:TextBox ID="txtBreastHeightDiameter" runat="server" />
+                            <asp:TextBox ID="txtBreastHeightDiameter" runat="server" TextMode="Number" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtBreastHeightCircumference" Text="胸高樹圍" />
-                            <asp:TextBox ID="txtBreastHeightCircumference" runat="server" />
+                            <asp:TextBox ID="txtBreastHeightCircumference" runat="server" TextMode="Number" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtCanopyArea" Text="樹冠投影面積" />
-                            <asp:TextBox ID="txtCanopyArea" runat="server" />
+                            <asp:TextBox ID="txtCanopyArea" runat="server" TextMode="Number" />
                         </div>
                     </div>
                     <div class="row">
