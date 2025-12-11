@@ -68,57 +68,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="backstage\sample\test.aspx" />
+    <Content Include="backstage\Manage\Tree.aspx" />
+    <Content Include="backstage\sample\HealthNew.aspx" />
+    <Content Include="backstage\sample\HealthEdit.aspx" />
+    <Content Include="backstage\sample\HealthList3.aspx" />
+    <Content Include="backstage\sample\HealthList2.aspx" />
+    <Content Include="backstage\sample\HealthList.aspx" />
+    <Content Include="backstage\sample\sample.css" />
+    <Content Include="backstage\sample\tree.jpg" />
+    <Content Include="backstage\sample\TreeEdit4.aspx" />
+    <Content Include="backstage\sample\TreeEdit3.aspx" />
+    <Content Include="backstage\sample\TreeEdit2.aspx" />
+    <Content Include="backstage\sample\TreeEdit1.aspx" />
+    <Content Include="backstage\sample\TreeNew.aspx" />
+    <Content Include="backstage\sample\TreeList.aspx" />
+    <Content Include="backstage\sample\TreeRead0b.aspx" />
+    <Content Include="backstage\sample\TreeRead0.aspx" />
+    <Content Include="backstage\sample\TreeRead1.aspx" />
+    <Content Include="backstage\sample\TreeRead3.aspx" />
+    <Content Include="backstage\sample\TreeRead2.aspx" />
     <Content Include="backstage\tree\detail.aspx" />
     <Content Include="backstage\tree\edit.aspx" />
     <Content Include="backstage\tree\edit_photos.aspx" />
     <Content Include="backstage\tree\query.aspx" />
-    <Content Include="bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll" />
-    <Content Include="bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml" />
-    <Content Include="bin\Newtonsoft.Json.dll" />
-    <Content Include="bin\protectTreesV2.dll" />
-    <Content Include="bin\protectTreesV2.pdb" />
-    <Content Include="bin\roslyn\csc.exe" />
-    <Content Include="bin\roslyn\csi.exe" />
-    <Content Include="bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll" />
-    <Content Include="bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll" />
-    <Content Include="bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll" />
-    <Content Include="bin\roslyn\Microsoft.Win32.Primitives.dll" />
-    <Content Include="bin\roslyn\System.AppContext.dll" />
-    <Content Include="bin\roslyn\System.Collections.Immutable.dll" />
-    <Content Include="bin\roslyn\System.Console.dll" />
-    <Content Include="bin\roslyn\System.Diagnostics.DiagnosticSource.dll" />
-    <Content Include="bin\roslyn\System.Diagnostics.FileVersionInfo.dll" />
-    <Content Include="bin\roslyn\System.Diagnostics.StackTrace.dll" />
-    <Content Include="bin\roslyn\System.Globalization.Calendars.dll" />
-    <Content Include="bin\roslyn\System.IO.Compression.dll" />
-    <Content Include="bin\roslyn\System.IO.Compression.ZipFile.dll" />
-    <Content Include="bin\roslyn\System.IO.FileSystem.dll" />
-    <Content Include="bin\roslyn\System.IO.FileSystem.Primitives.dll" />
-    <Content Include="bin\roslyn\System.Net.Http.dll" />
-    <Content Include="bin\roslyn\System.Net.Sockets.dll" />
-    <Content Include="bin\roslyn\System.Reflection.Metadata.dll" />
-    <Content Include="bin\roslyn\System.Runtime.InteropServices.RuntimeInformation.dll" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Algorithms.dll" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Encoding.dll" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Primitives.dll" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.X509Certificates.dll" />
-    <Content Include="bin\roslyn\System.Text.Encoding.CodePages.dll" />
-    <Content Include="bin\roslyn\System.Threading.Tasks.Extensions.dll" />
-    <Content Include="bin\roslyn\System.ValueTuple.dll" />
-    <Content Include="bin\roslyn\System.Xml.ReaderWriter.dll" />
-    <Content Include="bin\roslyn\System.Xml.XmlDocument.dll" />
-    <Content Include="bin\roslyn\System.Xml.XPath.dll" />
-    <Content Include="bin\roslyn\System.Xml.XPath.XDocument.dll" />
-    <Content Include="bin\roslyn\vbc.exe" />
-    <Content Include="bin\roslyn\VBCSCompiler.exe" />
     <Content Include="Login.aspx" />
-    <Content Include="SQL\Schema.sql" />
     <Content Include="Web.config" />
     <Content Include="_css\bootstrap-icons.css" />
     <Content Include="_css\bootstrap-table.css" />
@@ -126,7 +99,7 @@
     <Content Include="_css\control.css" />
     <Content Include="_css\fontawesome-all.css" />
     <Content Include="_css\mp_default.css" />
-    <Content Include="_css\mp_public.css" />
+    <Content Include="_css\mp_login.css" />
     <Content Include="_img\logo.png" />
     <Content Include="_img\logo_mini.png" />
     <Content Include="_js\bootstrap-table-zh-TW.js" />
@@ -153,12 +126,124 @@
     <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\TreeCatalog.cs" />
     <Compile Include="App_Code\User.cs" />
-    <Compile Include="backstage\sample\test.aspx.cs">
-      <DependentUpon>test.aspx</DependentUpon>
+    <Compile Include="backstage\Manage\Tree.aspx.cs">
+      <DependentUpon>Tree.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="backstage\sample\test.aspx.designer.cs">
-      <DependentUpon>test.aspx</DependentUpon>
+    <Compile Include="backstage\Manage\Tree.aspx.designer.cs">
+      <DependentUpon>Tree.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\HealthNew.aspx.cs">
+      <DependentUpon>HealthNew.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\HealthNew.aspx.designer.cs">
+      <DependentUpon>HealthNew.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\HealthEdit.aspx.cs">
+      <DependentUpon>HealthEdit.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\HealthEdit.aspx.designer.cs">
+      <DependentUpon>HealthEdit.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\HealthList3.aspx.cs">
+      <DependentUpon>HealthList3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\HealthList3.aspx.designer.cs">
+      <DependentUpon>HealthList3.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\HealthList2.aspx.cs">
+      <DependentUpon>HealthList2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\HealthList2.aspx.designer.cs">
+      <DependentUpon>HealthList2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\HealthList.aspx.cs">
+      <DependentUpon>HealthList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\HealthList.aspx.designer.cs">
+      <DependentUpon>HealthList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit4.aspx.cs">
+      <DependentUpon>TreeEdit4.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit4.aspx.designer.cs">
+      <DependentUpon>TreeEdit4.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit3.aspx.cs">
+      <DependentUpon>TreeEdit3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit3.aspx.designer.cs">
+      <DependentUpon>TreeEdit3.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit2.aspx.cs">
+      <DependentUpon>TreeEdit2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit2.aspx.designer.cs">
+      <DependentUpon>TreeEdit2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit1.aspx.cs">
+      <DependentUpon>TreeEdit1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeEdit1.aspx.designer.cs">
+      <DependentUpon>TreeEdit1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeNew.aspx.cs">
+      <DependentUpon>TreeNew.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeNew.aspx.designer.cs">
+      <DependentUpon>TreeNew.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeList.aspx.cs">
+      <DependentUpon>TreeList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeList.aspx.designer.cs">
+      <DependentUpon>TreeList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead0b.aspx.cs">
+      <DependentUpon>TreeRead0b.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead0b.aspx.designer.cs">
+      <DependentUpon>TreeRead0b.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead0.aspx.cs">
+      <DependentUpon>TreeRead0.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead0.aspx.designer.cs">
+      <DependentUpon>TreeRead0.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead1.aspx.cs">
+      <DependentUpon>TreeRead1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead1.aspx.designer.cs">
+      <DependentUpon>TreeRead1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead3.aspx.cs">
+      <DependentUpon>TreeRead3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead3.aspx.designer.cs">
+      <DependentUpon>TreeRead3.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead2.aspx.cs">
+      <DependentUpon>TreeRead2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\sample\TreeRead2.aspx.designer.cs">
+      <DependentUpon>TreeRead2.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\tree\detail.aspx.cs">
       <DependentUpon>detail.aspx</DependentUpon>
@@ -212,58 +297,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll.refresh" />
-    <Content Include="bin\Newtonsoft.Json.dll.refresh" />
-    <Content Include="bin\roslyn\csc.exe.config" />
-    <Content Include="bin\roslyn\csc.exe.refresh" />
-    <Content Include="bin\roslyn\csc.rsp" />
-    <Content Include="bin\roslyn\csi.exe.config" />
-    <Content Include="bin\roslyn\csi.exe.refresh" />
-    <Content Include="bin\roslyn\csi.rsp" />
-    <Content Include="bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.CSharp.Core.targets" />
-    <Content Include="bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll.refresh" />
-    <Content Include="bin\roslyn\Microsoft.Managed.Core.targets" />
-    <Content Include="bin\roslyn\Microsoft.VisualBasic.Core.targets" />
-    <Content Include="bin\roslyn\Microsoft.Win32.Primitives.dll.refresh" />
-    <Content Include="bin\roslyn\System.AppContext.dll.refresh" />
-    <Content Include="bin\roslyn\System.Collections.Immutable.dll.refresh" />
-    <Content Include="bin\roslyn\System.Console.dll.refresh" />
-    <Content Include="bin\roslyn\System.Diagnostics.DiagnosticSource.dll.refresh" />
-    <Content Include="bin\roslyn\System.Diagnostics.FileVersionInfo.dll.refresh" />
-    <Content Include="bin\roslyn\System.Diagnostics.StackTrace.dll.refresh" />
-    <Content Include="bin\roslyn\System.Globalization.Calendars.dll.refresh" />
-    <Content Include="bin\roslyn\System.IO.Compression.dll.refresh" />
-    <Content Include="bin\roslyn\System.IO.Compression.ZipFile.dll.refresh" />
-    <Content Include="bin\roslyn\System.IO.FileSystem.dll.refresh" />
-    <Content Include="bin\roslyn\System.IO.FileSystem.Primitives.dll.refresh" />
-    <Content Include="bin\roslyn\System.Net.Http.dll.refresh" />
-    <Content Include="bin\roslyn\System.Net.Sockets.dll.refresh" />
-    <Content Include="bin\roslyn\System.Reflection.Metadata.dll.refresh" />
-    <Content Include="bin\roslyn\System.Runtime.InteropServices.RuntimeInformation.dll.refresh" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Algorithms.dll.refresh" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Encoding.dll.refresh" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.Primitives.dll.refresh" />
-    <Content Include="bin\roslyn\System.Security.Cryptography.X509Certificates.dll.refresh" />
-    <Content Include="bin\roslyn\System.Text.Encoding.CodePages.dll.refresh" />
-    <Content Include="bin\roslyn\System.Threading.Tasks.Extensions.dll.refresh" />
-    <Content Include="bin\roslyn\System.ValueTuple.dll.refresh" />
-    <Content Include="bin\roslyn\System.Xml.ReaderWriter.dll.refresh" />
-    <Content Include="bin\roslyn\System.Xml.XmlDocument.dll.refresh" />
-    <Content Include="bin\roslyn\System.Xml.XPath.dll.refresh" />
-    <Content Include="bin\roslyn\System.Xml.XPath.XDocument.dll.refresh" />
-    <Content Include="bin\roslyn\vbc.exe.config" />
-    <Content Include="bin\roslyn\vbc.exe.refresh" />
-    <Content Include="bin\roslyn\vbc.rsp" />
-    <Content Include="bin\roslyn\VBCSCompiler.exe.config" />
-    <Content Include="bin\roslyn\VBCSCompiler.exe.refresh" />
-    <Content Include="bin\protectTreesV2.dll.config" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -283,9 +316,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="backstage\system\" />
-    <Folder Include="obj\" />
     <Folder Include="pages\" />
-    <Folder Include="SPEC\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

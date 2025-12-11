@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <自動產生>
 //     這段程式碼是由工具產生的。
 //
@@ -14,18 +14,58 @@ namespace protectTreesV2.backstage.tree
     public partial class edit_photos
     {
 
-        protected global::System.Web.UI.UpdatePanel UpdatePanel1;
-
+        /// <summary>
+        /// hfTreeID 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfTreeID;
 
+        /// <summary>
+        /// lblTreeInfo 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblTreeInfo;
 
+        /// <summary>
+        /// fuPhotos 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
         protected global::System.Web.UI.WebControls.FileUpload fuPhotos;
 
+        /// <summary>
+        /// btnUpload 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnUpload;
 
+        /// <summary>
+        /// btnBack 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnBack;
 
+        /// <summary>
+        /// rptPhotos 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptPhotos;
     }
 }

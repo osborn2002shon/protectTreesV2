@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="detail.aspx.cs" Inherits="protectTreesV2.backstage.tree.detail" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="detail.aspx.cs" Inherits="protectTreesV2.backstage.tree.detail" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
@@ -8,6 +8,7 @@
     樹籍檢視
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
+
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
             <asp:HiddenField ID="hfTreeID" runat="server" />
@@ -15,7 +16,7 @@
                 <div class="col">
                     <h4>基本資料</h4>
                     <div class="row">
-                        <div class="col">系統樹籍編號：<asp:Label ID="lblSystemTreeNo" runat="server" /></div>
+                        <div class="col">系統樹籍編號：<asp:Label ID="lblSystemTreeNo" runat="server"></asp:Label></div>
                         <div class="col">機關樹木編號：<asp:Label ID="lblAgencyTreeNo" runat="server" /></div>
                         <div class="col">機關管轄編碼：<asp:Label ID="lblJurisdiction" runat="server" /></div>
                     </div>
