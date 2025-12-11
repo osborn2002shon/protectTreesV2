@@ -154,6 +154,46 @@
         </ContentTemplate>
     </asp:UpdatePanel>
 
+    <asp:Panel ID="pnlLogs" runat="server" Visible="false">
+        <div class="row">
+            <div class="col">
+                <h4>編輯紀錄</h4>
+                <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
+                <asp:Repeater ID="rptLogs" runat="server">
+                    <HeaderTemplate>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>動作</th>
+                                    <th>說明</th>
+                                    <th>時間</th>
+                                    <th>帳號</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <tr>
+                            <td><%# Eval("ActionType") %></td>
+                            <td><%# Eval("Memo") %></td>
+                            <td><%# Eval("LogDateTime", "{0:yyyy-MM-dd HH:mm}") %></td>
+                            <td><%# Eval("AccountName") %> (<%# Eval("Account") %>) <%# Eval("AccountUnit") %></td>
+                        </tr>
+                    </ItemTemplate>
+                    <FooterTemplate>
+                            </tbody>
+                        </table>
+                    </FooterTemplate>
+                </asp:Repeater>
+                <div>
+                    <asp:LinkButton ID="lnkLogPrev" runat="server" Text="上一頁" OnClick="lnkLogPrev_Click" />
+                    <asp:Label ID="lblLogPageInfo" runat="server" />
+                    <asp:LinkButton ID="lnkLogNext" runat="server" Text="下一頁" OnClick="lnkLogNext_Click" />
+                </div>
+            </div>
+        </div>
+    </asp:Panel>
+
     <div class="modal fade" id="coordinateModal" tabindex="-1" aria-labelledby="coordinateModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

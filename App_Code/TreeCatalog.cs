@@ -817,12 +817,8 @@ WHERE treeID=@id AND removeDateTime IS NULL";
             string cityCode = !string.IsNullOrWhiteSpace(info?.CityCode)
                 ? info.CityCode.Trim().ToUpperInvariant()
                 : (cityId.HasValue ? cityId.Value.ToString("D2", CultureInfo.InvariantCulture) : "XX");
-            string areaCode = !string.IsNullOrWhiteSpace(info?.AreaCode)
-                ? info.AreaCode.Trim().ToUpperInvariant()
-                : (areaId.HasValue ? areaId.Value.ToString("D3", CultureInfo.InvariantCulture) : "000");
 
-            int rocYear = ToRocYear(referenceDate ?? DateTime.Today);
-            string prefix = string.Format(CultureInfo.InvariantCulture, "{0:000}{1}{2}", rocYear, cityCode, areaCode);
+            string prefix = cityCode;
 
             const string sql = "SELECT MAX(systemTreeNo) FROM Tree_Record WHERE systemTreeNo LIKE @prefix + '%'";
             using (var da = new MS_SQL())
@@ -840,7 +836,7 @@ WHERE treeID=@id AND removeDateTime IS NULL";
                 }
 
                 sequence++;
-                return prefix + sequence.ToString("D4", CultureInfo.InvariantCulture);
+                return prefix + sequence.ToString("D5", CultureInfo.InvariantCulture);
             }
         }
 
