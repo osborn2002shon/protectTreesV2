@@ -86,6 +86,11 @@
                     </asp:Repeater>
                 </div>
             </div>
+            <div class="row">
+                <div class="col">
+                    <asp:HyperLink ID="lnkBackToList" runat="server" Text="返回列表" NavigateUrl="query.aspx" />
+                </div>
+            </div>
         </ContentTemplate>
     </asp:UpdatePanel>
 </asp:Content>

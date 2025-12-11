@@ -225,8 +225,8 @@ namespace protectTreesV2.TreeCatalog
         private const string InsertTreeSql = @"
 INSERT INTO Tree_Record
 (systemTreeNo, agencyTreeNo, agencyJurisdictionCode,
- cityID, cityName, areaID, areaName,
- speciesID, speciesCommonName, speciesScientificName,
+ cityID, areaID,
+ speciesID,
  manager, managerContact, surveyDate, surveyor,
  announcementDate, isAnnounced, treeStatus, editStatus,
  treeCount, site, latitude, longitude,
@@ -242,8 +242,8 @@ INSERT INTO Tree_Record
 OUTPUT INSERTED.treeID
 VALUES
  (@systemTreeNo, @agencyTreeNo, @agencyJurisdictionCode,
- @cityID, @cityName, @areaID, @areaName,
- @speciesID, @speciesCommonName, @speciesScientificName,
+ @cityID, @areaID,
+ @speciesID,
  @manager, @managerContact, @surveyDate, @surveyor,
  @announcementDate, @isAnnounced, @treeStatus, @editStatus,
  @treeCount, @site, @latitude, @longitude,
@@ -334,25 +334,30 @@ VALUES
         public static TreeRecord GetTree(int treeId)
         {
             const string sql = @"
-SELECT TOP 1 treeID, systemTreeNo, agencyTreeNo, agencyJurisdictionCode,
-       cityID, cityName, areaID, areaName,
-       speciesID, speciesCommonName, speciesScientificName,
-       manager, managerContact, surveyDate, surveyor,
-       announcementDate, isAnnounced, treeStatus, editStatus,
-       treeCount, site, latitude, longitude,
-       landOwnership, landOwnershipNote, facilityDescription,
-       memo, keywords, recognitionCriteria,
-       recognitionNote, culturalHistoryIntro, estimatedPlantingYear, estimatedAgeNote,
-       groupGrowthInfo, treeHeight, breastHeightDiameter, breastHeightCircumference,
-       canopyProjectionArea, healthCondition,
-       hasEpiphyte, epiphyteDescription,
-       hasParasite, parasiteDescription,
-       hasClimbingPlant, climbingPlantDescription,
-       surveyOtherNote,
-       sourceUnit, sourceUnitID,
-       insertAccountID, insertDateTime, updateAccountID, updateDateTime
-FROM Tree_Record
-WHERE treeID=@id AND removeDateTime IS NULL";
+SELECT TOP 1 r.treeID, r.systemTreeNo, r.agencyTreeNo, r.agencyJurisdictionCode,
+       r.cityID, COALESCE(area.city, city.city, r.cityName) AS cityName,
+       r.areaID, COALESCE(area.area, r.areaName) AS areaName,
+       r.speciesID, COALESCE(species.commonName, r.speciesCommonName) AS speciesCommonName,
+       COALESCE(species.scientificName, r.speciesScientificName) AS speciesScientificName,
+       r.manager, r.managerContact, r.surveyDate, r.surveyor,
+       r.announcementDate, r.isAnnounced, r.treeStatus, r.editStatus,
+       r.treeCount, r.site, r.latitude, r.longitude,
+       r.landOwnership, r.landOwnershipNote, r.facilityDescription,
+       r.memo, r.keywords, r.recognitionCriteria,
+       r.recognitionNote, r.culturalHistoryIntro, r.estimatedPlantingYear, r.estimatedAgeNote,
+       r.groupGrowthInfo, r.treeHeight, r.breastHeightDiameter, r.breastHeightCircumference,
+       r.canopyProjectionArea, r.healthCondition,
+       r.hasEpiphyte, r.epiphyteDescription,
+       r.hasParasite, r.parasiteDescription,
+       r.hasClimbingPlant, r.climbingPlantDescription,
+       r.surveyOtherNote,
+       r.sourceUnit, r.sourceUnitID,
+       r.insertAccountID, r.insertDateTime, r.updateAccountID, r.updateDateTime
+FROM Tree_Record r
+OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) city
+LEFT JOIN System_Taiwan area ON area.twID = r.areaID
+LEFT JOIN Tree_Species species ON species.speciesID = r.speciesID
+WHERE r.treeID=@id AND r.removeDateTime IS NULL";
 
             using (var da = new MS_SQL())
             {
@@ -366,25 +371,30 @@ WHERE treeID=@id AND removeDateTime IS NULL";
             if (string.IsNullOrWhiteSpace(systemTreeNo)) return null;
 
             const string sql = @"
-SELECT TOP 1 treeID, systemTreeNo, agencyTreeNo, agencyJurisdictionCode,
-       cityID, cityName, areaID, areaName,
-       speciesID, speciesCommonName, speciesScientificName,
-       manager, managerContact, surveyDate, surveyor,
-       announcementDate, isAnnounced, treeStatus, editStatus,
-       treeCount, site, latitude, longitude,
-       landOwnership, landOwnershipNote, facilityDescription,
-       memo, keywords, recognitionCriteria,
-       recognitionNote, culturalHistoryIntro, estimatedPlantingYear, estimatedAgeNote,
-       groupGrowthInfo, treeHeight, breastHeightDiameter, breastHeightCircumference,
-       canopyProjectionArea, healthCondition,
-       hasEpiphyte, epiphyteDescription,
-       hasParasite, parasiteDescription,
-       hasClimbingPlant, climbingPlantDescription,
-       surveyOtherNote,
-       sourceUnit, sourceUnitID,
-       insertAccountID, insertDateTime, updateAccountID, updateDateTime
-FROM Tree_Record
-WHERE systemTreeNo=@systemTreeNo AND removeDateTime IS NULL";
+SELECT TOP 1 r.treeID, r.systemTreeNo, r.agencyTreeNo, r.agencyJurisdictionCode,
+       r.cityID, COALESCE(area.city, city.city, r.cityName) AS cityName,
+       r.areaID, COALESCE(area.area, r.areaName) AS areaName,
+       r.speciesID, COALESCE(species.commonName, r.speciesCommonName) AS speciesCommonName,
+       COALESCE(species.scientificName, r.speciesScientificName) AS speciesScientificName,
+       r.manager, r.managerContact, r.surveyDate, r.surveyor,
+       r.announcementDate, r.isAnnounced, r.treeStatus, r.editStatus,
+       r.treeCount, r.site, r.latitude, r.longitude,
+       r.landOwnership, r.landOwnershipNote, r.facilityDescription,
+       r.memo, r.keywords, r.recognitionCriteria,
+       r.recognitionNote, r.culturalHistoryIntro, r.estimatedPlantingYear, r.estimatedAgeNote,
+       r.groupGrowthInfo, r.treeHeight, r.breastHeightDiameter, r.breastHeightCircumference,
+       r.canopyProjectionArea, r.healthCondition,
+       r.hasEpiphyte, r.epiphyteDescription,
+       r.hasParasite, r.parasiteDescription,
+       r.hasClimbingPlant, r.climbingPlantDescription,
+       r.surveyOtherNote,
+       r.sourceUnit, r.sourceUnitID,
+       r.insertAccountID, r.insertDateTime, r.updateAccountID, r.updateDateTime
+FROM Tree_Record r
+OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) city
+LEFT JOIN System_Taiwan area ON area.twID = r.areaID
+LEFT JOIN Tree_Species species ON species.speciesID = r.speciesID
+WHERE r.systemTreeNo=@systemTreeNo AND r.removeDateTime IS NULL";
 
             using (var da = new MS_SQL())
             {
@@ -400,14 +410,19 @@ WHERE systemTreeNo=@systemTreeNo AND removeDateTime IS NULL";
         {
             var records = new List<TreeRecord>();
             var sql = new StringBuilder();
-            sql.Append(@"SELECT treeID, systemTreeNo, agencyTreeNo, agencyJurisdictionCode,
-                                cityID, cityName, areaID, areaName,
-                                speciesID, speciesCommonName, speciesScientificName,
-                                manager, managerContact, surveyDate, announcementDate, isAnnounced,
-                                treeStatus, editStatus, updateDateTime,
-                                sourceUnit
-                         FROM Tree_Record
-                         WHERE removeDateTime IS NULL");
+            sql.Append(@"SELECT r.treeID, r.systemTreeNo, r.agencyTreeNo, r.agencyJurisdictionCode,
+                                r.cityID, COALESCE(area.city, city.city, r.cityName) AS cityName,
+                                r.areaID, COALESCE(area.area, r.areaName) AS areaName,
+                                r.speciesID, COALESCE(species.commonName, r.speciesCommonName) AS speciesCommonName,
+                                COALESCE(species.scientificName, r.speciesScientificName) AS speciesScientificName,
+                                r.manager, r.managerContact, r.surveyDate, r.announcementDate, r.isAnnounced,
+                                r.treeStatus, r.editStatus, r.updateDateTime,
+                                r.sourceUnit
+                         FROM Tree_Record r
+                         OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) city
+                         LEFT JOIN System_Taiwan area ON area.twID = r.areaID
+                         LEFT JOIN Tree_Species species ON species.speciesID = r.speciesID
+                         WHERE r.removeDateTime IS NULL");
 
             var parameters = new List<SqlParameter>();
 
@@ -415,67 +430,67 @@ WHERE systemTreeNo=@systemTreeNo AND removeDateTime IS NULL";
             {
                 if (filter.CityID.HasValue)
                 {
-                    sql.Append(" AND cityID=@cityID");
+                    sql.Append(" AND r.cityID=@cityID");
                     parameters.Add(new SqlParameter("@cityID", filter.CityID.Value));
                 }
 
                 if (filter.AreaID.HasValue)
                 {
-                    sql.Append(" AND areaID=@areaID");
+                    sql.Append(" AND r.areaID=@areaID");
                     parameters.Add(new SqlParameter("@areaID", filter.AreaID.Value));
                 }
 
                 if (filter.EditStatus.HasValue)
                 {
-                    sql.Append(" AND editStatus=@editStatus");
+                    sql.Append(" AND r.editStatus=@editStatus");
                     parameters.Add(new SqlParameter("@editStatus", (int)filter.EditStatus.Value));
                 }
 
                 if (filter.Status.HasValue)
                 {
-                    sql.Append(" AND treeStatus=@status");
+                    sql.Append(" AND r.treeStatus=@status");
                     parameters.Add(new SqlParameter("@status", GetStatusValue(filter.Status.Value)));
                 }
 
                 if (filter.SpeciesID.HasValue)
                 {
-                    sql.Append(" AND speciesID=@speciesID");
+                    sql.Append(" AND r.speciesID=@speciesID");
                     parameters.Add(new SqlParameter("@speciesID", filter.SpeciesID.Value));
                 }
 
                 if (filter.SurveyDateStart.HasValue)
                 {
-                    sql.Append(" AND surveyDate>=@surveyStart");
+                    sql.Append(" AND r.surveyDate>=@surveyStart");
                     parameters.Add(new SqlParameter("@surveyStart", filter.SurveyDateStart.Value));
                 }
 
                 if (filter.SurveyDateEnd.HasValue)
                 {
-                    sql.Append(" AND surveyDate<=@surveyEnd");
+                    sql.Append(" AND r.surveyDate<=@surveyEnd");
                     parameters.Add(new SqlParameter("@surveyEnd", filter.SurveyDateEnd.Value));
                 }
 
                 if (filter.AnnouncementDateStart.HasValue)
                 {
-                    sql.Append(" AND announcementDate>=@announceStart");
+                    sql.Append(" AND r.announcementDate>=@announceStart");
                     parameters.Add(new SqlParameter("@announceStart", filter.AnnouncementDateStart.Value));
                 }
 
                 if (filter.AnnouncementDateEnd.HasValue)
                 {
-                    sql.Append(" AND announcementDate<=@announceEnd");
+                    sql.Append(" AND r.announcementDate<=@announceEnd");
                     parameters.Add(new SqlParameter("@announceEnd", filter.AnnouncementDateEnd.Value));
                 }
 
                 if (!string.IsNullOrWhiteSpace(filter.Keyword))
                 {
-                    sql.Append(" AND (systemTreeNo LIKE @kw OR agencyTreeNo LIKE @kw OR agencyJurisdictionCode LIKE @kw OR manager LIKE @kw)");
+                    sql.Append(" AND (r.systemTreeNo LIKE @kw OR r.agencyTreeNo LIKE @kw OR r.agencyJurisdictionCode LIKE @kw OR r.manager LIKE @kw)");
                     parameters.Add(new SqlParameter("@kw", "%" + filter.Keyword.Trim() + "%"));
                 }
 
                 if (!string.IsNullOrWhiteSpace(filter.SourceUnit))
                 {
-                    sql.Append(" AND sourceUnit=@sourceUnit");
+                    sql.Append(" AND r.sourceUnit=@sourceUnit");
                     parameters.Add(new SqlParameter("@sourceUnit", filter.SourceUnit));
                 }
             }
@@ -500,77 +515,80 @@ WHERE systemTreeNo=@systemTreeNo AND removeDateTime IS NULL";
         public static DataTable ExportTrees(TreeFilter filter)
         {
             var sql = new StringBuilder();
-            sql.Append(@"SELECT systemTreeNo AS [系統樹籍編號],
-                                agencyTreeNo AS [機關樹木編號],
-                                agencyJurisdictionCode AS [機關管轄編碼],
-                                cityName AS [縣市],
-                                areaName AS [鄉鎮市區],
-                                speciesCommonName AS [樹種],
-                                speciesScientificName AS [學名],
-                                manager AS [管理人],
-                                surveyDate AS [調查日期],
-                                announcementDate AS [公告日期],
-                                treeStatus AS [樹籍狀態],
-                                CASE WHEN editStatus=1 THEN N'完稿' ELSE N'草稿' END AS [編輯狀態]
-                         FROM Tree_Record
-                         WHERE removeDateTime IS NULL");
+            sql.Append(@"SELECT r.systemTreeNo AS [系統樹籍編號],
+                                r.agencyTreeNo AS [機關樹木編號],
+                                r.agencyJurisdictionCode AS [機關管轄編碼],
+                                COALESCE(area.city, city.city, r.cityName) AS [縣市],
+                                COALESCE(area.area, r.areaName) AS [鄉鎮市區],
+                                COALESCE(species.commonName, r.speciesCommonName) AS [樹種],
+                                COALESCE(species.scientificName, r.speciesScientificName) AS [學名],
+                                r.manager AS [管理人],
+                                r.surveyDate AS [調查日期],
+                                r.announcementDate AS [公告日期],
+                                r.treeStatus AS [樹籍狀態],
+                                CASE WHEN r.editStatus=1 THEN N'完稿' ELSE N'草稿' END AS [編輯狀態]
+                         FROM Tree_Record r
+                         OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) city
+                         LEFT JOIN System_Taiwan area ON area.twID = r.areaID
+                         LEFT JOIN Tree_Species species ON species.speciesID = r.speciesID
+                         WHERE r.removeDateTime IS NULL");
 
             var parameters = new List<SqlParameter>();
             if (filter != null)
             {
                 if (filter.CityID.HasValue)
                 {
-                    sql.Append(" AND cityID=@cityID");
+                    sql.Append(" AND r.cityID=@cityID");
                     parameters.Add(new SqlParameter("@cityID", filter.CityID.Value));
                 }
                 if (filter.AreaID.HasValue)
                 {
-                    sql.Append(" AND areaID=@areaID");
+                    sql.Append(" AND r.areaID=@areaID");
                     parameters.Add(new SqlParameter("@areaID", filter.AreaID.Value));
                 }
                 if (filter.EditStatus.HasValue)
                 {
-                    sql.Append(" AND editStatus=@editStatus");
+                    sql.Append(" AND r.editStatus=@editStatus");
                     parameters.Add(new SqlParameter("@editStatus", (int)filter.EditStatus.Value));
                 }
                 if (filter.Status.HasValue)
                 {
-                    sql.Append(" AND treeStatus=@status");
+                    sql.Append(" AND r.treeStatus=@status");
                     parameters.Add(new SqlParameter("@status", GetStatusValue(filter.Status.Value)));
                 }
                 if (filter.SpeciesID.HasValue)
                 {
-                    sql.Append(" AND speciesID=@speciesID");
+                    sql.Append(" AND r.speciesID=@speciesID");
                     parameters.Add(new SqlParameter("@speciesID", filter.SpeciesID.Value));
                 }
                 if (filter.SurveyDateStart.HasValue)
                 {
-                    sql.Append(" AND surveyDate>=@surveyStart");
+                    sql.Append(" AND r.surveyDate>=@surveyStart");
                     parameters.Add(new SqlParameter("@surveyStart", filter.SurveyDateStart.Value));
                 }
                 if (filter.SurveyDateEnd.HasValue)
                 {
-                    sql.Append(" AND surveyDate<=@surveyEnd");
+                    sql.Append(" AND r.surveyDate<=@surveyEnd");
                     parameters.Add(new SqlParameter("@surveyEnd", filter.SurveyDateEnd.Value));
                 }
                 if (filter.AnnouncementDateStart.HasValue)
                 {
-                    sql.Append(" AND announcementDate>=@announceStart");
+                    sql.Append(" AND r.announcementDate>=@announceStart");
                     parameters.Add(new SqlParameter("@announceStart", filter.AnnouncementDateStart.Value));
                 }
                 if (filter.AnnouncementDateEnd.HasValue)
                 {
-                    sql.Append(" AND announcementDate<=@announceEnd");
+                    sql.Append(" AND r.announcementDate<=@announceEnd");
                     parameters.Add(new SqlParameter("@announceEnd", filter.AnnouncementDateEnd.Value));
                 }
                 if (!string.IsNullOrWhiteSpace(filter.Keyword))
                 {
-                    sql.Append(" AND (systemTreeNo LIKE @kw OR agencyTreeNo LIKE @kw OR agencyJurisdictionCode LIKE @kw OR manager LIKE @kw)");
+                    sql.Append(" AND (r.systemTreeNo LIKE @kw OR r.agencyTreeNo LIKE @kw OR r.agencyJurisdictionCode LIKE @kw OR r.manager LIKE @kw)");
                     parameters.Add(new SqlParameter("@kw", "%" + filter.Keyword.Trim() + "%"));
                 }
                 if (!string.IsNullOrWhiteSpace(filter.SourceUnit))
                 {
-                    sql.Append(" AND sourceUnit=@sourceUnit");
+                    sql.Append(" AND r.sourceUnit=@sourceUnit");
                     parameters.Add(new SqlParameter("@sourceUnit", filter.SourceUnit));
                 }
             }
@@ -605,12 +623,8 @@ SET systemTreeNo=@systemTreeNo,
     agencyTreeNo=@agencyTreeNo,
     agencyJurisdictionCode=@agencyJurisdictionCode,
     cityID=@cityID,
-    cityName=@cityName,
     areaID=@areaID,
-    areaName=@areaName,
     speciesID=@speciesID,
-    speciesCommonName=@speciesCommonName,
-    speciesScientificName=@speciesScientificName,
     manager=@manager,
     managerContact=@managerContact,
     surveyDate=@surveyDate,
@@ -657,12 +671,8 @@ WHERE treeID=@id AND removeDateTime IS NULL";
                     new SqlParameter("@agencyTreeNo", ToDbValue(record.AgencyTreeNo)),
                     new SqlParameter("@agencyJurisdictionCode", ToDbValue(record.AgencyJurisdictionCode)),
                     new SqlParameter("@cityID", ToDbValue(record.CityID)),
-                    new SqlParameter("@cityName", ToDbValue(record.CityName)),
                     new SqlParameter("@areaID", ToDbValue(record.AreaID)),
-                    new SqlParameter("@areaName", ToDbValue(record.AreaName)),
                     new SqlParameter("@speciesID", ToDbValue(record.SpeciesID)),
-                    new SqlParameter("@speciesCommonName", ToDbValue(record.SpeciesCommonName)),
-                    new SqlParameter("@speciesScientificName", ToDbValue(record.SpeciesScientificName)),
                     new SqlParameter("@manager", ToDbValue(record.Manager)),
                     new SqlParameter("@managerContact", ToDbValue(record.ManagerContact)),
                     new SqlParameter("@surveyDate", ToDbValue(record.SurveyDate)),
@@ -1034,12 +1044,8 @@ WHERE treeID=@id AND removeDateTime IS NULL";
                 new SqlParameter("@agencyTreeNo", ToDbValue(record.AgencyTreeNo)),
                 new SqlParameter("@agencyJurisdictionCode", ToDbValue(record.AgencyJurisdictionCode)),
                 new SqlParameter("@cityID", ToDbValue(record.CityID)),
-                new SqlParameter("@cityName", ToDbValue(record.CityName)),
                 new SqlParameter("@areaID", ToDbValue(record.AreaID)),
-                new SqlParameter("@areaName", ToDbValue(record.AreaName)),
                 new SqlParameter("@speciesID", ToDbValue(record.SpeciesID)),
-                new SqlParameter("@speciesCommonName", ToDbValue(record.SpeciesCommonName)),
-                new SqlParameter("@speciesScientificName", ToDbValue(record.SpeciesScientificName)),
                 new SqlParameter("@manager", ToDbValue(record.Manager)),
                 new SqlParameter("@managerContact", ToDbValue(record.ManagerContact)),
                 new SqlParameter("@surveyDate", ToDbValue(record.SurveyDate)),
