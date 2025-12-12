@@ -306,7 +306,10 @@ namespace protectTreesV2.backstage.tree
             var deleted = ParseDeletedPhotoIds();
             int remaining = existing.Count(p => !deleted.Contains(p.PhotoID));
 
-            var files = fuPendingPhotos.PostedFiles;
+            var files = fuPendingPhotos.PostedFiles?
+                .Cast<System.Web.HttpPostedFile>()
+                .Where(f => f != null && f.ContentLength > 0)
+                .ToList();
             int newCount = files?.Count ?? 0;
             string[] newKeys = (hfNewPhotoKeys.Value ?? string.Empty)
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
