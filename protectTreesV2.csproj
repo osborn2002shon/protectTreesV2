@@ -92,6 +92,7 @@
     <Content Include="backstage\tree\edit_photos.aspx" />
     <Content Include="backstage\tree\query.aspx" />
     <Content Include="Login.aspx" />
+    <Content Include="SQL\Schema.sql" />
     <Content Include="Web.config" />
     <Content Include="_css\bootstrap-icons.css" />
     <Content Include="_css\bootstrap-table.css" />
