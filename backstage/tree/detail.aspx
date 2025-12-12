@@ -58,7 +58,7 @@
                         <div class="col">公告是否公開：<asp:Label ID="lblIsAnnounced" runat="server" /></div>
                     </div>
                     <div class="row">
-                        <div class="col">受保護認定理由：<asp:Label ID="lblRecognition" runat="server" /></div>
+                        <div class="col">受保護認定理由：<asp:Literal ID="ltlRecognition" runat="server" Mode="PassThrough" /></div>
                         <div class="col">認定理由備註：<asp:Label ID="lblRecognitionNote" runat="server" /></div>
                         <div class="col">文化歷史價值介紹：<asp:Label ID="lblCulturalHistory" runat="server" /></div>
                     </div>
