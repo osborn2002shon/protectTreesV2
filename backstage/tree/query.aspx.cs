@@ -8,6 +8,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
 using protectTreesV2.Log;
+using protectTreesV2.User;
 using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.tree
@@ -292,11 +293,22 @@ namespace protectTreesV2.backstage.tree
                 announcement = dt;
             }
 
-            var user = protectTreesV2.User.UserService.GetCurrentUser();
+            var user = UserService.GetCurrentUser();
             int accountId = user?.userID ?? 0;
 
             TreeService.BulkUpdateStatus(selected, status, announcement, accountId);
             OperationLogger.InsertLog("樹籍管理", "批次設定", $"更新{selected.Count}筆狀態為{TreeService.GetStatusText(status)}");
+            foreach (var treeId in selected)
+            {
+                TreeService.InsertTreeLog(treeId,
+                    "批次設定樹籍狀態",
+                    $"狀態更新為{TreeService.GetStatusText(status)}",
+                    Request?.UserHostAddress,
+                    user?.userID,
+                    user?.account,
+                    user?.name,
+                    user?.unit);
+            }
             BindTrees();
         }
     }

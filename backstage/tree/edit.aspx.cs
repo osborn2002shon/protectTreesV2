@@ -8,7 +8,9 @@ using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
+using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
+using protectTreesV2.User;
 
 namespace protectTreesV2.backstage.tree
 {
@@ -231,6 +233,7 @@ namespace protectTreesV2.backstage.tree
             {
                 return false;
             }
+            bool isNew = treeId <= 0;
             var record = treeId > 0 ? TreeService.GetTree(treeId) ?? new TreeRecord() : new TreeRecord();
 
             record.TreeID = treeId;
@@ -272,7 +275,7 @@ namespace protectTreesV2.backstage.tree
                 record.SystemTreeNo = TreeService.GenerateSystemTreeNo(record.CityID, record.AreaID, record.AnnouncementDate ?? record.SurveyDate ?? DateTime.Today);
             }
             
-            var user = protectTreesV2.User.UserService.GetCurrentUser();
+            var user = UserService.GetCurrentUser();
             int accountId = user?.userID ?? 0;
 
             if (record.TreeID > 0)
@@ -291,6 +294,17 @@ namespace protectTreesV2.backstage.tree
             {
                 return false;
             }
+
+            string logMemo = isNew ? "新增樹籍" : "編輯樹籍";
+            OperationLogger.InsertLog("樹籍管理", isNew ? "新增" : "編輯", logMemo);
+            TreeService.InsertTreeLog(record.TreeID,
+                logMemo,
+                $"系統樹籍編號：{record.SystemTreeNo ?? ""}，狀態：{TreeService.GetStatusText(record.Status)}，編輯狀態：{record.EditStatus}",
+                Request?.UserHostAddress,
+                user?.userID,
+                user?.account,
+                user?.name,
+                user?.unit);
 
             return true;
         }
