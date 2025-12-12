@@ -8,8 +8,8 @@
     樹籍資料查詢
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
-    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-        <ContentTemplate>
+<%--    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>--%>
             <div class="row">
                 <div class="col">
                     <h4>查詢條件</h4>
@@ -116,8 +116,8 @@
                     </asp:GridView>
                 </div>
             </div>
-        </ContentTemplate>
-    </asp:UpdatePanel>
+<%--        </ContentTemplate>
+    </asp:UpdatePanel>--%>
     <script type="text/javascript">
         function toggleSelectAll(master) {
             var grid = document.getElementById('<%= gvTrees.ClientID %>');
