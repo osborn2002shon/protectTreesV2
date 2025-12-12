@@ -89,7 +89,7 @@
                         <Columns>
                             <asp:TemplateField HeaderText="選取">
                                 <HeaderTemplate>
-                                    <asp:CheckBox ID="chkSelectAll" runat="server" OnClientClick="toggleSelectAll(this); return false;" />
+                                    <asp:CheckBox ID="chkSelectAll" runat="server" OnClientClick="toggleSelectAll(this);" />
                                 </HeaderTemplate>
                                 <ItemTemplate>
                                     <asp:CheckBox ID="chkSelect" runat="server" />
