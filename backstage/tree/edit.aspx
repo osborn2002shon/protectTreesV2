@@ -8,8 +8,8 @@
     樹籍資料
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
-    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-        <ContentTemplate>
+<%--    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>--%>
             <asp:HiddenField ID="hfTreeID" runat="server" />
             <asp:HiddenField ID="hfDeletedPhotos" runat="server" />
             <asp:HiddenField ID="hfCoverPhoto" runat="server" />
@@ -164,12 +164,12 @@
                     <asp:HyperLink ID="lnkUploadPhotos" runat="server" Text="樹木照片" NavigateUrl="edit_photos.aspx" />
                 </div>
             </div>
-        </ContentTemplate>
+       <%-- </ContentTemplate>
         <Triggers>
             <asp:PostBackTrigger ControlID="btnSaveDraft" />
             <asp:PostBackTrigger ControlID="btnSaveFinal" />
         </Triggers>
-    </asp:UpdatePanel>
+    </asp:UpdatePanel>--%>
 
     <asp:Panel ID="pnlLogs" runat="server" Visible="false">
     <div class="row">
