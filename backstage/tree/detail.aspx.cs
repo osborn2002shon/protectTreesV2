@@ -56,7 +56,26 @@ namespace protectTreesV2.backstage.tree
             lblLatitude.Text = tree.Latitude?.ToString();
             lblLongitude.Text = tree.Longitude?.ToString();
             lblIsAnnounced.Text = tree.IsAnnounced ? "是" : "否";
-            lblRecognition.Text = string.Join(",", tree.RecognitionCriteria ?? Enumerable.Empty<string>());
+            var criteriaLookup = TreeService.GetRecognitionCriteria()
+                .GroupBy(c => c.Code)
+                .ToDictionary(g => g.Key, g => g.First().Name);
+
+            var recognitionNames = (tree.RecognitionCriteria ?? Enumerable.Empty<string>())
+                .Select(code => criteriaLookup.TryGetValue(code, out var name) ? name : null)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToList();
+
+            if (recognitionNames.Any())
+            {
+                var htmlReadyNames = recognitionNames
+                    .Select(name => Server.HtmlEncode(name).Replace("\n", "<br />"));
+
+                ltlRecognition.Text = string.Join("<br />", htmlReadyNames);
+            }
+            else
+            {
+                ltlRecognition.Text = Server.HtmlEncode(string.Join(",", tree.RecognitionCriteria ?? Enumerable.Empty<string>()));
+            }
             lblRecognitionNote.Text = tree.RecognitionNote;
             lblCulturalHistory.Text = tree.CulturalHistoryIntro;
             lblHealth.Text = tree.HealthCondition;
