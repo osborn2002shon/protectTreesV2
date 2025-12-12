@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
@@ -20,6 +23,16 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+
+            if (int.TryParse(hfTreeID.Value, out int treeId) && treeId > 0)
+            {
+                BindPhotoJson(treeId);
+            }
+        }
+
         private int LogPageIndex
         {
             get => ViewState[nameof(LogPageIndex)] as int? ?? 0;
@@ -27,6 +40,8 @@ namespace protectTreesV2.backstage.tree
         }
 
         private const int LogsPageSize = 5;
+
+        protected string PhotoJson { get; private set; } = "[]";
 
         private void BindDropdowns()
         {
@@ -109,9 +124,23 @@ namespace protectTreesV2.backstage.tree
                         item.Selected = tree.RecognitionCriteria.Contains(item.Value);
                     }
 
+                    BindPhotoJson(tree.TreeID);
                     BindLogs(tree.TreeID);
                 }
             }
+        }
+
+        private void BindPhotoJson(int treeId)
+        {
+            var photos = TreeService.GetPhotos(treeId).Select(p => new
+            {
+                photoId = p.PhotoID,
+                filePath = p.FilePath,
+                caption = string.IsNullOrWhiteSpace(p.Caption) ? p.FileName : p.Caption,
+                isCover = p.IsCover
+            }).ToList();
+
+            PhotoJson = new JavaScriptSerializer().Serialize(photos);
         }
 
         private void SelectDropDown(DropDownList ddl, int? value)
@@ -160,13 +189,19 @@ namespace protectTreesV2.backstage.tree
 
         protected void btnSaveDraft_Click(object sender, EventArgs e)
         {
-            Save(TreeEditState.草稿);
+            if (Save(TreeEditState.草稿))
+            {
+                Response.Redirect("query.aspx");
+            }
         }
 
         protected void btnSaveFinal_Click(object sender, EventArgs e)
         {
             if (!ValidateForm()) return;
-            Save(TreeEditState.完稿);
+            if (Save(TreeEditState.完稿))
+            {
+                Response.Redirect("query.aspx");
+            }
         }
 
         private bool ValidateForm()
@@ -189,9 +224,13 @@ namespace protectTreesV2.backstage.tree
             return true;
         }
 
-        private void Save(TreeEditState state)
+        private bool Save(TreeEditState state)
         {
             int.TryParse(hfTreeID.Value, out int treeId);
+            if (!ValidatePhotoChanges(treeId))
+            {
+                return false;
+            }
             var record = treeId > 0 ? TreeService.GetTree(treeId) ?? new TreeRecord() : new TreeRecord();
 
             record.TreeID = treeId;
@@ -245,14 +284,163 @@ namespace protectTreesV2.backstage.tree
                 int newId = TreeService.InsertTree(record, accountId);
                 hfTreeID.Value = newId.ToString();
                 setTreeID = newId.ToString();
+                record.TreeID = newId;
             }
 
-            Response.Redirect("query.aspx");
+            if (!ProcessPhotos(record.TreeID, accountId))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         protected void btnCancel_Click(object sender, EventArgs e)
         {
             Response.Redirect("query.aspx");
+        }
+
+        private bool ValidatePhotoChanges(int treeId)
+        {
+            var existing = treeId > 0 ? TreeService.GetPhotos(treeId) : new List<TreePhoto>();
+            var deleted = ParseDeletedPhotoIds();
+            int remaining = existing.Count(p => !deleted.Contains(p.PhotoID));
+
+            var files = fuPendingPhotos.PostedFiles;
+            int newCount = files?.Count ?? 0;
+            string[] newKeys = (hfNewPhotoKeys.Value ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            const int maxCount = 5;
+            const int maxSize = 5 * 1024 * 1024;
+
+            if (newCount > maxCount)
+            {
+                ShowMessage("限制", "一次最多上傳 5 張照片", "warning");
+                return false;
+            }
+
+            if (remaining + newCount > maxCount)
+            {
+                ShowMessage("限制", "每棵樹最多保留 5 張照片", "warning");
+                return false;
+            }
+
+            if (files != null)
+            {
+                if (files.Count != newKeys.Length)
+                {
+                    ShowMessage("提示", "照片資訊不一致，請重新選擇照片", "warning");
+                    return false;
+                }
+
+                for (int i = 0; i < files.Count; i++)
+                {
+                    var file = files[i];
+                    if (file != null && file.ContentLength > maxSize)
+                    {
+                        ShowMessage("限制", $"{file.FileName} 超過 5MB，請重新選擇", "warning");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private bool ProcessPhotos(int treeId, int accountId)
+        {
+            var deleted = ParseDeletedPhotoIds();
+            var existing = TreeService.GetPhotos(treeId);
+
+            foreach (var photoId in deleted)
+            {
+                var photo = existing.FirstOrDefault(p => p.PhotoID == photoId);
+                if (photo != null)
+                {
+                    TreeService.DeletePhoto(photoId, accountId);
+                    string physical = Server.MapPath(photo.FilePath);
+                    if (File.Exists(physical))
+                    {
+                        File.Delete(physical);
+                    }
+                }
+            }
+
+            var files = fuPendingPhotos.PostedFiles;
+            string[] newKeys = (hfNewPhotoKeys.Value ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string coverKey = hfCoverPhoto.Value;
+            int? coverId = null;
+
+            if (!string.IsNullOrEmpty(coverKey) && coverKey.StartsWith("existing-", StringComparison.Ordinal))
+            {
+                if (int.TryParse(coverKey.Replace("existing-", string.Empty), out int requestedCover) && !deleted.Contains(requestedCover))
+                {
+                    coverId = requestedCover;
+                }
+            }
+
+            if (files != null && files.Count > 0)
+            {
+                string uploadFolder = Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/upload/tree/{0}/", treeId));
+                Directory.CreateDirectory(uploadFolder);
+
+                int count = Math.Min(files.Count, newKeys.Length);
+                for (int i = 0; i < count; i++)
+                {
+                    var file = files[i];
+                    if (file == null || file.ContentLength == 0) continue;
+
+                    string fileName = Path.GetFileName(file.FileName);
+                    string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, fileName);
+                    string physicalPath = Path.Combine(uploadFolder, savedName);
+                    file.SaveAs(physicalPath);
+
+                    var photo = new TreePhoto
+                    {
+                        TreeID = treeId,
+                        FileName = fileName,
+                        FilePath = string.Format(CultureInfo.InvariantCulture, "/upload/tree/{0}/{1}", treeId, savedName),
+                        Caption = fileName,
+                        IsCover = false
+                    };
+
+                    int photoId = TreeService.InsertPhoto(photo, accountId);
+                    if (coverKey == newKeys[i])
+                    {
+                        coverId = photoId;
+                    }
+                }
+            }
+
+            if (!coverId.HasValue)
+            {
+                var available = TreeService.GetPhotos(treeId).FirstOrDefault();
+                coverId = available?.PhotoID;
+            }
+
+            if (coverId.HasValue)
+            {
+                TreeService.SetCoverPhoto(treeId, coverId.Value, accountId);
+            }
+
+            return true;
+        }
+
+        private List<int> ParseDeletedPhotoIds()
+        {
+            var result = new List<int>();
+            var parts = (hfDeletedPhotos.Value ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var part in parts)
+            {
+                if (int.TryParse(part, out int id))
+                {
+                    result.Add(id);
+                }
+            }
+
+            return result;
         }
 
         private void BindLogs(int treeId)

@@ -11,6 +11,9 @@
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
             <asp:HiddenField ID="hfTreeID" runat="server" />
+            <asp:HiddenField ID="hfDeletedPhotos" runat="server" />
+            <asp:HiddenField ID="hfCoverPhoto" runat="server" />
+            <asp:HiddenField ID="hfNewPhotoKeys" runat="server" />
             <div class="row">
                 <div class="col">
                     <h4>基本資料</h4>
@@ -145,6 +148,16 @@
             </div>
             <div class="row">
                 <div class="col">
+                    <h4>樹木照片 (最多 5 張，每張 5MB)</h4>
+                    <div id="photoDropArea" class="photo-drop" title="拖曳照片到此處或點擊選擇">
+                        將照片拖曳到此處或點擊選擇
+                        <asp:FileUpload ID="fuPendingPhotos" runat="server" AllowMultiple="true" CssClass="d-none" accept="image/*" />
+                    </div>
+                    <div id="photoList" class="photo-list"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
                     <asp:Button ID="btnSaveDraft" runat="server" Text="暫存草稿" OnClick="btnSaveDraft_Click" />
                     <asp:Button ID="btnSaveFinal" runat="server" Text="存檔送出" OnClick="btnSaveFinal_Click" />
                     <asp:Button ID="btnCancel" runat="server" Text="返回列表" CausesValidation="false" OnClick="btnCancel_Click" />
@@ -152,6 +165,10 @@
                 </div>
             </div>
         </ContentTemplate>
+        <Triggers>
+            <asp:PostBackTrigger ControlID="btnSaveDraft" />
+            <asp:PostBackTrigger ControlID="btnSaveFinal" />
+        </Triggers>
     </asp:UpdatePanel>
 
     <asp:Panel ID="pnlLogs" runat="server" Visible="false">
@@ -222,6 +239,157 @@
         </div>
     </div>
     <script type="text/javascript">
+        const maxPhotos = 5;
+        const maxSize = 5 * 1024 * 1024;
+        const initialPhotos = <%= PhotoJson %>;
+        const photoListElement = document.getElementById('photoList');
+        const dropArea = document.getElementById('photoDropArea');
+        const fileInput = document.getElementById('<%= fuPendingPhotos.ClientID %>');
+        const deletedField = document.getElementById('<%= hfDeletedPhotos.ClientID %>');
+        const coverField = document.getElementById('<%= hfCoverPhoto.ClientID %>');
+        const newKeysField = document.getElementById('<%= hfNewPhotoKeys.ClientID %>');
+        let existingPhotos = (initialPhotos || []).map(p => ({
+            key: `existing-${p.photoId}`,
+            photoId: p.photoId,
+            filePath: p.filePath,
+            caption: p.caption,
+            isCover: p.isCover,
+            deleted: false
+        }));
+        let newPhotos = [];
+
+        function initializePhotos() {
+            const cover = existingPhotos.find(p => p.isCover && !p.deleted) || existingPhotos.find(p => !p.deleted);
+            coverField.value = cover ? cover.key : '';
+            renderPhotos();
+        }
+
+        function renderPhotos() {
+            const activeExisting = existingPhotos.filter(p => !p.deleted);
+            const allPhotos = [...activeExisting, ...newPhotos];
+            if (allPhotos.length === 0) {
+                photoListElement.innerHTML = '<div class="text-muted">尚未選擇照片</div>';
+                return;
+            }
+
+            const coverValue = coverField.value;
+            const items = allPhotos.map(p => {
+                const isCover = coverValue === p.key;
+                const src = p.filePath || p.previewUrl;
+                const caption = p.caption || p.file?.name || '';
+                return `
+                    <div class="photo-item">
+                        <img src="${src}" alt="${caption}" />
+                        <div class="photo-actions">
+                            <label>
+                                <input type="radio" name="coverPhoto" value="${p.key}" ${isCover ? 'checked' : ''} onchange="setCoverPhoto('${p.key}')" />
+                                設為封面
+                            </label>
+                            <button type="button" class="btn btn-link" onclick="removePhoto('${p.key}')">刪除</button>
+                        </div>
+                        <div class="photo-caption">${caption}</div>
+                    </div>`;
+            });
+
+            photoListElement.innerHTML = `<div class="photo-grid">${items.join('')}</div>`;
+            updateHiddenFields();
+        }
+
+        function setCoverPhoto(key) {
+            coverField.value = key;
+        }
+
+        function removePhoto(key) {
+            const existing = existingPhotos.find(p => p.key === key);
+            if (existing) {
+                existing.deleted = true;
+                deletedField.value = existingPhotos.filter(p => p.deleted).map(p => p.photoId).join(',');
+            } else {
+                newPhotos = newPhotos.filter(p => p.key !== key);
+                rebuildFileInput();
+            }
+
+            if (coverField.value === key) {
+                const next = existingPhotos.find(p => !p.deleted) || newPhotos[0];
+                coverField.value = next ? next.key : '';
+            }
+
+            renderPhotos();
+        }
+
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+
+            const activeExisting = existingPhotos.filter(p => !p.deleted).length;
+            if (activeExisting + newPhotos.length + files.length > maxPhotos) {
+                alert('每棵樹最多保留 5 張照片');
+                return;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.size > maxSize) {
+                    alert(`${file.name} 超過 5MB 限制，請重新選擇`);
+                    continue;
+                }
+
+                const key = `new-${Date.now()}-${i}`;
+                const previewUrl = URL.createObjectURL(file);
+                newPhotos.push({ key, file, previewUrl, caption: file.name });
+            }
+
+            rebuildFileInput();
+
+            if (!coverField.value) {
+                const firstNew = newPhotos[0];
+                if (firstNew) {
+                    coverField.value = firstNew.key;
+                }
+            }
+
+            renderPhotos();
+        }
+
+        function rebuildFileInput() {
+            const dataTransfer = new DataTransfer();
+            newPhotos.forEach(p => dataTransfer.items.add(p.file));
+            fileInput.files = dataTransfer.files;
+            newKeysField.value = newPhotos.map(p => p.key).join(',');
+        }
+
+        function updateHiddenFields() {
+            deletedField.value = existingPhotos.filter(p => p.deleted).map(p => p.photoId).join(',');
+            if (!coverField.value) {
+                const next = existingPhotos.find(p => !p.deleted) || newPhotos[0];
+                coverField.value = next ? next.key : '';
+            }
+        }
+
+        dropArea.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        dropArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            dropArea.classList.add('dragging');
+        });
+
+        dropArea.addEventListener('dragleave', function () {
+            dropArea.classList.remove('dragging');
+        });
+
+        dropArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropArea.classList.remove('dragging');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', function () {
+            handleFiles(fileInput.files);
+            fileInput.value = '';
+        });
+
+        document.addEventListener('DOMContentLoaded', initializePhotos);
         const latitudeInputId = '<%= txtLatitude.ClientID %>';
     const longitudeInputId = '<%= txtLongitude.ClientID %>';
 
@@ -297,6 +465,60 @@
             };
         }
     </script>
+    <style>
+        .photo-drop {
+            border: 2px dashed #6c757d;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+            color: #6c757d;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .photo-drop.dragging {
+            background-color: #f8f9fa;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .photo-item {
+            border: 1px solid #e2e2e2;
+            border-radius: 6px;
+            padding: 8px;
+            background: #fff;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .photo-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+        }
+
+        .photo-actions .btn-link {
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .photo-caption {
+            margin-top: 4px;
+            font-size: 0.9rem;
+            color: #555;
+            word-break: break-word;
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">
 </asp:Content>
