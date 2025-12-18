@@ -522,11 +522,43 @@ WHERE r.systemTreeNo=@systemTreeNo AND r.removeDateTime IS NULL";
                                 COALESCE(area.area, r.areaName) AS [鄉鎮市區],
                                 COALESCE(species.commonName, r.speciesCommonName) AS [樹種],
                                 COALESCE(species.scientificName, r.speciesScientificName) AS [學名],
-                                r.manager AS [管理人],
+                                r.manager AS [管理人員],
+                                r.managerContact AS [管理人聯絡資訊],
                                 r.surveyDate AS [調查日期],
+                                r.surveyor AS [調查人員],
                                 r.announcementDate AS [公告日期],
+                                r.isAnnounced AS [是否公告列管],
                                 r.treeStatus AS [樹籍狀態],
-                                CASE WHEN r.editStatus=1 THEN N'完稿' ELSE N'草稿' END AS [編輯狀態]
+                                CASE WHEN r.editStatus=1 THEN N'完稿' ELSE N'草稿' END AS [編輯狀態],
+                                r.treeCount AS [叢生株數],
+                                r.site AS [坐落地點],
+                                r.latitude AS [座標(WGS84)_緯度(N)],
+                                r.longitude AS [座標(WGS84)_經度(E)],
+                                r.landOwnership AS [土地權屬],
+                                r.landOwnershipNote AS [土地權屬備註],
+                                r.facilityDescription AS [管理設施描述],
+                                r.memo AS [其他備註],
+                                r.keywords AS [關鍵字],
+                                r.recognitionCriteria AS [受保護認定理由],
+                                r.recognitionNote AS [認定理由備註],
+                                r.culturalHistoryIntro AS [文化歷史價值介紹],
+                                r.estimatedPlantingYear AS [推估種植年間],
+                                r.estimatedAgeNote AS [推估樹齡備註],
+                                r.groupGrowthInfo AS [群生竹木或行道樹生長資訊],
+                                r.treeHeight AS [樹高],
+                                r.breastHeightDiameter AS [胸高直徑],
+                                r.breastHeightCircumference AS [胸高樹圍],
+                                r.canopyProjectionArea AS [樹冠投影面積],
+                                r.healthCondition AS [樹木健康及生育地概況],
+                                r.hasEpiphyte AS [是否有附生植物],
+                                r.epiphyteDescription AS [附生植物概況],
+                                r.hasParasite AS [是否有寄生植物],
+                                r.parasiteDescription AS [寄生植物概況],
+                                r.hasClimbingPlant AS [是否有纏勒植物],
+                                r.climbingPlantDescription AS [纏勒植物概況],
+                                r.surveyOtherNote AS [其他調查備註],
+                                r.sourceUnit AS [資料來源單位],
+                                r.sourceUnitID AS [資料來源代碼]
                          FROM Tree_Record r
                          OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) city
                          LEFT JOIN System_Taiwan area ON area.twID = r.areaID
@@ -597,7 +629,42 @@ WHERE r.systemTreeNo=@systemTreeNo AND r.removeDateTime IS NULL";
 
             using (var da = new MS_SQL())
             {
-                return da.GetDataTable(sql.ToString(), parameters.ToArray());
+                var table = da.GetDataTable(sql.ToString(), parameters.ToArray());
+                ReplaceRecognitionCriteriaWithOrderNo(table);
+                return table;
+            }
+        }
+
+        private static void ReplaceRecognitionCriteriaWithOrderNo(DataTable dt)
+        {
+            if (dt == null || !dt.Columns.Contains("受保護認定理由"))
+            {
+                return;
+            }
+
+            var orderMap = GetRecognitionCriteria().ToDictionary(c => c.Code, c => c.Order);
+
+            foreach (DataRow row in dt.Rows)
+            {
+                var raw = row["受保護認定理由"]?.ToString();
+                if (string.IsNullOrWhiteSpace(raw))
+                {
+                    row["受保護認定理由"] = string.Empty;
+                    continue;
+                }
+
+                var mappedOrders = raw
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(code => code.Trim())
+                    .Where(orderMap.ContainsKey)
+                    .Select(code => orderMap[code])
+                    .Distinct()
+                    .OrderBy(order => order)
+                    .ToList();
+
+                row["受保護認定理由"] = mappedOrders.Count == 0
+                    ? string.Empty
+                    : string.Join(",", mappedOrders);
             }
         }
 
