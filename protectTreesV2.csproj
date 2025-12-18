@@ -82,8 +82,6 @@
     <Content Include="backstage\sample\TreeEdit1.aspx" />
     <Content Include="backstage\sample\TreeNew.aspx" />
     <Content Include="backstage\sample\TreeList.aspx" />
-    <Content Include="backstage\sample\TreeRead0b.aspx" />
-    <Content Include="backstage\sample\TreeRead0.aspx" />
     <Content Include="backstage\sample\TreeRead1.aspx" />
     <Content Include="backstage\sample\TreeRead3.aspx" />
     <Content Include="backstage\sample\TreeRead2.aspx" />
@@ -210,20 +208,6 @@
     </Compile>
     <Compile Include="backstage\sample\TreeList.aspx.designer.cs">
       <DependentUpon>TreeList.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead0b.aspx.cs">
-      <DependentUpon>TreeRead0b.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead0b.aspx.designer.cs">
-      <DependentUpon>TreeRead0b.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead0.aspx.cs">
-      <DependentUpon>TreeRead0.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead0.aspx.designer.cs">
-      <DependentUpon>TreeRead0.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\sample\TreeRead1.aspx.cs">
       <DependentUpon>TreeRead1.aspx</DependentUpon>

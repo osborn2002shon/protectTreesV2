@@ -66,11 +66,11 @@
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" />
-                            <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" />
+                            <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" Step="0.000001" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" />
-                            <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number" />
+                            <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number"  Step="0.000001" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="btnCoordinateTool" Text="座標轉換" />

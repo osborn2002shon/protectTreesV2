@@ -89,7 +89,7 @@
                         <Columns>
                             <asp:TemplateField HeaderText="選取">
                                 <HeaderTemplate>
-                                    <asp:CheckBox ID="chkSelectAll" runat="server" OnClientClick="toggleSelectAll(this);" />
+                                    <input type="checkbox" onclick="toggleSelectAll(this);" />
                                 </HeaderTemplate>
                                 <ItemTemplate>
                                     <asp:CheckBox ID="chkSelect" runat="server" />
@@ -120,10 +120,12 @@
     </asp:UpdatePanel>--%>
     <script type="text/javascript">
         function toggleSelectAll(master) {
+            console.log('Y;');
             var grid = document.getElementById('<%= gvTrees.ClientID %>');
             if (!grid) return;
             var inputs = grid.getElementsByTagName('input');
             for (var i = 0; i < inputs.length; i++) {
+                
                 if (inputs[i].type === 'checkbox' && inputs[i].id.indexOf('chkSelect') > -1) {
                     inputs[i].checked = master.checked;
                 }

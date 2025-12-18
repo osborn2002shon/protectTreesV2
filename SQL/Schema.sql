@@ -416,9 +416,9 @@ CREATE TABLE [dbo].[Tree_Record](
         [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 編輯狀態（草稿／完稿）
         [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 叢生株數
         [site] [nvarchar](200) NULL, -- 坐落地點
-        [latitude] [decimal](10, 6) NULL, -- 座標(WGS84)：緯度(N)
-        [longitude] [decimal](10, 6) NULL, -- 座標(WGS84)：經度(E)
-        [landOwnership] [nvarchar](100) NULL, -- 土地權屬（國有／公有／私有／無資料）
+        [latitude] [nvarchar](max) NULL, -- 座標(WGS84)：緯度(N)
+        [longitude] [nvarchar](max) NULL, -- 座標(WGS84)：經度(E)
+        [landOwnership] [nvarchar](100) NULL, -- 土地權屬（國有／公有／私有／其他／無資料）
         [landOwnershipNote] [nvarchar](max) NULL, -- 土地權屬備註
         [facilityDescription] [nvarchar](max) NULL, -- 管理設施描述
         [recognitionCriteria] [nvarchar](max) NULL, -- 受保護認定理由（存放[Tree_RecognitionCriterion].[criterionCode]，使用逗號分隔多筆）
@@ -427,10 +427,10 @@ CREATE TABLE [dbo].[Tree_Record](
         [estimatedPlantingYear] [nvarchar](50) NULL, -- 推估種植年間
         [estimatedAgeNote] [nvarchar](max) NULL, -- 推估樹齡備註
         [groupGrowthInfo] [nvarchar](max) NULL, -- 群生竹木或行道樹生長資訊
-        [treeHeight] [decimal](10, 2) NULL, -- 樹高(公尺)
-        [breastHeightDiameter] [decimal](10, 2) NULL, -- 胸高直徑(公分)
-        [breastHeightCircumference] [decimal](10, 2) NULL, -- 胸高樹圍(公分)
-        [canopyProjectionArea] [decimal](10, 2) NULL, -- 樹冠投影面積(平方公尺)
+        [treeHeight] [nvarchar](max) NULL, -- 樹高(公尺)
+        [breastHeightDiameter] [nvarchar](max) NULL, -- 胸高直徑(公分)
+        [breastHeightCircumference] [nvarchar](max) NULL, -- 胸高樹圍(公分)
+        [canopyProjectionArea] [nvarchar](max) NULL, -- 樹冠投影面積(平方公尺)
         [healthCondition] [nvarchar](max) NULL, -- 樹木健康及生育地概況
         [epiphyteDescription] [nvarchar](max) NULL, -- 附生植物概況
         [parasiteDescription] [nvarchar](max) NULL, -- 寄生植物概況

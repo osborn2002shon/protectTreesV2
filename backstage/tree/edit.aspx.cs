@@ -76,6 +76,7 @@ namespace protectTreesV2.backstage.tree
             ddlLandOwnership.Items.Add(new ListItem("公有"));
             ddlLandOwnership.Items.Add(new ListItem("私有"));
             ddlLandOwnership.Items.Add(new ListItem("其他"));
+            ddlLandOwnership.Items.Add(new ListItem("無資料"));
 
             cblRecognition.Items.Clear();
             foreach (var item in TreeService.GetRecognitionCriteria())
@@ -299,7 +300,7 @@ namespace protectTreesV2.backstage.tree
             OperationLogger.InsertLog("樹籍管理", isNew ? "新增" : "編輯", logMemo);
             TreeService.InsertTreeLog(record.TreeID,
                 logMemo,
-                $"系統樹籍編號：{record.SystemTreeNo ?? ""}，狀態：{TreeService.GetStatusText(record.Status)}，編輯狀態：{record.EditStatus}",
+                $"系統樹籍編號：{record.SystemTreeNo ?? "無"}，狀態：{TreeService.GetStatusText(record.Status)}，編輯狀態：{record.EditStatus}",
                 Request?.UserHostAddress,
                 user?.userID,
                 user?.account,
