@@ -288,7 +288,7 @@ namespace protectTreesV2.backstage.tree
 
             var status = (TreeStatus)Convert.ToInt32(ddlBulkStatus.SelectedValue);
             DateTime? announcement = null;
-            if (DateTime.TryParse(txtBulkAnnouncement.Text, out DateTime dt))
+            if (status == TreeStatus.已公告列管 && DateTime.TryParse(txtBulkAnnouncement.Text, out DateTime dt))
             {
                 announcement = dt;
             }

@@ -77,8 +77,10 @@
                     <div>
                         <asp:Label runat="server" AssociatedControlID="ddlBulkStatus" Text="批次設定樹籍狀態" />
                         <asp:DropDownList ID="ddlBulkStatus" runat="server" />
-                        <asp:Label runat="server" AssociatedControlID="txtBulkAnnouncement" Text="公告日期" />
-                        <asp:TextBox ID="txtBulkAnnouncement" runat="server" TextMode="Date" />
+                        <span id="bulkAnnouncementWrapper">
+                            <asp:Label runat="server" AssociatedControlID="txtBulkAnnouncement" Text="公告日期" />
+                            <asp:TextBox ID="txtBulkAnnouncement" runat="server" TextMode="Date" />
+                        </span>
                         <asp:Button ID="btnApplyStatus" runat="server" Text="套用" OnClick="btnApplyStatus_Click" />
                     </div>
                 </div>
@@ -131,6 +133,28 @@
                 }
             }
         }
+
+        function toggleAnnouncementField() {
+            var ddl = document.getElementById('<%= ddlBulkStatus.ClientID %>');
+            var wrapper = document.getElementById('bulkAnnouncementWrapper');
+            var announcementInput = document.getElementById('<%= txtBulkAnnouncement.ClientID %>');
+            if (!ddl || !wrapper) return;
+
+            var shouldShow = ddl.value === '<%= ((int)protectTreesV2.TreeCatalog.TreeStatus.已公告列管).ToString() %>';
+            wrapper.style.display = shouldShow ? 'inline-block' : 'none';
+
+            if (!shouldShow && announcementInput) {
+                announcementInput.value = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var ddl = document.getElementById('<%= ddlBulkStatus.ClientID %>');
+            if (ddl) {
+                ddl.addEventListener('change', toggleAnnouncementField);
+            }
+            toggleAnnouncementField();
+        });
     </script>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">
