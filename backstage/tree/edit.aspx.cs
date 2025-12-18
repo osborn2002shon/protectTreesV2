@@ -122,6 +122,14 @@ namespace protectTreesV2.backstage.tree
                     txtRecognitionNote.Text = tree.RecognitionNote;
                     txtCulturalHistory.Text = tree.CulturalHistoryIntro;
                     txtHealth.Text = tree.HealthCondition;
+                    txtEstimatedPlantingYear.Text = tree.EstimatedPlantingYear;
+                    txtGroupGrowthInfo.Text = tree.GroupGrowthInfo;
+                    chkHasEpiphyte.Checked = tree.HasEpiphyte ?? false;
+                    txtEpiphyteDescription.Text = tree.EpiphyteDescription;
+                    chkHasParasite.Checked = tree.HasParasite ?? false;
+                    txtParasiteDescription.Text = tree.ParasiteDescription;
+                    chkHasClimbingPlant.Checked = tree.HasClimbingPlant ?? false;
+                    txtClimbingPlantDescription.Text = tree.ClimbingPlantDescription;
                     foreach (ListItem item in cblRecognition.Items)
                     {
                         item.Selected = tree.RecognitionCriteria.Contains(item.Value);
@@ -250,9 +258,16 @@ namespace protectTreesV2.backstage.tree
             record.ManagerContact = txtManagerContact.Text.Trim();
             record.SurveyDate = string.IsNullOrWhiteSpace(txtSurveyDate.Text) ? (DateTime?)null : DateTime.Parse(txtSurveyDate.Text);
             record.Surveyor = txtSurveyor.Text.Trim();
-            record.AnnouncementDate = string.IsNullOrWhiteSpace(txtAnnouncementDate.Text) ? (DateTime?)null : DateTime.Parse(txtAnnouncementDate.Text);
-            record.IsAnnounced = record.AnnouncementDate.HasValue;
             record.Status = string.IsNullOrWhiteSpace(ddlStatus.SelectedValue) ? TreeStatus.其他 : (TreeStatus)Convert.ToInt32(ddlStatus.SelectedValue);
+            if (record.Status == TreeStatus.已公告列管)
+            {
+                record.AnnouncementDate = string.IsNullOrWhiteSpace(txtAnnouncementDate.Text) ? (DateTime?)null : DateTime.Parse(txtAnnouncementDate.Text);
+            }
+            else
+            {
+                record.AnnouncementDate = null;
+            }
+            record.IsAnnounced = record.Status == TreeStatus.已公告列管 && record.AnnouncementDate.HasValue;
             record.EditStatus = state;
             record.TreeCount = int.TryParse(txtTreeCount.Text, out int count) && count > 0 ? count : 1;
             record.Site = txtSite.Text.Trim();
@@ -266,6 +281,14 @@ namespace protectTreesV2.backstage.tree
             record.BreastHeightDiameter = decimal.TryParse(txtBreastHeightDiameter.Text, out decimal d) ? d : (decimal?)null;
             record.BreastHeightCircumference = decimal.TryParse(txtBreastHeightCircumference.Text, out decimal c) ? c : (decimal?)null;
             record.CanopyProjectionArea = decimal.TryParse(txtCanopyArea.Text, out decimal area) ? area : (decimal?)null;
+            record.EstimatedPlantingYear = txtEstimatedPlantingYear.Text.Trim();
+            record.GroupGrowthInfo = txtGroupGrowthInfo.Text.Trim();
+            record.HasEpiphyte = chkHasEpiphyte.Checked;
+            record.EpiphyteDescription = txtEpiphyteDescription.Text.Trim();
+            record.HasParasite = chkHasParasite.Checked;
+            record.ParasiteDescription = txtParasiteDescription.Text.Trim();
+            record.HasClimbingPlant = chkHasClimbingPlant.Checked;
+            record.ClimbingPlantDescription = txtClimbingPlantDescription.Text.Trim();
             record.RecognitionCriteria = cblRecognition.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
             record.RecognitionNote = txtRecognitionNote.Text.Trim();
             record.CulturalHistoryIntro = txtCulturalHistory.Text.Trim();

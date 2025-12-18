@@ -60,7 +60,7 @@
                             <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" />
                             <asp:DropDownList ID="ddlStatus" runat="server" />
                         </div>                         
-                        <div class="col">
+                        <div class="col" id="announcementDateContainer">
                             <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" />
                             <asp:TextBox ID="txtAnnouncementDate" runat="server" TextMode="Date" />
                         </div>
@@ -150,8 +150,50 @@
                     </div>
                     <div class="row">
                         <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="txtEstimatedPlantingYear" Text="推估種植年間" />
+                            <asp:TextBox ID="txtEstimatedPlantingYear" runat="server" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="txtGroupGrowthInfo" Text="群生竹木或行道樹生長資訊" />
+                            <asp:TextBox ID="txtGroupGrowthInfo" runat="server" TextMode="MultiLine" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtHealth" Text="樹木健康及生育地概況" />
                             <asp:TextBox ID="txtHealth" runat="server" TextMode="MultiLine" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="chkHasEpiphyte" Text="附生植物概況" />
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <asp:CheckBox ID="chkHasEpiphyte" runat="server" Text="有" />
+                                <span>狀況說明：</span>
+                                <asp:TextBox ID="txtEpiphyteDescription" runat="server" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="chkHasParasite" Text="寄生植物概況" />
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <asp:CheckBox ID="chkHasParasite" runat="server" Text="有" />
+                                <span>狀況說明：</span>
+                                <asp:TextBox ID="txtParasiteDescription" runat="server" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="chkHasClimbingPlant" Text="纏勒植物概況" />
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <asp:CheckBox ID="chkHasClimbingPlant" runat="server" Text="有" />
+                                <span>狀況說明：</span>
+                                <asp:TextBox ID="txtClimbingPlantDescription" runat="server" />
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -405,7 +447,20 @@
             fileInput.value = '';
         });
 
-        document.addEventListener('DOMContentLoaded', initializePhotos);
+        function toggleAnnouncementDate(selectedValue) {
+            const container = document.getElementById('announcementDateContainer');
+            if (!container) return;
+            container.style.display = selectedValue === '1' ? '' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializePhotos();
+            const statusDropdown = document.getElementById('<%= ddlStatus.ClientID %>');
+            if (statusDropdown) {
+                toggleAnnouncementDate(statusDropdown.value);
+                statusDropdown.addEventListener('change', function () { toggleAnnouncementDate(statusDropdown.value); });
+            }
+        });
         const latitudeInputId = '<%= txtLatitude.ClientID %>';
     const longitudeInputId = '<%= txtLongitude.ClientID %>';
 
