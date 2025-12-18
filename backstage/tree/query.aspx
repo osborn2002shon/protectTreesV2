@@ -140,7 +140,7 @@
             var announcementInput = document.getElementById('<%= txtBulkAnnouncement.ClientID %>');
             if (!ddl || !wrapper) return;
 
-            var shouldShow = ddl.value === '<%= ((int)protectTreesV2.TreeCatalog.TreeStatus.已公告列管).ToString() %>';
+            var shouldShow = ddl.value === '1'; //已公告列管
             wrapper.style.display = shouldShow ? 'inline-block' : 'none';
 
             if (!shouldShow && announcementInput) {
