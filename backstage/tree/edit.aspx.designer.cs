@@ -267,6 +267,15 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtEstimatedPlantingYear;
 
         /// <summary>
+        /// txtEstimatedAgeNote 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtEstimatedAgeNote;
+
+        /// <summary>
         /// txtGroupGrowthInfo 控制項。
         /// </summary>
         /// <remarks>
@@ -321,15 +330,6 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtHealth;
 
         /// <summary>
-        /// chkHasEpiphyte 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox chkHasEpiphyte;
-
-        /// <summary>
         /// txtEpiphyteDescription 控制項。
         /// </summary>
         /// <remarks>
@@ -339,15 +339,6 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtEpiphyteDescription;
 
         /// <summary>
-        /// chkHasParasite 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox chkHasParasite;
-
-        /// <summary>
         /// txtParasiteDescription 控制項。
         /// </summary>
         /// <remarks>
@@ -355,15 +346,6 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtParasiteDescription;
-
-        /// <summary>
-        /// chkHasClimbingPlant 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox chkHasClimbingPlant;
 
         /// <summary>
         /// txtClimbingPlantDescription 控制項。
