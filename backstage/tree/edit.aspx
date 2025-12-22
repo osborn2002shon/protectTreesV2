@@ -113,6 +113,10 @@
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" />
                             <asp:CheckBoxList ID="cblRecognition" runat="server" RepeatDirection="Vertical" />
+                            
+                        </div>
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="認定理由備註說明" />
                             <asp:TextBox ID="txtRecognitionNote" runat="server" TextMode="MultiLine" placeholder="認定理由備註說明" />
                         </div>
                         <div class="col">
@@ -127,7 +131,14 @@
                     <h4>調查資料</h4>
                     <div class="row">
                         <div class="col">
-
+                            <asp:Label runat="server" AssociatedControlID="txtEstimatedPlantingYear" Text="推估種植年間" />
+                            <asp:TextBox ID="txtEstimatedPlantingYear" runat="server" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="txtGroupGrowthInfo" Text="群生竹木或行道樹生長資訊" />
+                            <asp:TextBox ID="txtGroupGrowthInfo" runat="server" TextMode="MultiLine" />
                         </div>
                     </div>
                     <div class="row">
@@ -148,18 +159,8 @@
                             <asp:TextBox ID="txtCanopyArea" runat="server" TextMode="Number" />
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtEstimatedPlantingYear" Text="推估種植年間" />
-                            <asp:TextBox ID="txtEstimatedPlantingYear" runat="server" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtGroupGrowthInfo" Text="群生竹木或行道樹生長資訊" />
-                            <asp:TextBox ID="txtGroupGrowthInfo" runat="server" TextMode="MultiLine" />
-                        </div>
-                    </div>
+                    
+                    
                     <div class="row">
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtHealth" Text="樹木健康及生育地概況" />
