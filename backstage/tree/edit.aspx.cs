@@ -123,12 +123,10 @@ namespace protectTreesV2.backstage.tree
                     txtCulturalHistory.Text = tree.CulturalHistoryIntro;
                     txtHealth.Text = tree.HealthCondition;
                     txtEstimatedPlantingYear.Text = tree.EstimatedPlantingYear;
+                    txtEstimatedAgeNote.Text = tree.EstimatedAgeNote;
                     txtGroupGrowthInfo.Text = tree.GroupGrowthInfo;
-                    chkHasEpiphyte.Checked = tree.HasEpiphyte ?? false;
                     txtEpiphyteDescription.Text = tree.EpiphyteDescription;
-                    chkHasParasite.Checked = tree.HasParasite ?? false;
                     txtParasiteDescription.Text = tree.ParasiteDescription;
-                    chkHasClimbingPlant.Checked = tree.HasClimbingPlant ?? false;
                     txtClimbingPlantDescription.Text = tree.ClimbingPlantDescription;
                     foreach (ListItem item in cblRecognition.Items)
                     {
@@ -282,12 +280,10 @@ namespace protectTreesV2.backstage.tree
             record.BreastHeightCircumference = decimal.TryParse(txtBreastHeightCircumference.Text, out decimal c) ? c : (decimal?)null;
             record.CanopyProjectionArea = decimal.TryParse(txtCanopyArea.Text, out decimal area) ? area : (decimal?)null;
             record.EstimatedPlantingYear = txtEstimatedPlantingYear.Text.Trim();
+            record.EstimatedAgeNote = txtEstimatedAgeNote.Text.Trim();
             record.GroupGrowthInfo = txtGroupGrowthInfo.Text.Trim();
-            record.HasEpiphyte = chkHasEpiphyte.Checked;
             record.EpiphyteDescription = txtEpiphyteDescription.Text.Trim();
-            record.HasParasite = chkHasParasite.Checked;
             record.ParasiteDescription = txtParasiteDescription.Text.Trim();
-            record.HasClimbingPlant = chkHasClimbingPlant.Checked;
             record.ClimbingPlantDescription = txtClimbingPlantDescription.Text.Trim();
             record.RecognitionCriteria = cblRecognition.Items.Cast<ListItem>().Where(i => i.Selected).Select(i => i.Value).ToList();
             record.RecognitionNote = txtRecognitionNote.Text.Trim();

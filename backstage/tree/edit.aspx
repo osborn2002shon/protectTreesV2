@@ -134,6 +134,10 @@
                             <asp:Label runat="server" AssociatedControlID="txtEstimatedPlantingYear" Text="推估種植年間" />
                             <asp:TextBox ID="txtEstimatedPlantingYear" runat="server" />
                         </div>
+                        <div class="col">
+                            <asp:Label runat="server" AssociatedControlID="txtEstimatedAgeNote" Text="推估年齡備註" />
+                            <asp:TextBox ID="txtEstimatedAgeNote" runat="server" />
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col">
@@ -169,9 +173,8 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="chkHasEpiphyte" Text="附生植物概況" />
+                            <asp:Label runat="server" AssociatedControlID="txtEpiphyteDescription" Text="附生植物概況" />
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <asp:CheckBox ID="chkHasEpiphyte" runat="server" Text="有" />
                                 <span>狀況說明：</span>
                                 <asp:TextBox ID="txtEpiphyteDescription" runat="server" />
                             </div>
@@ -179,9 +182,8 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="chkHasParasite" Text="寄生植物概況" />
+                            <asp:Label runat="server" AssociatedControlID="txtParasiteDescription" Text="寄生植物概況" />
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <asp:CheckBox ID="chkHasParasite" runat="server" Text="有" />
                                 <span>狀況說明：</span>
                                 <asp:TextBox ID="txtParasiteDescription" runat="server" />
                             </div>
@@ -189,9 +191,8 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="chkHasClimbingPlant" Text="纏勒植物概況" />
+                            <asp:Label runat="server" AssociatedControlID="txtClimbingPlantDescription" Text="纏勒植物概況" />
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <asp:CheckBox ID="chkHasClimbingPlant" runat="server" Text="有" />
                                 <span>狀況說明：</span>
                                 <asp:TextBox ID="txtClimbingPlantDescription" runat="server" />
                             </div>
@@ -598,5 +599,4 @@
 </asp:Content>
 <asp:Content ID="Content7" ContentPlaceHolderID="ContentPlaceHolder_msg_btn" runat="server">
 </asp:Content>
-
 
