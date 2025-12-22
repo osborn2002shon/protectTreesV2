@@ -141,7 +141,7 @@ namespace protectTreesV2.backstage.tree
                 case "AgencyJurisdictionCode": keySelector = r => r.AgencyJurisdictionCode; break;
                 case "CityName": keySelector = r => r.CityName; break;
                 case "AreaName": keySelector = r => r.AreaName; break;
-                case "SpeciesDisplayName": keySelector = r => r.SpeciesDisplayName; break;
+                case "SpeciesCommonName": keySelector = r => r.SpeciesCommonName; break;
                 case "SurveyDate": keySelector = r => r.SurveyDate; break;
                 case "AnnouncementDate": keySelector = r => r.AnnouncementDate; break;
                 case "Status": keySelector = r => r.Status; break;

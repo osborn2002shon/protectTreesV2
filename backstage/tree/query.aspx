@@ -97,7 +97,7 @@
                             <asp:BoundField DataField="AgencyJurisdictionCode" ItemStyle-HorizontalAlign="Center" HeaderText="管轄編碼" SortExpression="AgencyJurisdictionCode" />
                             <asp:BoundField DataField="CityName" ItemStyle-HorizontalAlign="Center" HeaderText="縣市" SortExpression="CityName" />
                             <asp:BoundField DataField="AreaName" ItemStyle-HorizontalAlign="Center" HeaderText="鄉鎮" SortExpression="AreaName" />
-                            <asp:BoundField DataField="SpeciesDisplayName" ItemStyle-HorizontalAlign="Center" HeaderText="樹種" SortExpression="SpeciesDisplayName" />
+                            <asp:BoundField DataField="SpeciesCommonName" ItemStyle-HorizontalAlign="Center" HeaderText="樹種" SortExpression="SpeciesCommonName" />
                             <asp:BoundField DataField="SurveyDate" ItemStyle-HorizontalAlign="Center" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" SortExpression="SurveyDate" />
                             <asp:BoundField DataField="AnnouncementDisplay" ItemStyle-HorizontalAlign="Center" HeaderText="公告日期" SortExpression="AnnouncementDate" />
                             <asp:BoundField DataField="StatusText" ItemStyle-HorizontalAlign="Center" HeaderText="樹籍狀態" SortExpression="Status" />
