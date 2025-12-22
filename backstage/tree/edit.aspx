@@ -31,12 +31,14 @@
                             </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市" />
-                            <asp:DropDownList ID="ddlCity" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCity_SelectedIndexChanged" />
-                            <asp:DropDownList ID="ddlArea" runat="server" CssClass="form-select" />
+                            <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" /><i class="fa-solid fa-eye"></i>
+                            <div class="d-flex gap-2">
+                                <asp:DropDownList ID="ddlCity" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCity_SelectedIndexChanged" />
+                                <asp:DropDownList ID="ddlArea" runat="server" CssClass="form-select" />
+                            </div>
                         </div>
                         <div class="col">
-                            系統樹籍編號：<asp:Label ID="lblSystemTreeNo" runat="server" />
+                            系統樹籍編號<i class="fa-solid fa-eye"></i><asp:Label ID="lblSystemTreeNo" runat="server" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtJurisdiction" Text="機關管轄編碼" />
@@ -50,35 +52,35 @@
                     </div>
                     <div class="row">
                          <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種" />
+                            <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種及學名" /><i class="fa-solid fa-eye"></i>
                             <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" />
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="叢生株數" />
+                            <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="叢生株數" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtTreeCount" runat="server" TextMode="Number" CssClass="form-control" />
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" />
+                            <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" /><i class="fa-solid fa-eye"></i>
                             <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-select" />
                         </div>                         
                         <div class="col" id="announcementDateContainer">
-                            <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" />
+                            <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtAnnouncementDate" runat="server" TextMode="Date" CssClass="form-control" />
                         </div>
                     </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtSite" Text="坐落地點" />
+                            <asp:Label runat="server" AssociatedControlID="txtSite" Text="坐落地點" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtSite" runat="server" TextMode="MultiLine" CssClass="form-control" />
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row align-items-end">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" />
+                            <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" Step="0.000001" CssClass="form-control" />
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" />
+                            <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number" Step="0.000001" CssClass="form-control" />
                         </div>
                         <div class="col">
@@ -87,43 +89,52 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col">
+                        <div class="col-2">
                             <asp:Label runat="server" AssociatedControlID="ddlLandOwnership" Text="土地權屬" />
                             <asp:DropDownList ID="ddlLandOwnership" runat="server" CssClass="form-select" />
+                        </div>
+                        <div class="col">
+                            土地權屬備註
                             <asp:TextBox ID="txtLandOwnershipNote" runat="server" placeholder="其他說明" CssClass="form-control" />
                         </div>
-                        
                     </div>
                     <div class="row">
                         
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtManager" Text="管理人員" />
+                            <asp:Label runat="server" AssociatedControlID="txtManager" Text="管理人" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtManager" runat="server" CssClass="form-control" />
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtManagerContact" Text="管理人聯絡資訊" />
+                            <asp:Label runat="server" AssociatedControlID="txtManagerContact" Text="管理人聯絡電話" />
                             <asp:TextBox ID="txtManagerContact" runat="server" CssClass="form-control" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" AssociatedControlID="txtFacility" Text="管理設施描述" />
-                            <asp:TextBox ID="txtFacility" runat="server" TextMode="MultiLine" CssClass="form-control" />
+                            <asp:TextBox ID="txtFacility" runat="server" CssClass="form-control" />
                         </div>
                         
                     </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" />
+                            <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" /><i class="fa-solid fa-eye"></i>
                             <asp:CheckBoxList ID="cblRecognition" runat="server" RepeatDirection="Vertical" />
                             
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="認定理由備註說明" />
-                            <asp:TextBox ID="txtRecognitionNote" runat="server" TextMode="MultiLine" placeholder="認定理由備註說明" CssClass="form-control" />
+                            <div class="row">
+                                <div class="col">
+                                    <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="認定理由備註說明" />
+                                    <asp:TextBox ID="txtRecognitionNote" runat="server" TextMode="MultiLine" Height="150" placeholder="認定理由備註說明" CssClass="form-control" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="文化歷史價值介紹" /><i class="fa-solid fa-eye"></i>
+                                    <asp:TextBox ID="txtCulturalHistory" runat="server" TextMode="MultiLine" Height="150" CssClass="form-control" />
+                                </div>
+                            </div>     
                         </div>
-                        <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="文化歷史價值介紹" />
-                            <asp:TextBox ID="txtCulturalHistory" runat="server" TextMode="MultiLine" CssClass="form-control" />
-                        </div>
+
                     </div>
                         </div>
                     </div>
@@ -152,15 +163,15 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtTreeHeight" Text="樹高" />
+                            <asp:Label runat="server" AssociatedControlID="txtTreeHeight" Text="樹高" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtTreeHeight" runat="server" TextMode="Number" CssClass="form-control" />
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtBreastHeightDiameter" Text="胸高直徑" />
+                            <asp:Label runat="server" AssociatedControlID="txtBreastHeightDiameter" Text="胸高直徑" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtBreastHeightDiameter" runat="server" TextMode="Number" CssClass="form-control" />
                         </div>
                         <div class="col">
-                            <asp:Label runat="server" AssociatedControlID="txtBreastHeightCircumference" Text="胸高樹圍" />
+                            <asp:Label runat="server" AssociatedControlID="txtBreastHeightCircumference" Text="胸高樹圍" /><i class="fa-solid fa-eye"></i>
                             <asp:TextBox ID="txtBreastHeightCircumference" runat="server" TextMode="Number" CssClass="form-control" />
                         </div>
                         <div class="col">
@@ -208,7 +219,7 @@
                             <asp:Label runat="server" AssociatedControlID="txtMemo" Text="其他備註" />
                             <asp:TextBox ID="txtMemo" runat="server" TextMode="MultiLine" CssClass="form-control" />
                         </div>
-                    </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -216,7 +227,7 @@
             <div class="row">
                 <div class="col">
                     <div class="formCard card">
-                        <div class="card-header">樹木照片 (最多 5 張，每張 5MB)</div>
+                        <div class="card-header">樹木照片<i class="fa-solid fa-eye"></i> (最多 5 張，每張 5MB)</div>
                         <div class="card-body">
                             <div id="photoDropArea" class="photo-drop" title="拖曳照片到此處或點擊選擇">
                                 將照片拖曳到此處或點擊選擇
@@ -227,10 +238,22 @@
                     </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col">
                     <div class="formCard card">
-                        <div class="card-footer">
+                        <div class="card-header">操作說明</div>
+                        <div class="card-body">
+                            1. 樹籍狀態若為「已公告列管」，則「公告日期」為必填項目，並且此樹將顯示於前台可被民眾查看。<br />
+                            2. 標示為<i class="fa-solid fa-eye"></i>之項目，填打內容將顯示於前台可被民眾查看。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="formCard card">
+                        <div class="card-footer m-0 mt-3">
                             <asp:Button ID="btnSaveDraft" runat="server" Text="暫存草稿" OnClick="btnSaveDraft_Click" CssClass="btn btn-secondary" />
                             <asp:Button ID="btnSaveFinal" runat="server" Text="存檔送出" OnClick="btnSaveFinal_Click" CssClass="btn btn-primary" />
                             <asp:Button ID="btnCancel" runat="server" Text="返回列表" CausesValidation="false" OnClick="btnCancel_Click" CssClass="btn btn-outline-secondary" />
