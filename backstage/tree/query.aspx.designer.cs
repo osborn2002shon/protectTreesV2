@@ -105,15 +105,6 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtKeyword;
 
         /// <summary>
-        /// txtSourceUnit 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSourceUnit;
-
-        /// <summary>
         /// btnSearch 控制項。
         /// </summary>
         /// <remarks>
@@ -159,6 +150,15 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Label lblCount;
 
         /// <summary>
+        /// gvTrees 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvTrees;
+
+        /// <summary>
         /// ddlBulkStatus 控制項。
         /// </summary>
         /// <remarks>
@@ -184,14 +184,5 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnApplyStatus;
-
-        /// <summary>
-        /// gvTrees 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvTrees;
     }
 }

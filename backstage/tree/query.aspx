@@ -59,11 +59,7 @@
                 <div class="row">
                     <div class="col">
                         <asp:Label runat="server" AssociatedControlID="txtKeyword" Text="關鍵字" />
-                        <asp:TextBox ID="txtKeyword" runat="server" CssClass="form-control" />
-                    </div>
-                    <div class="col">
-                        <asp:Label runat="server" AssociatedControlID="txtSourceUnit" Text="資料來源單位" />
-                        <asp:TextBox ID="txtSourceUnit" runat="server" CssClass="form-control" />
+                        <asp:TextBox ID="txtKeyword" runat="server" CssClass="form-control" placeholder="管理人、樹籍編號、樹木編號、管轄編碼" />
                     </div>
                 </div>
                 <div class="row">
@@ -83,19 +79,6 @@
                     <asp:Label ID="lblCount" runat="server" />
                 </div>
             </div>
-            <div class="row m-0 mt-3 mb-3 align-items-end">
-                <div class="col">
-                    <asp:Label runat="server" AssociatedControlID="ddlBulkStatus" Text="批次設定樹籍狀態" />
-                    <asp:DropDownList ID="ddlBulkStatus" runat="server" CssClass="form-select" />
-                </div>
-                <div class="col" id="bulkAnnouncementWrapper">
-                    <asp:Label runat="server" AssociatedControlID="txtBulkAnnouncement" Text="公告日期" />
-                    <asp:TextBox ID="txtBulkAnnouncement" runat="server" TextMode="Date" CssClass="form-control" />
-                </div>
-                <div class="col">
-                    <asp:Button ID="btnApplyStatus" runat="server" Text="套用" CssClass="btn btn-primary" OnClick="btnApplyStatus_Click" />
-                </div>
-            </div>
             <div class="container-fluid gv-tb">
                 <div class="table-responsive">
                     <asp:GridView ID="gvTrees" runat="server"  CssClass="gv" AutoGenerateColumns="false" AllowSorting="true" OnSorting="gvTrees_Sorting" OnRowCommand="gvTrees_RowCommand">
@@ -109,16 +92,16 @@
                                     <asp:HiddenField ID="hfTreeId" runat="server" Value='<%# Eval("TreeID") %>' />
                                 </ItemTemplate>
                             </asp:TemplateField>
-                            <asp:BoundField DataField="SystemTreeNo" HeaderText="系統樹籍編號" SortExpression="SystemTreeNo" />
-                            <asp:BoundField DataField="AgencyTreeNo" HeaderText="樹木編號" SortExpression="AgencyTreeNo" />
-                            <asp:BoundField DataField="AgencyJurisdictionCode" HeaderText="管轄編碼" SortExpression="AgencyJurisdictionCode" />
-                            <asp:BoundField DataField="CityName" HeaderText="縣市" SortExpression="CityName" />
-                            <asp:BoundField DataField="AreaName" HeaderText="鄉鎮" SortExpression="AreaName" />
-                            <asp:BoundField DataField="SpeciesDisplayName" HeaderText="樹種" SortExpression="SpeciesDisplayName" />
-                            <asp:BoundField DataField="SurveyDate" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" SortExpression="SurveyDate" />
-                            <asp:BoundField DataField="AnnouncementDisplay" HeaderText="公告日期" SortExpression="AnnouncementDate" />
-                            <asp:BoundField DataField="StatusText" HeaderText="樹籍狀態" SortExpression="Status" />
-                            <asp:BoundField DataField="EditStatusText" HeaderText="編輯狀態" SortExpression="EditStatus" />
+                            <asp:BoundField DataField="SystemTreeNo" ItemStyle-HorizontalAlign="Center" HtmlEncode="false" HeaderText="系統樹籍<br />編號" SortExpression="SystemTreeNo" />
+                            <asp:BoundField DataField="AgencyTreeNo" ItemStyle-HorizontalAlign="Center" HeaderText="樹木編號" SortExpression="AgencyTreeNo" />
+                            <asp:BoundField DataField="AgencyJurisdictionCode" ItemStyle-HorizontalAlign="Center" HeaderText="管轄編碼" SortExpression="AgencyJurisdictionCode" />
+                            <asp:BoundField DataField="CityName" ItemStyle-HorizontalAlign="Center" HeaderText="縣市" SortExpression="CityName" />
+                            <asp:BoundField DataField="AreaName" ItemStyle-HorizontalAlign="Center" HeaderText="鄉鎮" SortExpression="AreaName" />
+                            <asp:BoundField DataField="SpeciesDisplayName" ItemStyle-HorizontalAlign="Center" HeaderText="樹種" SortExpression="SpeciesDisplayName" />
+                            <asp:BoundField DataField="SurveyDate" ItemStyle-HorizontalAlign="Center" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" SortExpression="SurveyDate" />
+                            <asp:BoundField DataField="AnnouncementDisplay" ItemStyle-HorizontalAlign="Center" HeaderText="公告日期" SortExpression="AnnouncementDate" />
+                            <asp:BoundField DataField="StatusText" ItemStyle-HorizontalAlign="Center" HeaderText="樹籍狀態" SortExpression="Status" />
+                            <asp:BoundField DataField="EditStatusText" ItemStyle-HorizontalAlign="Center" HeaderText="編輯狀態" SortExpression="EditStatus" />
                             <asp:TemplateField HeaderText="操作">
                                 <ItemTemplate>
                                     <asp:LinkButton ID="lnkEdit" runat="server" CommandName="EditTree" CommandArgument='<%# Eval("TreeID") %>' Text="編輯" />
@@ -127,6 +110,19 @@
                             </asp:TemplateField>
                         </Columns>
                     </asp:GridView>
+                </div>
+            </div>
+            <div class="row m-0 mt-3 mb-3 align-items-end">
+                <div class="col">
+                    <asp:Label runat="server" AssociatedControlID="ddlBulkStatus" Text="將勾選樹籍案件進行快速設定" />
+                    <asp:DropDownList ID="ddlBulkStatus" runat="server" CssClass="form-select" />
+                </div>
+                <div class="col" id="bulkAnnouncementWrapper">
+                    <asp:Label runat="server" AssociatedControlID="txtBulkAnnouncement" Text="公告日期" />
+                    <asp:TextBox ID="txtBulkAnnouncement" runat="server" TextMode="Date" CssClass="form-control" />
+                </div>
+                <div class="col">
+                    <asp:Button ID="btnApplyStatus" runat="server" Text="套用" CssClass="btn btn-primary" OnClick="btnApplyStatus_Click" />
                 </div>
             </div>
 <%--        </ContentTemplate>

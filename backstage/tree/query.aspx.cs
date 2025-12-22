@@ -90,8 +90,7 @@ namespace protectTreesV2.backstage.tree
                 SurveyDateEnd = ParseDate(txtSurveyEnd.Text),
                 AnnouncementDateStart = ParseDate(txtAnnouncementStart.Text),
                 AnnouncementDateEnd = ParseDate(txtAnnouncementEnd.Text),
-                Keyword = txtKeyword.Text.Trim(),
-                SourceUnit = txtSourceUnit.Text.Trim()
+                Keyword = txtKeyword.Text.Trim()
             };
         }
 
@@ -178,7 +177,6 @@ namespace protectTreesV2.backstage.tree
             txtAnnouncementStart.Text = string.Empty;
             txtAnnouncementEnd.Text = string.Empty;
             txtKeyword.Text = string.Empty;
-            txtSourceUnit.Text = string.Empty;
             BindTrees();
         }
 
