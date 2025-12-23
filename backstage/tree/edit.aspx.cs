@@ -94,7 +94,7 @@ namespace protectTreesV2.backstage.tree
                 if (tree != null)
                 {
                     hfTreeID.Value = tree.TreeID.ToString();
-                    lblSystemTreeNo.Text = tree.SystemTreeNo;
+                    SetSystemTreeNo(tree.SystemTreeNo);
                     txtAgencyTreeNo.Text = tree.AgencyTreeNo;
                     txtJurisdiction.Text = tree.AgencyJurisdictionCode;
                     SelectDropDown(ddlCity, tree.CityID);
@@ -135,7 +135,17 @@ namespace protectTreesV2.backstage.tree
 
                     BindPhotoJson(tree.TreeID);
                     BindLogs(tree.TreeID);
+                    SetEditModeLabel(isNew: false, tree.EditStatus);
+                    ConfigureFinalState(tree.EditStatus);
+                    hfIsFinal.Value = tree.EditStatus == TreeEditState.完稿 ? "1" : "0";
                 }
+            }
+            else
+            {
+                SetSystemTreeNo(null);
+                SetEditModeLabel(isNew: true, TreeEditState.草稿);
+                ConfigureFinalState(TreeEditState.草稿);
+                hfIsFinal.Value = "0";
             }
         }
 
@@ -196,18 +206,15 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
-        protected void btnSaveDraft_Click(object sender, EventArgs e)
+        protected void btnSave_Click(object sender, EventArgs e)
         {
-            if (Save(TreeEditState.草稿))
+            var requestedState = chkFinalConfirm.Checked ? TreeEditState.完稿 : TreeEditState.草稿;
+            bool isFinalLocked = hfIsFinal.Value == "1";
+            if ((requestedState == TreeEditState.完稿 || isFinalLocked) && !ValidateForm())
             {
-                Response.Redirect("query.aspx");
+                return;
             }
-        }
-
-        protected void btnSaveFinal_Click(object sender, EventArgs e)
-        {
-            if (!ValidateForm()) return;
-            if (Save(TreeEditState.完稿))
+            if (Save(requestedState))
             {
                 Response.Redirect("query.aspx");
             }
@@ -266,6 +273,10 @@ namespace protectTreesV2.backstage.tree
                 record.AnnouncementDate = null;
             }
             record.IsAnnounced = record.Status == TreeStatus.已公告列管 && record.AnnouncementDate.HasValue;
+            if (record.TreeID > 0 && record.EditStatus == TreeEditState.完稿)
+            {
+                state = TreeEditState.完稿;
+            }
             record.EditStatus = state;
             record.TreeCount = int.TryParse(txtTreeCount.Text, out int count) && count > 0 ? count : 1;
             record.Site = txtSite.Text.Trim();
@@ -327,6 +338,35 @@ namespace protectTreesV2.backstage.tree
                 user?.unit);
 
             return true;
+        }
+
+        private void SetSystemTreeNo(string systemTreeNo)
+        {
+            if (string.IsNullOrWhiteSpace(systemTreeNo))
+            {
+                lblTopSystemTreeNo.Visible = false;
+                lblTopSystemTreeNo.Text = string.Empty;
+                return;
+            }
+
+            lblTopSystemTreeNo.Visible = true;
+            lblTopSystemTreeNo.Text = $"系統樹籍編號：{systemTreeNo}";
+        }
+
+        private void SetEditModeLabel(bool isNew, TreeEditState editState)
+        {
+            string mode = isNew ? "新增" : "編輯";
+            string status = editState == TreeEditState.完稿 ? "定稿" : "草稿";
+            lblEditMode.Text = $"目前為{mode}（{status}）";
+        }
+
+        private void ConfigureFinalState(TreeEditState editState)
+        {
+            if (editState == TreeEditState.完稿)
+            {
+                chkFinalConfirm.Checked = true;
+                chkFinalConfirm.Enabled = false;
+            }
         }
 
         protected void btnCancel_Click(object sender, EventArgs e)

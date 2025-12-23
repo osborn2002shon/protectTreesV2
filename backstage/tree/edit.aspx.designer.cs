@@ -51,13 +51,31 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.HiddenField hfNewPhotoKeys;
 
         /// <summary>
-        /// lblSystemTreeNo 控制項。
+        /// hfIsFinal 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblSystemTreeNo;
+        protected global::System.Web.UI.WebControls.HiddenField hfIsFinal;
+
+        /// <summary>
+        /// lblEditMode 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEditMode;
+
+        /// <summary>
+        /// lblTopSystemTreeNo 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTopSystemTreeNo;
 
         /// <summary>
         /// txtJurisdiction 控制項。
@@ -375,22 +393,22 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.FileUpload fuPendingPhotos;
 
         /// <summary>
-        /// btnSaveDraft 控制項。
+        /// chkFinalConfirm 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSaveDraft;
+        protected global::System.Web.UI.WebControls.CheckBox chkFinalConfirm;
 
         /// <summary>
-        /// btnSaveFinal 控制項。
+        /// btnSave 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSaveFinal;
+        protected global::System.Web.UI.WebControls.Button btnSave;
 
         /// <summary>
         /// btnCancel 控制項。
