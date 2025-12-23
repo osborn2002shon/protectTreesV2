@@ -130,6 +130,7 @@
                                             <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" /><i class="fa-solid fa-eye"></i>
                                             <asp:CheckBoxList ID="cblRecognition" runat="server" RepeatDirection="Vertical" />
                                         </div>
+                                    </div>
                                         <div class="col">
                                             <div class="row">
                                                 <div class="col">
@@ -144,7 +145,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                   
                                 </div>
                             </div>
                         </div>
@@ -277,7 +278,7 @@
                         <div class="card-footer m-0 mt-3">
                             <div class="d-flex flex-wrap align-items-center gap-3">
                                 <div class="form-check">
-                                    <asp:CheckBox ID="chkFinalConfirm" runat="server" CssClass="form-check-input" />
+                                    <asp:CheckBox ID="chkFinalConfirm" runat="server" />
                                     <asp:Label runat="server" AssociatedControlID="chkFinalConfirm" CssClass="form-check-label" Text="確認為定稿（定稿後無法回復為草稿）" />
                                 </div>
                                 <asp:Button ID="btnSave" runat="server" Text="儲存" OnClick="btnSave_Click" CssClass="btn btn-primary" />
