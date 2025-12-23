@@ -73,10 +73,10 @@
 
 
             <div class="row m-0 mt-3 mb-3 align-items-center">
-                <div class="col p-0">
+                <div class="col p-0 d-flex justify-content-end align-items-center gap-2">
+                    <asp:Label ID="lblCount" runat="server" />
                     <asp:Button ID="btnExport" runat="server" Text="下載列表" OnClick="btnExport_Click" CssClass="btn btn-primary" />
                     <asp:Button ID="btnAdd" runat="server" Text="新增樹籍" OnClick="btnAdd_Click" CssClass="btn btn-primary"/>
-                    <asp:Label ID="lblCount" runat="server" />
                 </div>
             </div>
             <div class="container-fluid gv-tb">
