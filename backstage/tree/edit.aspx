@@ -34,23 +34,6 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col">
-                                            <asp:Label runat="server" AssociatedControlID="txtSurveyDate" Text="調查日期" />
-                                            <asp:TextBox ID="txtSurveyDate" runat="server" TextMode="Date" CssClass="form-control" />
-                                        </div>
-                                        <div class="col">
-                                            <asp:Label runat="server" AssociatedControlID="txtSurveyor" Text="調查人員" />
-                                            <asp:TextBox ID="txtSurveyor" runat="server" CssClass="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col">
-                                            <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" /><i class="fa-solid fa-eye"></i>
-                                            <div class="d-flex gap-2">
-                                                <asp:DropDownList ID="ddlCity" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCity_SelectedIndexChanged" />
-                                                <asp:DropDownList ID="ddlArea" runat="server" CssClass="form-select" />
-                                            </div>
-                                        </div>
-                                        <div class="col">
                                             系統樹籍編號<i class="fa-solid fa-eye"></i><asp:Label ID="lblSystemTreeNo" runat="server" />
                                         </div>
                                         <div class="col">
@@ -61,24 +44,24 @@
                                             <asp:Label runat="server" AssociatedControlID="txtAgencyTreeNo" Text="機關樹木編號" />
                                             <asp:TextBox ID="txtAgencyTreeNo" runat="server" CssClass="form-control" />
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種及學名" /><i class="fa-solid fa-eye"></i>
                                             <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" />
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="叢生株數" /><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtTreeCount" runat="server" TextMode="Number" CssClass="form-control" />
                                         </div>
                                         <div class="col">
-                                            <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" /><i class="fa-solid fa-eye"></i>
-                                            <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-select" />
+                                            <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" /><i class="fa-solid fa-eye"></i>
+                                            <div class="d-flex gap-2">
+                                                <asp:DropDownList ID="ddlCity" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCity_SelectedIndexChanged" />
+                                                <asp:DropDownList ID="ddlArea" runat="server" CssClass="form-select" />
+                                            </div>
                                         </div>
-                                        <div class="col" id="announcementDateContainer">
-                                            <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" /><i class="fa-solid fa-eye"></i>
-                                            <asp:TextBox ID="txtAnnouncementDate" runat="server" TextMode="Date" CssClass="form-control" />
-                                        </div>
+                                        
                                     </div>
                                     <div class="row">
                                         <div class="col">
@@ -126,6 +109,20 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
+                                            <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" /><i class="fa-solid fa-eye"></i>
+                                            <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-select" />
+                                        </div>
+                                        <div class="col" id="announcementDateContainer">
+                                            <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" /><i class="fa-solid fa-eye"></i>
+                                            <asp:TextBox ID="txtAnnouncementDate" runat="server" TextMode="Date" CssClass="form-control" />
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    
+                                    
+                                    <div class="row">
+                                        <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" /><i class="fa-solid fa-eye"></i>
                                             <asp:CheckBoxList ID="cblRecognition" runat="server" RepeatDirection="Vertical" />
                                         </div>
@@ -156,6 +153,14 @@
                                 <div class="card-header">調查資料</div>
                                 <div class="card-body">
                                     <div class="row">
+                                        <div class="col">
+                                            <asp:Label runat="server" AssociatedControlID="txtSurveyDate" Text="調查日期" />
+                                            <asp:TextBox ID="txtSurveyDate" runat="server" TextMode="Date" CssClass="form-control" />
+                                        </div>
+                                        <div class="col">
+                                            <asp:Label runat="server" AssociatedControlID="txtSurveyor" Text="調查人姓名" />
+                                            <asp:TextBox ID="txtSurveyor" runat="server" CssClass="form-control" />
+                                        </div>
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="txtEstimatedPlantingYear" Text="推估種植年間" />
                                             <asp:TextBox ID="txtEstimatedPlantingYear" runat="server" CssClass="form-control" />

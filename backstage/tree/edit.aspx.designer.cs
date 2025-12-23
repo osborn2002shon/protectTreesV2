@@ -51,42 +51,6 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.HiddenField hfNewPhotoKeys;
 
         /// <summary>
-        /// txtSurveyDate 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSurveyDate;
-
-        /// <summary>
-        /// txtSurveyor 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSurveyor;
-
-        /// <summary>
-        /// ddlCity 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlCity;
-
-        /// <summary>
-        /// ddlArea 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlArea;
-
-        /// <summary>
         /// lblSystemTreeNo 控制項。
         /// </summary>
         /// <remarks>
@@ -132,22 +96,22 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtTreeCount;
 
         /// <summary>
-        /// ddlStatus 控制項。
+        /// ddlCity 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlStatus;
+        protected global::System.Web.UI.WebControls.DropDownList ddlCity;
 
         /// <summary>
-        /// txtAnnouncementDate 控制項。
+        /// ddlArea 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtAnnouncementDate;
+        protected global::System.Web.UI.WebControls.DropDownList ddlArea;
 
         /// <summary>
         /// txtSite 控制項。
@@ -231,6 +195,24 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtFacility;
 
         /// <summary>
+        /// ddlStatus 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlStatus;
+
+        /// <summary>
+        /// txtAnnouncementDate 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtAnnouncementDate;
+
+        /// <summary>
         /// cblRecognition 控制項。
         /// </summary>
         /// <remarks>
@@ -256,6 +238,24 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtCulturalHistory;
+
+        /// <summary>
+        /// txtSurveyDate 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSurveyDate;
+
+        /// <summary>
+        /// txtSurveyor 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSurveyor;
 
         /// <summary>
         /// txtEstimatedPlantingYear 控制項。
