@@ -14,6 +14,13 @@
             <asp:HiddenField ID="hfDeletedPhotos" runat="server" />
             <asp:HiddenField ID="hfCoverPhoto" runat="server" />
             <asp:HiddenField ID="hfNewPhotoKeys" runat="server" />
+            <asp:HiddenField ID="hfIsFinal" runat="server" />
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <asp:Label ID="lblEditMode" runat="server" CssClass="fw-semibold" />
+                    <asp:Label ID="lblTopSystemTreeNo" runat="server" CssClass="text-muted" />
+                </div>
+            </div>
             <ul class="nav nav-tabs" id="treeEditTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="tab-basic" data-bs-toggle="tab" data-bs-target="#pane-basic" type="button" role="tab" aria-controls="pane-basic" aria-selected="true">基本資料</button>
@@ -33,9 +40,6 @@
                                 <div class="card-header">基本資料</div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col">
-                                            系統樹籍編號<i class="fa-solid fa-eye"></i><asp:Label ID="lblSystemTreeNo" runat="server" />
-                                        </div>
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="txtJurisdiction" Text="機關管轄編碼" />
                                             <asp:TextBox ID="txtJurisdiction" runat="server" CssClass="form-control" />
@@ -121,7 +125,7 @@
                                     
                                     
                                     
-                                    <div class="row">
+                                    <div class="row" id="recognitionContainer">
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" /><i class="fa-solid fa-eye"></i>
                                             <asp:CheckBoxList ID="cblRecognition" runat="server" RepeatDirection="Vertical" />
@@ -271,10 +275,15 @@
                 <div class="col">
                     <div class="formCard card">
                         <div class="card-footer m-0 mt-3">
-                            <asp:Button ID="btnSaveDraft" runat="server" Text="暫存草稿" OnClick="btnSaveDraft_Click" CssClass="btn btn-secondary" />
-                            <asp:Button ID="btnSaveFinal" runat="server" Text="存檔送出" OnClick="btnSaveFinal_Click" CssClass="btn btn-primary" />
-                            <asp:Button ID="btnCancel" runat="server" Text="返回列表" CausesValidation="false" OnClick="btnCancel_Click" CssClass="btn btn-outline-secondary" />
-                            <asp:HyperLink Visible="false" ID="lnkUploadPhotos" runat="server" Text="樹木照片" NavigateUrl="edit_photos.aspx" CssClass="btn btn-link" />
+                            <div class="d-flex flex-wrap align-items-center gap-3">
+                                <div class="form-check">
+                                    <asp:CheckBox ID="chkFinalConfirm" runat="server" CssClass="form-check-input" />
+                                    <asp:Label runat="server" AssociatedControlID="chkFinalConfirm" CssClass="form-check-label" Text="確認為定稿（定稿後無法回復為草稿）" />
+                                </div>
+                                <asp:Button ID="btnSave" runat="server" Text="儲存" OnClick="btnSave_Click" CssClass="btn btn-primary" />
+                                <asp:Button ID="btnCancel" runat="server" Text="返回列表" CausesValidation="false" OnClick="btnCancel_Click" CssClass="btn btn-outline-secondary" />
+                                <asp:HyperLink Visible="false" ID="lnkUploadPhotos" runat="server" Text="樹木照片" NavigateUrl="edit_photos.aspx" CssClass="btn btn-link" />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -514,12 +523,22 @@
             container.style.display = selectedValue === '1' ? '' : 'none';
         }
 
+        function toggleRecognition(selectedValue) {
+            const container = document.getElementById('recognitionContainer');
+            if (!container) return;
+            container.style.display = selectedValue === '1' ? '' : 'none';
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             initializePhotos();
             const statusDropdown = document.getElementById('<%= ddlStatus.ClientID %>');
             if (statusDropdown) {
                 toggleAnnouncementDate(statusDropdown.value);
-                statusDropdown.addEventListener('change', function () { toggleAnnouncementDate(statusDropdown.value); });
+                toggleRecognition(statusDropdown.value);
+                statusDropdown.addEventListener('change', function () {
+                    toggleAnnouncementDate(statusDropdown.value);
+                    toggleRecognition(statusDropdown.value);
+                });
             }
         });
         const latitudeInputId = '<%= txtLatitude.ClientID %>';
