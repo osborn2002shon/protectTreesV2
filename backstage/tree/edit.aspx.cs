@@ -63,20 +63,8 @@ namespace protectTreesV2.backstage.tree
                 ddlStatus.Items.Add(new ListItem(TreeService.GetStatusText(status), ((int)status).ToString()));
             }
 
-            ddlSpecies.Items.Clear();
-            ddlSpecies.Items.Add(new ListItem("請選擇", string.Empty));
-            foreach (var species in TreeService.GetSpecies())
-            {
-                ddlSpecies.Items.Add(new ListItem(species.DisplayName, species.SpeciesID.ToString()));
-            }
-
-            ddlLandOwnership.Items.Clear();
-            ddlLandOwnership.Items.Add(new ListItem("請選擇", string.Empty));
-            ddlLandOwnership.Items.Add(new ListItem("國有"));
-            ddlLandOwnership.Items.Add(new ListItem("公有"));
-            ddlLandOwnership.Items.Add(new ListItem("私有"));
-            ddlLandOwnership.Items.Add(new ListItem("其他"));
-            ddlLandOwnership.Items.Add(new ListItem("無資料"));
+            DropdownBinder.Bind_DropDownList_LandType(ref ddlSpecies, true);
+            DropdownBinder.Bind_DropDownList_LandType(ref ddlLandOwnership);
 
             cblRecognition.Items.Clear();
             foreach (var item in TreeService.GetRecognitionCriteria())
@@ -222,14 +210,63 @@ namespace protectTreesV2.backstage.tree
 
         private bool ValidateForm()
         {
+            bool requiresFinalFields = chkFinalConfirm.Checked || hfIsFinal.Value == "1";
             if (string.IsNullOrWhiteSpace(ddlCity.SelectedValue))
             {
                 ShowMessage("驗證", "請選擇縣市", "warning");
                 return false;
             }
+            if (requiresFinalFields && string.IsNullOrWhiteSpace(ddlArea.SelectedValue))
+            {
+                ShowMessage("驗證", "請選擇鄉鎮區", "warning");
+                return false;
+            }
             if (string.IsNullOrWhiteSpace(ddlSpecies.SelectedValue))
             {
-                ShowMessage("驗證", "請選擇樹種", "warning");
+                ShowMessage("驗證", "請選擇樹種及學名", "warning");
+                return false;
+            }
+            if (!int.TryParse(txtTreeCount.Text, out int treeCount) || treeCount <= 0)
+            {
+                ShowMessage("驗證", "請填寫數量並確認大於 0", "warning");
+                return false;
+            }
+            if (requiresFinalFields && string.IsNullOrWhiteSpace(txtSite.Text))
+            {
+                ShowMessage("驗證", "請填寫坐落地點", "warning");
+                return false;
+            }
+            if (requiresFinalFields && (!decimal.TryParse(txtLatitude.Text, out _) || !decimal.TryParse(txtLongitude.Text, out _)))
+            {
+                ShowMessage("驗證", "請填寫有效的座標（緯度與經度）", "warning");
+                return false;
+            }
+            if (requiresFinalFields && string.IsNullOrWhiteSpace(txtManager.Text))
+            {
+                ShowMessage("驗證", "請填寫管理人", "warning");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(ddlStatus.SelectedValue))
+            {
+                ShowMessage("驗證", "請選擇樹籍狀態", "warning");
+                return false;
+            }
+            if (requiresFinalFields && ddlStatus.SelectedValue == ((int)TreeStatus.已公告列管).ToString())
+            {
+                if (string.IsNullOrWhiteSpace(txtAnnouncementDate.Text))
+                {
+                    ShowMessage("驗證", "樹籍狀態為已公告列管時，公告日期為必填", "warning");
+                    return false;
+                }
+                if (!cblRecognition.Items.Cast<ListItem>().Any(i => i.Selected))
+                {
+                    ShowMessage("驗證", "樹籍狀態為已公告列管時，請至少勾選一項受保護認定理由", "warning");
+                    return false;
+                }
+            }
+            if (requiresFinalFields && string.IsNullOrWhiteSpace(txtCulturalHistory.Text))
+            {
+                ShowMessage("驗證", "請填寫文化歷史價值介紹", "warning");
                 return false;
             }
             if (string.IsNullOrWhiteSpace(txtSurveyDate.Text))
@@ -388,7 +425,7 @@ namespace protectTreesV2.backstage.tree
             string[] newKeys = (hfNewPhotoKeys.Value ?? string.Empty)
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             const int maxCount = 5;
-            const int maxSize = 5 * 1024 * 1024;
+            const int maxSize = 10 * 1024 * 1024;
 
             if (newCount > maxCount)
             {
@@ -415,7 +452,7 @@ namespace protectTreesV2.backstage.tree
                     var file = files[i];
                     if (file != null && file.ContentLength > maxSize)
                     {
-                        ShowMessage("限制", $"{file.FileName} 超過 5MB，請重新選擇", "warning");
+                        ShowMessage("限制", $"{file.FileName} 超過 10MB，請重新選擇", "warning");
                         return false;
                     }
                 }
