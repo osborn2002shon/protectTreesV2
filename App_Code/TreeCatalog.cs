@@ -530,7 +530,7 @@ WHERE r.systemTreeNo=@systemTreeNo AND r.removeDateTime IS NULL";
                                 r.isAnnounced AS [是否公告列管],
                                 r.treeStatus AS [樹籍狀態],
                                 CASE WHEN r.editStatus=1 THEN N'完稿' ELSE N'草稿' END AS [編輯狀態],
-                                r.treeCount AS [叢生株數],
+                                r.treeCount AS [數量],
                                 r.site AS [坐落地點],
                                 r.latitude AS [座標(WGS84)_緯度(N)],
                                 r.longitude AS [座標(WGS84)_經度(E)],

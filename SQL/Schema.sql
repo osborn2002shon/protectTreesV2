@@ -414,7 +414,7 @@ CREATE TABLE [dbo].[Tree_Record](
         [isAnnounced] [bit] NOT NULL CONSTRAINT [DF_Tree_Record_isAnnounced] DEFAULT ((0)), -- 是否已公告列管（樹籍狀態為已公告列管才為1）
         [treeStatus] [nvarchar](20) NOT NULL CONSTRAINT [DF_Tree_Record_treeStatus] DEFAULT (N'其他'), -- 樹籍狀態（已公告列管／符合標準／其他）
         [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 編輯狀態（草稿／完稿）
-        [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 叢生株數
+        [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 數量
         [site] [nvarchar](200) NULL, -- 坐落地點
         [latitude] [nvarchar](max) NULL, -- 座標(WGS84)：緯度(N)
         [longitude] [nvarchar](max) NULL, -- 座標(WGS84)：經度(E)

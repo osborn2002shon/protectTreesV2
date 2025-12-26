@@ -55,7 +55,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="叢生株數" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="數量" /><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtTreeCount" runat="server" TextMode="Number" CssClass="form-control" />
                                         </div>
                                         <div class="col">
