@@ -668,7 +668,7 @@
                 const requirement = el.getAttribute('data-requirement');
                 let visible = requiresFinal;
                 if (requirement === 'announcement' || requirement === 'recognition') {
-                    visible = requiresFinal && statusValue === '<%= ((int)protectTreesV2.TreeCatalog.TreeStatus.已公告列管).ToString() %>';
+                    visible = requiresFinal && statusValue === '已公告列管';
                 }
                 el.style.display = visible ? 'inline' : 'none';
             });
