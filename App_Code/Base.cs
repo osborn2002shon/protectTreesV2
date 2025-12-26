@@ -48,15 +48,40 @@ namespace protectTreesV2.Base
         public void ShowMessage(string title, string text, string icon = "info")
         {
             var serializer = new JavaScriptSerializer();
-            var options = new
-            {
-                title,
-                text,
-                icon
-            };
+            var options = new { title, text, icon };
 
-            string script = $"Swal.fire({serializer.Serialize(options)});";
-            string key = "SweetAlert_" + Guid.NewGuid().ToString("N");
+            string script = $@"
+                (function() {{
+                    var data = {serializer.Serialize(options)};
+                    var modalElement = document.getElementById('divMSG');
+                    if (!modalElement || typeof bootstrap === 'undefined') return;
+
+                    var titleElement = modalElement.querySelector('.modal-title');
+                    var bodyElement = modalElement.querySelector('.modal-body');
+                    var iconMap = {{
+                        success: 'fa-circle-check text-success',
+                        warning: 'fa-triangle-exclamation text-warning',
+                        error: 'fa-circle-xmark text-danger',
+                        info: 'fa-circle-info text-info'
+                    }};
+                    var iconClass = iconMap[(data.icon || '').toLowerCase()] || iconMap.info;
+
+                    if (titleElement) {{
+                        titleElement.innerHTML = '';
+                        var icon = document.createElement('i');
+                        icon.className = 'message-icon fa-solid ' + iconClass;
+                        titleElement.appendChild(icon);
+                        titleElement.appendChild(document.createTextNode(' ' + (data.title || '')));
+                    }}
+
+                    if (bodyElement) {{
+                        bodyElement.textContent = data.text || '';
+                    }}
+
+                    var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modal.show();
+                }})();";
+            string key = "BootstrapModal_" + Guid.NewGuid().ToString("N");
 
             if (ScriptManager.GetCurrent(Page) != null)
             {
