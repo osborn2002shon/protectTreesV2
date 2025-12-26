@@ -282,7 +282,7 @@
                                     <asp:Label runat="server" AssociatedControlID="chkFinalConfirm" CssClass="form-check-label" Text="確認為定稿（定稿後無法回復為草稿）" />
                                 </div>
                                 <asp:Button ID="btnSave" runat="server" Text="儲存" OnClick="btnSave_Click" CssClass="btn btn-primary" />
-                                <asp:Button ID="btnCancel" runat="server" Text="返回列表" CausesValidation="false" OnClick="btnCancel_Click" CssClass="btn btn-outline-secondary" />
+                                <asp:Button ID="btnCancel" runat="server" Text="取消" CausesValidation="false" OnClick="btnCancel_Click" CssClass="btn btn-outline-secondary" />
                                 <asp:HyperLink Visible="false" ID="lnkUploadPhotos" runat="server" Text="樹木照片" NavigateUrl="edit_photos.aspx" CssClass="btn btn-link" />
                             </div>
                         </div>

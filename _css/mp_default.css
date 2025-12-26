@@ -15,7 +15,7 @@ body {
 /* 側邊欄樣式 */
 .sidebar {
     min-height: 100vh;
-    background: linear-gradient(180deg, #0f2350 0%, #1a3b6b 100%);
+    background: linear-gradient(180deg, #006948 0%, #54917f 50%, #79c06e 100%);
     width: 280px;
     transition: all 0.3s ease;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -60,7 +60,7 @@ body {
 
 /* 導航樣式 */
 .nav-section {
-    padding: 20px 0;
+    padding: 20px 0px 0px 0px;
 }
 
 .nav-item {
@@ -226,9 +226,9 @@ body {
 
 /* Footer */
 .footer {
-    background: #0f2350;
+    background: #caac71;
     color: white;
-    padding: 20px 30px;
+    padding: 10px 30px;
     text-align: center;
     margin-top: auto;
 }

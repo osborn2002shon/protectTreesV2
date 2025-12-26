@@ -69,22 +69,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="backstage\Manage\Tree.aspx" />
-    <Content Include="backstage\sample\HealthNew.aspx" />
-    <Content Include="backstage\sample\HealthEdit.aspx" />
-    <Content Include="backstage\sample\HealthList3.aspx" />
-    <Content Include="backstage\sample\HealthList2.aspx" />
-    <Content Include="backstage\sample\HealthList.aspx" />
-    <Content Include="backstage\sample\sample.css" />
-    <Content Include="backstage\sample\tree.jpg" />
-    <Content Include="backstage\sample\TreeEdit4.aspx" />
-    <Content Include="backstage\sample\TreeEdit3.aspx" />
-    <Content Include="backstage\sample\TreeEdit2.aspx" />
-    <Content Include="backstage\sample\TreeEdit1.aspx" />
-    <Content Include="backstage\sample\TreeNew.aspx" />
-    <Content Include="backstage\sample\TreeList.aspx" />
-    <Content Include="backstage\sample\TreeRead1.aspx" />
-    <Content Include="backstage\sample\TreeRead3.aspx" />
-    <Content Include="backstage\sample\TreeRead2.aspx" />
     <Content Include="backstage\tree\detail.aspx" />
     <Content Include="backstage\tree\edit.aspx" />
     <Content Include="backstage\tree\edit_photos.aspx" />
@@ -131,104 +115,6 @@
     </Compile>
     <Compile Include="backstage\Manage\Tree.aspx.designer.cs">
       <DependentUpon>Tree.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\HealthNew.aspx.cs">
-      <DependentUpon>HealthNew.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\HealthNew.aspx.designer.cs">
-      <DependentUpon>HealthNew.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\HealthEdit.aspx.cs">
-      <DependentUpon>HealthEdit.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\HealthEdit.aspx.designer.cs">
-      <DependentUpon>HealthEdit.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\HealthList3.aspx.cs">
-      <DependentUpon>HealthList3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\HealthList3.aspx.designer.cs">
-      <DependentUpon>HealthList3.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\HealthList2.aspx.cs">
-      <DependentUpon>HealthList2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\HealthList2.aspx.designer.cs">
-      <DependentUpon>HealthList2.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\HealthList.aspx.cs">
-      <DependentUpon>HealthList.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\HealthList.aspx.designer.cs">
-      <DependentUpon>HealthList.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit4.aspx.cs">
-      <DependentUpon>TreeEdit4.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit4.aspx.designer.cs">
-      <DependentUpon>TreeEdit4.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit3.aspx.cs">
-      <DependentUpon>TreeEdit3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit3.aspx.designer.cs">
-      <DependentUpon>TreeEdit3.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit2.aspx.cs">
-      <DependentUpon>TreeEdit2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit2.aspx.designer.cs">
-      <DependentUpon>TreeEdit2.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit1.aspx.cs">
-      <DependentUpon>TreeEdit1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeEdit1.aspx.designer.cs">
-      <DependentUpon>TreeEdit1.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeNew.aspx.cs">
-      <DependentUpon>TreeNew.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeNew.aspx.designer.cs">
-      <DependentUpon>TreeNew.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeList.aspx.cs">
-      <DependentUpon>TreeList.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeList.aspx.designer.cs">
-      <DependentUpon>TreeList.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead1.aspx.cs">
-      <DependentUpon>TreeRead1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead1.aspx.designer.cs">
-      <DependentUpon>TreeRead1.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead3.aspx.cs">
-      <DependentUpon>TreeRead3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead3.aspx.designer.cs">
-      <DependentUpon>TreeRead3.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead2.aspx.cs">
-      <DependentUpon>TreeRead2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\sample\TreeRead2.aspx.designer.cs">
-      <DependentUpon>TreeRead2.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\tree\detail.aspx.cs">
       <DependentUpon>detail.aspx</DependentUpon>
