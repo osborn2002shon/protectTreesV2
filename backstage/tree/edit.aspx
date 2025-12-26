@@ -570,6 +570,7 @@
                     markDirty();
                 });
             }
+            setupPostbackBypass();
         });
         const latitudeInputId = '<%= txtLatitude.ClientID %>';
         const longitudeInputId = '<%= txtLongitude.ClientID %>';
@@ -679,6 +680,21 @@
             watched.forEach(el => {
                 el.addEventListener('change', markDirty);
                 el.addEventListener('input', markDirty);
+            });
+        }
+
+        function setupPostbackBypass() {
+            const postbackIds = [
+                '<%= ddlCity.ClientID %>',
+                '<%= ddlArea.ClientID %>'
+            ];
+            postbackIds.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', function () {
+                        allowUnload = true;
+                    });
+                }
             });
         }
 
