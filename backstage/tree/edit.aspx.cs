@@ -198,7 +198,9 @@ namespace protectTreesV2.backstage.tree
         {
             var requestedState = chkFinalConfirm.Checked ? TreeEditState.完稿 : TreeEditState.草稿;
             bool isFinalLocked = hfIsFinal.Value == "1";
-            if ((requestedState == TreeEditState.完稿 || isFinalLocked) && !ValidateForm())
+            bool requiresFinalValidation = requestedState == TreeEditState.完稿 || isFinalLocked;
+            bool requiresDraftMinimum = !requiresFinalValidation && requestedState == TreeEditState.草稿;
+            if (!ValidateForm(requiresFinalValidation, requiresDraftMinimum))
             {
                 return;
             }
@@ -208,70 +210,72 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
-        private bool ValidateForm()
+        private bool ValidateForm(bool requiresFinalFields, bool requiresDraftMinimum)
         {
-            bool requiresFinalFields = chkFinalConfirm.Checked || hfIsFinal.Value == "1";
-            if (string.IsNullOrWhiteSpace(ddlCity.SelectedValue))
+            var missingFields = new List<string>();
+
+            if (requiresDraftMinimum || requiresFinalFields)
             {
-                ShowMessage("驗證", "請選擇縣市", "warning");
-                return false;
-            }
-            if (requiresFinalFields && string.IsNullOrWhiteSpace(ddlArea.SelectedValue))
-            {
-                ShowMessage("驗證", "請選擇鄉鎮區", "warning");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(ddlSpecies.SelectedValue))
-            {
-                ShowMessage("驗證", "請選擇樹種及學名", "warning");
-                return false;
-            }
-            if (!int.TryParse(txtTreeCount.Text, out int treeCount) || treeCount <= 0)
-            {
-                ShowMessage("驗證", "請填寫數量並確認大於 0", "warning");
-                return false;
-            }
-            if (requiresFinalFields && string.IsNullOrWhiteSpace(txtSite.Text))
-            {
-                ShowMessage("驗證", "請填寫坐落地點", "warning");
-                return false;
-            }
-            if (requiresFinalFields && (!decimal.TryParse(txtLatitude.Text, out _) || !decimal.TryParse(txtLongitude.Text, out _)))
-            {
-                ShowMessage("驗證", "請填寫有效的座標（緯度與經度）", "warning");
-                return false;
-            }
-            if (requiresFinalFields && string.IsNullOrWhiteSpace(txtManager.Text))
-            {
-                ShowMessage("驗證", "請填寫管理人", "warning");
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(ddlStatus.SelectedValue))
-            {
-                ShowMessage("驗證", "請選擇樹籍狀態", "warning");
-                return false;
-            }
-            if (requiresFinalFields && ddlStatus.SelectedValue == ((int)TreeStatus.已公告列管).ToString())
-            {
-                if (string.IsNullOrWhiteSpace(txtAnnouncementDate.Text))
+                if (string.IsNullOrWhiteSpace(ddlCity.SelectedValue))
                 {
-                    ShowMessage("驗證", "樹籍狀態為已公告列管時，公告日期為必填", "warning");
-                    return false;
+                    missingFields.Add("縣市");
                 }
-                if (!cblRecognition.Items.Cast<ListItem>().Any(i => i.Selected))
+                if (string.IsNullOrWhiteSpace(ddlSpecies.SelectedValue))
                 {
-                    ShowMessage("驗證", "樹籍狀態為已公告列管時，請至少勾選一項受保護認定理由", "warning");
-                    return false;
+                    missingFields.Add("樹種及學名");
                 }
             }
-            if (requiresFinalFields && string.IsNullOrWhiteSpace(txtCulturalHistory.Text))
+
+            if (requiresFinalFields)
             {
-                ShowMessage("驗證", "請填寫文化歷史價值介紹", "warning");
-                return false;
+                if (string.IsNullOrWhiteSpace(ddlArea.SelectedValue))
+                {
+                    missingFields.Add("鄉鎮區");
+                }
+                if (!int.TryParse(txtTreeCount.Text, out int treeCount) || treeCount <= 0)
+                {
+                    missingFields.Add("數量（需大於 0）");
+                }
+                if (string.IsNullOrWhiteSpace(txtSite.Text))
+                {
+                    missingFields.Add("坐落地點");
+                }
+                if (!decimal.TryParse(txtLatitude.Text, out _) || !decimal.TryParse(txtLongitude.Text, out _))
+                {
+                    missingFields.Add("有效的座標（緯度與經度）");
+                }
+                if (string.IsNullOrWhiteSpace(txtManager.Text))
+                {
+                    missingFields.Add("管理人");
+                }
+                if (string.IsNullOrWhiteSpace(ddlStatus.SelectedValue))
+                {
+                    missingFields.Add("樹籍狀態");
+                }
+                if (ddlStatus.SelectedValue == ((int)TreeStatus.已公告列管).ToString())
+                {
+                    if (string.IsNullOrWhiteSpace(txtAnnouncementDate.Text))
+                    {
+                        missingFields.Add("公告日期");
+                    }
+                    if (!cblRecognition.Items.Cast<ListItem>().Any(i => i.Selected))
+                    {
+                        missingFields.Add("至少一項受保護認定理由");
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(txtCulturalHistory.Text))
+                {
+                    missingFields.Add("文化歷史價值介紹");
+                }
+                if (string.IsNullOrWhiteSpace(txtSurveyDate.Text))
+                {
+                    missingFields.Add("調查日期");
+                }
             }
-            if (string.IsNullOrWhiteSpace(txtSurveyDate.Text))
+
+            if (missingFields.Any())
             {
-                ShowMessage("驗證", "請填寫調查日期", "warning");
+                ShowMessage("驗證", $"請補齊以下欄位：{string.Join("、", missingFields)}", "warning");
                 return false;
             }
             return true;
