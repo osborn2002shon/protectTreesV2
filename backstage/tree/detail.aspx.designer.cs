@@ -33,6 +33,24 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.HiddenField hfTreeID;
 
         /// <summary>
+        /// rptPhotos 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptPhotos;
+
+        /// <summary>
+        /// lblNoPhotos 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblNoPhotos;
+
+        /// <summary>
         /// lblSystemTreeNo 控制項。
         /// </summary>
         /// <remarks>
@@ -40,6 +58,24 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblSystemTreeNo;
+
+        /// <summary>
+        /// lblEditStatus 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEditStatus;
+
+        /// <summary>
+        /// lblJurisdiction 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblJurisdiction;
 
         /// <summary>
         /// lblAgencyTreeNo 控制項。
@@ -51,13 +87,22 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Label lblAgencyTreeNo;
 
         /// <summary>
-        /// lblJurisdiction 控制項。
+        /// lblSpecies 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblJurisdiction;
+        protected global::System.Web.UI.WebControls.Label lblSpecies;
+
+        /// <summary>
+        /// lblTreeCount 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTreeCount;
 
         /// <summary>
         /// lblCity 控制項。
@@ -78,13 +123,76 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Label lblArea;
 
         /// <summary>
-        /// lblSpecies 控制項。
+        /// lblSite 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblSpecies;
+        protected global::System.Web.UI.WebControls.Label lblSite;
+
+        /// <summary>
+        /// lblLatitude 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblLatitude;
+
+        /// <summary>
+        /// lblLongitude 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblLongitude;
+
+        /// <summary>
+        /// lblLandOwnership 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblLandOwnership;
+
+        /// <summary>
+        /// lblLandOwnershipNote 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblLandOwnershipNote;
+
+        /// <summary>
+        /// lblManager 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblManager;
+
+        /// <summary>
+        /// lblManagerContact 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblManagerContact;
+
+        /// <summary>
+        /// lblFacility 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblFacility;
 
         /// <summary>
         /// lblStatus 控制項。
@@ -96,13 +204,40 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Label lblStatus;
 
         /// <summary>
-        /// lblEditStatus 控制項。
+        /// lblAnnouncementDate 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblEditStatus;
+        protected global::System.Web.UI.WebControls.Label lblAnnouncementDate;
+
+        /// <summary>
+        /// ltlRecognition 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal ltlRecognition;
+
+        /// <summary>
+        /// lblRecognitionNote 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblRecognitionNote;
+
+        /// <summary>
+        /// lblCulturalHistory 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblCulturalHistory;
 
         /// <summary>
         /// lblSurveyDate 控制項。
@@ -150,78 +285,6 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Label lblGroupGrowthInfo;
 
         /// <summary>
-        /// lblAnnouncementDate 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAnnouncementDate;
-
-        /// <summary>
-        /// lblManager 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblManager;
-
-        /// <summary>
-        /// lblManagerContact 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblManagerContact;
-
-        /// <summary>
-        /// lblFacility 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblFacility;
-
-        /// <summary>
-        /// lblSite 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblSite;
-
-        /// <summary>
-        /// lblLandOwnership 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLandOwnership;
-
-        /// <summary>
-        /// lblLandOwnershipNote 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLandOwnershipNote;
-
-        /// <summary>
-        /// lblTreeCount 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblTreeCount;
-
-        /// <summary>
         /// lblTreeHeight 控制項。
         /// </summary>
         /// <remarks>
@@ -256,51 +319,6 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblCanopyArea;
-
-        /// <summary>
-        /// lblLatitude 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLatitude;
-
-        /// <summary>
-        /// lblLongitude 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLongitude;
-
-        /// <summary>
-        /// ltlRecognition 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal ltlRecognition;
-
-        /// <summary>
-        /// lblRecognitionNote 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblRecognitionNote;
-
-        /// <summary>
-        /// lblCulturalHistory 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCulturalHistory;
 
         /// <summary>
         /// lblHealth 控制項。
@@ -346,24 +364,6 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblMemo;
-
-        /// <summary>
-        /// rptPhotos 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptPhotos;
-
-        /// <summary>
-        /// lblNoPhotos 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblNoPhotos;
 
         /// <summary>
         /// lnkBackToList 控制項。

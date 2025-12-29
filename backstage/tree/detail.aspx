@@ -63,7 +63,7 @@
                                                     <div class="text-muted">系統樹籍編號</div>
                                                     <asp:Label ID="lblSystemTreeNo" runat="server" CssClass="fw-semibold d-block" />
                                                 </div>
-                                                <div class="col">
+                                                <div class="col d-none">
                                                     <div class="text-muted">編輯狀態</div>
                                                     <asp:Label ID="lblEditStatus" runat="server" CssClass="fw-semibold d-block" />
                                                 </div>
