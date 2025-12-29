@@ -59,20 +59,26 @@
                                 <div class="card-body">
                                     <asp:Panel ID="pnlPhotoGallery" runat="server">
                                         <div class="row g-3 align-items-start">
+                                            
                                             <div class="col-lg-12">
                                                 <asp:Panel ID="pnlCoverPhoto" runat="server" CssClass="tree-cover-image">
                                                     <div class="ratio ratio-4x3 rounded overflow-hidden position-relative bg-light mb-3">
                                                         <a id="lnkCoverLightbox" runat="server" class="tree-lightbox d-block h-100 w-100">
                                                             <asp:Image ID="imgCover" runat="server" CssClass="w-100 h-100" />
                                                         </a>
-                                                        <span class="position-absolute badge bg-primary tree-cover-badge">封面</span>
+                                                        
                                                     </div>
+                                                    
                                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                        
                                                         <asp:Label ID="lblCoverCaption" runat="server" CssClass="fw-semibold" />
                                                         <asp:Label ID="lblCoverUploadTime" runat="server" CssClass="text-muted small" />
+                                                        
                                                     </div>
                                                 </asp:Panel>
+                                                
                                             </div>
+                                            
                                             <div class="col-lg-12">
                                                 <div class="row row-cols-1 row-cols-sm-2 g-3">
                                                     <asp:Repeater ID="rptGallery" runat="server">
