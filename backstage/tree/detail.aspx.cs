@@ -48,6 +48,7 @@ namespace protectTreesV2.backstage.tree
             lblSite.Text = tree.Site;
             lblLandOwnership.Text = tree.LandOwnership;
             lblLandOwnershipNote.Text = tree.LandOwnershipNote;
+            lblFacility.Text = tree.FacilityDescription;
             lblTreeCount.Text = tree.TreeCount.ToString();
             lblTreeHeight.Text = tree.TreeHeight?.ToString();
             lblBreastHeightDiameter.Text = tree.BreastHeightDiameter?.ToString();
@@ -55,7 +56,13 @@ namespace protectTreesV2.backstage.tree
             lblCanopyArea.Text = tree.CanopyProjectionArea?.ToString();
             lblLatitude.Text = tree.Latitude?.ToString();
             lblLongitude.Text = tree.Longitude?.ToString();
-            lblIsAnnounced.Text = tree.IsAnnounced ? "是" : "否";
+            lblSurveyor.Text = tree.Surveyor;
+            lblEstimatedPlantingYear.Text = tree.EstimatedPlantingYear;
+            lblEstimatedAgeNote.Text = tree.EstimatedAgeNote;
+            lblGroupGrowthInfo.Text = tree.GroupGrowthInfo;
+            lblEpiphyteDescription.Text = tree.EpiphyteDescription;
+            lblParasiteDescription.Text = tree.ParasiteDescription;
+            lblClimbingPlantDescription.Text = tree.ClimbingPlantDescription;
             var criteriaLookup = TreeService.GetRecognitionCriteria()
                 .GroupBy(c => c.Code)
                 .ToDictionary(g => g.Key, g => g.First().Name);
@@ -81,8 +88,10 @@ namespace protectTreesV2.backstage.tree
             lblHealth.Text = tree.HealthCondition;
             lblMemo.Text = tree.Memo;
 
-            rptPhotos.DataSource = TreeService.GetPhotos(treeId);
+            var photos = TreeService.GetPhotos(treeId)?.ToList() ?? Enumerable.Empty<TreePhoto>().ToList();
+            rptPhotos.DataSource = photos;
             rptPhotos.DataBind();
+            lblNoPhotos.Visible = !photos.Any();
         }
     }
 }
