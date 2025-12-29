@@ -169,11 +169,6 @@
                                                     <asp:Label ID="lblLongitude" runat="server" CssClass="fw-semibold d-block" />
                                                 </div>
                                             </div>
-                                            <div class="row mb-2">
-                                                <div class="col">
-                                                    <small class="form-text text-muted">請輸入精度最多至第六位的經緯度座標</small>
-                                                </div>
-                                            </div>
                                             <div class="row mb-3">
                                                 <div class="col-3">
                                                     <div class="text-muted">土地權屬</div>
