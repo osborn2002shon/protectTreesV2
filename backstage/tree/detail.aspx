@@ -1,5 +1,26 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="detail.aspx.cs" Inherits="protectTreesV2.backstage.tree.detail" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+    <style>
+        .tree-cover-image img,
+        .tree-gallery-thumb img {
+            object-fit: cover;
+        }
+
+        .tree-cover-badge {
+            top: 12px;
+            left: 12px;
+        }
+
+        .tree-gallery-thumb .card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .tree-gallery-thumb .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
     樹籍管理 / 樹籍檢視
@@ -29,26 +50,60 @@
             <div class="tab-content" id="treeDetailTabContent">
                 <div class="tab-pane fade show active" id="pane-tree" role="tabpanel" aria-labelledby="tree-detail-tab">
                     <div class="row g-4">
-                        <div class="col-lg-4">
+                        <div class="col-lg-5">
                             <div class="card h-100">
-                                <div class="card-header">樹木照片</div>
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <span class="fw-semibold">樹木照片</span>
+                                    <span class="text-muted small">點擊照片以燈箱檢視</span>
+                                </div>
                                 <div class="card-body">
-                                    <asp:Repeater ID="rptPhotos" runat="server">
-                                        <ItemTemplate>
-                                            <div class="mb-4">
-                                                <asp:Image runat="server" CssClass="img-fluid rounded" ImageUrl='<%# Eval("FilePath") %>' />
-                                                <div class="mt-2">
-                                                    <asp:Label runat="server" Text='<%# Eval("Caption") %>' CssClass="d-block" />
-                                                    <asp:Label runat="server" Text='<%# (bool)Eval("IsCover") ? "封面" : string.Empty %>' CssClass="badge bg-primary" />
+                                    <asp:Panel ID="pnlPhotoGallery" runat="server">
+                                        <div class="row g-3 align-items-start">
+                                            <div class="col-lg-12">
+                                                <asp:Panel ID="pnlCoverPhoto" runat="server" CssClass="tree-cover-image">
+                                                    <div class="ratio ratio-4x3 rounded overflow-hidden position-relative bg-light mb-3">
+                                                        <a id="lnkCoverLightbox" runat="server" class="tree-lightbox d-block h-100 w-100">
+                                                            <asp:Image ID="imgCover" runat="server" CssClass="w-100 h-100" />
+                                                        </a>
+                                                        <span class="position-absolute badge bg-primary tree-cover-badge">封面</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                        <asp:Label ID="lblCoverCaption" runat="server" CssClass="fw-semibold" />
+                                                        <asp:Label ID="lblCoverUploadTime" runat="server" CssClass="text-muted small" />
+                                                    </div>
+                                                </asp:Panel>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <div class="row row-cols-1 row-cols-sm-2 g-3">
+                                                    <asp:Repeater ID="rptGallery" runat="server">
+                                                        <ItemTemplate>
+                                                            <div class="col tree-gallery-thumb">
+                                                                <div class="card h-100 border-0 shadow-sm">
+                                                                    <a href='<%# Eval("FilePath") %>' class="tree-lightbox" data-gallery="tree-photos" data-title='<%# BuildLightboxTitle((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttribute((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %>'>
+                                                                        <div class="ratio ratio-4x3 overflow-hidden rounded-top">
+                                                                            <img src='<%# Eval("FilePath") %>' class="w-100 h-100" alt='<%# BuildLightboxTitle((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %>' />
+                                                                        </div>
+                                                                    </a>
+                                                                    <div class="p-2">
+                                                                        <div class="d-flex align-items-center justify-content-between gap-2">
+                                                                            <span class="fw-semibold text-truncate"><%# BuildPhotoCaption((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %></span>
+                                                                            <asp:Label runat="server" Visible='<%# (bool)Eval("IsCover") %>' CssClass="badge bg-primary">封面</asp:Label>
+                                                                        </div>
+                                                                        <div class="text-muted small">上傳：<%# BuildUploadTimeDisplay((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:Repeater>
                                                 </div>
                                             </div>
-                                        </ItemTemplate>
-                                    </asp:Repeater>
+                                        </div>
+                                    </asp:Panel>
                                     <asp:Label ID="lblNoPhotos" runat="server" Text="尚無照片" CssClass="text-muted" Visible="false" />
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-8">
+                        <div class="col-lg-7">
                             <div class="accordion" id="treeDetailAccordion">
                                 <div class="accordion-item">
                                     <h2 class="accordion-header" id="headingBasic">
@@ -258,15 +313,36 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-4">
-                        <div class="col">
-                            <asp:HyperLink ID="lnkBackToList" runat="server" Text="返回列表" NavigateUrl="query.aspx" CssClass="btn btn-outline-secondary" />
-                        </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <asp:HyperLink ID="lnkBackToList" runat="server" Text="返回列表" NavigateUrl="query.aspx" CssClass="btn btn-outline-secondary" />
                     </div>
                 </div>
             </div>
-        </ContentTemplate>
+        </div>
+    </ContentTemplate>
     </asp:UpdatePanel>
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            var lightboxInstance;
+            function initLightbox() {
+                if (lightboxInstance) {
+                    lightboxInstance.destroy();
+                }
+                lightboxInstance = GLightbox({
+                    selector: '.tree-lightbox',
+                    loop: true,
+                    touchNavigation: true
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', initLightbox);
+            if (window.Sys && Sys.WebForms && Sys.WebForms.PageRequestManager) {
+                Sys.WebForms.PageRequestManager.getInstance().add_endRequest(initLightbox);
+            }
+        })();
+    </script>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">
 </asp:Content>
