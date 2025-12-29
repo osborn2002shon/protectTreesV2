@@ -144,6 +144,13 @@
     <Compile Include="backstage\tree\query.aspx.designer.cs">
       <DependentUpon>query.aspx</DependentUpon>
     </Compile>
+    <Compile Include="_uc\TreePhotoAlbum.ascx.cs">
+      <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_uc\TreePhotoAlbum.ascx.designer.cs">
+      <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
+    </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -178,6 +185,7 @@
     <Content Include="_fonts\bootstrap-icons.woff" />
     <Content Include="_fonts\bootstrap-icons.woff2" />
     <Content Include="_uc\captcha.ashx" />
+    <Content Include="_uc\TreePhotoAlbum.ascx" />
     <Content Include="_fonts\fa-brands-400.woff2" />
     <Content Include="_fonts\fa-regular-400.woff2" />
     <Content Include="_fonts\fa-solid-900.woff2" />

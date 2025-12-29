@@ -1,53 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="detail.aspx.cs" Inherits="protectTreesV2.backstage.tree.detail" %>
+<%@ Register Src="~/_uc/TreePhotoAlbum.ascx" TagPrefix="uc" TagName="TreePhotoAlbum" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
-    <style>
-        .tree-cover-image img,
-        .tree-gallery-thumb img {
-            object-fit: cover;
-        }
-
-        .tree-cover-badge {
-            top: 12px;
-            left: 12px;
-        }
-
-        .tree-gallery-slider {
-            position: relative;
-        }
-
-        .tree-gallery-track {
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-behavior: smooth;
-        }
-
-        .tree-gallery-track-inner {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 0.75rem;
-            padding: 0.25rem 0;
-            margin: 0;
-        }
-
-        .tree-gallery-thumb {
-            flex: 0 0 160px;
-        }
-
-        .tree-gallery-thumb .ratio {
-            border: 1px solid #e9ecef;
-            border-radius: 0.5rem;
-        }
-
-        .tree-gallery-thumb .card {
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .tree-gallery-thumb .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
-        }
-    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
     樹籍管理 / 樹籍檢視
@@ -84,50 +38,7 @@
                                     <span class="text-muted small">點擊照片以燈箱檢視</span>
                                 </div>
                                 <div class="card-body">
-                                    <asp:Panel ID="pnlPhotoGallery" runat="server">
-                                        <div class="row g-3 align-items-start">
-                                            
-                                            <div class="col-lg-12">
-                                                <asp:Panel ID="pnlCoverPhoto" runat="server" CssClass="tree-cover-image">
-                                                    <div class="ratio ratio-4x3 rounded overflow-hidden position-relative bg-light mb-3">
-                                                        <a id="lnkCoverLightbox" runat="server" class="tree-lightbox d-block h-100 w-100">
-                                                            <asp:Image ID="imgCover" runat="server" CssClass="w-100 h-100" />
-                                                        </a>
-                                                    </div>
-                                                </asp:Panel>
-                                                
-                                            </div>
-                                            
-                                            <div class="col-lg-12">
-                                                <div class="tree-gallery-slider">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-gallery-nav="prev" aria-label="上一張">
-                                                            &lsaquo;
-                                                        </button>
-                                                        <div class="flex-grow-1 tree-gallery-track">
-                                                            <div id="treeGalleryTrack" class="tree-gallery-track-inner">
-                                                                <asp:Repeater ID="rptGallery" runat="server">
-                                                                    <ItemTemplate>
-                                                                        <div class="tree-gallery-thumb">
-                                                                            <a href='<%# Eval("FilePath") %>' class="tree-lightbox d-block" data-gallery="tree-photos" data-title='<%# BuildLightboxTitleFromData(Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttributeFromData(Container.DataItem) %>'>
-                                                                                <div class="ratio ratio-4x3 overflow-hidden bg-light">
-                                                                                    <img src='<%# Eval("FilePath") %>' class="w-100 h-100" alt='<%# BuildLightboxTitleFromData(Container.DataItem) %>' />
-                                                                                </div>
-                                                                            </a>
-                                                                        </div>
-                                                                    </ItemTemplate>
-                                                                </asp:Repeater>
-                                                            </div>
-                                                        </div>
-                                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-gallery-nav="next" aria-label="下一張">
-                                                            &rsaquo;
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </asp:Panel>
-                                    <asp:Label ID="lblNoPhotos" runat="server" Text="尚無照片" CssClass="text-muted" Visible="false" />
+                                    <uc:TreePhotoAlbum ID="treePhotoAlbum" runat="server" />
                                 </div>
                             </div>
                         </div>
@@ -360,28 +271,8 @@
                 });
             }
 
-            function initGallerySlider() {
-                var trackContainer = document.querySelector('.tree-gallery-track');
-                var track = document.getElementById('treeGalleryTrack');
-                if (!trackContainer || !track) {
-                    return;
-                }
-
-                var navButtons = document.querySelectorAll('[data-gallery-nav]');
-
-                navButtons.forEach(function (button) {
-                    button.onclick = function () {
-                        var scrollAmount = trackContainer.clientWidth * 0.8;
-                        var direction = button.getAttribute('data-gallery-nav');
-                        var delta = direction === 'next' ? scrollAmount : -scrollAmount;
-                        trackContainer.scrollBy({ left: delta, behavior: 'smooth' });
-                    };
-                });
-            }
-
             function initPageComponents() {
                 initLightbox();
-                initGallerySlider();
             }
 
             document.addEventListener('DOMContentLoaded', initPageComponents);
