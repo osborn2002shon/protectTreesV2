@@ -33,36 +33,36 @@ namespace protectTreesV2.backstage.tree
                 return;
             }
 
-            lblSystemTreeNo.Text = tree.SystemTreeNo;
-            lblAgencyTreeNo.Text = tree.AgencyTreeNo;
-            lblJurisdiction.Text = tree.AgencyJurisdictionCode;
-            lblCity.Text = tree.CityName;
-            lblArea.Text = tree.AreaName;
-            lblSpecies.Text = tree.SpeciesDisplayName;
-            lblStatus.Text = tree.StatusText;
-            lblEditStatus.Text = tree.EditStatusText;
-            lblSurveyDate.Text = tree.SurveyDate?.ToString("yyyy/MM/dd");
-            lblAnnouncementDate.Text = tree.AnnouncementDate?.ToString("yyyy/MM/dd");
-            lblManager.Text = tree.Manager;
-            lblManagerContact.Text = tree.ManagerContact;
-            lblSite.Text = tree.Site;
-            lblLandOwnership.Text = tree.LandOwnership;
-            lblLandOwnershipNote.Text = tree.LandOwnershipNote;
-            lblFacility.Text = tree.FacilityDescription;
-            lblTreeCount.Text = tree.TreeCount.ToString();
-            lblTreeHeight.Text = tree.TreeHeight?.ToString();
-            lblBreastHeightDiameter.Text = tree.BreastHeightDiameter?.ToString();
-            lblBreastHeightCircumference.Text = tree.BreastHeightCircumference?.ToString();
-            lblCanopyArea.Text = tree.CanopyProjectionArea?.ToString();
-            lblLatitude.Text = tree.Latitude?.ToString();
-            lblLongitude.Text = tree.Longitude?.ToString();
-            lblSurveyor.Text = tree.Surveyor;
-            lblEstimatedPlantingYear.Text = tree.EstimatedPlantingYear;
-            lblEstimatedAgeNote.Text = tree.EstimatedAgeNote;
-            lblGroupGrowthInfo.Text = tree.GroupGrowthInfo;
-            lblEpiphyteDescription.Text = tree.EpiphyteDescription;
-            lblParasiteDescription.Text = tree.ParasiteDescription;
-            lblClimbingPlantDescription.Text = tree.ClimbingPlantDescription;
+            lblSystemTreeNo.Text = DisplayOrDefault(tree.SystemTreeNo);
+            lblAgencyTreeNo.Text = DisplayOrDefault(tree.AgencyTreeNo);
+            lblJurisdiction.Text = DisplayOrDefault(tree.AgencyJurisdictionCode);
+            lblCity.Text = DisplayOrDefault(tree.CityName);
+            lblArea.Text = DisplayOrDefault(tree.AreaName);
+            lblSpecies.Text = DisplayOrDefault(tree.SpeciesDisplayName);
+            lblStatus.Text = DisplayOrDefault(tree.StatusText);
+            lblEditStatus.Text = DisplayOrDefault(tree.EditStatusText);
+            lblSurveyDate.Text = DisplayOrDefault(tree.SurveyDate);
+            lblAnnouncementDate.Text = DisplayOrDefault(tree.AnnouncementDate);
+            lblManager.Text = DisplayOrDefault(tree.Manager);
+            lblManagerContact.Text = DisplayOrDefault(tree.ManagerContact);
+            lblSite.Text = DisplayOrDefault(tree.Site);
+            lblLandOwnership.Text = DisplayOrDefault(tree.LandOwnership);
+            lblLandOwnershipNote.Text = DisplayOrDefault(tree.LandOwnershipNote);
+            lblFacility.Text = DisplayOrDefault(tree.FacilityDescription);
+            lblTreeCount.Text = DisplayOrDefault((int?)tree.TreeCount);
+            lblTreeHeight.Text = DisplayOrDefault(tree.TreeHeight);
+            lblBreastHeightDiameter.Text = DisplayOrDefault(tree.BreastHeightDiameter);
+            lblBreastHeightCircumference.Text = DisplayOrDefault(tree.BreastHeightCircumference);
+            lblCanopyArea.Text = DisplayOrDefault(tree.CanopyProjectionArea);
+            lblLatitude.Text = DisplayOrDefault(tree.Latitude);
+            lblLongitude.Text = DisplayOrDefault(tree.Longitude);
+            lblSurveyor.Text = DisplayOrDefault(tree.Surveyor);
+            lblEstimatedPlantingYear.Text = DisplayOrDefault(tree.EstimatedPlantingYear);
+            lblEstimatedAgeNote.Text = DisplayOrDefault(tree.EstimatedAgeNote);
+            lblGroupGrowthInfo.Text = DisplayOrDefault(tree.GroupGrowthInfo);
+            lblEpiphyteDescription.Text = DisplayOrDefault(tree.EpiphyteDescription);
+            lblParasiteDescription.Text = DisplayOrDefault(tree.ParasiteDescription);
+            lblClimbingPlantDescription.Text = DisplayOrDefault(tree.ClimbingPlantDescription);
             var criteriaLookup = TreeService.GetRecognitionCriteria()
                 .GroupBy(c => c.Code)
                 .ToDictionary(g => g.Key, g => g.First().Name);
@@ -72,26 +72,51 @@ namespace protectTreesV2.backstage.tree
                 .Where(name => !string.IsNullOrWhiteSpace(name))
                 .ToList();
 
+            string recognitionText = string.Empty;
             if (recognitionNames.Any())
             {
                 var htmlReadyNames = recognitionNames
                     .Select(name => Server.HtmlEncode(name).Replace("\n", "<br />"));
 
-                ltlRecognition.Text = string.Join("<br />", htmlReadyNames);
+                recognitionText = string.Join("<br />", htmlReadyNames);
             }
             else
             {
-                ltlRecognition.Text = Server.HtmlEncode(string.Join(",", tree.RecognitionCriteria ?? Enumerable.Empty<string>()));
+                recognitionText = Server.HtmlEncode(string.Join(",", tree.RecognitionCriteria ?? Enumerable.Empty<string>()));
             }
-            lblRecognitionNote.Text = tree.RecognitionNote;
-            lblCulturalHistory.Text = tree.CulturalHistoryIntro;
-            lblHealth.Text = tree.HealthCondition;
-            lblMemo.Text = tree.Memo;
+
+            ltlRecognition.Text = DisplayOrDefault(recognitionText);
+            lblRecognitionNote.Text = DisplayOrDefault(tree.RecognitionNote);
+            lblCulturalHistory.Text = DisplayOrDefault(tree.CulturalHistoryIntro);
+            lblHealth.Text = DisplayOrDefault(tree.HealthCondition);
+            lblMemo.Text = DisplayOrDefault(tree.Memo);
 
             var photos = TreeService.GetPhotos(treeId)?.ToList() ?? Enumerable.Empty<TreePhoto>().ToList();
             rptPhotos.DataSource = photos;
             rptPhotos.DataBind();
             lblNoPhotos.Visible = !photos.Any();
+
+            pnlAnnouncementSection.Visible = tree.Status == TreeStatus.已公告列管;
+        }
+
+        private string DisplayOrDefault(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "無資料" : value;
+        }
+
+        private string DisplayOrDefault(DateTime? value)
+        {
+            return value.HasValue ? value.Value.ToString("yyyy/MM/dd") : "無資料";
+        }
+
+        private string DisplayOrDefault(decimal? value)
+        {
+            return value.HasValue ? value.Value.ToString() : "無資料";
+        }
+
+        private string DisplayOrDefault(int? value)
+        {
+            return value.HasValue ? value.Value.ToString() : "無資料";
         }
     }
 }

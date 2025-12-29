@@ -142,17 +142,21 @@
                                                     <div class="text-muted">樹籍狀態</div>
                                                     <asp:Label ID="lblStatus" runat="server" CssClass="fw-semibold d-block" />
                                                 </div>
-                                                <div class="col">
-                                                    <div class="text-muted">公告日期</div>
-                                                    <asp:Label ID="lblAnnouncementDate" runat="server" CssClass="fw-semibold d-block" />
-                                                </div>
                                             </div>
-                                            <div class="row mb-3">
-                                                <div class="col">
-                                                    <div class="text-muted">受保護認定理由</div>
-                                                    <asp:Literal ID="ltlRecognition" runat="server" Mode="PassThrough" />
+                                            <asp:Panel ID="pnlAnnouncementSection" runat="server">
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        <div class="text-muted">公告日期</div>
+                                                        <asp:Label ID="lblAnnouncementDate" runat="server" CssClass="fw-semibold d-block" />
+                                                    </div>
                                                 </div>
-                                            </div>
+                                                <div class="row mb-3">
+                                                    <div class="col">
+                                                        <div class="text-muted">受保護認定理由</div>
+                                                        <asp:Literal ID="ltlRecognition" runat="server" Mode="PassThrough" />
+                                                    </div>
+                                                </div>
+                                            </asp:Panel>
                                             <div class="row mb-3">
                                                 <div class="col">
                                                     <div class="text-muted">認定理由備註說明</div>
