@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Web;
+using System.Web.UI.HtmlControls;
 using protectTreesV2.Base;
 using protectTreesV2.TreeCatalog;
 
@@ -92,11 +94,40 @@ namespace protectTreesV2.backstage.tree
             lblMemo.Text = DisplayOrDefault(tree.Memo);
 
             var photos = TreeService.GetPhotos(treeId)?.ToList() ?? Enumerable.Empty<TreePhoto>().ToList();
-            rptPhotos.DataSource = photos;
-            rptPhotos.DataBind();
-            lblNoPhotos.Visible = !photos.Any();
+            BindPhotoGallery(photos);
 
             pnlAnnouncementSection.Visible = tree.Status == TreeStatus.已公告列管;
+        }
+
+        private void BindPhotoGallery(System.Collections.Generic.List<TreePhoto> photos)
+        {
+            if (photos == null || !photos.Any())
+            {
+                pnlPhotoGallery.Visible = false;
+                lblNoPhotos.Visible = true;
+                return;
+            }
+
+            var coverPhoto = photos.FirstOrDefault(p => p.IsCover) ?? photos.FirstOrDefault();
+
+            if (coverPhoto != null)
+            {
+                imgCover.ImageUrl = coverPhoto.FilePath;
+                imgCover.AlternateText = BuildLightboxTitle(coverPhoto);
+                lblCoverCaption.Text = BuildPhotoCaption(coverPhoto);
+                lblCoverUploadTime.Text = $"上傳：{BuildUploadTimeDisplay(coverPhoto)}";
+
+                lnkCoverLightbox.HRef = coverPhoto.FilePath;
+                lnkCoverLightbox.Attributes["data-gallery"] = "tree-photos";
+                lnkCoverLightbox.Attributes["data-title"] = BuildLightboxTitle(coverPhoto);
+                lnkCoverLightbox.Attributes["data-description"] = BuildLightboxDescriptionAttribute(coverPhoto);
+            }
+
+            rptGallery.DataSource = photos;
+            rptGallery.DataBind();
+
+            pnlPhotoGallery.Visible = true;
+            lblNoPhotos.Visible = false;
         }
 
         private string DisplayOrDefault(string value)
@@ -117,6 +148,38 @@ namespace protectTreesV2.backstage.tree
         private string DisplayOrDefault(int? value)
         {
             return value.HasValue ? value.Value.ToString() : "無資料";
+        }
+
+        protected string BuildPhotoCaption(TreePhoto photo)
+        {
+            if (photo == null) return "未命名照片";
+            return string.IsNullOrWhiteSpace(photo.Caption) ? "未命名照片" : photo.Caption;
+        }
+
+        protected string BuildUploadTimeDisplay(TreePhoto photo)
+        {
+            if (photo == null || photo.InsertDateTime == default)
+            {
+                return "未知時間";
+            }
+
+            return photo.InsertDateTime.ToString("yyyy/MM/dd HH:mm");
+        }
+
+        protected string BuildLightboxTitle(TreePhoto photo)
+        {
+            if (photo == null) return string.Empty;
+            var caption = BuildPhotoCaption(photo);
+            return photo.IsCover ? $"{caption}（封面）" : caption;
+        }
+
+        protected string BuildLightboxDescriptionAttribute(TreePhoto photo)
+        {
+            if (photo == null) return string.Empty;
+            var caption = BuildPhotoCaption(photo);
+            var uploadTime = BuildUploadTimeDisplay(photo);
+            var description = $"{caption}｜上傳：{uploadTime}";
+            return HttpUtility.HtmlAttributeEncode(description);
         }
     }
 }
