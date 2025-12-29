@@ -114,8 +114,6 @@ namespace protectTreesV2.backstage.tree
             {
                 imgCover.ImageUrl = coverPhoto.FilePath;
                 imgCover.AlternateText = BuildLightboxTitle(coverPhoto);
-                lblCoverCaption.Text = BuildPhotoCaption(coverPhoto);
-                lblCoverUploadTime.Text = $"上傳：{BuildUploadTimeDisplay(coverPhoto)}";
 
                 lnkCoverLightbox.HRef = coverPhoto.FilePath;
                 lnkCoverLightbox.Attributes["data-gallery"] = "tree-photos";
@@ -123,7 +121,11 @@ namespace protectTreesV2.backstage.tree
                 lnkCoverLightbox.Attributes["data-description"] = BuildLightboxDescriptionAttribute(coverPhoto);
             }
 
-            rptGallery.DataSource = photos;
+            var galleryPhotos = photos
+                .Where(p => coverPhoto == null || p.PhotoID != coverPhoto.PhotoID)
+                .ToList();
+
+            rptGallery.DataSource = galleryPhotos;
             rptGallery.DataBind();
 
             pnlPhotoGallery.Visible = true;
