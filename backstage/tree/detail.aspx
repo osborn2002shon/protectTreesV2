@@ -79,17 +79,17 @@
                                                         <ItemTemplate>
                                                             <div class="col tree-gallery-thumb">
                                                                 <div class="card h-100 border-0 shadow-sm">
-                                                                    <a href='<%# Eval("FilePath") %>' class="tree-lightbox" data-gallery="tree-photos" data-title='<%# BuildLightboxTitle((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttribute((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %>'>
+                                                                    <a href='<%# Eval("FilePath") %>' class="tree-lightbox" data-gallery="tree-photos" data-title='<%# BuildLightboxTitleFromData(Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttributeFromData(Container.DataItem) %>'>
                                                                         <div class="ratio ratio-4x3 overflow-hidden rounded-top">
-                                                                            <img src='<%# Eval("FilePath") %>' class="w-100 h-100" alt='<%# BuildLightboxTitle((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %>' />
+                                                                            <img src='<%# Eval("FilePath") %>' class="w-100 h-100" alt='<%# BuildLightboxTitleFromData(Container.DataItem) %>' />
                                                                         </div>
                                                                     </a>
                                                                     <div class="p-2">
                                                                         <div class="d-flex align-items-center justify-content-between gap-2">
-                                                                            <span class="fw-semibold text-truncate"><%# BuildPhotoCaption((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %></span>
+                                                                            <span class="fw-semibold text-truncate"><%# BuildPhotoCaptionFromData(Container.DataItem) %></span>
                                                                             <asp:Label runat="server" Visible='<%# (bool)Eval("IsCover") %>' CssClass="badge bg-primary">封面</asp:Label>
                                                                         </div>
-                                                                        <div class="text-muted small">上傳：<%# BuildUploadTimeDisplay((protectTreesV2.TreeCatalog.TreePhoto)Container.DataItem) %></div>
+                                                                        <div class="text-muted small">上傳：<%# BuildUploadTimeDisplayFromData(Container.DataItem) %></div>
                                                                     </div>
                                                                 </div>
                                                             </div>
