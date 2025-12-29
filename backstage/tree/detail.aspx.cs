@@ -181,5 +181,25 @@ namespace protectTreesV2.backstage.tree
             var description = $"{caption}｜上傳：{uploadTime}";
             return HttpUtility.HtmlAttributeEncode(description);
         }
+
+        protected string BuildPhotoCaptionFromData(object dataItem)
+        {
+            return BuildPhotoCaption(dataItem as TreePhoto);
+        }
+
+        protected string BuildUploadTimeDisplayFromData(object dataItem)
+        {
+            return BuildUploadTimeDisplay(dataItem as TreePhoto);
+        }
+
+        protected string BuildLightboxTitleFromData(object dataItem)
+        {
+            return BuildLightboxTitle(dataItem as TreePhoto);
+        }
+
+        protected string BuildLightboxDescriptionAttributeFromData(object dataItem)
+        {
+            return BuildLightboxDescriptionAttribute(dataItem as TreePhoto);
+        }
     }
 }
