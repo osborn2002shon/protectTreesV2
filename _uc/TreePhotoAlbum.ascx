@@ -38,7 +38,7 @@
         filter: blur(0);
     }
 
-    .image-wrapper::before {
+    .image-wrapper::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -51,7 +51,8 @@
         pointer-events: none;
     }
 
-    .image-wrapper.is-loading::before {
+
+    .image-wrapper.is-loading::after {
         opacity: 1;
     }
 
