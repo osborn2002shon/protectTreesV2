@@ -154,15 +154,19 @@
 
             img.dataset.loaded = "true";
 
-            const handleComplete = function () { markLoaded(img); };
-            img.addEventListener('load', handleComplete, { once: true });
-            img.addEventListener('error', handleComplete, { once: true });
+            const initiateLoad = function () {
+                const handleComplete = function () { markLoaded(img); };
+                img.addEventListener('load', handleComplete, { once: true });
+                img.addEventListener('error', handleComplete, { once: true });
 
-            if (img.getAttribute('src') !== src) {
-                img.src = src;
-            } else {
-                markLoaded(img);
-            }
+                if (img.getAttribute('src') !== src) {
+                    img.src = src;
+                } else {
+                    markLoaded(img);
+                }
+            };
+
+            window.setTimeout(initiateLoad, 500);
         }
 
         if ('IntersectionObserver' in window) {
