@@ -10,6 +10,7 @@ namespace protectTreesV2._uc
 {
     public partial class TreePhotoAlbum : UserControl
     {
+        private const string TransparentPixel = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
         public IEnumerable<TreePhoto> Photos { get; private set; } = Enumerable.Empty<TreePhoto>();
 
         public void SetPhotos(IEnumerable<TreePhoto> photos)
@@ -32,9 +33,11 @@ namespace protectTreesV2._uc
 
             if (coverPhoto != null)
             {
-                imgCover.ImageUrl = coverPhoto.FilePath;
+                imgCover.ImageUrl = TransparentPixel;
                 imgCover.AlternateText = BuildLightboxTitle(coverPhoto);
-                imgCover.Attributes["loading"] = "eager";
+                imgCover.Attributes["loading"] = "lazy";
+                imgCover.Attributes["decoding"] = "async";
+                imgCover.Attributes["data-src"] = coverPhoto.FilePath;
 
                 lnkCoverLightbox.HRef = coverPhoto.FilePath;
                 lnkCoverLightbox.Attributes["data-gallery"] = "tree-photos";
