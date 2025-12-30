@@ -51,6 +51,7 @@
         pointer-events: none;
     }
 
+
     .image-wrapper.is-loading::after {
         opacity: 1;
     }
