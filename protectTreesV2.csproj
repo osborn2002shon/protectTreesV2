@@ -68,6 +68,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="backstage\health\list.aspx" />
+    <Content Include="backstage\health\main.aspx" />
+    <Content Include="backstage\health\upload.aspx" />
+    <Content Include="backstage\health\uploadFile.aspx" />
+    <Content Include="backstage\health\uploadPhoto.aspx" />
     <Content Include="backstage\Manage\Tree.aspx" />
     <Content Include="backstage\tree\detail.aspx" />
     <Content Include="backstage\tree\edit.aspx" />
@@ -109,6 +114,41 @@
     <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\TreeCatalog.cs" />
     <Compile Include="App_Code\User.cs" />
+    <Compile Include="backstage\health\list.aspx.cs">
+      <DependentUpon>list.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\health\list.aspx.designer.cs">
+      <DependentUpon>list.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\health\main.aspx.cs">
+      <DependentUpon>main.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\health\main.aspx.designer.cs">
+      <DependentUpon>main.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\health\upload.aspx.cs">
+      <DependentUpon>upload.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\health\upload.aspx.designer.cs">
+      <DependentUpon>upload.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\health\uploadFile.aspx.cs">
+      <DependentUpon>uploadFile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\health\uploadFile.aspx.designer.cs">
+      <DependentUpon>uploadFile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\health\uploadPhoto.aspx.cs">
+      <DependentUpon>uploadPhoto.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\health\uploadPhoto.aspx.designer.cs">
+      <DependentUpon>uploadPhoto.aspx</DependentUpon>
+    </Compile>
     <Compile Include="backstage\Manage\Tree.aspx.cs">
       <DependentUpon>Tree.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

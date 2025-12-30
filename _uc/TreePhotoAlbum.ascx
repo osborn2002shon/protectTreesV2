@@ -14,7 +14,8 @@
     }
 
     .tree-gallery-thumb {
-        min-width: 0;
+        min-width: 100px;
+
     }
 
     .tree-gallery-thumb .ratio {
