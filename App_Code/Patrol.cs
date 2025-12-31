@@ -10,6 +10,12 @@ namespace protectTreesV2.Patrol
 {
     public class Patrol
     {
+        public enum PatrolRecordStatus
+        {
+            草稿 = 0,
+            完稿 = 1
+        }
+
         [Serializable]
         public class PatrolMainQueryFilter
         {
@@ -78,6 +84,7 @@ namespace protectTreesV2.Patrol
             public int patrolID { get; set; }
             public DateTime? patrolDate { get; set; }
             public string patroller { get; set; }
+            public int? dataStatus { get; set; }
             public DateTime? lastUpdate { get; set; }
 
             public int treeID { get; set; }
@@ -88,6 +95,9 @@ namespace protectTreesV2.Patrol
             public string speciesName { get; set; }
             public string manager { get; set; }
             public int? areaID { get; set; }
+
+            public string dataStatusText
+                => dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.完稿 ? "完稿" : "草稿";
         }
 
         public List<PatrolMainQueryResult> GetPatrolMainList(PatrolMainQueryFilter filter, int currentUserId)
@@ -361,6 +371,7 @@ namespace protectTreesV2.Patrol
                     patrol.patrolID,
                     patrol.patrolDate,
                     patrol.patroller,
+                    patrol.dataStatus,
                     COALESCE(patrol.updateDateTime, patrol.insertDateTime) AS lastUpdate,
 
                     record.treeID,
@@ -448,7 +459,7 @@ namespace protectTreesV2.Patrol
             }
             else
             {
-                if (sortField == "patrolDate" || sortField == "patroller" || sortField == "lastUpdate")
+                if (sortField == "patrolDate" || sortField == "patroller" || sortField == "lastUpdate" || sortField == "dataStatus")
                 {
                     sortField = "patrol." + sortField;
                 }
@@ -471,6 +482,7 @@ namespace protectTreesV2.Patrol
                         patrolID = GetNullableInt(row, "patrolID") ?? 0,
                         patrolDate = GetNullableDateTime(row, "patrolDate"),
                         patroller = GetString(row, "patroller"),
+                        dataStatus = GetNullableInt(row, "dataStatus"),
                         lastUpdate = GetNullableDateTime(row, "lastUpdate"),
 
                         treeID = GetNullableInt(row, "treeID") ?? 0,
