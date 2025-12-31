@@ -280,7 +280,7 @@ namespace protectTreesV2.backstage.patrol
                         CreateCell(row, 5, item.speciesName);
                     }
                 }
-
+                /*
                 ISheet sheetPatrol = workbook.GetSheet("巡查紀錄");
                 if (sheetPatrol != null)
                 {
@@ -297,7 +297,7 @@ namespace protectTreesV2.backstage.patrol
                         CreateCell(row, 3, item.patroller);
                     }
                 }
-
+                */
                 using (MemoryStream ms = new MemoryStream())
                 {
                     workbook.Write(ms);

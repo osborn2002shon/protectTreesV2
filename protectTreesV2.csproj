@@ -178,7 +178,7 @@
     <Compile Include="App_Code\DataAccess_MS_SQL.cs" />
     <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />
-    <Compile Include="App_Code\Patrol\Patrol.cs" />
+    <Compile Include="App_Code\Patrol.cs" />
     <Compile Include="backstage\patrol\main.aspx.cs">
       <DependentUpon>main.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

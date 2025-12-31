@@ -164,8 +164,8 @@
     <div class="table-responsive gv-tb mt-3">
         <asp:GridView ID="GridView_selectedList" runat="server" CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" OnRowCommand="GridView_selectedList_RowCommand">
             <Columns>
-                <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" />
-                <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" />
+                <asp:BoundField HtmlEncode="false" DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" />
+                <asp:BoundField HtmlEncode="false" DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" />
                 <asp:BoundField DataField="cityName" HeaderText="縣市" />
                 <asp:BoundField DataField="areaName" HeaderText="鄉鎮" />
                 <asp:BoundField DataField="speciesName" HeaderText="樹種" />
