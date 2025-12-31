@@ -109,9 +109,9 @@
                 <asp:BoundField DataField="patrolDate" HeaderText="巡查日期" SortExpression="patrolDate" DataFormatString="{0:yyyy/MM/dd}" />
                 <asp:BoundField DataField="patroller" HeaderText="巡查人" SortExpression="patroller" />
 
-                <asp:TemplateField HeaderText="公共安全" SortExpression="hasPublicSafetyRisk">
+                <asp:TemplateField HeaderText="巡查紀錄<br/>狀態" SortExpression="dataStatus">
                     <ItemTemplate>
-                        <%# Eval("hasPublicSafetyRisk") == null ? "--" : ((bool)Eval("hasPublicSafetyRisk") ? "有風險" : "無風險") %>
+                        <%# Eval("patrolRecordStatusText") %>
                         <%# Eval("lastUpdate") == null ? "" : "<div class='tbMiniInfo'>" + Eval("lastUpdate", "{0:yyyy/MM/dd HH:mm}") + "</div>" %>
                     </ItemTemplate>
                 </asp:TemplateField>

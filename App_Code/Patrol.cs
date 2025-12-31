@@ -32,6 +32,7 @@ namespace protectTreesV2.Patrol
         {
             public int treeID { get; set; }
             public int? patrolID { get; set; }
+            public int? dataStatus { get; set; }
             public string systemTreeNo { get; set; }
             public string agencyTreeNo { get; set; }
             public string agencyJurisdictionCode { get; set; }
@@ -47,6 +48,11 @@ namespace protectTreesV2.Patrol
             public bool? hasPublicSafetyRisk { get; set; }
             public DateTime? lastUpdate { get; set; }
             public bool isAdded { get; set; }
+
+            public string patrolRecordStatusText =>
+                !patrolID.HasValue || patrolID.Value == 0
+                    ? "--"
+                    : (dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.完稿 ? "完稿" : "草稿");
         }
 
         public class PatrolBatchSettingResult
@@ -118,6 +124,7 @@ namespace protectTreesV2.Patrol
                     latest_patrol.patrolID,
                     latest_patrol.patrolDate,
                     latest_patrol.patroller,
+                    latest_patrol.dataStatus,
                     latest_patrol.hasPublicSafetyRisk,
                     COALESCE(latest_patrol.updateDateTime, latest_patrol.insertDateTime) AS lastUpdate,
 
@@ -204,7 +211,7 @@ namespace protectTreesV2.Patrol
             else
             {
                 string sortField = filter.sortExpression;
-                if (sortField == "patrolDate" || sortField == "patroller" || sortField == "hasPublicSafetyRisk")
+                if (sortField == "patrolDate" || sortField == "patroller" || sortField == "hasPublicSafetyRisk" || sortField == "dataStatus")
                 {
                     sortField = "latest_patrol." + sortField;
                 }
@@ -236,6 +243,7 @@ namespace protectTreesV2.Patrol
                         patrolID = GetNullableInt(row, "patrolID"),
                         patrolDate = GetNullableDateTime(row, "patrolDate"),
                         patroller = GetString(row, "patroller"),
+                        dataStatus = GetNullableInt(row, "dataStatus"),
                         hasPublicSafetyRisk = GetNullableBoolean(row, "hasPublicSafetyRisk"),
                         lastUpdate = GetNullableDateTime(row, "lastUpdate"),
                         isAdded = GetNullableInt(row, "isAdded") == 1
