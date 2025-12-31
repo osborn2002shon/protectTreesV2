@@ -136,6 +136,7 @@
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
+    <Content Include="backstage\patrol\main.aspx" />
     <Content Include="backstage\health\upload.aspx" />
     <Content Include="backstage\health\uploadFile.aspx" />
     <Content Include="backstage\health\uploadPhoto.aspx" />
@@ -177,6 +178,14 @@
     <Compile Include="App_Code\DataAccess_MS_SQL.cs" />
     <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />
+    <Compile Include="App_Code\Patrol\Patrol.cs" />
+    <Compile Include="backstage\patrol\main.aspx.cs">
+      <DependentUpon>main.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\patrol\main.aspx.designer.cs">
+      <DependentUpon>main.aspx</DependentUpon>
+    </Compile>
     <Compile Include="App_Code\Log.cs" />
     <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\TreeCatalog.cs" />
