@@ -21,15 +21,15 @@
                     <asp:Label ID="lblTopSystemTreeNo" runat="server" CssClass="text-muted" />
                 </div>
             </div>
-            <ul class="nav nav-tabs" id="treeEditTabs" role="tablist">
+            <ul class="nav nav-tabs mb-4" id="treeEditTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="tab-basic" data-bs-toggle="tab" data-bs-target="#pane-basic" type="button" role="tab" aria-controls="pane-basic" aria-selected="true">基本資料</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-survey" data-bs-toggle="tab" data-bs-target="#pane-survey" type="button" role="tab" aria-controls="pane-survey" aria-selected="false">調查資料</button>
+                    <button class="nav-link text-dark" id="tab-survey" data-bs-toggle="tab" data-bs-target="#pane-survey" type="button" role="tab" aria-controls="pane-survey" aria-selected="false">調查資料</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="tab-photos" data-bs-toggle="tab" data-bs-target="#pane-photos" type="button" role="tab" aria-controls="pane-photos" aria-selected="false">樹木照片</button>
+                    <button class="nav-link text-dark" id="tab-photos" data-bs-toggle="tab" data-bs-target="#pane-photos" type="button" role="tab" aria-controls="pane-photos" aria-selected="false">樹木照片</button>
                 </li>
             </ul>
             <div class="tab-content mt-3" id="treeEditTabContent">

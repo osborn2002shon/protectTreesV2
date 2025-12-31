@@ -14,18 +14,18 @@
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
             <asp:HiddenField ID="hfTreeID" runat="server" />
-            <ul class="nav nav-tabs mb-3" id="treeDetailTabs" role="tablist">
+            <ul class="nav nav-tabs mb-4" id="treeDetailTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <a class="nav-link active" aria-current="page" href="#">樹籍資料</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">健檢紀錄</a>
+                    <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">健檢紀錄</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">巡查紀錄</a>
+                    <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">巡查紀錄</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">養護紀錄</a>
+                    <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">養護紀錄</a>
                 </li>
             </ul>
             <div class="tab-content" id="treeDetailTabContent">
