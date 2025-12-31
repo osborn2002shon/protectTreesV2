@@ -1,0 +1,323 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using protectTreesV2.Base;
+using protectTreesV2.TreeCatalog;
+using static protectTreesV2.Base.DataRowHelper;
+
+namespace protectTreesV2.Patrol
+{
+    public class Patrol
+    {
+        [Serializable]
+        public class PatrolMainQueryFilter
+        {
+            public int? cityID { get; set; }
+            public int? areaID { get; set; }
+            public int? speciesID { get; set; }
+            public string keyword { get; set; }
+            public string queryOption { get; set; } = "NoRecord180"; // All / NoRecord180 / Never
+            public string sortExpression { get; set; }
+            public string sortDirection { get; set; }
+        }
+
+        public class PatrolMainQueryResult
+        {
+            public int treeID { get; set; }
+            public int? patrolID { get; set; }
+            public string systemTreeNo { get; set; }
+            public string agencyTreeNo { get; set; }
+            public string agencyJurisdictionCode { get; set; }
+            public string cityName { get; set; }
+            public string areaName { get; set; }
+            public string speciesName { get; set; }
+            public string manager { get; set; }
+            public TreeStatus? treeStatus { get; set; }
+            public string treeStatusText => treeStatus.HasValue ? TreeService.GetStatusText(treeStatus.Value) : string.Empty;
+
+            public DateTime? patrolDate { get; set; }
+            public string patroller { get; set; }
+            public bool? hasPublicSafetyRisk { get; set; }
+            public DateTime? lastUpdate { get; set; }
+            public bool isAdded { get; set; }
+        }
+
+        public class PatrolBatchSettingResult
+        {
+            public int settingID { get; set; }
+            public DateTime insertDateTime { get; set; }
+            public int treeID { get; set; }
+            public string systemTreeNo { get; set; }
+            public string agencyTreeNo { get; set; }
+            public string agencyJurisdictionCode { get; set; }
+            public string cityName { get; set; }
+            public string areaName { get; set; }
+            public string speciesName { get; set; }
+            public string manager { get; set; }
+            public DateTime? patrolDate { get; set; }
+            public string patroller { get; set; }
+        }
+
+        public List<PatrolMainQueryResult> GetPatrolMainList(PatrolMainQueryFilter filter, int currentUserId)
+        {
+            var parameters = new List<SqlParameter>();
+            var whereClauses = new List<string>();
+
+            string baseSql = @"
+                SELECT 
+                    record.treeID, record.systemTreeNo, record.agencyTreeNo, record.agencyJurisdictionCode,
+                    record.manager, record.treeStatus,
+
+                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
+                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+
+                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+
+                    latest_patrol.patrolID,
+                    latest_patrol.patrolDate,
+                    latest_patrol.patroller,
+                    latest_patrol.hasPublicSafetyRisk,
+                    COALESCE(latest_patrol.updateDateTime, latest_patrol.insertDateTime) AS lastUpdate,
+
+                    CASE WHEN batch.treeID IS NOT NULL THEN 1 ELSE 0 END AS isAdded
+
+                FROM Tree_Record record
+
+                OUTER APPLY (
+                    SELECT TOP 1 p.*
+                    FROM Tree_PatrolRecord p
+                    WHERE p.treeID = record.treeID AND p.removeDateTime IS NULL
+                    ORDER BY p.patrolDate DESC, p.patrolID DESC
+                ) latest_patrol
+
+                OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = record.cityID) cityInfo
+                LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = record.areaID
+                LEFT JOIN Tree_Species species ON species.speciesID = record.speciesID
+                LEFT JOIN Tree_PatrolBatchSetting batch ON record.treeID = batch.treeID AND batch.accountID = @currentUserId
+            ";
+
+            parameters.Add(new SqlParameter("@currentUserId", currentUserId));
+
+            whereClauses.Add("record.removeDateTime IS NULL");
+            whereClauses.Add("record.editStatus = 1");
+
+            if (filter != null)
+            {
+                if (filter.cityID.HasValue)
+                {
+                    whereClauses.Add("record.cityID = @cityID");
+                    parameters.Add(new SqlParameter("@cityID", filter.cityID));
+                }
+
+                if (filter.areaID.HasValue)
+                {
+                    whereClauses.Add("record.areaID = @areaID");
+                    parameters.Add(new SqlParameter("@areaID", filter.areaID));
+                }
+
+                if (filter.speciesID.HasValue)
+                {
+                    whereClauses.Add("record.speciesID = @speciesID");
+                    parameters.Add(new SqlParameter("@speciesID", filter.speciesID));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.keyword))
+                {
+                    string kwSql = @"(
+                        record.systemTreeNo LIKE @kw OR
+                        record.agencyTreeNo LIKE @kw OR
+                        record.agencyJurisdictionCode LIKE @kw OR
+                        record.manager LIKE @kw OR
+                        latest_patrol.patroller LIKE @kw
+                    )";
+                    whereClauses.Add(kwSql);
+                    parameters.Add(new SqlParameter("@kw", "%" + filter.keyword.Trim() + "%"));
+                }
+
+                switch (filter.queryOption)
+                {
+                    case "Never":
+                        whereClauses.Add("latest_patrol.patrolID IS NULL");
+                        break;
+                    case "NoRecord180":
+                        whereClauses.Add("(latest_patrol.patrolDate IS NULL OR latest_patrol.patrolDate < DATEADD(day, -180, CAST(GETDATE() AS date)))");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            string finalSql = $"{baseSql} WHERE {string.Join(" AND ", whereClauses)}";
+
+            string dir = (filter?.sortDirection == "DESC") ? "DESC" : "ASC";
+            string sortSql;
+            if (string.IsNullOrEmpty(filter?.sortExpression) || filter.sortExpression == "DefaultSort")
+            {
+                sortSql = "ORDER BY (CASE WHEN latest_patrol.patrolID IS NULL THEN 0 ELSE 1 END) ASC, latest_patrol.patrolDate DESC, record.systemTreeNo ASC";
+            }
+            else if (filter.sortExpression == "areaID")
+            {
+                sortSql = $"ORDER BY record.areaID {dir}";
+            }
+            else
+            {
+                string sortField = filter.sortExpression;
+                if (sortField == "patrolDate" || sortField == "patroller" || sortField == "hasPublicSafetyRisk")
+                {
+                    sortField = "latest_patrol." + sortField;
+                }
+                else if (!sortField.Contains("."))
+                {
+                    sortField = "record." + sortField;
+                }
+                sortSql = $"ORDER BY {sortField} {dir}";
+            }
+
+            finalSql += " " + sortSql;
+
+            var result = new List<PatrolMainQueryResult>();
+            using (var da = new DataAccess.MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(finalSql, parameters.ToArray());
+                foreach (DataRow row in dt.Rows)
+                {
+                    var item = new PatrolMainQueryResult
+                    {
+                        treeID = GetNullableInt(row, "treeID") ?? 0,
+                        systemTreeNo = GetString(row, "systemTreeNo"),
+                        agencyTreeNo = GetString(row, "agencyTreeNo"),
+                        agencyJurisdictionCode = GetString(row, "agencyJurisdictionCode"),
+                        cityName = GetString(row, "cityName"),
+                        areaName = GetString(row, "areaName"),
+                        speciesName = GetString(row, "speciesName"),
+                        manager = GetString(row, "manager"),
+                        patrolID = GetNullableInt(row, "patrolID"),
+                        patrolDate = GetNullableDateTime(row, "patrolDate"),
+                        patroller = GetString(row, "patroller"),
+                        hasPublicSafetyRisk = GetNullableBoolean(row, "hasPublicSafetyRisk"),
+                        lastUpdate = GetNullableDateTime(row, "lastUpdate"),
+                        isAdded = GetNullableInt(row, "isAdded") == 1
+                    };
+
+                    string statusText = GetString(row, "treeStatus");
+                    if (!string.IsNullOrEmpty(statusText) && Enum.TryParse(statusText, out TreeStatus parsedStatus))
+                    {
+                        item.treeStatus = parsedStatus;
+                    }
+
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        public List<PatrolBatchSettingResult> GetPatrolBatchSetting(int accountId)
+        {
+            string sql = @"
+                SELECT s.settingID, s.insertDateTime,
+                       record.treeID,
+                       record.systemTreeNo,
+                       record.agencyTreeNo,
+                       record.agencyJurisdictionCode,
+
+                       COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
+                       COALESCE(areaInfo.area, record.areaName) AS areaName,
+                       COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                       record.manager,
+
+                       latest_patrol.patrolDate,
+                       latest_patrol.patroller
+
+                FROM Tree_PatrolBatchSetting s
+                JOIN Tree_Record record ON s.treeID = record.treeID
+
+                OUTER APPLY (
+                    SELECT TOP 1 p.patrolDate, p.patroller
+                    FROM Tree_PatrolRecord p
+                    WHERE p.treeID = record.treeID AND p.removeDateTime IS NULL
+                    ORDER BY p.patrolDate DESC, p.patrolID DESC
+                ) latest_patrol
+
+                OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = record.cityID) cityInfo
+                LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = record.areaID
+                LEFT JOIN Tree_Species species ON species.speciesID = record.speciesID
+
+                WHERE s.accountID = @accountID
+                ORDER BY s.insertDateTime DESC
+            ";
+
+            var result = new List<PatrolBatchSettingResult>();
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@accountID", accountId));
+                foreach (DataRow row in dt.Rows)
+                {
+                    var item = new PatrolBatchSettingResult
+                    {
+                        settingID = GetNullableInt(row, "settingID") ?? 0,
+                        insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
+                        treeID = GetNullableInt(row, "treeID") ?? 0,
+                        systemTreeNo = GetString(row, "systemTreeNo"),
+                        agencyTreeNo = GetString(row, "agencyTreeNo"),
+                        agencyJurisdictionCode = GetString(row, "agencyJurisdictionCode"),
+                        cityName = GetString(row, "cityName"),
+                        areaName = GetString(row, "areaName"),
+                        speciesName = GetString(row, "speciesName"),
+                        manager = GetString(row, "manager"),
+                        patrolDate = GetNullableDateTime(row, "patrolDate"),
+                        patroller = GetString(row, "patroller")
+                    };
+
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        public void AddToPatrolBatchSetting(int accountId, int treeId)
+        {
+            const string sql = @"
+            IF NOT EXISTS (SELECT 1 FROM Tree_PatrolBatchSetting WHERE accountID = @accountID AND treeID = @treeID)
+            BEGIN
+                INSERT INTO Tree_PatrolBatchSetting (accountID, treeID)
+                VALUES (@accountID, @treeID)
+            END
+        ";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@accountID", accountId),
+                    new SqlParameter("@treeID", treeId));
+            }
+        }
+
+        public void RemoveFromPatrolBatchSetting(int accountId, int? treeId = null)
+        {
+            string sql;
+            var parameters = new List<SqlParameter>
+            {
+                new SqlParameter("@accountID", accountId)
+            };
+
+            if (treeId.HasValue)
+            {
+                sql = "DELETE FROM Tree_PatrolBatchSetting WHERE accountID = @accountID AND treeID = @treeID";
+                parameters.Add(new SqlParameter("@treeID", treeId.Value));
+            }
+            else
+            {
+                sql = "DELETE FROM Tree_PatrolBatchSetting WHERE accountID = @accountID";
+            }
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql, parameters.ToArray());
+            }
+        }
+    }
+}

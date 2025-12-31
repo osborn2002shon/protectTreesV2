@@ -187,6 +187,86 @@ REFERENCES [dbo].[Tree_HealthRecord] ([healthID])
 GO
 ALTER TABLE [dbo].[Tree_HealthAttachment] CHECK CONSTRAINT [FK_Tree_HealthAttachment_Tree_HealthRecord]
 GO
+/****** Object:  Table [dbo].[Tree_PatrolRecord]    Script Date: 2025/8/19 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tree_PatrolRecord](
+        [patrolID] [int] IDENTITY(1,1) NOT NULL, -- 巡查紀錄主鍵
+        [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
+        [patrolDate] [date] NOT NULL, -- 巡查日期
+        [patroller] [nvarchar](100) NULL, -- 巡查人姓名
+        [memo] [nvarchar](max) NULL, -- 巡查備註
+        [hasPublicSafetyRisk] [bit] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_hasPublicSafetyRisk] DEFAULT ((0)), -- 是否有危害公共安全風險或緊急狀況
+        [sourceUnit] [nvarchar](200) NULL, -- 資料來源單位名稱
+        [sourceUnitID] [int] NULL, -- 資料來源單位代碼
+        [sourceDataID] [int] NULL, -- 資料來源ID
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [updateAccountID] [int] NULL, -- 最後更新者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
+        [removeDateTime] [datetime] NULL, -- 移除時間
+ CONSTRAINT [PK_Tree_PatrolRecord] PRIMARY KEY CLUSTERED
+(
+        [patrolID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Tree_PatrolRecord]  WITH CHECK ADD  CONSTRAINT [FK_Tree_PatrolRecord_Tree_Record] FOREIGN KEY([treeID])
+REFERENCES [dbo].[Tree_Record] ([treeID])
+GO
+ALTER TABLE [dbo].[Tree_PatrolRecord] CHECK CONSTRAINT [FK_Tree_PatrolRecord_Tree_Record]
+GO
+/****** Object:  Table [dbo].[Tree_PatrolPhoto]    Script Date: 2025/8/19 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tree_PatrolPhoto](
+        [photoID] [int] IDENTITY(1,1) NOT NULL, -- 照片主鍵編號
+        [patrolID] [int] NOT NULL, -- 巡查紀錄主鍵
+        [fileName] [nvarchar](260) NOT NULL, -- 檔案名稱
+        [filePath] [nvarchar](500) NOT NULL, -- 檔案儲存路徑
+        [fileSize] [int] NULL, -- 檔案大小(位元組)
+        [caption] [nvarchar](200) NULL, -- 照片或附件說明文字
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_PatrolPhoto_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [removeDateTime] [datetime] NULL, -- 移除時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
+ CONSTRAINT [PK_Tree_PatrolPhoto] PRIMARY KEY CLUSTERED
+(
+        [photoID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Tree_PatrolPhoto]  WITH CHECK ADD  CONSTRAINT [FK_Tree_PatrolPhoto_Tree_PatrolRecord] FOREIGN KEY([patrolID])
+REFERENCES [dbo].[Tree_PatrolRecord] ([patrolID])
+GO
+ALTER TABLE [dbo].[Tree_PatrolPhoto] CHECK CONSTRAINT [FK_Tree_PatrolPhoto_Tree_PatrolRecord]
+GO
+/****** Object:  Table [dbo].[Tree_PatrolBatchSetting]    Script Date: 2025/8/19 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tree_PatrolBatchSetting](
+        [settingID] [int] IDENTITY(1,1) NOT NULL, -- 暫存設定主鍵
+        [accountID] [int] NOT NULL, -- 使用者帳號ID
+        [treeID] [int] NOT NULL, -- 樹木基本資料編號
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_PatrolBatchSetting_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+ CONSTRAINT [PK_Tree_PatrolBatchSetting] PRIMARY KEY CLUSTERED
+(
+        [settingID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Tree_PatrolBatchSetting]  WITH CHECK ADD  CONSTRAINT [FK_Tree_PatrolBatchSetting_Tree_Record] FOREIGN KEY([treeID])
+REFERENCES [dbo].[Tree_Record] ([treeID])
+GO
+ALTER TABLE [dbo].[Tree_PatrolBatchSetting] CHECK CONSTRAINT [FK_Tree_PatrolBatchSetting_Tree_Record]
+GO
 /****** Object:  Table [dbo].[System_Menu]    Script Date: 2025/8/19 下午 07:16:49 ******/
 SET ANSI_NULLS ON
 GO
