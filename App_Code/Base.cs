@@ -151,20 +151,10 @@ namespace protectTreesV2.Base
 
     public static class DropdownBinder
     {
-        public static void Bind_DropDownList_LandType(ref DropDownList dropdownlist, bool bindSpecies = false)
+        public static void Bind_DropDownList_LandType(ref DropDownList dropdownlist)
         {
             dropdownlist.Items.Clear();
             dropdownlist.Items.Add(new ListItem("請選擇", string.Empty));
-
-            if (bindSpecies)
-            {
-                foreach (var species in TreeService.GetSpecies())
-                {
-                    dropdownlist.Items.Add(new ListItem(species.DisplayName, species.SpeciesID.ToString()));
-                }
-
-                return;
-            }
 
             dropdownlist.Items.Add(new ListItem("國有"));
             dropdownlist.Items.Add(new ListItem("公有"));
@@ -175,7 +165,15 @@ namespace protectTreesV2.Base
 
         public static void Bind_DropDownList_Species(ref DropDownList dropdownlist)
         {
-            Bind_DropDownList_LandType(ref dropdownlist, true);
+            dropdownlist.Items.Clear();
+            dropdownlist.Items.Add(new ListItem("請選擇", string.Empty));
+
+            foreach (var species in TreeService.GetSpecies())
+            {
+                dropdownlist.Items.Add(new ListItem(species.DisplayName, species.SpeciesID.ToString()));
+            }
+
+            return;
         }
     }
 }

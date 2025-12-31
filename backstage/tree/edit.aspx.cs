@@ -63,7 +63,7 @@ namespace protectTreesV2.backstage.tree
                 ddlStatus.Items.Add(new ListItem(TreeService.GetStatusText(status), ((int)status).ToString()));
             }
 
-            DropdownBinder.Bind_DropDownList_LandType(ref ddlSpecies, true);
+            DropdownBinder.Bind_DropDownList_Species(ref ddlSpecies);
             DropdownBinder.Bind_DropDownList_LandType(ref ddlLandOwnership);
 
             cblRecognition.Items.Clear();
