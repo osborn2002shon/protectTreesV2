@@ -197,6 +197,7 @@ CREATE TABLE [dbo].[Tree_PatrolRecord](
         [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
         [patrolDate] [date] NOT NULL, -- 巡查日期
         [patroller] [nvarchar](100) NULL, -- 巡查人姓名
+        [dataStatus] [tinyint] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_dataStatus] DEFAULT ((0)), -- 資料狀態代碼 (0=草稿,1=完稿)
         [memo] [nvarchar](max) NULL, -- 巡查備註
         [hasPublicSafetyRisk] [bit] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_hasPublicSafetyRisk] DEFAULT ((0)), -- 是否有危害公共安全風險或緊急狀況
         [sourceUnit] [nvarchar](200) NULL, -- 資料來源單位名稱

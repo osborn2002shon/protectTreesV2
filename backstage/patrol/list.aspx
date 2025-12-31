@@ -119,10 +119,12 @@
                 <%-- 7. 巡查人 --%>
                 <asp:BoundField DataField="patroller" HeaderText="巡查人" SortExpression="patroller" />
 
-                <%-- 8. 最後更新時間 --%>
-                <asp:TemplateField HeaderText="最後更新" SortExpression="lastUpdate">
+                <%-- 8. 巡查紀錄狀態 (草稿/完稿) + 最後更新時間 --%>
+                <asp:TemplateField HeaderText="紀錄狀態" SortExpression="dataStatus">
                     <ItemTemplate>
-                        <%# Eval("lastUpdate") == null ? "--" : Eval("lastUpdate", "{0:yyyy/MM/dd HH:mm}") %>
+                        <%# Eval("dataStatusText") %>
+                        <%# Eval("lastUpdate") == null ? "" :
+                            "<div class='tbMiniInfo'>" + Eval("lastUpdate", "{0:yyyy/MM/dd HH:mm}") + "</div>" %>
                     </ItemTemplate>
                 </asp:TemplateField>
 
