@@ -21,139 +21,217 @@ namespace protectTreesV2.Health
 
         public class TreeHealthRecord
         {
-            public int HealthID { get; set; }
-            public int TreeID { get; set; }
-            public string SystemTreeNo { get; set; }
-            public string AgencyTreeNo { get; set; }
-            public string CityName { get; set; }
-            public string AreaName { get; set; }
-            public string SpeciesName { get; set; }
-            public DateTime? SurveyDate { get; set; }
-            public string Surveyor { get; set; }
-            public HealthRecordStatus DataStatus { get; set; }
-            public string Memo { get; set; }
-            public byte? TreeSignStatus { get; set; }
-            public decimal? Latitude { get; set; }
-            public decimal? Longitude { get; set; }
-            public decimal? TreeHeight { get; set; }
-            public decimal? CanopyArea { get; set; }
-            public decimal? Girth100 { get; set; }
-            public decimal? Diameter100 { get; set; }
-            public decimal? Girth130 { get; set; }
-            public decimal? Diameter130 { get; set; }
-            public string MeasureNote { get; set; }
-            public bool? MajorDiseaseBrownRoot { get; set; }
-            public bool? MajorDiseaseGanoderma { get; set; }
-            public bool? MajorDiseaseWoodDecayFungus { get; set; }
-            public bool? MajorDiseaseCanker { get; set; }
-            public bool? MajorDiseaseOther { get; set; }
-            public string MajorDiseaseOtherNote { get; set; }
-            public bool? MajorPestRootTunnel { get; set; }
-            public bool? MajorPestRootChew { get; set; }
-            public bool? MajorPestRootLive { get; set; }
-            public bool? MajorPestBaseTunnel { get; set; }
-            public bool? MajorPestBaseChew { get; set; }
-            public bool? MajorPestBaseLive { get; set; }
-            public bool? MajorPestTrunkTunnel { get; set; }
-            public bool? MajorPestTrunkChew { get; set; }
-            public bool? MajorPestTrunkLive { get; set; }
-            public bool? MajorPestBranchTunnel { get; set; }
-            public bool? MajorPestBranchChew { get; set; }
-            public bool? MajorPestBranchLive { get; set; }
-            public bool? MajorPestCrownTunnel { get; set; }
-            public bool? MajorPestCrownChew { get; set; }
-            public bool? MajorPestCrownLive { get; set; }
-            public bool? MajorPestOtherTunnel { get; set; }
-            public bool? MajorPestOtherChew { get; set; }
-            public bool? MajorPestOtherLive { get; set; }
-            public string GeneralPestRoot { get; set; }
-            public string GeneralPestBase { get; set; }
-            public string GeneralPestTrunk { get; set; }
-            public string GeneralPestBranch { get; set; }
-            public string GeneralPestCrown { get; set; }
-            public string GeneralPestOther { get; set; }
-            public string GeneralDiseaseRoot { get; set; }
-            public string GeneralDiseaseBase { get; set; }
-            public string GeneralDiseaseTrunk { get; set; }
-            public string GeneralDiseaseBranch { get; set; }
-            public string GeneralDiseaseCrown { get; set; }
-            public string GeneralDiseaseOther { get; set; }
-            public string PestOtherNote { get; set; }
-            public decimal? RootDecayPercent { get; set; }
-            public decimal? RootCavityMaxDiameter { get; set; }
-            public decimal? RootWoundMaxDiameter { get; set; }
-            public bool? RootMechanicalDamage { get; set; }
-            public bool? RootMowingInjury { get; set; }
-            public bool? RootInjury { get; set; }
-            public bool? RootGirdling { get; set; }
-            public string RootOtherNote { get; set; }
-            public decimal? BaseDecayPercent { get; set; }
-            public decimal? BaseCavityMaxDiameter { get; set; }
-            public decimal? BaseWoundMaxDiameter { get; set; }
-            public bool? BaseMechanicalDamage { get; set; }
-            public bool? BaseMowingInjury { get; set; }
-            public string BaseOtherNote { get; set; }
-            public decimal? TrunkDecayPercent { get; set; }
-            public decimal? TrunkCavityMaxDiameter { get; set; }
-            public decimal? TrunkWoundMaxDiameter { get; set; }
-            public bool? TrunkMechanicalDamage { get; set; }
-            public bool? TrunkIncludedBark { get; set; }
-            public string TrunkOtherNote { get; set; }
-            public decimal? BranchDecayPercent { get; set; }
-            public decimal? BranchCavityMaxDiameter { get; set; }
-            public decimal? BranchWoundMaxDiameter { get; set; }
-            public bool? BranchMechanicalDamage { get; set; }
-            public bool? BranchIncludedBark { get; set; }
-            public bool? BranchDrooping { get; set; }
-            public string BranchOtherNote { get; set; }
-            public decimal? CrownLeafCoveragePercent { get; set; }
-            public decimal? CrownDeadBranchPercent { get; set; }
-            public bool? CrownHangingBranch { get; set; }
-            public string CrownOtherNote { get; set; }
-            public string PruningWrongDamage { get; set; }
-            public bool? PruningWoundHealing { get; set; }
-            public bool? PruningEpiphyte { get; set; }
-            public bool? PruningParasite { get; set; }
-            public bool? PruningVine { get; set; }
-            public string PruningOtherNote { get; set; }
-            public int? SupportCount { get; set; }
-            public bool? SupportEmbedded { get; set; }
-            public string SupportOtherNote { get; set; }
-            public decimal? SiteCementPercent { get; set; }
-            public decimal? SiteAsphaltPercent { get; set; }
-            public bool? SitePlanter { get; set; }
-            public bool? SiteRecreationFacility { get; set; }
-            public bool? SiteDebrisStack { get; set; }
-            public bool? SiteBetweenBuildings { get; set; }
-            public bool? SiteSoilCompaction { get; set; }
-            public bool? SiteOverburiedSoil { get; set; }
-            public string SiteOtherNote { get; set; }
-            public decimal? SoilPh { get; set; }
-            public decimal? SoilOrganicMatter { get; set; }
-            public decimal? SoilEc { get; set; }
-            public string ManagementStatus { get; set; }
-            public string Priority { get; set; }
-            public string TreatmentDescription { get; set; }
-            public string SourceUnit { get; set; }
-            public int? SourceUnitID { get; set; }
-            public int InsertAccountID { get; set; }
-            public DateTime InsertDateTime { get; set; }
-            public int? UpdateAccountID { get; set; }
-            public DateTime? UpdateDateTime { get; set; }
+            // ==========================================
+            // 1. Primary Key & Foreign Key
+            // ==========================================
+            public int healthID { get; set; }
+            public int treeID { get; set; }
 
-            public string SurveyDateDisplay => SurveyDate.HasValue ? SurveyDate.Value.ToString("yyyy/MM/dd") : string.Empty;
+            // ==========================================
+            // 樹籍資料
+            // ==========================================
+            public string systemTreeNo { get; set; }
+            public string agencyTreeNo { get; set; }
+            public string cityName { get; set; }
+            public string areaName { get; set; }
+            public string speciesName { get; set; }
 
-            public string DataStatusText => DataStatus == HealthRecordStatus.完稿 ? "完稿" : "草稿";
+            // ==========================================
+            // 基本資料
+            // ==========================================
+            public DateTime? surveyDate { get; set; }
+            public string surveyor { get; set; }
+            public int dataStatus { get; set; } // 0=草稿, 1=完稿
+            public string memo { get; set; }
+            public byte? treeSignStatus { get; set; }
 
-            public string LastUpdateDisplay
+            // ==========================================
+            // 樹木規格
+            // ==========================================
+            public decimal? latitude { get; set; }
+            public decimal? longitude { get; set; }
+            public decimal? treeHeight { get; set; }
+            public decimal? canopyArea { get; set; }
+
+            // 樹圍與直徑
+            public decimal? girth100 { get; set; }
+            public decimal? diameter100 { get; set; }
+            public decimal? girth130 { get; set; }
+            public decimal? diameter130 { get; set; }
+            public string measureNote { get; set; }
+
+            // ==========================================
+            // 主要病害 
+            // ==========================================
+            public bool? majorDiseaseBrownRoot { get; set; }
+            public bool? majorDiseaseGanoderma { get; set; }
+            public bool? majorDiseaseWoodDecayFungus { get; set; }
+            public bool? majorDiseaseCanker { get; set; }
+            public bool? majorDiseaseOther { get; set; }
+            public string majorDiseaseOtherNote { get; set; }
+
+            // ==========================================
+            // 主要害蟲
+            // ==========================================
+            // 根部
+            public bool? majorPestRootTunnel { get; set; }
+            public bool? majorPestRootChew { get; set; }
+            public bool? majorPestRootLive { get; set; }
+            // 基部
+            public bool? majorPestBaseTunnel { get; set; }
+            public bool? majorPestBaseChew { get; set; }
+            public bool? majorPestBaseLive { get; set; }
+            // 樹幹
+            public bool? majorPestTrunkTunnel { get; set; }
+            public bool? majorPestTrunkChew { get; set; }
+            public bool? majorPestTrunkLive { get; set; }
+            // 枝條
+            public bool? majorPestBranchTunnel { get; set; }
+            public bool? majorPestBranchChew { get; set; }
+            public bool? majorPestBranchLive { get; set; }
+            // 樹冠
+            public bool? majorPestCrownTunnel { get; set; }
+            public bool? majorPestCrownChew { get; set; }
+            public bool? majorPestCrownLive { get; set; }
+            // 其他
+            public bool? majorPestOtherTunnel { get; set; }
+            public bool? majorPestOtherChew { get; set; }
+            public bool? majorPestOtherLive { get; set; }
+
+            // ==========================================
+            // 一般病蟲害描述 
+            // ==========================================
+            public string generalPestRoot { get; set; }
+            public string generalPestBase { get; set; }
+            public string generalPestTrunk { get; set; }
+            public string generalPestBranch { get; set; }
+            public string generalPestCrown { get; set; }
+            public string generalPestOther { get; set; }
+
+            public string generalDiseaseRoot { get; set; }
+            public string generalDiseaseBase { get; set; }
+            public string generalDiseaseTrunk { get; set; }
+            public string generalDiseaseBranch { get; set; }
+            public string generalDiseaseCrown { get; set; }
+            public string generalDiseaseOther { get; set; }
+
+            public string pestOtherNote { get; set; }
+
+            // ==========================================
+            // 各部位細節檢測
+            // ==========================================
+            // 根部
+            public decimal? rootDecayPercent { get; set; }
+            public decimal? rootCavityMaxDiameter { get; set; }
+            public decimal? rootWoundMaxDiameter { get; set; }
+            public bool? rootMechanicalDamage { get; set; }
+            public bool? rootMowingInjury { get; set; }
+            public bool? rootInjury { get; set; }
+            public bool? rootGirdling { get; set; }
+            public string rootOtherNote { get; set; }
+
+            // 基部
+            public decimal? baseDecayPercent { get; set; }
+            public decimal? baseCavityMaxDiameter { get; set; }
+            public decimal? baseWoundMaxDiameter { get; set; }
+            public bool? baseMechanicalDamage { get; set; }
+            public bool? baseMowingInjury { get; set; }
+            public string baseOtherNote { get; set; }
+
+            // 樹幹
+            public decimal? trunkDecayPercent { get; set; }
+            public decimal? trunkCavityMaxDiameter { get; set; }
+            public decimal? trunkWoundMaxDiameter { get; set; }
+            public bool? trunkMechanicalDamage { get; set; }
+            public bool? trunkIncludedBark { get; set; }
+            public string trunkOtherNote { get; set; }
+
+            // 枝條
+            public decimal? branchDecayPercent { get; set; }
+            public decimal? branchCavityMaxDiameter { get; set; }
+            public decimal? branchWoundMaxDiameter { get; set; }
+            public bool? branchMechanicalDamage { get; set; }
+            public bool? branchIncludedBark { get; set; }
+            public bool? branchDrooping { get; set; }
+            public string branchOtherNote { get; set; }
+
+            // 樹冠
+            public decimal? crownLeafCoveragePercent { get; set; }
+            public decimal? crownDeadBranchPercent { get; set; }
+            public bool? crownHangingBranch { get; set; }
+            public string crownOtherNote { get; set; }
+
+            // ==========================================
+            // 修剪與支撐
+            // ==========================================
+            public string pruningWrongDamage { get; set; }
+            public bool? pruningWoundHealing { get; set; }
+            public bool? pruningEpiphyte { get; set; }
+            public bool? pruningParasite { get; set; }
+            public bool? pruningVine { get; set; }
+            public string pruningOtherNote { get; set; }
+
+            public int? supportCount { get; set; }
+            public bool? supportEmbedded { get; set; }
+            public string supportOtherNote { get; set; }
+
+            // ==========================================
+            // 棲地與土壤 
+            // ==========================================
+            public decimal? siteCementPercent { get; set; }
+            public decimal? siteAsphaltPercent { get; set; }
+            public bool? sitePlanter { get; set; }
+            public bool? siteRecreationFacility { get; set; }
+            public bool? siteDebrisStack { get; set; }
+            public bool? siteBetweenBuildings { get; set; }
+            public bool? siteSoilCompaction { get; set; }
+            public bool? siteOverburiedSoil { get; set; }
+            public string siteOtherNote { get; set; }
+
+            public decimal? soilPh { get; set; }
+            public decimal? soilOrganicMatter { get; set; }
+            public decimal? soilEc { get; set; }
+
+            // ==========================================
+            // 11. 管理建議 (Management)
+            // ==========================================
+            public string managementStatus { get; set; }
+            public string priority { get; set; }
+            public string treatmentDescription { get; set; }
+
+            // ==========================================
+            // 系統資訊
+            // ==========================================
+            public string sourceUnit { get; set; }
+            public int? sourceUnitID { get; set; }
+
+            public int insertAccountID { get; set; }
+            public DateTime insertDateTime { get; set; }
+            public int? updateAccountID { get; set; }
+            public DateTime? updateDateTime { get; set; }
+
+            // ==========================================
+            // 輔助顯示屬性 
+            // ==========================================
+
+            // 顯示日期 (yyyy/MM/dd)
+            public string surveyDateDisplay
+                => surveyDate.HasValue ? surveyDate.Value.ToString("yyyy/MM/dd") : string.Empty;
+
+            // 顯示狀態
+            public string dataStatusText
+                => dataStatus == 1 ? "完稿" : "草稿";
+
+            // 顯示最後更新時間
+            public string lastUpdateDisplay
             {
                 get
                 {
-                    if (UpdateDateTime.HasValue)
+                    if (updateDateTime.HasValue)
                     {
-                        return UpdateDateTime.Value.ToString("yyyy/MM/dd HH:mm");
+                        return updateDateTime.Value.ToString("yyyy/MM/dd HH:mm");
                     }
-                    return InsertDateTime == DateTime.MinValue ? string.Empty : InsertDateTime.ToString("yyyy/MM/dd HH:mm");
+                    return insertDateTime == DateTime.MinValue ? string.Empty : insertDateTime.ToString("yyyy/MM/dd HH:mm");
                 }
             }
         }
@@ -237,6 +315,8 @@ namespace protectTreesV2.Health
             public string systemTreeNo { get; set; }
             public string agencyTreeNo { get; set; }
             public string agencyJurisdictionCode { get; set; }
+            public string cityName { get; set; }
+            public string areaName { get; set; }
             public string speciesName { get; set; }
             public string manager { get; set; }
         }
@@ -482,7 +562,9 @@ namespace protectTreesV2.Health
                        record.systemTreeNo, 
                        record.agencyTreeNo, 
                        record.agencyJurisdictionCode,
-               
+
+                       COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
+                       COALESCE(areaInfo.area, record.areaName) AS areaName,
                        /* 樹種 */
                        COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
                
@@ -490,6 +572,9 @@ namespace protectTreesV2.Health
                
                 FROM Tree_HealthBatchSetting s
                 JOIN Tree_Record record ON s.treeID = record.treeID
+
+                OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = record.cityID) cityInfo
+                LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = record.areaID
         
                 LEFT JOIN Tree_Species species ON species.speciesID = record.speciesID
         
@@ -513,6 +598,9 @@ namespace protectTreesV2.Health
                     item.systemTreeNo = DataRowHelper.GetString(row, "systemTreeNo");
                     item.agencyTreeNo = DataRowHelper.GetString(row, "agencyTreeNo");
                     item.agencyJurisdictionCode = DataRowHelper.GetString(row, "agencyJurisdictionCode");
+
+                    item.cityName = DataRowHelper.GetString(row, "cityName");
+                    item.areaName = DataRowHelper.GetString(row, "areaName");
 
                     item.speciesName = DataRowHelper.GetString(row, "speciesName");
                     item.manager = DataRowHelper.GetString(row, "manager");
@@ -783,134 +871,162 @@ namespace protectTreesV2.Health
                     return null;
                 }
 
+                // 預先取得狀態值，方便後面使用
                 int statusValue = GetNullableInt(row, "dataStatus") ?? 0;
 
                 return new TreeHealthRecord
                 {
-                    HealthID = GetNullableInt(row, "healthID") ?? 0,
-                    TreeID = GetNullableInt(row, "treeID") ?? 0,
-                    SurveyDate = GetNullableDateTime(row, "surveyDate"),
-                    Surveyor = GetString(row, "surveyor"),
-                    DataStatus = Enum.IsDefined(typeof(HealthRecordStatus), statusValue)
-                        ? (HealthRecordStatus)statusValue
-                        : HealthRecordStatus.草稿,
-                    Memo = GetString(row, "memo"),
-                    TreeSignStatus = GetNullableInt(row, "treeSignStatus") is int signStatus ? (byte?)signStatus : null,
-                    Latitude = GetNullableDecimal(row, "latitude"),
-                    Longitude = GetNullableDecimal(row, "longitude"),
-                    TreeHeight = GetNullableDecimal(row, "treeHeight"),
-                    CanopyArea = GetNullableDecimal(row, "canopyArea"),
-                    Girth100 = GetNullableDecimal(row, "girth100"),
-                    Diameter100 = GetNullableDecimal(row, "diameter100"),
-                    Girth130 = GetNullableDecimal(row, "girth130"),
-                    Diameter130 = GetNullableDecimal(row, "diameter130"),
-                    MeasureNote = GetString(row, "measureNote"),
-                    MajorDiseaseBrownRoot = GetNullableBoolean(row, "majorDiseaseBrownRoot"),
-                    MajorDiseaseGanoderma = GetNullableBoolean(row, "majorDiseaseGanoderma"),
-                    MajorDiseaseWoodDecayFungus = GetNullableBoolean(row, "majorDiseaseWoodDecayFungus"),
-                    MajorDiseaseCanker = GetNullableBoolean(row, "majorDiseaseCanker"),
-                    MajorDiseaseOther = GetNullableBoolean(row, "majorDiseaseOther"),
-                    MajorDiseaseOtherNote = GetString(row, "majorDiseaseOtherNote"),
-                    MajorPestRootTunnel = GetNullableBoolean(row, "majorPestRootTunnel"),
-                    MajorPestRootChew = GetNullableBoolean(row, "majorPestRootChew"),
-                    MajorPestRootLive = GetNullableBoolean(row, "majorPestRootLive"),
-                    MajorPestBaseTunnel = GetNullableBoolean(row, "majorPestBaseTunnel"),
-                    MajorPestBaseChew = GetNullableBoolean(row, "majorPestBaseChew"),
-                    MajorPestBaseLive = GetNullableBoolean(row, "majorPestBaseLive"),
-                    MajorPestTrunkTunnel = GetNullableBoolean(row, "majorPestTrunkTunnel"),
-                    MajorPestTrunkChew = GetNullableBoolean(row, "majorPestTrunkChew"),
-                    MajorPestTrunkLive = GetNullableBoolean(row, "majorPestTrunkLive"),
-                    MajorPestBranchTunnel = GetNullableBoolean(row, "majorPestBranchTunnel"),
-                    MajorPestBranchChew = GetNullableBoolean(row, "majorPestBranchChew"),
-                    MajorPestBranchLive = GetNullableBoolean(row, "majorPestBranchLive"),
-                    MajorPestCrownTunnel = GetNullableBoolean(row, "majorPestCrownTunnel"),
-                    MajorPestCrownChew = GetNullableBoolean(row, "majorPestCrownChew"),
-                    MajorPestCrownLive = GetNullableBoolean(row, "majorPestCrownLive"),
-                    MajorPestOtherTunnel = GetNullableBoolean(row, "majorPestOtherTunnel"),
-                    MajorPestOtherChew = GetNullableBoolean(row, "majorPestOtherChew"),
-                    MajorPestOtherLive = GetNullableBoolean(row, "majorPestOtherLive"),
-                    GeneralPestRoot = GetString(row, "generalPestRoot"),
-                    GeneralPestBase = GetString(row, "generalPestBase"),
-                    GeneralPestTrunk = GetString(row, "generalPestTrunk"),
-                    GeneralPestBranch = GetString(row, "generalPestBranch"),
-                    GeneralPestCrown = GetString(row, "generalPestCrown"),
-                    GeneralPestOther = GetString(row, "generalPestOther"),
-                    GeneralDiseaseRoot = GetString(row, "generalDiseaseRoot"),
-                    GeneralDiseaseBase = GetString(row, "generalDiseaseBase"),
-                    GeneralDiseaseTrunk = GetString(row, "generalDiseaseTrunk"),
-                    GeneralDiseaseBranch = GetString(row, "generalDiseaseBranch"),
-                    GeneralDiseaseCrown = GetString(row, "generalDiseaseCrown"),
-                    GeneralDiseaseOther = GetString(row, "generalDiseaseOther"),
-                    PestOtherNote = GetString(row, "pestOtherNote"),
-                    RootDecayPercent = GetNullableDecimal(row, "rootDecayPercent"),
-                    RootCavityMaxDiameter = GetNullableDecimal(row, "rootCavityMaxDiameter"),
-                    RootWoundMaxDiameter = GetNullableDecimal(row, "rootWoundMaxDiameter"),
-                    RootMechanicalDamage = GetNullableBoolean(row, "rootMechanicalDamage"),
-                    RootMowingInjury = GetNullableBoolean(row, "rootMowingInjury"),
-                    RootInjury = GetNullableBoolean(row, "rootInjury"),
-                    RootGirdling = GetNullableBoolean(row, "rootGirdling"),
-                    RootOtherNote = GetString(row, "rootOtherNote"),
-                    BaseDecayPercent = GetNullableDecimal(row, "baseDecayPercent"),
-                    BaseCavityMaxDiameter = GetNullableDecimal(row, "baseCavityMaxDiameter"),
-                    BaseWoundMaxDiameter = GetNullableDecimal(row, "baseWoundMaxDiameter"),
-                    BaseMechanicalDamage = GetNullableBoolean(row, "baseMechanicalDamage"),
-                    BaseMowingInjury = GetNullableBoolean(row, "baseMowingInjury"),
-                    BaseOtherNote = GetString(row, "baseOtherNote"),
-                    TrunkDecayPercent = GetNullableDecimal(row, "trunkDecayPercent"),
-                    TrunkCavityMaxDiameter = GetNullableDecimal(row, "trunkCavityMaxDiameter"),
-                    TrunkWoundMaxDiameter = GetNullableDecimal(row, "trunkWoundMaxDiameter"),
-                    TrunkMechanicalDamage = GetNullableBoolean(row, "trunkMechanicalDamage"),
-                    TrunkIncludedBark = GetNullableBoolean(row, "trunkIncludedBark"),
-                    TrunkOtherNote = GetString(row, "trunkOtherNote"),
-                    BranchDecayPercent = GetNullableDecimal(row, "branchDecayPercent"),
-                    BranchCavityMaxDiameter = GetNullableDecimal(row, "branchCavityMaxDiameter"),
-                    BranchWoundMaxDiameter = GetNullableDecimal(row, "branchWoundMaxDiameter"),
-                    BranchMechanicalDamage = GetNullableBoolean(row, "branchMechanicalDamage"),
-                    BranchIncludedBark = GetNullableBoolean(row, "branchIncludedBark"),
-                    BranchDrooping = GetNullableBoolean(row, "branchDrooping"),
-                    BranchOtherNote = GetString(row, "branchOtherNote"),
-                    CrownLeafCoveragePercent = GetNullableDecimal(row, "crownLeafCoveragePercent"),
-                    CrownDeadBranchPercent = GetNullableDecimal(row, "crownDeadBranchPercent"),
-                    CrownHangingBranch = GetNullableBoolean(row, "crownHangingBranch"),
-                    CrownOtherNote = GetString(row, "crownOtherNote"),
-                    PruningWrongDamage = GetString(row, "pruningWrongDamage"),
-                    PruningWoundHealing = GetNullableBoolean(row, "pruningWoundHealing"),
-                    PruningEpiphyte = GetNullableBoolean(row, "pruningEpiphyte"),
-                    PruningParasite = GetNullableBoolean(row, "pruningParasite"),
-                    PruningVine = GetNullableBoolean(row, "pruningVine"),
-                    PruningOtherNote = GetString(row, "pruningOtherNote"),
-                    SupportCount = GetNullableInt(row, "supportCount"),
-                    SupportEmbedded = GetNullableBoolean(row, "supportEmbedded"),
-                    SupportOtherNote = GetString(row, "supportOtherNote"),
-                    SiteCementPercent = GetNullableDecimal(row, "siteCementPercent"),
-                    SiteAsphaltPercent = GetNullableDecimal(row, "siteAsphaltPercent"),
-                    SitePlanter = GetNullableBoolean(row, "sitePlanter"),
-                    SiteRecreationFacility = GetNullableBoolean(row, "siteRecreationFacility"),
-                    SiteDebrisStack = GetNullableBoolean(row, "siteDebrisStack"),
-                    SiteBetweenBuildings = GetNullableBoolean(row, "siteBetweenBuildings"),
-                    SiteSoilCompaction = GetNullableBoolean(row, "siteSoilCompaction"),
-                    SiteOverburiedSoil = GetNullableBoolean(row, "siteOverburiedSoil"),
-                    SiteOtherNote = GetString(row, "siteOtherNote"),
-                    SoilPh = GetNullableDecimal(row, "soilPh"),
-                    SoilOrganicMatter = GetNullableDecimal(row, "soilOrganicMatter"),
-                    SoilEc = GetNullableDecimal(row, "soilEc"),
-                    ManagementStatus = GetString(row, "managementStatus"),
-                    Priority = GetString(row, "priority"),
-                    TreatmentDescription = GetString(row, "treatmentDescription"),
-                    SourceUnit = GetString(row, "sourceUnit"),
-                    SourceUnitID = GetNullableInt(row, "sourceUnitID"),
-                    InsertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
-                    InsertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
-                    UpdateAccountID = GetNullableInt(row, "updateAccountID"),
-                    UpdateDateTime = GetNullableDateTime(row, "updateDateTime"),
-                    SystemTreeNo = GetString(row, "systemTreeNo"),
-                    AgencyTreeNo = GetString(row, "agencyTreeNo"),
-                    CityName = GetString(row, "cityName"),
-                    AreaName = GetString(row, "areaName"),
-                    SpeciesName = GetString(row, "speciesCommonName")
+                    // 1. PK & FK
+                    healthID = GetNullableInt(row, "healthID") ?? 0,
+                    treeID = GetNullableInt(row, "treeID") ?? 0,
+
+                    // 2. JOIN 欄位
+                    systemTreeNo = GetString(row, "systemTreeNo"),
+                    agencyTreeNo = GetString(row, "agencyTreeNo"),
+                    cityName = GetString(row, "cityName"),
+                    areaName = GetString(row, "areaName"),
+                    speciesName = GetString(row, "speciesCommonName"), 
+
+                    // 3. 基本資料
+                    surveyDate = GetNullableDateTime(row, "surveyDate"),
+                    surveyor = GetString(row, "surveyor"),
+                    dataStatus = statusValue,
+
+                    memo = GetString(row, "memo"),
+                    treeSignStatus = (byte?)GetNullableInt(row, "treeSignStatus"),
+
+                    // 4. 樹木規格
+                    latitude = GetNullableDecimal(row, "latitude"),
+                    longitude = GetNullableDecimal(row, "longitude"),
+                    treeHeight = GetNullableDecimal(row, "treeHeight"),
+                    canopyArea = GetNullableDecimal(row, "canopyArea"),
+                    girth100 = GetNullableDecimal(row, "girth100"),
+                    diameter100 = GetNullableDecimal(row, "diameter100"),
+                    girth130 = GetNullableDecimal(row, "girth130"),
+                    diameter130 = GetNullableDecimal(row, "diameter130"),
+                    measureNote = GetString(row, "measureNote"),
+
+                    // 5. 主要病害
+                    majorDiseaseBrownRoot = GetNullableBoolean(row, "majorDiseaseBrownRoot"),
+                    majorDiseaseGanoderma = GetNullableBoolean(row, "majorDiseaseGanoderma"),
+                    majorDiseaseWoodDecayFungus = GetNullableBoolean(row, "majorDiseaseWoodDecayFungus"),
+                    majorDiseaseCanker = GetNullableBoolean(row, "majorDiseaseCanker"),
+                    majorDiseaseOther = GetNullableBoolean(row, "majorDiseaseOther"),
+                    majorDiseaseOtherNote = GetString(row, "majorDiseaseOtherNote"),
+
+                    // 6. 主要害蟲
+                    majorPestRootTunnel = GetNullableBoolean(row, "majorPestRootTunnel"),
+                    majorPestRootChew = GetNullableBoolean(row, "majorPestRootChew"),
+                    majorPestRootLive = GetNullableBoolean(row, "majorPestRootLive"),
+                    majorPestBaseTunnel = GetNullableBoolean(row, "majorPestBaseTunnel"),
+                    majorPestBaseChew = GetNullableBoolean(row, "majorPestBaseChew"),
+                    majorPestBaseLive = GetNullableBoolean(row, "majorPestBaseLive"),
+                    majorPestTrunkTunnel = GetNullableBoolean(row, "majorPestTrunkTunnel"),
+                    majorPestTrunkChew = GetNullableBoolean(row, "majorPestTrunkChew"),
+                    majorPestTrunkLive = GetNullableBoolean(row, "majorPestTrunkLive"),
+                    majorPestBranchTunnel = GetNullableBoolean(row, "majorPestBranchTunnel"),
+                    majorPestBranchChew = GetNullableBoolean(row, "majorPestBranchChew"),
+                    majorPestBranchLive = GetNullableBoolean(row, "majorPestBranchLive"),
+                    majorPestCrownTunnel = GetNullableBoolean(row, "majorPestCrownTunnel"),
+                    majorPestCrownChew = GetNullableBoolean(row, "majorPestCrownChew"),
+                    majorPestCrownLive = GetNullableBoolean(row, "majorPestCrownLive"),
+                    majorPestOtherTunnel = GetNullableBoolean(row, "majorPestOtherTunnel"),
+                    majorPestOtherChew = GetNullableBoolean(row, "majorPestOtherChew"),
+                    majorPestOtherLive = GetNullableBoolean(row, "majorPestOtherLive"),
+
+                    // 7. 一般病蟲害
+                    generalPestRoot = GetString(row, "generalPestRoot"),
+                    generalPestBase = GetString(row, "generalPestBase"),
+                    generalPestTrunk = GetString(row, "generalPestTrunk"),
+                    generalPestBranch = GetString(row, "generalPestBranch"),
+                    generalPestCrown = GetString(row, "generalPestCrown"),
+                    generalPestOther = GetString(row, "generalPestOther"),
+                    generalDiseaseRoot = GetString(row, "generalDiseaseRoot"),
+                    generalDiseaseBase = GetString(row, "generalDiseaseBase"),
+                    generalDiseaseTrunk = GetString(row, "generalDiseaseTrunk"),
+                    generalDiseaseBranch = GetString(row, "generalDiseaseBranch"),
+                    generalDiseaseCrown = GetString(row, "generalDiseaseCrown"),
+                    generalDiseaseOther = GetString(row, "generalDiseaseOther"),
+                    pestOtherNote = GetString(row, "pestOtherNote"),
+
+                    // 8. 各部位細節
+                    rootDecayPercent = GetNullableDecimal(row, "rootDecayPercent"),
+                    rootCavityMaxDiameter = GetNullableDecimal(row, "rootCavityMaxDiameter"),
+                    rootWoundMaxDiameter = GetNullableDecimal(row, "rootWoundMaxDiameter"),
+                    rootMechanicalDamage = GetNullableBoolean(row, "rootMechanicalDamage"),
+                    rootMowingInjury = GetNullableBoolean(row, "rootMowingInjury"),
+                    rootInjury = GetNullableBoolean(row, "rootInjury"),
+                    rootGirdling = GetNullableBoolean(row, "rootGirdling"),
+                    rootOtherNote = GetString(row, "rootOtherNote"),
+
+                    baseDecayPercent = GetNullableDecimal(row, "baseDecayPercent"),
+                    baseCavityMaxDiameter = GetNullableDecimal(row, "baseCavityMaxDiameter"),
+                    baseWoundMaxDiameter = GetNullableDecimal(row, "baseWoundMaxDiameter"),
+                    baseMechanicalDamage = GetNullableBoolean(row, "baseMechanicalDamage"),
+                    baseMowingInjury = GetNullableBoolean(row, "baseMowingInjury"),
+                    baseOtherNote = GetString(row, "baseOtherNote"),
+
+                    trunkDecayPercent = GetNullableDecimal(row, "trunkDecayPercent"),
+                    trunkCavityMaxDiameter = GetNullableDecimal(row, "trunkCavityMaxDiameter"),
+                    trunkWoundMaxDiameter = GetNullableDecimal(row, "trunkWoundMaxDiameter"),
+                    trunkMechanicalDamage = GetNullableBoolean(row, "trunkMechanicalDamage"),
+                    trunkIncludedBark = GetNullableBoolean(row, "trunkIncludedBark"),
+                    trunkOtherNote = GetString(row, "trunkOtherNote"),
+
+                    branchDecayPercent = GetNullableDecimal(row, "branchDecayPercent"),
+                    branchCavityMaxDiameter = GetNullableDecimal(row, "branchCavityMaxDiameter"),
+                    branchWoundMaxDiameter = GetNullableDecimal(row, "branchWoundMaxDiameter"),
+                    branchMechanicalDamage = GetNullableBoolean(row, "branchMechanicalDamage"),
+                    branchIncludedBark = GetNullableBoolean(row, "branchIncludedBark"),
+                    branchDrooping = GetNullableBoolean(row, "branchDrooping"),
+                    branchOtherNote = GetString(row, "branchOtherNote"),
+
+                    crownLeafCoveragePercent = GetNullableDecimal(row, "crownLeafCoveragePercent"),
+                    crownDeadBranchPercent = GetNullableDecimal(row, "crownDeadBranchPercent"),
+                    crownHangingBranch = GetNullableBoolean(row, "crownHangingBranch"),
+                    crownOtherNote = GetString(row, "crownOtherNote"),
+
+                    // 9. 修剪與支撐
+                    pruningWrongDamage = GetString(row, "pruningWrongDamage"),
+                    pruningWoundHealing = GetNullableBoolean(row, "pruningWoundHealing"),
+                    pruningEpiphyte = GetNullableBoolean(row, "pruningEpiphyte"),
+                    pruningParasite = GetNullableBoolean(row, "pruningParasite"),
+                    pruningVine = GetNullableBoolean(row, "pruningVine"),
+                    pruningOtherNote = GetString(row, "pruningOtherNote"),
+
+                    supportCount = GetNullableInt(row, "supportCount"),
+                    supportEmbedded = GetNullableBoolean(row, "supportEmbedded"),
+                    supportOtherNote = GetString(row, "supportOtherNote"),
+
+                    // 10. 棲地與土壤
+                    siteCementPercent = GetNullableDecimal(row, "siteCementPercent"),
+                    siteAsphaltPercent = GetNullableDecimal(row, "siteAsphaltPercent"),
+                    sitePlanter = GetNullableBoolean(row, "sitePlanter"),
+                    siteRecreationFacility = GetNullableBoolean(row, "siteRecreationFacility"),
+                    siteDebrisStack = GetNullableBoolean(row, "siteDebrisStack"),
+                    siteBetweenBuildings = GetNullableBoolean(row, "siteBetweenBuildings"),
+                    siteSoilCompaction = GetNullableBoolean(row, "siteSoilCompaction"),
+                    siteOverburiedSoil = GetNullableBoolean(row, "siteOverburiedSoil"),
+                    siteOtherNote = GetString(row, "siteOtherNote"),
+
+                    soilPh = GetNullableDecimal(row, "soilPh"),
+                    soilOrganicMatter = GetNullableDecimal(row, "soilOrganicMatter"),
+                    soilEc = GetNullableDecimal(row, "soilEc"),
+
+                    // 11. 管理建議
+                    managementStatus = GetString(row, "managementStatus"),
+                    priority = GetString(row, "priority"),
+                    treatmentDescription = GetString(row, "treatmentDescription"),
+
+                    // 12. 系統資訊
+                    sourceUnit = GetString(row, "sourceUnit"),
+                    sourceUnitID = GetNullableInt(row, "sourceUnitID"),
+                    insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
+                    insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
+                    updateAccountID = GetNullableInt(row, "updateAccountID"),
+                    updateDateTime = GetNullableDateTime(row, "updateDateTime")
                 };
             }
-
             private static TreeHealthPhoto ToHealthPhoto(DataRow row)
             {
                 if (row == null)
@@ -1056,7 +1172,7 @@ WHERE h.removeDateTime IS NULL AND t.removeDateTime IS NULL");
             {
                 if (record == null) throw new ArgumentNullException(nameof(record));
 
-                if (record.HealthID <= 0)
+                if (record.healthID <= 0)
                 {
                     const string insertSql = @"INSERT INTO Tree_HealthRecord
 (treeID, surveyDate, surveyor, dataStatus, memo, treeSignStatus, latitude, longitude, treeHeight, canopyArea,
@@ -1112,7 +1228,7 @@ VALUES
                     {
                         var parameters = new List<SqlParameter>
                     {
-                        new SqlParameter("@treeID", record.TreeID),
+                        new SqlParameter("@treeID", record.treeID),
                         new SqlParameter("@accountId", accountId)
                     };
                         parameters.AddRange(GetHealthRecordFieldParameters(record));
@@ -1240,127 +1356,152 @@ WHERE healthID=@id AND removeDateTime IS NULL";
                         var parameters = new List<SqlParameter>
                     {
                         new SqlParameter("@accountId", accountId),
-                        new SqlParameter("@id", record.HealthID)
+                        new SqlParameter("@id", record.healthID)
                     };
                         parameters.AddRange(GetHealthRecordFieldParameters(record));
 
                         da.ExecNonQuery(updateSql, parameters.ToArray());
                     }
 
-                    return record.HealthID;
+                    return record.healthID;
                 }
             }
 
             private static IEnumerable<SqlParameter> GetHealthRecordFieldParameters(TreeHealthRecord record)
             {
-                yield return new SqlParameter("@surveyDate", record.SurveyDate?.Date ?? (object)DBNull.Value);
-                yield return new SqlParameter("@surveyor", ToDbValue(record.Surveyor));
-                yield return new SqlParameter("@dataStatus", (int)record.DataStatus);
-                yield return new SqlParameter("@memo", ToDbValue(record.Memo));
-                yield return new SqlParameter("@treeSignStatus", ToDbValue(record.TreeSignStatus));
-                yield return new SqlParameter("@latitude", ToDbValue(record.Latitude));
-                yield return new SqlParameter("@longitude", ToDbValue(record.Longitude));
-                yield return new SqlParameter("@treeHeight", ToDbValue(record.TreeHeight));
-                yield return new SqlParameter("@canopyArea", ToDbValue(record.CanopyArea));
-                yield return new SqlParameter("@girth100", ToDbValue(record.Girth100));
-                yield return new SqlParameter("@diameter100", ToDbValue(record.Diameter100));
-                yield return new SqlParameter("@girth130", ToDbValue(record.Girth130));
-                yield return new SqlParameter("@diameter130", ToDbValue(record.Diameter130));
-                yield return new SqlParameter("@measureNote", ToDbValue(record.MeasureNote));
-                yield return new SqlParameter("@majorDiseaseBrownRoot", ToDbValue(record.MajorDiseaseBrownRoot));
-                yield return new SqlParameter("@majorDiseaseGanoderma", ToDbValue(record.MajorDiseaseGanoderma));
-                yield return new SqlParameter("@majorDiseaseWoodDecayFungus", ToDbValue(record.MajorDiseaseWoodDecayFungus));
-                yield return new SqlParameter("@majorDiseaseCanker", ToDbValue(record.MajorDiseaseCanker));
-                yield return new SqlParameter("@majorDiseaseOther", ToDbValue(record.MajorDiseaseOther));
-                yield return new SqlParameter("@majorDiseaseOtherNote", ToDbValue(record.MajorDiseaseOtherNote));
-                yield return new SqlParameter("@majorPestRootTunnel", ToDbValue(record.MajorPestRootTunnel));
-                yield return new SqlParameter("@majorPestRootChew", ToDbValue(record.MajorPestRootChew));
-                yield return new SqlParameter("@majorPestRootLive", ToDbValue(record.MajorPestRootLive));
-                yield return new SqlParameter("@majorPestBaseTunnel", ToDbValue(record.MajorPestBaseTunnel));
-                yield return new SqlParameter("@majorPestBaseChew", ToDbValue(record.MajorPestBaseChew));
-                yield return new SqlParameter("@majorPestBaseLive", ToDbValue(record.MajorPestBaseLive));
-                yield return new SqlParameter("@majorPestTrunkTunnel", ToDbValue(record.MajorPestTrunkTunnel));
-                yield return new SqlParameter("@majorPestTrunkChew", ToDbValue(record.MajorPestTrunkChew));
-                yield return new SqlParameter("@majorPestTrunkLive", ToDbValue(record.MajorPestTrunkLive));
-                yield return new SqlParameter("@majorPestBranchTunnel", ToDbValue(record.MajorPestBranchTunnel));
-                yield return new SqlParameter("@majorPestBranchChew", ToDbValue(record.MajorPestBranchChew));
-                yield return new SqlParameter("@majorPestBranchLive", ToDbValue(record.MajorPestBranchLive));
-                yield return new SqlParameter("@majorPestCrownTunnel", ToDbValue(record.MajorPestCrownTunnel));
-                yield return new SqlParameter("@majorPestCrownChew", ToDbValue(record.MajorPestCrownChew));
-                yield return new SqlParameter("@majorPestCrownLive", ToDbValue(record.MajorPestCrownLive));
-                yield return new SqlParameter("@majorPestOtherTunnel", ToDbValue(record.MajorPestOtherTunnel));
-                yield return new SqlParameter("@majorPestOtherChew", ToDbValue(record.MajorPestOtherChew));
-                yield return new SqlParameter("@majorPestOtherLive", ToDbValue(record.MajorPestOtherLive));
-                yield return new SqlParameter("@generalPestRoot", ToDbValue(record.GeneralPestRoot));
-                yield return new SqlParameter("@generalPestBase", ToDbValue(record.GeneralPestBase));
-                yield return new SqlParameter("@generalPestTrunk", ToDbValue(record.GeneralPestTrunk));
-                yield return new SqlParameter("@generalPestBranch", ToDbValue(record.GeneralPestBranch));
-                yield return new SqlParameter("@generalPestCrown", ToDbValue(record.GeneralPestCrown));
-                yield return new SqlParameter("@generalPestOther", ToDbValue(record.GeneralPestOther));
-                yield return new SqlParameter("@generalDiseaseRoot", ToDbValue(record.GeneralDiseaseRoot));
-                yield return new SqlParameter("@generalDiseaseBase", ToDbValue(record.GeneralDiseaseBase));
-                yield return new SqlParameter("@generalDiseaseTrunk", ToDbValue(record.GeneralDiseaseTrunk));
-                yield return new SqlParameter("@generalDiseaseBranch", ToDbValue(record.GeneralDiseaseBranch));
-                yield return new SqlParameter("@generalDiseaseCrown", ToDbValue(record.GeneralDiseaseCrown));
-                yield return new SqlParameter("@generalDiseaseOther", ToDbValue(record.GeneralDiseaseOther));
-                yield return new SqlParameter("@pestOtherNote", ToDbValue(record.PestOtherNote));
-                yield return new SqlParameter("@rootDecayPercent", ToDbValue(record.RootDecayPercent));
-                yield return new SqlParameter("@rootCavityMaxDiameter", ToDbValue(record.RootCavityMaxDiameter));
-                yield return new SqlParameter("@rootWoundMaxDiameter", ToDbValue(record.RootWoundMaxDiameter));
-                yield return new SqlParameter("@rootMechanicalDamage", ToDbValue(record.RootMechanicalDamage));
-                yield return new SqlParameter("@rootMowingInjury", ToDbValue(record.RootMowingInjury));
-                yield return new SqlParameter("@rootInjury", ToDbValue(record.RootInjury));
-                yield return new SqlParameter("@rootGirdling", ToDbValue(record.RootGirdling));
-                yield return new SqlParameter("@rootOtherNote", ToDbValue(record.RootOtherNote));
-                yield return new SqlParameter("@baseDecayPercent", ToDbValue(record.BaseDecayPercent));
-                yield return new SqlParameter("@baseCavityMaxDiameter", ToDbValue(record.BaseCavityMaxDiameter));
-                yield return new SqlParameter("@baseWoundMaxDiameter", ToDbValue(record.BaseWoundMaxDiameter));
-                yield return new SqlParameter("@baseMechanicalDamage", ToDbValue(record.BaseMechanicalDamage));
-                yield return new SqlParameter("@baseMowingInjury", ToDbValue(record.BaseMowingInjury));
-                yield return new SqlParameter("@baseOtherNote", ToDbValue(record.BaseOtherNote));
-                yield return new SqlParameter("@trunkDecayPercent", ToDbValue(record.TrunkDecayPercent));
-                yield return new SqlParameter("@trunkCavityMaxDiameter", ToDbValue(record.TrunkCavityMaxDiameter));
-                yield return new SqlParameter("@trunkWoundMaxDiameter", ToDbValue(record.TrunkWoundMaxDiameter));
-                yield return new SqlParameter("@trunkMechanicalDamage", ToDbValue(record.TrunkMechanicalDamage));
-                yield return new SqlParameter("@trunkIncludedBark", ToDbValue(record.TrunkIncludedBark));
-                yield return new SqlParameter("@trunkOtherNote", ToDbValue(record.TrunkOtherNote));
-                yield return new SqlParameter("@branchDecayPercent", ToDbValue(record.BranchDecayPercent));
-                yield return new SqlParameter("@branchCavityMaxDiameter", ToDbValue(record.BranchCavityMaxDiameter));
-                yield return new SqlParameter("@branchWoundMaxDiameter", ToDbValue(record.BranchWoundMaxDiameter));
-                yield return new SqlParameter("@branchMechanicalDamage", ToDbValue(record.BranchMechanicalDamage));
-                yield return new SqlParameter("@branchIncludedBark", ToDbValue(record.BranchIncludedBark));
-                yield return new SqlParameter("@branchDrooping", ToDbValue(record.BranchDrooping));
-                yield return new SqlParameter("@branchOtherNote", ToDbValue(record.BranchOtherNote));
-                yield return new SqlParameter("@crownLeafCoveragePercent", ToDbValue(record.CrownLeafCoveragePercent));
-                yield return new SqlParameter("@crownDeadBranchPercent", ToDbValue(record.CrownDeadBranchPercent));
-                yield return new SqlParameter("@crownHangingBranch", ToDbValue(record.CrownHangingBranch));
-                yield return new SqlParameter("@crownOtherNote", ToDbValue(record.CrownOtherNote));
-                yield return new SqlParameter("@pruningWrongDamage", ToDbValue(record.PruningWrongDamage));
-                yield return new SqlParameter("@pruningWoundHealing", ToDbValue(record.PruningWoundHealing));
-                yield return new SqlParameter("@pruningEpiphyte", ToDbValue(record.PruningEpiphyte));
-                yield return new SqlParameter("@pruningParasite", ToDbValue(record.PruningParasite));
-                yield return new SqlParameter("@pruningVine", ToDbValue(record.PruningVine));
-                yield return new SqlParameter("@pruningOtherNote", ToDbValue(record.PruningOtherNote));
-                yield return new SqlParameter("@supportCount", ToDbValue(record.SupportCount));
-                yield return new SqlParameter("@supportEmbedded", ToDbValue(record.SupportEmbedded));
-                yield return new SqlParameter("@supportOtherNote", ToDbValue(record.SupportOtherNote));
-                yield return new SqlParameter("@siteCementPercent", ToDbValue(record.SiteCementPercent));
-                yield return new SqlParameter("@siteAsphaltPercent", ToDbValue(record.SiteAsphaltPercent));
-                yield return new SqlParameter("@sitePlanter", ToDbValue(record.SitePlanter));
-                yield return new SqlParameter("@siteRecreationFacility", ToDbValue(record.SiteRecreationFacility));
-                yield return new SqlParameter("@siteDebrisStack", ToDbValue(record.SiteDebrisStack));
-                yield return new SqlParameter("@siteBetweenBuildings", ToDbValue(record.SiteBetweenBuildings));
-                yield return new SqlParameter("@siteSoilCompaction", ToDbValue(record.SiteSoilCompaction));
-                yield return new SqlParameter("@siteOverburiedSoil", ToDbValue(record.SiteOverburiedSoil));
-                yield return new SqlParameter("@siteOtherNote", ToDbValue(record.SiteOtherNote));
-                yield return new SqlParameter("@soilPh", ToDbValue(record.SoilPh));
-                yield return new SqlParameter("@soilOrganicMatter", ToDbValue(record.SoilOrganicMatter));
-                yield return new SqlParameter("@soilEc", ToDbValue(record.SoilEc));
-                yield return new SqlParameter("@managementStatus", ToDbValue(record.ManagementStatus));
-                yield return new SqlParameter("@priority", ToDbValue(record.Priority));
-                yield return new SqlParameter("@treatmentDescription", ToDbValue(record.TreatmentDescription));
-                yield return new SqlParameter("@sourceUnit", ToDbValue(record.SourceUnit));
-                yield return new SqlParameter("@sourceUnitID", ToDbValue(record.SourceUnitID));
+                // 基本資料
+                yield return new SqlParameter("@surveyDate", record.surveyDate?.Date ?? (object)DBNull.Value);
+                yield return new SqlParameter("@surveyor", ToDbValue(record.surveyor));
+                yield return new SqlParameter("@dataStatus", record.dataStatus); // 屬性已是 int，不需轉型
+                yield return new SqlParameter("@memo", ToDbValue(record.memo));
+                yield return new SqlParameter("@treeSignStatus", ToDbValue(record.treeSignStatus));
+
+                // 樹木規格
+                yield return new SqlParameter("@latitude", ToDbValue(record.latitude));
+                yield return new SqlParameter("@longitude", ToDbValue(record.longitude));
+                yield return new SqlParameter("@treeHeight", ToDbValue(record.treeHeight));
+                yield return new SqlParameter("@canopyArea", ToDbValue(record.canopyArea));
+                yield return new SqlParameter("@girth100", ToDbValue(record.girth100));
+                yield return new SqlParameter("@diameter100", ToDbValue(record.diameter100));
+                yield return new SqlParameter("@girth130", ToDbValue(record.girth130));
+                yield return new SqlParameter("@diameter130", ToDbValue(record.diameter130));
+                yield return new SqlParameter("@measureNote", ToDbValue(record.measureNote));
+
+                // 主要病害
+                yield return new SqlParameter("@majorDiseaseBrownRoot", ToDbValue(record.majorDiseaseBrownRoot));
+                yield return new SqlParameter("@majorDiseaseGanoderma", ToDbValue(record.majorDiseaseGanoderma));
+                yield return new SqlParameter("@majorDiseaseWoodDecayFungus", ToDbValue(record.majorDiseaseWoodDecayFungus));
+                yield return new SqlParameter("@majorDiseaseCanker", ToDbValue(record.majorDiseaseCanker));
+                yield return new SqlParameter("@majorDiseaseOther", ToDbValue(record.majorDiseaseOther));
+                yield return new SqlParameter("@majorDiseaseOtherNote", ToDbValue(record.majorDiseaseOtherNote));
+
+                // 主要害蟲
+                yield return new SqlParameter("@majorPestRootTunnel", ToDbValue(record.majorPestRootTunnel));
+                yield return new SqlParameter("@majorPestRootChew", ToDbValue(record.majorPestRootChew));
+                yield return new SqlParameter("@majorPestRootLive", ToDbValue(record.majorPestRootLive));
+                yield return new SqlParameter("@majorPestBaseTunnel", ToDbValue(record.majorPestBaseTunnel));
+                yield return new SqlParameter("@majorPestBaseChew", ToDbValue(record.majorPestBaseChew));
+                yield return new SqlParameter("@majorPestBaseLive", ToDbValue(record.majorPestBaseLive));
+                yield return new SqlParameter("@majorPestTrunkTunnel", ToDbValue(record.majorPestTrunkTunnel));
+                yield return new SqlParameter("@majorPestTrunkChew", ToDbValue(record.majorPestTrunkChew));
+                yield return new SqlParameter("@majorPestTrunkLive", ToDbValue(record.majorPestTrunkLive));
+                yield return new SqlParameter("@majorPestBranchTunnel", ToDbValue(record.majorPestBranchTunnel));
+                yield return new SqlParameter("@majorPestBranchChew", ToDbValue(record.majorPestBranchChew));
+                yield return new SqlParameter("@majorPestBranchLive", ToDbValue(record.majorPestBranchLive));
+                yield return new SqlParameter("@majorPestCrownTunnel", ToDbValue(record.majorPestCrownTunnel));
+                yield return new SqlParameter("@majorPestCrownChew", ToDbValue(record.majorPestCrownChew));
+                yield return new SqlParameter("@majorPestCrownLive", ToDbValue(record.majorPestCrownLive));
+                yield return new SqlParameter("@majorPestOtherTunnel", ToDbValue(record.majorPestOtherTunnel));
+                yield return new SqlParameter("@majorPestOtherChew", ToDbValue(record.majorPestOtherChew));
+                yield return new SqlParameter("@majorPestOtherLive", ToDbValue(record.majorPestOtherLive));
+
+                // 一般病蟲害
+                yield return new SqlParameter("@generalPestRoot", ToDbValue(record.generalPestRoot));
+                yield return new SqlParameter("@generalPestBase", ToDbValue(record.generalPestBase));
+                yield return new SqlParameter("@generalPestTrunk", ToDbValue(record.generalPestTrunk));
+                yield return new SqlParameter("@generalPestBranch", ToDbValue(record.generalPestBranch));
+                yield return new SqlParameter("@generalPestCrown", ToDbValue(record.generalPestCrown));
+                yield return new SqlParameter("@generalPestOther", ToDbValue(record.generalPestOther));
+                yield return new SqlParameter("@generalDiseaseRoot", ToDbValue(record.generalDiseaseRoot));
+                yield return new SqlParameter("@generalDiseaseBase", ToDbValue(record.generalDiseaseBase));
+                yield return new SqlParameter("@generalDiseaseTrunk", ToDbValue(record.generalDiseaseTrunk));
+                yield return new SqlParameter("@generalDiseaseBranch", ToDbValue(record.generalDiseaseBranch));
+                yield return new SqlParameter("@generalDiseaseCrown", ToDbValue(record.generalDiseaseCrown));
+                yield return new SqlParameter("@generalDiseaseOther", ToDbValue(record.generalDiseaseOther));
+                yield return new SqlParameter("@pestOtherNote", ToDbValue(record.pestOtherNote));
+
+                // 根部細節
+                yield return new SqlParameter("@rootDecayPercent", ToDbValue(record.rootDecayPercent));
+                yield return new SqlParameter("@rootCavityMaxDiameter", ToDbValue(record.rootCavityMaxDiameter));
+                yield return new SqlParameter("@rootWoundMaxDiameter", ToDbValue(record.rootWoundMaxDiameter));
+                yield return new SqlParameter("@rootMechanicalDamage", ToDbValue(record.rootMechanicalDamage));
+                yield return new SqlParameter("@rootMowingInjury", ToDbValue(record.rootMowingInjury));
+                yield return new SqlParameter("@rootInjury", ToDbValue(record.rootInjury));
+                yield return new SqlParameter("@rootGirdling", ToDbValue(record.rootGirdling));
+                yield return new SqlParameter("@rootOtherNote", ToDbValue(record.rootOtherNote));
+
+                // 基部細節
+                yield return new SqlParameter("@baseDecayPercent", ToDbValue(record.baseDecayPercent));
+                yield return new SqlParameter("@baseCavityMaxDiameter", ToDbValue(record.baseCavityMaxDiameter));
+                yield return new SqlParameter("@baseWoundMaxDiameter", ToDbValue(record.baseWoundMaxDiameter));
+                yield return new SqlParameter("@baseMechanicalDamage", ToDbValue(record.baseMechanicalDamage));
+                yield return new SqlParameter("@baseMowingInjury", ToDbValue(record.baseMowingInjury));
+                yield return new SqlParameter("@baseOtherNote", ToDbValue(record.baseOtherNote));
+
+                // 樹幹細節
+                yield return new SqlParameter("@trunkDecayPercent", ToDbValue(record.trunkDecayPercent));
+                yield return new SqlParameter("@trunkCavityMaxDiameter", ToDbValue(record.trunkCavityMaxDiameter));
+                yield return new SqlParameter("@trunkWoundMaxDiameter", ToDbValue(record.trunkWoundMaxDiameter));
+                yield return new SqlParameter("@trunkMechanicalDamage", ToDbValue(record.trunkMechanicalDamage));
+                yield return new SqlParameter("@trunkIncludedBark", ToDbValue(record.trunkIncludedBark));
+                yield return new SqlParameter("@trunkOtherNote", ToDbValue(record.trunkOtherNote));
+
+                // 枝條細節
+                yield return new SqlParameter("@branchDecayPercent", ToDbValue(record.branchDecayPercent));
+                yield return new SqlParameter("@branchCavityMaxDiameter", ToDbValue(record.branchCavityMaxDiameter));
+                yield return new SqlParameter("@branchWoundMaxDiameter", ToDbValue(record.branchWoundMaxDiameter));
+                yield return new SqlParameter("@branchMechanicalDamage", ToDbValue(record.branchMechanicalDamage));
+                yield return new SqlParameter("@branchIncludedBark", ToDbValue(record.branchIncludedBark));
+                yield return new SqlParameter("@branchDrooping", ToDbValue(record.branchDrooping));
+                yield return new SqlParameter("@branchOtherNote", ToDbValue(record.branchOtherNote));
+
+                // 樹冠細節
+                yield return new SqlParameter("@crownLeafCoveragePercent", ToDbValue(record.crownLeafCoveragePercent));
+                yield return new SqlParameter("@crownDeadBranchPercent", ToDbValue(record.crownDeadBranchPercent));
+                yield return new SqlParameter("@crownHangingBranch", ToDbValue(record.crownHangingBranch));
+                yield return new SqlParameter("@crownOtherNote", ToDbValue(record.crownOtherNote));
+
+                // 修剪與支撐
+                yield return new SqlParameter("@pruningWrongDamage", ToDbValue(record.pruningWrongDamage));
+                yield return new SqlParameter("@pruningWoundHealing", ToDbValue(record.pruningWoundHealing));
+                yield return new SqlParameter("@pruningEpiphyte", ToDbValue(record.pruningEpiphyte));
+                yield return new SqlParameter("@pruningParasite", ToDbValue(record.pruningParasite));
+                yield return new SqlParameter("@pruningVine", ToDbValue(record.pruningVine));
+                yield return new SqlParameter("@pruningOtherNote", ToDbValue(record.pruningOtherNote));
+                yield return new SqlParameter("@supportCount", ToDbValue(record.supportCount));
+                yield return new SqlParameter("@supportEmbedded", ToDbValue(record.supportEmbedded));
+                yield return new SqlParameter("@supportOtherNote", ToDbValue(record.supportOtherNote));
+
+                // 棲地與土壤
+                yield return new SqlParameter("@siteCementPercent", ToDbValue(record.siteCementPercent));
+                yield return new SqlParameter("@siteAsphaltPercent", ToDbValue(record.siteAsphaltPercent));
+                yield return new SqlParameter("@sitePlanter", ToDbValue(record.sitePlanter));
+                yield return new SqlParameter("@siteRecreationFacility", ToDbValue(record.siteRecreationFacility));
+                yield return new SqlParameter("@siteDebrisStack", ToDbValue(record.siteDebrisStack));
+                yield return new SqlParameter("@siteBetweenBuildings", ToDbValue(record.siteBetweenBuildings));
+                yield return new SqlParameter("@siteSoilCompaction", ToDbValue(record.siteSoilCompaction));
+                yield return new SqlParameter("@siteOverburiedSoil", ToDbValue(record.siteOverburiedSoil));
+                yield return new SqlParameter("@siteOtherNote", ToDbValue(record.siteOtherNote));
+                yield return new SqlParameter("@soilPh", ToDbValue(record.soilPh));
+                yield return new SqlParameter("@soilOrganicMatter", ToDbValue(record.soilOrganicMatter));
+                yield return new SqlParameter("@soilEc", ToDbValue(record.soilEc));
+
+                // 管理建議與系統資訊
+                yield return new SqlParameter("@managementStatus", ToDbValue(record.managementStatus));
+                yield return new SqlParameter("@priority", ToDbValue(record.priority));
+                yield return new SqlParameter("@treatmentDescription", ToDbValue(record.treatmentDescription));
+                yield return new SqlParameter("@sourceUnit", ToDbValue(record.sourceUnit));
+                yield return new SqlParameter("@sourceUnitID", ToDbValue(record.sourceUnitID));
             }
 
             public static void DeleteHealthRecord(int healthId, int accountId)

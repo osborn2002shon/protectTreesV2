@@ -25,6 +25,19 @@ namespace protectTreesV2.Base
                 Session["setTreeID"] = value;
             }
         }
+
+        public string setHealthID
+        {
+            get
+            {
+                return Session["setHealthID"] != null ? Session["setHealthID"].ToString() : string.Empty;
+            }
+            set
+            {
+                Session["setHealthID"] = value;
+            }
+        }
+
         public List<ListItem> GetCities()
         {
             using (var da = new DataAccess.MS_SQL())
