@@ -59,6 +59,37 @@ namespace protectTreesV2.Patrol
             public string patroller { get; set; }
         }
 
+        [Serializable]
+        public class PatrolRecordListFilter
+        {
+            public string scope { get; set; } = "Unit"; // My / Unit
+            public int? cityID { get; set; }
+            public int? areaID { get; set; }
+            public int? speciesID { get; set; }
+            public DateTime? dateStart { get; set; }
+            public DateTime? dateEnd { get; set; }
+            public string keyword { get; set; }
+            public string sortExpression { get; set; }
+            public string sortDirection { get; set; }
+        }
+
+        public class PatrolRecordListResult
+        {
+            public int patrolID { get; set; }
+            public DateTime? patrolDate { get; set; }
+            public string patroller { get; set; }
+            public DateTime? lastUpdate { get; set; }
+
+            public int treeID { get; set; }
+            public string systemTreeNo { get; set; }
+            public string agencyTreeNo { get; set; }
+            public string cityName { get; set; }
+            public string areaName { get; set; }
+            public string speciesName { get; set; }
+            public string manager { get; set; }
+            public int? areaID { get; set; }
+        }
+
         public List<PatrolMainQueryResult> GetPatrolMainList(PatrolMainQueryFilter filter, int currentUserId)
         {
             var parameters = new List<SqlParameter>();
@@ -318,6 +349,145 @@ namespace protectTreesV2.Patrol
             {
                 da.ExecNonQuery(sql, parameters.ToArray());
             }
+        }
+
+        public List<PatrolRecordListResult> GetPatrolRecordList(PatrolRecordListFilter filter, int currentUserId)
+        {
+            var parameters = new List<SqlParameter>();
+            var whereClauses = new List<string>();
+
+            string sql = @"
+                SELECT
+                    patrol.patrolID,
+                    patrol.patrolDate,
+                    patrol.patroller,
+                    COALESCE(patrol.updateDateTime, patrol.insertDateTime) AS lastUpdate,
+
+                    record.treeID,
+                    record.systemTreeNo,
+                    record.agencyTreeNo,
+
+                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
+                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+
+                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    record.manager,
+                    record.areaID
+
+                FROM Tree_PatrolRecord patrol
+                JOIN Tree_Record record ON patrol.treeID = record.treeID
+
+                OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = record.cityID) cityInfo
+                LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = record.areaID
+                LEFT JOIN Tree_Species species ON species.speciesID = record.speciesID
+            ";
+
+            whereClauses.Add("patrol.removeDateTime IS NULL");
+            whereClauses.Add("record.removeDateTime IS NULL");
+            whereClauses.Add("record.editStatus = 1");
+
+            if (filter != null)
+            {
+                if (filter.scope == "My")
+                {
+                    whereClauses.Add("patrol.insertAccountID = @userID");
+                    parameters.Add(new SqlParameter("@userID", currentUserId));
+                }
+
+                if (filter.dateStart.HasValue)
+                {
+                    whereClauses.Add("patrol.patrolDate >= @dStart");
+                    parameters.Add(new SqlParameter("@dStart", filter.dateStart.Value));
+                }
+
+                if (filter.dateEnd.HasValue)
+                {
+                    whereClauses.Add("patrol.patrolDate <= @dEnd");
+                    parameters.Add(new SqlParameter("@dEnd", filter.dateEnd.Value));
+                }
+
+                if (filter.cityID.HasValue)
+                {
+                    whereClauses.Add("record.cityID = @cityID");
+                    parameters.Add(new SqlParameter("@cityID", filter.cityID));
+                }
+
+                if (filter.areaID.HasValue)
+                {
+                    whereClauses.Add("record.areaID = @areaID");
+                    parameters.Add(new SqlParameter("@areaID", filter.areaID));
+                }
+
+                if (filter.speciesID.HasValue)
+                {
+                    whereClauses.Add("record.speciesID = @speciesID");
+                    parameters.Add(new SqlParameter("@speciesID", filter.speciesID));
+                }
+
+                if (!string.IsNullOrWhiteSpace(filter.keyword))
+                {
+                    string kwSql = @"(
+                        record.systemTreeNo LIKE @kw OR
+                        record.agencyTreeNo LIKE @kw OR
+                        record.manager LIKE @kw OR
+                        patrol.patroller LIKE @kw
+                    )";
+                    whereClauses.Add(kwSql);
+                    parameters.Add(new SqlParameter("@kw", "%" + filter.keyword.Trim() + "%"));
+                }
+            }
+
+            sql += $" WHERE {string.Join(" AND ", whereClauses)}";
+
+            string sortField = filter?.sortExpression;
+            string sortDir = (filter?.sortDirection == "ASC") ? "ASC" : "DESC";
+
+            if (string.IsNullOrEmpty(sortField) || sortField == "DefaultSort")
+            {
+                sql += " ORDER BY patrol.patrolDate DESC, record.systemTreeNo DESC";
+            }
+            else
+            {
+                if (sortField == "patrolDate" || sortField == "patroller" || sortField == "lastUpdate")
+                {
+                    sortField = "patrol." + sortField;
+                }
+                else if (sortField != "speciesName" && sortField != "cityName" && sortField != "areaName")
+                {
+                    sortField = "record." + sortField;
+                }
+
+                sql += $" ORDER BY {sortField} {sortDir}";
+            }
+
+            var result = new List<PatrolRecordListResult>();
+            using (var da = new DataAccess.MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sql, parameters.ToArray());
+                foreach (DataRow row in dt.Rows)
+                {
+                    var item = new PatrolRecordListResult
+                    {
+                        patrolID = GetNullableInt(row, "patrolID") ?? 0,
+                        patrolDate = GetNullableDateTime(row, "patrolDate"),
+                        patroller = GetString(row, "patroller"),
+                        lastUpdate = GetNullableDateTime(row, "lastUpdate"),
+
+                        treeID = GetNullableInt(row, "treeID") ?? 0,
+                        systemTreeNo = GetString(row, "systemTreeNo"),
+                        agencyTreeNo = GetString(row, "agencyTreeNo"),
+                        cityName = GetString(row, "cityName"),
+                        areaName = GetString(row, "areaName"),
+                        speciesName = GetString(row, "speciesName"),
+                        manager = GetString(row, "manager"),
+                        areaID = GetNullableInt(row, "areaID")
+                    };
+
+                    result.Add(item);
+                }
+            }
+
+            return result;
         }
     }
 }
