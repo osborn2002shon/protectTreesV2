@@ -500,7 +500,7 @@ namespace protectTreesV2.backstage.tree
 
             if (files != null && files.Count > 0)
             {
-                string uploadFolder = Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/upload/tree/{0}/", treeId));
+                string uploadFolder = Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/_file/tree/img/{0}/", treeId));
                 Directory.CreateDirectory(uploadFolder);
 
                 int count = Math.Min(files.Count, newKeys.Length);
@@ -518,7 +518,7 @@ namespace protectTreesV2.backstage.tree
                     {
                         TreeID = treeId,
                         FileName = fileName,
-                        FilePath = string.Format(CultureInfo.InvariantCulture, "/upload/tree/{0}/{1}", treeId, savedName),
+                        FilePath = string.Format(CultureInfo.InvariantCulture, "/_file/tree/img/{0}/{1}", treeId, savedName),
                         Caption = fileName,
                         IsCover = false
                     };
