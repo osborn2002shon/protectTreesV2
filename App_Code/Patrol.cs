@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using protectTreesV2.Base;
 using protectTreesV2.TreeCatalog;
 using static protectTreesV2.Base.DataRowHelper;
@@ -104,6 +105,33 @@ namespace protectTreesV2.Patrol
 
             public string dataStatusText
                 => dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.完稿 ? "完稿" : "草稿";
+        }
+
+        public class PatrolRecord
+        {
+            public int patrolID { get; set; }
+            public int treeID { get; set; }
+            public DateTime? patrolDate { get; set; }
+            public string patroller { get; set; }
+            public int dataStatus { get; set; }
+            public string memo { get; set; }
+            public bool hasPublicSafetyRisk { get; set; }
+            public string sourceUnit { get; set; }
+            public int? sourceUnitID { get; set; }
+            public int insertAccountID { get; set; }
+            public DateTime insertDateTime { get; set; }
+            public int? updateAccountID { get; set; }
+            public DateTime? updateDateTime { get; set; }
+        }
+
+        public class PatrolPhoto
+        {
+            public int PhotoID { get; set; }
+            public int PatrolID { get; set; }
+            public string FileName { get; set; }
+            public string FilePath { get; set; }
+            public int? FileSize { get; set; }
+            public string Caption { get; set; }
         }
 
         public List<PatrolMainQueryResult> GetPatrolMainList(PatrolMainQueryFilter filter, int currentUserId)
@@ -508,6 +536,179 @@ namespace protectTreesV2.Patrol
             }
 
             return result;
+        }
+
+        public PatrolRecord GetPatrolRecord(int patrolId)
+        {
+            const string sql = @"SELECT TOP 1 * FROM Tree_PatrolRecord WHERE patrolID=@id AND removeDateTime IS NULL";
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var dt = da.GetDataTable(sql, new SqlParameter("@id", patrolId));
+                if (dt.Rows.Count != 1) return null;
+
+                var row = dt.Rows[0];
+                return new PatrolRecord
+                {
+                    patrolID = GetNullableInt(row, "patrolID") ?? 0,
+                    treeID = GetNullableInt(row, "treeID") ?? 0,
+                    patrolDate = GetNullableDateTime(row, "patrolDate"),
+                    patroller = GetString(row, "patroller"),
+                    dataStatus = GetNullableInt(row, "dataStatus") ?? 0,
+                    memo = GetString(row, "memo"),
+                    hasPublicSafetyRisk = GetBoolean(row, "hasPublicSafetyRisk"),
+                    sourceUnit = GetString(row, "sourceUnit"),
+                    sourceUnitID = GetNullableInt(row, "sourceUnitID"),
+                    insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
+                    insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
+                    updateAccountID = GetNullableInt(row, "updateAccountID"),
+                    updateDateTime = GetNullableDateTime(row, "updateDateTime")
+                };
+            }
+        }
+
+        public List<PatrolPhoto> GetPatrolPhotos(int patrolId)
+        {
+            const string sql = @"SELECT * FROM Tree_PatrolPhoto WHERE patrolID=@id AND removeDateTime IS NULL ORDER BY insertDateTime";
+            var result = new List<PatrolPhoto>();
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var dt = da.GetDataTable(sql, new SqlParameter("@id", patrolId));
+                foreach (DataRow row in dt.Rows)
+                {
+                    result.Add(new PatrolPhoto
+                    {
+                        PhotoID = GetNullableInt(row, "photoID") ?? 0,
+                        PatrolID = GetNullableInt(row, "patrolID") ?? 0,
+                        FileName = GetString(row, "fileName"),
+                        FilePath = GetString(row, "filePath"),
+                        FileSize = GetNullableInt(row, "fileSize"),
+                        Caption = GetString(row, "caption")
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        public int InsertPatrolRecord(PatrolRecord record, int accountId)
+        {
+            const string sql = @"
+INSERT INTO Tree_PatrolRecord(treeID, patrolDate, patroller, dataStatus, memo, hasPublicSafetyRisk, sourceUnit, sourceUnitID, insertAccountID, insertDateTime)
+VALUES(@treeID, @patrolDate, @patroller, @dataStatus, @memo, @hasPublicSafetyRisk, @sourceUnit, @sourceUnitID, @accountId, GETDATE());
+SELECT SCOPE_IDENTITY();";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                object result = da.ExcuteScalar(sql,
+                    new SqlParameter("@treeID", record.treeID),
+                    new SqlParameter("@patrolDate", (object)record.patrolDate ?? DBNull.Value),
+                    new SqlParameter("@patroller", (object)record.patroller ?? DBNull.Value),
+                    new SqlParameter("@dataStatus", record.dataStatus),
+                    new SqlParameter("@memo", (object)record.memo ?? DBNull.Value),
+                    new SqlParameter("@hasPublicSafetyRisk", record.hasPublicSafetyRisk),
+                    new SqlParameter("@sourceUnit", (object)record.sourceUnit ?? DBNull.Value),
+                    new SqlParameter("@sourceUnitID", (object)record.sourceUnitID ?? DBNull.Value),
+                    new SqlParameter("@accountId", accountId));
+
+                return Convert.ToInt32(result);
+            }
+        }
+
+        public void UpdatePatrolRecord(PatrolRecord record, int accountId)
+        {
+            const string sql = @"
+UPDATE Tree_PatrolRecord
+SET patrolDate=@patrolDate,
+    patroller=@patroller,
+    dataStatus=@dataStatus,
+    memo=@memo,
+    hasPublicSafetyRisk=@hasPublicSafetyRisk,
+    updateAccountID=@accountId,
+    updateDateTime=GETDATE()
+WHERE patrolID=@patrolID AND removeDateTime IS NULL";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@patrolDate", (object)record.patrolDate ?? DBNull.Value),
+                    new SqlParameter("@patroller", (object)record.patroller ?? DBNull.Value),
+                    new SqlParameter("@dataStatus", record.dataStatus),
+                    new SqlParameter("@memo", (object)record.memo ?? DBNull.Value),
+                    new SqlParameter("@hasPublicSafetyRisk", record.hasPublicSafetyRisk),
+                    new SqlParameter("@accountId", accountId),
+                    new SqlParameter("@patrolID", record.patrolID));
+            }
+        }
+
+        public int InsertPatrolPhoto(PatrolPhoto photo, int accountId)
+        {
+            const string sql = @"
+INSERT INTO Tree_PatrolPhoto(patrolID, fileName, filePath, fileSize, caption, insertAccountID)
+VALUES(@patrolID, @fileName, @filePath, @fileSize, @caption, @accountId);
+SELECT SCOPE_IDENTITY();";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                object result = da.ExcuteScalar(sql,
+                    new SqlParameter("@patrolID", photo.PatrolID),
+                    new SqlParameter("@fileName", (object)photo.FileName ?? DBNull.Value),
+                    new SqlParameter("@filePath", (object)photo.FilePath ?? DBNull.Value),
+                    new SqlParameter("@fileSize", (object)photo.FileSize ?? DBNull.Value),
+                    new SqlParameter("@caption", (object)photo.Caption ?? DBNull.Value),
+                    new SqlParameter("@accountId", accountId));
+
+                return Convert.ToInt32(result);
+            }
+        }
+
+        public void UpdatePatrolPhotoCaption(int photoId, string caption, int accountId)
+        {
+            const string sql = @"UPDATE Tree_PatrolPhoto SET caption=@caption WHERE photoID=@id AND removeDateTime IS NULL";
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@caption", (object)caption ?? DBNull.Value),
+                    new SqlParameter("@id", photoId));
+            }
+        }
+
+        public void SoftDeletePatrolPhoto(int photoId, int accountId)
+        {
+            const string sql = @"UPDATE Tree_PatrolPhoto SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE photoID=@id AND removeDateTime IS NULL";
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@accountId", accountId),
+                    new SqlParameter("@id", photoId));
+            }
+        }
+
+        public List<string> GetRiskNotificationEmails(int cityId)
+        {
+            const string sql = @"
+SELECT DISTINCT ua.email
+FROM User_Account ua
+JOIN User_Area_Mapping map ON ua.accountID = map.accountID
+WHERE ua.auTypeID = 4
+  AND ua.isActive = 1
+  AND ua.removeDateTime IS NULL
+  AND (map.city = @cityId OR map.city = '-1')";
+
+            var emails = new List<string>();
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var dt = da.GetDataTable(sql, new SqlParameter("@cityId", cityId.ToString(CultureInfo.InvariantCulture)));
+                foreach (DataRow row in dt.Rows)
+                {
+                    var mail = GetString(row, "email");
+                    if (!string.IsNullOrWhiteSpace(mail))
+                    {
+                        emails.Add(mail);
+                    }
+                }
+            }
+            return emails;
         }
     }
 }
