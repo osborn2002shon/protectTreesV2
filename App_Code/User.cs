@@ -23,6 +23,12 @@ namespace protectTreesV2.User {
         public DateTime setPasswordTime { get; set; }
     }
 
+    public class UserAreaMapping
+    {
+        public string cityID { get; set; }
+        public string areaID { get; set; }
+    }
+
     /// <summary>
     /// 使用者帳號
     /// </summary>
@@ -46,6 +52,7 @@ namespace protectTreesV2.User {
         public DateTime? updateDateTime { get; set; }
         public int? updateUserID { get; set; }
         public DateTime? lastUpdatePWDateTime { get; set; }
+        public List<UserAreaMapping> areaMappings { get; set; }
         public enum enum_auType {
             系統管理權限 = 1,
             檢視管理權限 = 2,
@@ -60,6 +67,7 @@ namespace protectTreesV2.User {
         public Account()
         {
             this.auType = enum_auType.未登入;
+            this.areaMappings = new List<UserAreaMapping>();
         }
 
         public List<enum_auType> GetEnum_AuTypes()
@@ -95,6 +103,25 @@ namespace protectTreesV2.User {
         private const string SESSION_KEY = "CurrentUser";
         public const string PasswordPolicyDescription = "密碼需包含至少一個大寫字母、一個小寫字母及一個數字。";
 
+        private static List<UserAreaMapping> GetUserAreas(int accountID)
+        {
+            const string sql = "SELECT city, area FROM User_Area_Mapping WHERE accountID=@accountID";
+            var result = new List<UserAreaMapping>();
+            using (var da = new MS_SQL())
+            {
+                var dt = da.GetDataTable(sql, new SqlParameter("@accountID", accountID));
+                foreach (DataRow row in dt.Rows)
+                {
+                    result.Add(new UserAreaMapping
+                    {
+                        cityID = row["city"].ToString(),
+                        areaID = row["area"].ToString()
+                    });
+                }
+            }
+            return result;
+        }
+
         private static User.Account DataRowToUser(DataRow row)
         {
             return new User.Account
@@ -112,7 +139,8 @@ namespace protectTreesV2.User {
                 insertUserID = Convert.ToInt32(row["insertAccountID"]),
                 updateDateTime = row["updateDateTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row["updateDateTime"]),
                 updateUserID = row["updateAccountID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["updateAccountID"]),
-                lastUpdatePWDateTime = row["lastUpdatePWDateTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row["lastUpdatePWDateTime"])
+                lastUpdatePWDateTime = row["lastUpdatePWDateTime"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row["lastUpdatePWDateTime"]),
+                areaMappings = GetUserAreas(Convert.ToInt32(row["accountID"]))
             };
         }
 
@@ -276,4 +304,3 @@ namespace protectTreesV2.User {
         }
     }
 }
-
