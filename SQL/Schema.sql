@@ -372,11 +372,39 @@ CREATE TABLE [dbo].[User_Account](
 	[removeAccountID] [int] NULL, -- 移除者帳號ID
 	[lastUpdatePWDateTime] [datetime] NULL, -- 最後修改密碼時間
 	[SSOToken] [varchar](max) NULL, -- 單一登入Token
- CONSTRAINT [PK_System_UserAccountInfo] PRIMARY KEY CLUSTERED 
+CONSTRAINT [PK_System_UserAccountInfo] PRIMARY KEY CLUSTERED 
 (
 	[accountID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[User_Area_Mapping]    Script Date: 2025/8/19 下午 07:16:49 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[User_Area_Mapping](
+        [mappingID] [int] IDENTITY(1,1) NOT NULL, -- 帳號區域對應主鍵
+        [accountID] [int] NOT NULL, -- 帳號主鍵編號
+        [city] [nvarchar](50) NOT NULL, -- 可管轄城市代碼，全部為-1
+        [area] [nvarchar](50) NOT NULL, -- 可管轄區域代碼，全部為-1
+ CONSTRAINT [PK_User_Area_Mapping] PRIMARY KEY CLUSTERED 
+(
+        [mappingID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[User_Area_Mapping]  WITH CHECK ADD  CONSTRAINT [FK_User_Area_Mapping_User_Account] FOREIGN KEY([accountID])
+REFERENCES [dbo].[User_Account] ([accountID])
+GO
+ALTER TABLE [dbo].[User_Area_Mapping] CHECK CONSTRAINT [FK_User_Area_Mapping_User_Account]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UX_User_Area_Mapping_Account_City_Area] ON [dbo].[User_Area_Mapping]
+(
+        [accountID] ASC,
+        [city] ASC,
+        [area] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 GO
 /****** Object:  Table [dbo].[User_Log]    Script Date: 2025/8/19 下午 07:16:49 ******/
 SET ANSI_NULLS ON
