@@ -38,6 +38,18 @@ namespace protectTreesV2.Base
             }
         }
 
+        public string setPatrolID
+        {
+            get
+            {
+                return Session["setPatrolID"] != null ? Session["setPatrolID"].ToString() : string.Empty;
+            }
+            set
+            {
+                Session["setPatrolID"] = value;
+            }
+        }
+
         public List<ListItem> GetCities()
         {
             using (var da = new DataAccess.MS_SQL())
