@@ -130,12 +130,11 @@ namespace protectTreesV2.backstage.health
         }
 
         /// <summary>
-        /// 儲存按鈕事件 (範例)
+        /// 儲存按鈕事件 
         /// </summary>
         protected void LinkButton_save_Click(object sender, EventArgs e)
         {
-            // 在這裡儲存時，請使用 this.CurrentHealthID 或 this.CurrentTreeID
-            // 不要再用 setHealthID (Session)，因為已經空了
+            
         }
 
         protected void LinkButton_cancel_Click(object sender, EventArgs e)

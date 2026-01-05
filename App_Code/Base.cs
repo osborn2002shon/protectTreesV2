@@ -188,5 +188,68 @@ namespace protectTreesV2.Base
 
             return;
         }
+
+        /// <summary>
+        /// 綁定縣市下拉選單
+        /// </summary>
+        /// <param name="ddl">下拉選單控制項</param>
+        /// <param name="showAll">是否顯示「不拘/請選擇」，預設 true</param>
+        public static void Bind_DropDownList_City(ref DropDownList ddl, bool showAll = true)
+        {
+            ddl.Items.Clear();
+
+            // 判斷是否要加入預設選項
+            if (showAll)
+            {
+                ddl.Items.Add(new ListItem("縣市不拘*", string.Empty));
+            }
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                const string sql = "SELECT DISTINCT cityID, city FROM System_Taiwan ORDER BY cityID";
+
+                var dt = da.GetDataTable(sql);
+                foreach (DataRow row in dt.Rows)
+                {
+                    ddl.Items.Add(new ListItem(row["city"].ToString(), row["cityID"].ToString()));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 綁定鄉鎮下拉選單 (依據縣市ID)
+        /// </summary>
+        /// <param name="ddl">下拉選單控制項</param>
+        /// <param name="cityID">選中的縣市 ID</param>
+        /// <param name="showAll">是否顯示「不拘/請選擇」，預設 true</param>
+        public static void Bind_DropDownList_Area(ref DropDownList ddl, string cityID, bool showAll = true)
+        {
+            ddl.Items.Clear();
+
+            // 判斷是否要加入預設選項
+            if (showAll)
+            {
+                ddl.Items.Add(new ListItem("鄉鎮不拘*", string.Empty));
+            }
+
+            // 如果沒有傳入縣市ID，就只顯示「不拘」
+            if (string.IsNullOrWhiteSpace(cityID)) return;
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                const string sql = "SELECT twID, area FROM System_Taiwan WHERE cityID=@city ORDER BY area";
+
+                var parameters = new System.Data.SqlClient.SqlParameter[]
+                {
+                new System.Data.SqlClient.SqlParameter("@city", cityID)
+                };
+
+                var dt = da.GetDataTable(sql, parameters);
+                foreach (System.Data.DataRow row in dt.Rows)
+                {
+                    ddl.Items.Add(new System.Web.UI.WebControls.ListItem(row["area"].ToString(), row["twID"].ToString()));
+                }
+            }
+        }
     }
 }

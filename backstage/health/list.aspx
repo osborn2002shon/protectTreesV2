@@ -48,14 +48,14 @@
 
             <%-- 第二列：一般查詢 (縣市鄉鎮、樹種) --%>
             <div class="row mb-2">
-                <div class="col-md-6">
+                <div class="col">
                     <asp:Label runat="server" AssociatedControlID="DropDownList_city" Text="縣市鄉鎮" />
                     <div class="d-flex gap-2">
-                        <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select flex-fill" AutoPostBack="true" />
+                        <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select flex-fill" AutoPostBack="true" OnSelectedIndexChanged="DropDownList_city_SelectedIndexChanged" />
                         <asp:DropDownList ID="DropDownList_area" runat="server" CssClass="form-select flex-fill" />
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col">
                     <asp:Label runat="server" AssociatedControlID="DropDownList_species" Text="樹種" />
                     <asp:DropDownList ID="DropDownList_species" runat="server" CssClass="form-select" />
                 </div>
@@ -63,7 +63,7 @@
 
             <%-- 第三列：日期區間、關鍵字 --%>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col">
                     <label>調查日期</label>
                     <div class="d-flex align-items-center gap-2">
                         <asp:TextBox ID="TextBox_dateStart" runat="server" CssClass="form-control" TextMode="Date" />
@@ -71,7 +71,7 @@
                         <asp:TextBox ID="TextBox_dateEnd" runat="server" CssClass="form-control" TextMode="Date" />
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col">
                     <asp:Label runat="server" AssociatedControlID="TextBox_keyword" Text="關鍵字" />
                     <asp:TextBox ID="TextBox_keyword" runat="server" CssClass="form-control" placeholder="管理人、調查人、樹籍編號" />
                 </div>

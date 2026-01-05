@@ -94,6 +94,12 @@ namespace protectTreesV2.backstage.health
         /// </summary>
         private void InitSearchFilters()
         {
+            //縣市
+            Base.DropdownBinder.Bind_DropDownList_City(ref DropDownList_city);
+
+            //鄉鎮
+            Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
+
             //樹種
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
         }
@@ -143,6 +149,10 @@ namespace protectTreesV2.backstage.health
             GridView_healthList.DataBind();
         }
 
+        protected void DropDownList_city_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
+        }
         protected void LinkButton_search_Click(object sender, EventArgs e)
         {
             CollectFilterFromUI();
@@ -164,11 +174,12 @@ namespace protectTreesV2.backstage.health
         protected void GridView_healthList_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             // 取得 CommandArgument (HealthID)
-            int healthId = Convert.ToInt32(e.CommandArgument);
+            string healthStr = e.CommandArgument.ToString();
 
             // A. 檢視 (開新視窗)
             if (e.CommandName == "_ViewHealth")
             {
+                int healthId = Convert.ToInt32(healthStr);
                 var record = TreeService.GetHealthRecord(healthId);
                 uc_healthRecordModal.BindRecord(record);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModal", "showHealthRecordModal();", true);
@@ -177,7 +188,7 @@ namespace protectTreesV2.backstage.health
             else if (e.CommandName == "_EditHealth")
             {
                 // 設定健檢 ID 
-                setHealthID = healthId.ToString();
+                setHealthID = healthStr;
 
                 // 清空樹木 ID 
                 setTreeID = null;
@@ -202,5 +213,7 @@ namespace protectTreesV2.backstage.health
 
             BindResult();
         }
+
+       
     }
 }

@@ -24,7 +24,7 @@
                 <div class="col">
                     <asp:Label runat="server" AssociatedControlID="DropDownList_city" Text="縣市鄉鎮" />
                     <div class="d-flex gap-2">
-                        <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select flex-fill" AutoPostBack="true" />
+                        <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select flex-fill" AutoPostBack="true" OnSelectedIndexChanged="DropDownList_city_SelectedIndexChanged" />
                         <asp:DropDownList ID="DropDownList_area" runat="server" CssClass="form-select flex-fill" />
                     </div>
                 </div>

@@ -136,6 +136,7 @@
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
+    <Content Include="backstage\patrol\list.aspx" />
     <Content Include="backstage\patrol\main.aspx" />
     <Content Include="backstage\health\upload.aspx" />
     <Content Include="backstage\health\uploadFile.aspx" />
@@ -329,10 +330,15 @@
     <Content Include="_fonts\fa-v4compatibility.woff2" />
     <Content Include="_mp\mp_backstage.Master" />
     <Content Include="_mp\mp_login.Master" />
+    <Content Include="_doc\~%24受保護樹木健檢資料蒐集用表格.xlsx" />
+    <Content Include="_doc\受保護樹木健檢資料蒐集用表格.xlsx" />
+    <Content Include="_doc\受保護樹木巡查資料蒐集用表格.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="backstage\system\" />
     <Folder Include="pages\" />
+    <Folder Include="_file\health\" />
+    <Folder Include="_file\tree\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

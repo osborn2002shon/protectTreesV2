@@ -8,6 +8,7 @@ using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
 using static protectTreesV2.Health.Health;
+using System.Security.Cryptography;
 
 namespace protectTreesV2.backstage.health
 {
@@ -52,6 +53,12 @@ namespace protectTreesV2.backstage.health
         /// </summary>
         private void InitSearchFilters()
         {
+            //縣市
+            Base.DropdownBinder.Bind_DropDownList_City(ref DropDownList_city);
+
+            //鄉鎮
+            Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area,DropDownList_city.SelectedValue);
+
             //樹種
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
         }
@@ -97,6 +104,10 @@ namespace protectTreesV2.backstage.health
             // 5. 綁定
             GridView_list.DataSource = data;
             GridView_list.DataBind();
+        }
+        protected void DropDownList_city_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
         }
 
         protected void LinkButton_search_Click(object sender, EventArgs e)

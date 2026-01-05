@@ -161,6 +161,8 @@ namespace protectTreesV2.Health
             public bool? crownHangingBranch { get; set; }
             public string crownOtherNote { get; set; }
 
+            public string growthNote { get; set; }
+
             // ==========================================
             // 修剪與支撐
             // ==========================================
