@@ -241,10 +241,22 @@
                 const jsonVal = $existingDataField.val();
                 if (jsonVal) {
                     try {
-                        existingPhotos = JSON.parse(jsonVal);
-                        $.each(existingPhotos, function (i, p) {
-                            p.deleted = false;
-                            if (!p.caption) p.caption = '';
+                        const parsed = JSON.parse(jsonVal);
+                        $.each(parsed, function (i, p) {
+                            if (p.isTemp) {
+                                newPhotos.push({
+                                    key: p.key,
+                                    fileName: p.fileName,
+                                    previewUrl: p.filePath,
+                                    caption: p.caption || '',
+                                    isTemp: true
+                                });
+                                tempIdCounter = Math.min(tempIdCounter, p.key - 1);
+                            } else {
+                                p.deleted = false;
+                                if (!p.caption) p.caption = '';
+                                existingPhotos.push(p);
+                            }
                         });
                     } catch (e) { console.error(e); }
                 }
@@ -291,7 +303,7 @@
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     if (file.size > maxSize) { alert(`${file.name} 太大`); continue; }
-                    if (newPhotos.some(np => np.file.name === file.name && np.file.size === file.size)) continue;
+                    if (newPhotos.some(np => np.file && np.file.name === file.name && np.file.size === file.size)) continue;
 
                     const key = tempIdCounter--;
                     const previewUrl = URL.createObjectURL(file);
@@ -302,7 +314,11 @@
 
             function rebuildFileInput() {
                 const dt = new DataTransfer();
-                $.each(newPhotos, function (i, p) { dt.items.add(p.file); });
+                $.each(newPhotos, function (i, p) {
+                    if (p.file) {
+                        dt.items.add(p.file);
+                    }
+                });
                 $fileInput[0].files = dt.files;
             }
 
@@ -320,7 +336,7 @@
                 $.each(newPhotos, function (i, p) {
                     metadata.push({
                         key: p.key,
-                        fileName: p.file.name,
+                        fileName: p.file ? p.file.name : (p.fileName || ''),
                         caption: p.caption
                     });
                 });
