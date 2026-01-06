@@ -147,6 +147,15 @@ namespace protectTreesV2.backstage.patrol
                 string script = $"window.open('{targetUrl}', '_blank');";
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenTreeWindow", script, true);
             }
+            else if (e.CommandName == "_EditPatrol")
+            {
+                if (int.TryParse(arg, out int patrolId))
+                {
+                    setPatrolID = patrolId.ToString();
+                    setTreeID = null;
+                    Response.Redirect("edit.aspx");
+                }
+            }
         }
 
         protected void GridView_patrolList_Sorting(object sender, GridViewSortEventArgs e)

@@ -129,7 +129,7 @@
                 </asp:TemplateField>
 
                 <%-- 9. 動作區塊 --%>
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="120px" ItemStyle-HorizontalAlign="Center">
+                <asp:TemplateField HeaderText="動作" ItemStyle-Width="180px" ItemStyle-HorizontalAlign="Center">
                     <ItemTemplate>
                         <div class="d-flex gap-2 justify-content-center">
                             <asp:LinkButton ID="LinkButton_viewTree" runat="server"
@@ -137,6 +137,11 @@
                                 Text="檢視樹籍"
                                 CommandName="_ViewTree"
                                 CommandArgument='<%# Eval("treeID") %>' />
+                            <asp:LinkButton ID="LinkButton_edit" runat="server"
+                                CssClass="btn btn-sm btn-primary"
+                                Text="編輯"
+                                CommandName="_EditPatrol"
+                                CommandArgument='<%# Eval("patrolID") %>' />
                         </div>
                     </ItemTemplate>
                 </asp:TemplateField>
