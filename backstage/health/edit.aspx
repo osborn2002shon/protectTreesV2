@@ -794,7 +794,7 @@
 
                     <%-- 1. 說明文字 --%>
                     <div class="mb-3 text-muted small">
-                        <i class="fa-solid fa-circle-info me-1"></i> 可上傳多張照片，支援 JPG/PNG，單張上限 10MB。
+                        <i class="fa-solid fa-circle-info me-1"></i> 可上傳多張照片（最多 5 張），支援 JPG/PNG，單張上限 10MB。
                     </div>
 
                     <%-- 2. 拖曳上傳區 --%>
@@ -858,6 +858,7 @@
             const $metadataField = $('#<%= HiddenField_photoMetadata.ClientID %>');
 
             const maxSize = 10 * 1024 * 1024;
+            const maxPhotos = 5;
             let existingPhotos = [];
             let newPhotos = [];
             // 用來產生新照片的暫時 ID (負數遞減)
@@ -916,8 +917,15 @@
             function handleFiles(files) {
                 if (!files || files.length === 0) return;
 
+                const activeExistingCount = $.grep(existingPhotos, function (p) { return !p.deleted; }).length;
+                let currentCount = activeExistingCount + newPhotos.length;
+
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
+                    if (currentCount >= maxPhotos) {
+                        alert(`最多只能上傳 ${maxPhotos} 張照片`);
+                        break;
+                    }
                     if (file.size > maxSize) { alert(`${file.name} 太大`); continue; }
                     if (newPhotos.some(np => np.file.name === file.name && np.file.size === file.size)) continue;
 
@@ -927,6 +935,7 @@
 
                     const previewUrl = URL.createObjectURL(file);
                     newPhotos.push({ key: key, file: file, previewUrl: previewUrl, caption: '' });
+                    currentCount++;
                 }
                 renderPhotos();
             }
