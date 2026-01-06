@@ -75,6 +75,8 @@ namespace protectTreesV2.backstage.patrol
 
         private void InitSearchFilters()
         {
+            Base.DropdownBinder.Bind_DropDownList_City(ref DropDownList_city);
+            Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
         }
 
@@ -196,6 +198,11 @@ namespace protectTreesV2.backstage.patrol
             }
 
             BindResult();
+        }
+
+        protected void DropDownList_city_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
         }
 
         protected bool IsDraft(object dataStatus)
