@@ -5,13 +5,13 @@ using System.Configuration;
 
 public static class EmailService
 {
-    public static void SendMail(string to, string subject, string body)
+    public static void  SendMail(string to, string subject, string body)
     {
-        var host = ConfigurationManager.AppSettings["smtpHost"];
-        var portStr = ConfigurationManager.AppSettings["smtpPort"];
-        var user = ConfigurationManager.AppSettings["smtpUser"];
-        var password = ConfigurationManager.AppSettings["smtpPassword"];
-        var enableSsl = ConfigurationManager.AppSettings["EnableSSL"];
+        var host = ConfigurationManager.AppSettings["MailSMTP"];
+        var portStr = ConfigurationManager.AppSettings["MailPort"];
+        var user = ConfigurationManager.AppSettings["MailAccount"];
+        var password = ConfigurationManager.AppSettings["MailPassword"];
+        var enableSsl = ConfigurationManager.AppSettings["MailEnableSsl"];
 
         int port = 25;
         int.TryParse(portStr, out port);
@@ -26,7 +26,10 @@ public static class EmailService
         var smtp = new SmtpClient(host, port)
         {
             EnableSsl = ssl,
-            Credentials = new NetworkCredential(user, password)
+            UseDefaultCredentials = false,   // 非常重要
+            Credentials = new NetworkCredential(user, password),
+            DeliveryMethod = SmtpDeliveryMethod.Network
+
         };
         smtp.Send(mail);
     }
