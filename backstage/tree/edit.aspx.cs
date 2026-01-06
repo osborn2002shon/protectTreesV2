@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -16,10 +17,28 @@ namespace protectTreesV2.backstage.tree
 {
     public partial class edit : BasePage
     {
+        [Serializable]
+        private class TempUploadInfo
+        {
+            public string Key { get; set; }
+            public string FileName { get; set; }
+            public string VirtualPath { get; set; }
+            public string PhysicalPath { get; set; }
+            public int ContentLength { get; set; }
+        }
+
+        private const int MaxPhotoCount = 5;
+        private const int MaxPhotoSize = 10 * 1024 * 1024;
+
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
+            if (IsPostBack)
             {
+                HandlePendingUploads();
+            }
+            else
+            {
+                ClearPendingUploads();
                 BindDropdowns();
                 LoadData();
             }
@@ -29,10 +48,8 @@ namespace protectTreesV2.backstage.tree
         {
             base.OnPreRender(e);
 
-            if (int.TryParse(hfTreeID.Value, out int treeId) && treeId > 0)
-            {
-                BindPhotoJson(treeId);
-            }
+            int.TryParse(hfTreeID.Value, out int treeId);
+            BindPhotoJson(treeId);
         }
 
         private int LogPageIndex
@@ -139,13 +156,33 @@ namespace protectTreesV2.backstage.tree
 
         private void BindPhotoJson(int treeId)
         {
-            var photos = TreeService.GetPhotos(treeId).Select(p => new
+            var photos = new List<object>();
+            if (treeId > 0)
             {
-                photoId = p.PhotoID,
-                filePath = p.FilePath,
-                caption = string.IsNullOrWhiteSpace(p.Caption) ? p.FileName : p.Caption,
-                isCover = p.IsCover
-            }).ToList();
+                photos.AddRange(TreeService.GetPhotos(treeId).Select(p => new
+                {
+                    photoId = p.PhotoID,
+                    filePath = p.FilePath,
+                    caption = string.IsNullOrWhiteSpace(p.Caption) ? p.FileName : p.Caption,
+                    isCover = p.IsCover
+                }));
+            }
+
+            foreach (var temp in GetPendingUploads())
+            {
+                if (!File.Exists(temp.PhysicalPath) && string.IsNullOrWhiteSpace(temp.VirtualPath)) continue;
+
+                photos.Add(new
+                {
+                    photoId = 0,
+                    key = temp.Key,
+                    filePath = temp.VirtualPath,
+                    fileName = temp.FileName,
+                    caption = temp.FileName,
+                    isCover = false,
+                    isTemp = true
+                });
+            }
 
             PhotoJson = new JavaScriptSerializer().Serialize(photos);
         }
@@ -413,6 +450,7 @@ namespace protectTreesV2.backstage.tree
 
         protected void btnCancel_Click(object sender, EventArgs e)
         {
+            ClearPendingUploads();
             Response.Redirect("query.aspx");
         }
 
@@ -421,46 +459,26 @@ namespace protectTreesV2.backstage.tree
             var existing = treeId > 0 ? TreeService.GetPhotos(treeId) : new List<TreePhoto>();
             var deleted = ParseDeletedPhotoIds();
             int remaining = existing.Count(p => !deleted.Contains(p.PhotoID));
+            var pending = GetPendingUploads();
+            var newKeys = GetNewPhotoKeys();
 
-            var files = fuPendingPhotos.PostedFiles?
-                .Cast<System.Web.HttpPostedFile>()
-                .Where(f => f != null && f.ContentLength > 0)
-                .ToList();
-            int newCount = files?.Count ?? 0;
-            string[] newKeys = (hfNewPhotoKeys.Value ?? string.Empty)
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            const int maxCount = 5;
-            const int maxSize = 10 * 1024 * 1024;
-
-            if (newCount > maxCount)
-            {
-                ShowMessage("限制", "一次最多上傳 5 張照片", "warning");
-                return false;
-            }
-
-            if (remaining + newCount > maxCount)
+            if (remaining + pending.Count > MaxPhotoCount)
             {
                 ShowMessage("限制", "每棵樹最多保留 5 張照片", "warning");
                 return false;
             }
 
-            if (files != null)
+            if (pending.Any(p => p.ContentLength > MaxPhotoSize))
             {
-                if (files.Count != newKeys.Length)
-                {
-                    ShowMessage("提示", "照片資訊不一致，請重新選擇照片", "warning");
-                    return false;
-                }
+                ShowMessage("限制", "單張照片大小不可超過 10MB", "warning");
+                return false;
+            }
 
-                for (int i = 0; i < files.Count; i++)
-                {
-                    var file = files[i];
-                    if (file != null && file.ContentLength > maxSize)
-                    {
-                        ShowMessage("限制", $"{file.FileName} 超過 10MB，請重新選擇", "warning");
-                        return false;
-                    }
-                }
+            var missing = newKeys.Where(k => pending.All(p => p.Key != k)).ToList();
+            if (missing.Any())
+            {
+                ShowMessage("提示", "部分照片未成功暫存，請重新選擇照片後再試一次", "warning");
+                return false;
             }
 
             return true;
@@ -470,6 +488,7 @@ namespace protectTreesV2.backstage.tree
         {
             var deleted = ParseDeletedPhotoIds();
             var existing = TreeService.GetPhotos(treeId);
+            var pending = GetPendingUploads();
 
             foreach (var photoId in deleted)
             {
@@ -485,9 +504,6 @@ namespace protectTreesV2.backstage.tree
                 }
             }
 
-            var files = fuPendingPhotos.PostedFiles;
-            string[] newKeys = (hfNewPhotoKeys.Value ?? string.Empty)
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string coverKey = hfCoverPhoto.Value;
             int? coverId = null;
 
@@ -499,33 +515,30 @@ namespace protectTreesV2.backstage.tree
                 }
             }
 
-            if (files != null && files.Count > 0)
+            if (pending.Any())
             {
                 string uploadFolder = Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/_file/tree/img/{0}/", treeId));
                 Directory.CreateDirectory(uploadFolder);
 
-                int count = Math.Min(files.Count, newKeys.Length);
-                for (int i = 0; i < count; i++)
+                foreach (var temp in pending)
                 {
-                    var file = files[i];
-                    if (file == null || file.ContentLength == 0) continue;
+                    if (string.IsNullOrEmpty(temp.PhysicalPath) || !File.Exists(temp.PhysicalPath)) continue;
 
-                    string fileName = Path.GetFileName(file.FileName);
-                    string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, fileName);
-                    string physicalPath = Path.Combine(uploadFolder, savedName);
-                    file.SaveAs(physicalPath);
+                    string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, temp.FileName);
+                    string targetPath = Path.Combine(uploadFolder, savedName);
+                    File.Move(temp.PhysicalPath, targetPath);
 
                     var photo = new TreePhoto
                     {
                         TreeID = treeId,
-                        FileName = fileName,
+                        FileName = temp.FileName,
                         FilePath = string.Format(CultureInfo.InvariantCulture, "/_file/tree/img/{0}/{1}", treeId, savedName),
-                        Caption = fileName,
+                        Caption = temp.FileName,
                         IsCover = false
                     };
 
                     int photoId = TreeService.InsertPhoto(photo, accountId);
-                    if (coverKey == newKeys[i])
+                    if (coverKey == temp.Key)
                     {
                         coverId = photoId;
                     }
@@ -543,6 +556,7 @@ namespace protectTreesV2.backstage.tree
                 TreeService.SetCoverPhoto(treeId, coverId.Value, accountId);
             }
 
+            ClearPendingUploads();
             return true;
         }
 
@@ -604,6 +618,165 @@ namespace protectTreesV2.backstage.tree
             {
                 LogPageIndex++;
                 BindLogs(treeId);
+            }
+        }
+
+        private void HandlePendingUploads()
+        {
+            var newKeys = GetNewPhotoKeys();
+            SyncPendingUploads(newKeys);
+            SavePendingUploads(newKeys);
+        }
+
+        private List<string> GetNewPhotoKeys()
+        {
+            return (hfNewPhotoKeys.Value ?? string.Empty)
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(k => k.Trim())
+                .Where(k => !string.IsNullOrWhiteSpace(k))
+                .ToList();
+        }
+
+        private void SavePendingUploads(List<string> newKeys)
+        {
+            var files = fuPendingPhotos.PostedFiles?
+                .Cast<HttpPostedFile>()
+                .Where(f => f != null && f.ContentLength > 0)
+                .ToList();
+
+            if (files == null || files.Count == 0) return;
+
+            var pending = GetPendingUploads();
+            string tempFolder = GetTempFolderPath();
+            Directory.CreateDirectory(tempFolder);
+
+            int fileIndex = 0;
+            foreach (var key in newKeys)
+            {
+                if (pending.Any(p => p.Key == key)) continue;
+                if (fileIndex >= files.Count) break;
+
+                var file = files[fileIndex++];
+                if (file == null || file.ContentLength == 0) continue;
+                if (file.ContentLength > MaxPhotoSize) continue;
+
+                string originalName = Path.GetFileName(file.FileName);
+                string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, originalName);
+                string physicalPath = Path.Combine(tempFolder, savedName);
+                file.SaveAs(physicalPath);
+
+                string virtualPath = string.Format(CultureInfo.InvariantCulture, "/_file/tree/temp/{0}/{1}", Session.SessionID, savedName);
+
+                pending.Add(new TempUploadInfo
+                {
+                    Key = key,
+                    FileName = originalName,
+                    PhysicalPath = physicalPath,
+                    VirtualPath = virtualPath,
+                    ContentLength = file.ContentLength
+                });
+            }
+
+            Session[PendingUploadSessionKey] = pending;
+        }
+
+        private void SyncPendingUploads(List<string> newKeys)
+        {
+            var pending = GetPendingUploads();
+            var keep = new HashSet<string>(newKeys ?? new List<string>());
+
+            for (int i = pending.Count - 1; i >= 0; i--)
+            {
+                if (!keep.Contains(pending[i].Key))
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(pending[i].PhysicalPath) && File.Exists(pending[i].PhysicalPath))
+                        {
+                            File.Delete(pending[i].PhysicalPath);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                    pending.RemoveAt(i);
+                }
+            }
+
+            Session[PendingUploadSessionKey] = pending;
+        }
+
+        private List<TempUploadInfo> GetPendingUploads()
+        {
+            var pending = Session[PendingUploadSessionKey] as List<TempUploadInfo>;
+            if (pending == null)
+            {
+                pending = new List<TempUploadInfo>();
+                Session[PendingUploadSessionKey] = pending;
+            }
+            return pending;
+        }
+
+        private string PendingUploadSessionKey
+        {
+            get
+            {
+                if (ViewState[nameof(PendingUploadSessionKey)] == null)
+                {
+                    string idPart = "new";
+                    if (int.TryParse(hfTreeID.Value, out int treeId) && treeId > 0)
+                    {
+                        idPart = treeId.ToString();
+                    }
+                    else if (int.TryParse(setTreeID, out int queryId) && queryId > 0)
+                    {
+                        idPart = queryId.ToString();
+                    }
+
+                    ViewState[nameof(PendingUploadSessionKey)] = $"TreePendingUploads_{Session.SessionID}_{idPart}";
+                }
+
+                return (string)ViewState[nameof(PendingUploadSessionKey)];
+            }
+        }
+
+        private string GetTempFolderPath()
+        {
+            return Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/_file/tree/temp/{0}/", Session.SessionID));
+        }
+
+        private void ClearPendingUploads()
+        {
+            var pending = Session[PendingUploadSessionKey] as List<TempUploadInfo>;
+            if (pending != null)
+            {
+                foreach (var temp in pending)
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(temp.PhysicalPath) && File.Exists(temp.PhysicalPath))
+                        {
+                            File.Delete(temp.PhysicalPath);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            Session[PendingUploadSessionKey] = null;
+
+            try
+            {
+                string folder = GetTempFolderPath();
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
+            }
+            catch
+            {
             }
         }
     }

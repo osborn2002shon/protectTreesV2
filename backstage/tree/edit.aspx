@@ -385,34 +385,57 @@
     <script type="text/javascript">
         const maxPhotos = 5;
         const maxSize = 10 * 1024 * 1024;
-        const initialPhotos = <%= PhotoJson %>;
+        const initialPhotos = <%= PhotoJson %> || [];
         const photoListElement = document.getElementById('photoList');
         const dropArea = document.getElementById('photoDropArea');
         const fileInput = document.getElementById('<%= fuPendingPhotos.ClientID %>');
         const deletedField = document.getElementById('<%= hfDeletedPhotos.ClientID %>');
         const coverField = document.getElementById('<%= hfCoverPhoto.ClientID %>');
         const newKeysField = document.getElementById('<%= hfNewPhotoKeys.ClientID %>');
-        let existingPhotos = (initialPhotos || []).map(p => ({
-            key: `existing-${p.photoId}`,
-            photoId: p.photoId,
-            filePath: p.filePath,
-            caption: p.caption,
-            isCover: p.isCover,
-            deleted: false
-        }));
-        let newPhotos = [];
+        let existingPhotos = initialPhotos
+            .filter(p => !p.isTemp)
+            .map(p => ({
+                key: `existing-${p.photoId}`,
+                photoId: p.photoId,
+                filePath: p.filePath,
+                caption: p.caption,
+                isCover: p.isCover,
+                deleted: false
+            }));
+        let newPhotos = initialPhotos
+            .filter(p => p.isTemp)
+            .map(p => ({
+                key: p.key || `temp-${Date.now()}`,
+                fileName: p.fileName || p.caption || '',
+                filePath: p.filePath,
+                previewUrl: p.filePath,
+                caption: p.caption || p.fileName || '',
+                isTemp: true
+            }));
 
         function initializePhotos() {
-            const cover = existingPhotos.find(p => p.isCover && !p.deleted) || existingPhotos.find(p => !p.deleted);
+            const allPhotos = getAllActivePhotos();
+            const existingCover = coverField.value;
+            if (existingCover && allPhotos.some(p => p.key === existingCover)) {
+                renderPhotos();
+                return;
+            }
+
+            const cover = allPhotos.find(p => p.isCover && !p.deleted) || allPhotos[0];
             coverField.value = cover ? cover.key : '';
             renderPhotos();
         }
 
-        function renderPhotos() {
+        function getAllActivePhotos() {
             const activeExisting = existingPhotos.filter(p => !p.deleted);
-            const allPhotos = [...activeExisting, ...newPhotos];
+            return [...activeExisting, ...newPhotos];
+        }
+
+        function renderPhotos() {
+            const allPhotos = getAllActivePhotos();
             if (allPhotos.length === 0) {
                 photoListElement.innerHTML = '<div class="text-muted">尚未選擇照片</div>';
+                updateHiddenFields();
                 return;
             }
 
@@ -420,7 +443,7 @@
             const items = allPhotos.map(p => {
                 const isCover = coverValue === p.key;
                 const src = p.filePath || p.previewUrl;
-                const caption = p.caption || p.file?.name || '';
+                const caption = p.caption || p.fileName || p.file?.name || '';
                 return `
                     <div class="photo-item">
                         <img src="${src}" alt="${caption}" />
@@ -481,7 +504,7 @@
 
                 const key = `new-${Date.now()}-${i}`;
                 const previewUrl = URL.createObjectURL(file);
-                newPhotos.push({ key, file, previewUrl, caption: file.name });
+                newPhotos.push({ key, file, previewUrl, caption: file.name, fileName: file.name });
             }
 
             rebuildFileInput();
@@ -499,17 +522,22 @@
 
         function rebuildFileInput() {
             const dataTransfer = new DataTransfer();
-            newPhotos.forEach(p => dataTransfer.items.add(p.file));
+            newPhotos.forEach(p => {
+                if (p.file) {
+                    dataTransfer.items.add(p.file);
+                }
+            });
             fileInput.files = dataTransfer.files;
-            newKeysField.value = newPhotos.map(p => p.key).join(',');
         }
 
         function updateHiddenFields() {
             deletedField.value = existingPhotos.filter(p => p.deleted).map(p => p.photoId).join(',');
-            if (!coverField.value) {
-                const next = existingPhotos.find(p => !p.deleted) || newPhotos[0];
+            const allPhotos = getAllActivePhotos();
+            if (!coverField.value || !allPhotos.some(p => p.key === coverField.value)) {
+                const next = allPhotos[0];
                 coverField.value = next ? next.key : '';
             }
+            newKeysField.value = newPhotos.map(p => p.key).join(',');
         }
 
         dropArea.addEventListener('click', function () {
