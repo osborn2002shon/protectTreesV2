@@ -17,6 +17,16 @@ namespace protectTreesV2.backstage.patrol
     {
         private readonly protectTreesV2.Patrol.Patrol system_patrol = new protectTreesV2.Patrol.Patrol();
 
+        [Serializable]
+        private class TempUploadInfo
+        {
+            public int Key { get; set; }
+            public string FileName { get; set; }
+            public string VirtualPath { get; set; }
+            public string PhysicalPath { get; set; }
+            public string Caption { get; set; }
+        }
+
         public int CurrentPatrolID
         {
             get { return (int)(ViewState["CurrentPatrolID"] ?? 0); }
@@ -31,6 +41,14 @@ namespace protectTreesV2.backstage.patrol
 
         public string Action => CurrentPatrolID > 0 ? "edit" : "add";
 
+        private string PendingUploadSessionKey
+        {
+            get
+            {
+                return $"PatrolPendingUploads_{Session.SessionID}_{CurrentPatrolID}_{CurrentTreeID}";
+            }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             LinkButton_save.OnClientClick = "return confirmPatrolRisk();";
@@ -38,6 +56,7 @@ namespace protectTreesV2.backstage.patrol
             if (!IsPostBack)
             {
                 InitIdsFromSession();
+                ClearPendingUploads();
 
                 if (CurrentPatrolID == 0 && CurrentTreeID == 0)
                 {
@@ -141,36 +160,221 @@ namespace protectTreesV2.backstage.patrol
             Label_manager.Text = tree.Manager ?? "--";
         }
 
-        private void BindPhotoData()
+        private void BindPhotoData(Dictionary<int, (string fileName, string caption)> metadata = null)
         {
             var serializer = new JavaScriptSerializer();
-            if (CurrentPatrolID <= 0)
+            var photos = new List<object>();
+
+            if (CurrentPatrolID > 0)
             {
-                HiddenField_existingPhotosData.Value = serializer.Serialize(new List<object>());
-                return;
+                var existingPhotos = system_patrol.GetPatrolPhotos(CurrentPatrolID)
+                    .Select(p => new
+                    {
+                        key = p.PhotoID,
+                        fileName = p.FileName,
+                        filePath = p.FilePath,
+                        caption = p.Caption
+                    }).ToList();
+                photos.AddRange(existingPhotos);
             }
 
-            var photos = system_patrol.GetPatrolPhotos(CurrentPatrolID)
-                .Select(p => new
+            if (metadata != null)
+            {
+                SyncPendingUploadsWithMetadata(metadata);
+            }
+
+            foreach (var temp in GetPendingUploads())
+            {
+                if (File.Exists(temp.PhysicalPath) || !string.IsNullOrEmpty(temp.VirtualPath))
                 {
-                    key = p.PhotoID,
-                    fileName = p.FileName,
-                    filePath = p.FilePath,
-                    caption = p.Caption
-                }).ToList();
+                    photos.Add(new
+                    {
+                        key = temp.Key,
+                        fileName = temp.FileName,
+                        filePath = temp.VirtualPath,
+                        caption = temp.Caption,
+                        isTemp = true
+                    });
+                }
+            }
 
             HiddenField_existingPhotosData.Value = serializer.Serialize(photos);
         }
 
+        private void SavePendingUploads(Dictionary<int, (string fileName, string caption)> metadata)
+        {
+            var files = GetPostedFiles();
+            if (files.Count == 0) return;
+
+            var pending = GetPendingUploads();
+            string tempFolder = GetTempFolderPath();
+            Directory.CreateDirectory(tempFolder);
+
+            foreach (var file in files)
+            {
+                if (file == null || file.ContentLength == 0) continue;
+                if (file.ContentLength > 10 * 1024 * 1024) continue;
+
+                string originalName = Path.GetFileName(file.FileName);
+                int key = 0;
+                if (metadata != null)
+                {
+                    key = metadata.Where(m => m.Key < 0 && string.Equals(m.Value.fileName, originalName, StringComparison.OrdinalIgnoreCase))
+                                  .Select(m => m.Key)
+                                  .FirstOrDefault();
+                }
+
+                if (key == 0)
+                {
+                    key = GetNextTempKey(pending);
+                }
+
+                var existed = pending.FirstOrDefault(p => p.Key == key);
+                if (existed != null)
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(existed.PhysicalPath) && File.Exists(existed.PhysicalPath))
+                        {
+                            File.Delete(existed.PhysicalPath);
+                        }
+                    }
+                    catch { }
+                    pending.Remove(existed);
+                }
+
+                string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, originalName);
+                string physicalPath = Path.Combine(tempFolder, savedName);
+                file.SaveAs(physicalPath);
+
+                string virtualPath = string.Format(CultureInfo.InvariantCulture, "/_file/patrol/temp/{0}/{1}", Session.SessionID, savedName);
+                string caption = metadata != null && metadata.ContainsKey(key) ? metadata[key].caption : string.Empty;
+
+                pending.Add(new TempUploadInfo
+                {
+                    Key = key,
+                    FileName = originalName,
+                    PhysicalPath = physicalPath,
+                    VirtualPath = virtualPath,
+                    Caption = caption
+                });
+            }
+
+            Session[PendingUploadSessionKey] = pending;
+        }
+
+        private void SyncPendingUploadsWithMetadata(Dictionary<int, (string fileName, string caption)> metadata)
+        {
+            if (metadata == null) return;
+
+            var pending = GetPendingUploads();
+            var validKeys = new HashSet<int>(metadata.Where(m => m.Key < 0).Select(m => m.Key));
+
+            for (int i = pending.Count - 1; i >= 0; i--)
+            {
+                var temp = pending[i];
+                if (!validKeys.Contains(temp.Key))
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(temp.PhysicalPath) && File.Exists(temp.PhysicalPath))
+                        {
+                            File.Delete(temp.PhysicalPath);
+                        }
+                    }
+                    catch { }
+                    pending.RemoveAt(i);
+                }
+                else
+                {
+                    if (metadata.ContainsKey(temp.Key))
+                    {
+                        temp.Caption = metadata[temp.Key].caption;
+                    }
+                    else
+                    {
+                        var matchByName = metadata.FirstOrDefault(m =>
+                            m.Key < 0 && string.Equals(m.Value.fileName, temp.FileName, StringComparison.OrdinalIgnoreCase));
+                        if (!matchByName.Equals(default(KeyValuePair<int, (string fileName, string caption)>)))
+                        {
+                            temp.Caption = matchByName.Value.caption;
+                            temp.Key = matchByName.Key;
+                        }
+                    }
+                }
+            }
+
+            Session[PendingUploadSessionKey] = pending;
+        }
+
+        private int GetNextTempKey(List<TempUploadInfo> pending)
+        {
+            return pending.Any() ? pending.Min(p => p.Key) - 1 : -1;
+        }
+
+        private string GetTempFolderPath()
+        {
+            return Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/_file/patrol/temp/{0}/", Session.SessionID));
+        }
+
+        private List<TempUploadInfo> GetPendingUploads()
+        {
+            var pending = Session[PendingUploadSessionKey] as List<TempUploadInfo>;
+            if (pending == null)
+            {
+                pending = new List<TempUploadInfo>();
+                Session[PendingUploadSessionKey] = pending;
+            }
+            return pending;
+        }
+
+        private void ClearPendingUploads()
+        {
+            var pending = Session[PendingUploadSessionKey] as List<TempUploadInfo>;
+            if (pending != null)
+            {
+                foreach (var temp in pending)
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(temp.PhysicalPath) && File.Exists(temp.PhysicalPath))
+                        {
+                            File.Delete(temp.PhysicalPath);
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            Session[PendingUploadSessionKey] = null;
+
+            try
+            {
+                string folder = GetTempFolderPath();
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
+            }
+            catch
+            {
+            }
+        }
+
         protected void LinkButton_save_Click(object sender, EventArgs e)
         {
-            if (!ValidateForm(out DateTime? patrolDate))
-            {
-                return;
-            }
+            var metadata = ParsePhotoMetadata();
+            SavePendingUploads(metadata);
+            SyncPendingUploadsWithMetadata(metadata);
 
             bool isFinal = CheckBox_isFinal.Checked;
             bool hasRisk = CheckBox_hasPublicSafetyRisk.Checked;
+
+            if (!ValidateForm(out DateTime? patrolDate, isFinal))
+            {
+                BindPhotoData(metadata);
+                return;
+            }
 
             var record = this.Action == "edit"
                 ? system_patrol.GetPatrolRecord(this.CurrentPatrolID) ?? new PatrolRecord()
@@ -204,8 +408,9 @@ namespace protectTreesV2.backstage.patrol
                 record.patrolID = newId;
             }
 
-            if (!ProcessPhotos(record.patrolID, accountId, isFinal))
+            if (!ProcessPhotos(record.patrolID, accountId, isFinal, metadata))
             {
+                BindPhotoData(metadata);
                 return;
             }
 
@@ -214,29 +419,38 @@ namespace protectTreesV2.backstage.patrol
                 TrySendRiskNotification(record, tree);
             }
 
+            ClearPendingUploads();
             Response.Redirect("list.aspx");
         }
 
         protected void LinkButton_cancel_Click(object sender, EventArgs e)
         {
+            ClearPendingUploads();
             Response.Redirect("list.aspx");
         }
 
-        private bool ValidateForm(out DateTime? patrolDate)
+        private bool ValidateForm(out DateTime? patrolDate, bool isFinal)
         {
             patrolDate = null;
             var missing = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(TextBox_patrolDate.Text) || !DateTime.TryParse(TextBox_patrolDate.Text, out DateTime parsed))
+            if (!string.IsNullOrWhiteSpace(TextBox_patrolDate.Text))
+            {
+                if (DateTime.TryParse(TextBox_patrolDate.Text, out DateTime parsed))
+                {
+                    patrolDate = parsed;
+                }
+                else
+                {
+                    missing.Add("巡查日期格式不正確");
+                }
+            }
+            else if (isFinal)
             {
                 missing.Add("巡查日期");
             }
-            else
-            {
-                patrolDate = parsed;
-            }
 
-            if (string.IsNullOrWhiteSpace(TextBox_patroller.Text))
+            if (string.IsNullOrWhiteSpace(TextBox_patroller.Text) && isFinal)
             {
                 missing.Add("巡查人姓名");
             }
@@ -247,11 +461,11 @@ namespace protectTreesV2.backstage.patrol
                 return false;
             }
 
-            bool isFinal = CheckBox_isFinal.Checked;
             var deleted = ParseDeletedPhotoIds();
             var existing = CurrentPatrolID > 0 ? system_patrol.GetPatrolPhotos(CurrentPatrolID) : new List<PatrolPhoto>();
             int remainingExisting = existing.Count(p => !deleted.Contains(p.PhotoID));
             var files = GetPostedFiles();
+            var pendingTemp = GetPendingUploads();
 
             if (files.Any(f => f.ContentLength > 10 * 1024 * 1024))
             {
@@ -259,7 +473,7 @@ namespace protectTreesV2.backstage.patrol
                 return false;
             }
 
-            if (isFinal && (remainingExisting + files.Count == 0))
+            if (isFinal && (remainingExisting + files.Count + pendingTemp.Count == 0))
             {
                 ShowMessage("限制", "定稿至少需要一張巡查照片", "warning");
                 return false;
@@ -268,11 +482,11 @@ namespace protectTreesV2.backstage.patrol
             return true;
         }
 
-        private bool ProcessPhotos(int patrolId, int accountId, bool isFinal)
+        private bool ProcessPhotos(int patrolId, int accountId, bool isFinal, Dictionary<int, (string fileName, string caption)> metadata)
         {
-            var metadata = ParsePhotoMetadata();
             var deleted = ParseDeletedPhotoIds();
             var existing = system_patrol.GetPatrolPhotos(patrolId);
+            var pendingUploads = GetPendingUploads();
 
             foreach (int id in deleted)
             {
@@ -297,6 +511,7 @@ namespace protectTreesV2.backstage.patrol
             var files = GetPostedFiles();
             var newMetas = metadata.Where(m => m.Key < 0).Select(m => m.Value).ToList();
             var usedFiles = new HashSet<int>();
+            var processedFileNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             string uploadFolder = Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/_file/patrol/img/{0}/", patrolId));
             Directory.CreateDirectory(uploadFolder);
@@ -338,6 +553,31 @@ namespace protectTreesV2.backstage.patrol
                 };
 
                 system_patrol.InsertPatrolPhoto(photo, accountId);
+                processedFileNames.Add(meta.fileName);
+            }
+
+            foreach (var meta in newMetas.Where(m => !processedFileNames.Contains(m.fileName)))
+            {
+                var temp = pendingUploads.FirstOrDefault(p =>
+                    string.Equals(p.FileName, meta.fileName, StringComparison.OrdinalIgnoreCase));
+
+                if (temp == null || !File.Exists(temp.PhysicalPath)) continue;
+
+                string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, temp.FileName);
+                string targetPath = Path.Combine(uploadFolder, savedName);
+                File.Move(temp.PhysicalPath, targetPath);
+
+                var photo = new PatrolPhoto
+                {
+                    PatrolID = patrolId,
+                    FileName = temp.FileName,
+                    FilePath = string.Format(CultureInfo.InvariantCulture, "/_file/patrol/img/{0}/{1}", patrolId, savedName),
+                    FileSize = (int)(new FileInfo(targetPath).Length),
+                    Caption = meta.caption ?? temp.Caption
+                };
+
+                system_patrol.InsertPatrolPhoto(photo, accountId);
+                processedFileNames.Add(meta.fileName);
             }
 
             var remaining = system_patrol.GetPatrolPhotos(patrolId).Count(p => !deleted.Contains(p.PhotoID));
