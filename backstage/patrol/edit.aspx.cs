@@ -445,7 +445,7 @@ namespace protectTreesV2.backstage.patrol
                     missing.Add("巡查日期格式不正確");
                 }
             }
-            else if (isFinal)
+            else
             {
                 missing.Add("巡查日期");
             }

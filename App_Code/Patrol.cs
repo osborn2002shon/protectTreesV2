@@ -641,6 +641,25 @@ WHERE patrolID=@patrolID AND removeDateTime IS NULL";
             }
         }
 
+        public void DeletePatrolRecord(int patrolId, int accountId)
+        {
+            const string sql = @"
+UPDATE Tree_PatrolRecord
+SET removeDateTime=GETDATE(), removeAccountID=@accountId
+WHERE patrolID=@patrolID AND removeDateTime IS NULL;
+
+UPDATE Tree_PatrolPhoto
+SET removeDateTime=GETDATE(), removeAccountID=@accountId
+WHERE patrolID=@patrolID AND removeDateTime IS NULL;";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@accountId", accountId),
+                    new SqlParameter("@patrolID", patrolId));
+            }
+        }
+
         public int InsertPatrolPhoto(PatrolPhoto photo, int accountId)
         {
             const string sql = @"

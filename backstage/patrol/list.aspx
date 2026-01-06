@@ -142,6 +142,13 @@
                                 Text="編輯"
                                 CommandName="_EditPatrol"
                                 CommandArgument='<%# Eval("patrolID") %>' />
+                            <asp:LinkButton ID="LinkButton_delete" runat="server"
+                                CssClass="btn btn-sm btn-outline-danger"
+                                Text="刪除"
+                                CommandName="_DeletePatrol"
+                                CommandArgument='<%# Eval("patrolID") %>'
+                                Visible='<%# IsDraft(Eval("dataStatus")) %>'
+                                OnClientClick="return confirm('確認刪除草稿紀錄？');" />
                         </div>
                     </ItemTemplate>
                 </asp:TemplateField>
