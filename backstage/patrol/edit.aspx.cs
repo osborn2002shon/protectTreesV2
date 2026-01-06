@@ -671,6 +671,7 @@ namespace protectTreesV2.backstage.patrol
             }
             catch
             {
+                throw;
                 // 若寄信失敗不阻斷流程
             }
         }

@@ -709,7 +709,7 @@ SELECT SCOPE_IDENTITY();";
 SELECT DISTINCT ua.email
 FROM User_Account ua
 JOIN User_Area_Mapping map ON ua.accountID = map.accountID
-WHERE ua.auTypeID = 4
+WHERE (ua.auTypeID = 4 or ua.auTypeID = 1)
   AND ua.isActive = 1
   AND ua.removeDateTime IS NULL
   AND (map.city = @cityId OR map.city = '-1')";
