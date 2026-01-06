@@ -159,7 +159,7 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_isFinal" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_isFinal" runat="server" />
                                 <label class="form-check-label fw-bold" for="<%= CheckBox_isFinal.ClientID %>">
                                     是否定稿
                                 </label>
@@ -167,7 +167,7 @@
                         </div>
                         <div class="col-md-8">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_hasPublicSafetyRisk" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_hasPublicSafetyRisk" runat="server" />
                                 <label class="form-check-label fw-bold" for="<%= CheckBox_hasPublicSafetyRisk.ClientID %>">
                                     是否有危害公共安全風險或緊急狀況
                                 </label>

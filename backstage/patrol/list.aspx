@@ -134,7 +134,7 @@
                         <div class="d-flex gap-2 justify-content-center">
                             <asp:LinkButton ID="LinkButton_viewTree" runat="server"
                                 CssClass="btn btn-sm btn-info text-white"
-                                Text="檢視樹籍"
+                                Text="檢視"
                                 CommandName="_ViewTree"
                                 CommandArgument='<%# Eval("treeID") %>' />
                             <asp:LinkButton ID="LinkButton_edit" runat="server"
