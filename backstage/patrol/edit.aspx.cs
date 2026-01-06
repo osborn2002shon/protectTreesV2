@@ -45,7 +45,12 @@ namespace protectTreesV2.backstage.patrol
         {
             get
             {
-                return $"PatrolPendingUploads_{Session.SessionID}_{CurrentPatrolID}_{CurrentTreeID}";
+                if (ViewState["PendingUploadSessionKey"] == null)
+                {
+                    ViewState["PendingUploadSessionKey"] = $"PatrolPendingUploads_{Session.SessionID}_{CurrentPatrolID}_{CurrentTreeID}";
+                }
+
+                return (string)ViewState["PendingUploadSessionKey"];
             }
         }
 
