@@ -369,7 +369,8 @@ namespace protectTreesV2.backstage.tree
 
             string logMemo = isNew ? "新增樹籍" : "編輯樹籍";
             OperationLogger.InsertLog("樹籍管理", isNew ? "新增" : "編輯", logMemo);
-            TreeService.InsertTreeLog(record.TreeID,
+            FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog,
+                record.TreeID,
                 logMemo,
                 $"系統樹籍編號：{record.SystemTreeNo ?? "無"}，狀態：{TreeService.GetStatusText(record.Status)}，編輯狀態：{record.EditStatus}",
                 Request?.UserHostAddress,
@@ -563,7 +564,7 @@ namespace protectTreesV2.backstage.tree
 
         private void BindLogs(int treeId)
         {
-            var logs = TreeService.GetTreeLogs(treeId);
+            var logs = FunctionLogService.GetLogs(LogFunctionTypes.TreeCatalog, treeId) ?? new List<FunctionLogEntry>();
             pnlLogs.Visible = true;
             lblLogEmpty.Visible = logs.Count == 0;
             rptLogs.Visible = logs.Count > 0;
