@@ -68,20 +68,6 @@ namespace protectTreesV2.TreeCatalog
         public int InsertAccountID { get; set; }
     }
 
-    public class TreeRecordLog
-    {
-        public int LogID { get; set; }
-        public int TreeID { get; set; }
-        public string ActionType { get; set; }
-        public string Memo { get; set; }
-        public string IPAddress { get; set; }
-        public int? AccountID { get; set; }
-        public string Account { get; set; }
-        public string AccountName { get; set; }
-        public string AccountUnit { get; set; }
-        public DateTime LogDateTime { get; set; }
-    }
-
     /// <summary>
     /// 樹籍資料
     /// </summary>
@@ -907,54 +893,6 @@ WHERE treeID=@id AND removeDateTime IS NULL";
             }
         }
 
-        public static List<TreeRecordLog> GetTreeLogs(int treeId)
-        {
-            var logs = new List<TreeRecordLog>();
-            const string sql = @"SELECT logID, treeID, actionType, memo, ipAddress, accountID, account, accountName, accountUnit, logDateTime
-                                 FROM Tree_RecordLog
-                                 WHERE treeID=@id
-                                 ORDER BY logDateTime DESC, logID DESC";
-            using (var da = new MS_SQL())
-            {
-                var dt = da.GetDataTable(sql, new SqlParameter("@id", treeId));
-                foreach (DataRow row in dt.Rows)
-                {
-                    logs.Add(new TreeRecordLog
-                    {
-                        LogID = Convert.ToInt32(row["logID"]),
-                        TreeID = Convert.ToInt32(row["treeID"]),
-                        ActionType = row["actionType"] as string,
-                        Memo = row["memo"] as string,
-                        IPAddress = row["ipAddress"] as string,
-                        AccountID = row["accountID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["accountID"]),
-                        Account = row["account"] as string,
-                        AccountName = row["accountName"] as string,
-                        AccountUnit = row["accountUnit"] as string,
-                        LogDateTime = Convert.ToDateTime(row["logDateTime"])
-                    });
-                }
-            }
-            return logs;
-        }
-
-        public static void InsertTreeLog(int treeId, string actionType, string memo, string ipAddress, int? accountId, string account, string accountName, string accountUnit)
-        {
-            const string sql = @"INSERT INTO Tree_RecordLog(treeID, actionType, memo, ipAddress, accountID, account, accountName, accountUnit)
-                                 VALUES(@treeID, @actionType, @memo, @ipAddress, @accountID, @account, @accountName, @accountUnit)";
-            using (var da = new MS_SQL())
-            {
-                da.ExecNonQuery(sql,
-                    new SqlParameter("@treeID", treeId),
-                    new SqlParameter("@actionType", actionType ?? string.Empty),
-                    new SqlParameter("@memo", ToDbValue(memo)),
-                    new SqlParameter("@ipAddress", ToDbValue(ipAddress)),
-                    new SqlParameter("@accountID", ToDbValue(accountId)),
-                    new SqlParameter("@account", ToDbValue(account)),
-                    new SqlParameter("@accountName", ToDbValue(accountName)),
-                    new SqlParameter("@accountUnit", ToDbValue(accountUnit)));
-            }
-        }
-
         /// <summary>
         /// 取得樹種清單
         /// </summary>
@@ -1255,4 +1193,3 @@ VALUES(@treeID, @fileName, @filePath, @caption, @isCover, @accountId, GETDATE())
         }
     }
 }
-

@@ -1,5 +1,6 @@
 ﻿using DataAccess;
 using protectTreesV2.Base;
+using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
 using protectTreesV2.User;
 using System;
@@ -539,7 +540,7 @@ namespace protectTreesV2.backstage.Manage
                 LogPageIndex = 0;
             }
 
-            var logs = TreeService.GetTreeLogs(treeId) ?? Enumerable.Empty<TreeRecordLog>();
+            var logs = FunctionLogService.GetLogs(LogFunctionTypes.TreeCatalog, treeId) ?? Enumerable.Empty<FunctionLogEntry>();
             var logList = logs.ToList();
             int totalCount = logList.Count;
             phLogList.Visible = totalCount > 0;
@@ -1274,7 +1275,7 @@ namespace protectTreesV2.backstage.Manage
         {
             var user = CurrentUser;
             string ip = Request?.UserHostAddress;
-            TreeService.InsertTreeLog(treeId, actionType ?? string.Empty, memo, ip, user?.userID, user?.account, user?.name, user?.unit);
+            FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog, treeId, actionType ?? string.Empty, memo, ip, user?.userID, user?.account, user?.name, user?.unit);
         }
 
         protected void ddlCity_SelectedIndexChanged(object sender, EventArgs e)

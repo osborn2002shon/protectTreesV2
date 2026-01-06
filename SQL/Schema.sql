@@ -585,14 +585,15 @@ CREATE TABLE [dbo].[Tree_RecordPhoto](
 ) ON [PRIMARY]
 GO
 
-/****** Object:  Table [dbo].[Tree_RecordLog]    Script Date: 2025/8/19 下午 07:16:49 ******/
+/****** Object:  Table [dbo].[Tree_Log]    Script Date: 2025/8/19 下午 07:16:49 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tree_RecordLog](
+CREATE TABLE [dbo].[Tree_Log](
         [logID] [int] IDENTITY(1,1) NOT NULL, -- 操作紀錄主鍵
-        [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
+        [functionType] [nvarchar](20) NOT NULL, -- 功能類型 (樹籍、健檢、巡查、養護)
+        [dataID] [int] NOT NULL, -- 對應資料主鍵
         [actionType] [nvarchar](50) NOT NULL, -- 操作類型
         [memo] [nvarchar](max) NULL, -- 備註說明
         [ipAddress] [nvarchar](50) NULL, -- 操作IP位址
@@ -600,8 +601,8 @@ CREATE TABLE [dbo].[Tree_RecordLog](
         [account] [nvarchar](50) NULL, -- 登入帳號
         [accountName] [nvarchar](100) NULL, -- 操作人姓名
         [accountUnit] [nvarchar](100) NULL, -- 操作人單位
-        [logDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_RecordLog_logDateTime] DEFAULT (GETDATE()), -- 紀錄時間
- CONSTRAINT [PK_Tree_RecordLog] PRIMARY KEY CLUSTERED
+        [logDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_Log_logDateTime] DEFAULT (GETDATE()), -- 紀錄時間
+ CONSTRAINT [PK_Tree_Log] PRIMARY KEY CLUSTERED
 (
         [logID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
@@ -618,11 +619,6 @@ ALTER TABLE [dbo].[Tree_RecordPhoto]  WITH CHECK ADD  CONSTRAINT [FK_Tree_Record
 REFERENCES [dbo].[Tree_Record] ([treeID])
 GO
 ALTER TABLE [dbo].[Tree_RecordPhoto] CHECK CONSTRAINT [FK_Tree_RecordPhoto_Tree_Record]
-GO
-ALTER TABLE [dbo].[Tree_RecordLog]  WITH CHECK ADD  CONSTRAINT [FK_Tree_RecordLog_Tree_Record] FOREIGN KEY([treeID])
-REFERENCES [dbo].[Tree_Record] ([treeID])
-GO
-ALTER TABLE [dbo].[Tree_RecordLog] CHECK CONSTRAINT [FK_Tree_RecordLog_Tree_Record]
 GO
 
 DELETE FROM [dbo].[Tree_RecognitionCriterion];

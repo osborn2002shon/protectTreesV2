@@ -298,7 +298,8 @@ namespace protectTreesV2.backstage.tree
             OperationLogger.InsertLog("樹籍管理", "批次設定", $"更新{selected.Count}筆狀態為{TreeService.GetStatusText(status)}");
             foreach (var treeId in selected)
             {
-                TreeService.InsertTreeLog(treeId,
+                FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog,
+                    treeId,
                     "批次設定樹籍狀態",
                     $"狀態更新為{TreeService.GetStatusText(status)}",
                     Request?.UserHostAddress,
