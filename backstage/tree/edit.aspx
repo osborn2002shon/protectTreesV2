@@ -174,6 +174,7 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col">
+                                            <span class="text-danger required-marker required-final">*</span>
                                             <asp:Label runat="server" AssociatedControlID="txtSurveyDate" Text="調查日期" />
                                             <asp:TextBox ID="txtSurveyDate" runat="server" TextMode="Date" CssClass="form-control" placeholder="2024-05-01" />
                                         </div>
