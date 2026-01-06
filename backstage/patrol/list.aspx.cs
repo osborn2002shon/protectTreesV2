@@ -156,6 +156,31 @@ namespace protectTreesV2.backstage.patrol
                     Response.Redirect("edit.aspx");
                 }
             }
+            else if (e.CommandName == "_DeletePatrol")
+            {
+                if (int.TryParse(arg, out int patrolId))
+                {
+                    var record = system_patrol.GetPatrolRecord(patrolId);
+                    if (record == null)
+                    {
+                        ShowMessage("刪除失敗", "找不到巡查紀錄。", "error");
+                        return;
+                    }
+
+                    if (record.dataStatus != (int)PatrolRecordStatus.草稿)
+                    {
+                        ShowMessage("刪除失敗", "只有草稿狀態可以刪除。", "warning");
+                        return;
+                    }
+
+                    var user = UserService.GetCurrentUser();
+                    int accountId = user?.userID ?? 0;
+                    system_patrol.DeletePatrolRecord(patrolId, accountId);
+
+                    ShowMessage("完成", "已刪除草稿巡查紀錄。", "success");
+                    BindResult();
+                }
+            }
         }
 
         protected void GridView_patrolList_Sorting(object sender, GridViewSortEventArgs e)
@@ -171,6 +196,14 @@ namespace protectTreesV2.backstage.patrol
             }
 
             BindResult();
+        }
+
+        protected bool IsDraft(object dataStatus)
+        {
+            int status;
+            return dataStatus != null
+                && int.TryParse(dataStatus.ToString(), out status)
+                && status == (int)PatrolRecordStatus.草稿;
         }
     }
 }
