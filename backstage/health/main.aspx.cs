@@ -218,7 +218,7 @@ namespace protectTreesV2.backstage.health
                 {
                     // 捕捉錯誤並顯示 (例如資料庫連線失敗)
                     // ex.Message 會顯示具體的錯誤原因
-                    ShowMessage("錯誤", "加入失敗：" + ex.Message);
+                    ShowMessage("提示", "加入失敗：" + ex.Message);
                 }
             }
 
@@ -297,7 +297,7 @@ namespace protectTreesV2.backstage.health
             {
                 GridView_selectedList.DataSource = null;
                 GridView_selectedList.DataBind();
-                ShowMessage("錯誤", "讀取設定清單失敗：" + ex.Message);
+                ShowMessage("提示", "讀取設定清單失敗：" + ex.Message);
             }
         }
 
@@ -336,7 +336,7 @@ namespace protectTreesV2.backstage.health
                 }
                 catch (Exception ex)
                 {
-                    ShowMessage("錯誤", "移除失敗：" + ex.Message);
+                    ShowMessage("提示", "移除失敗：" + ex.Message);
                 }
             }
         }
@@ -361,7 +361,7 @@ namespace protectTreesV2.backstage.health
             }
             catch (Exception ex)
             {
-                ShowMessage("錯誤", "清空失敗：" + ex.Message);
+                ShowMessage("提示", "清空失敗：" + ex.Message);
             }
         }
 
@@ -377,7 +377,7 @@ namespace protectTreesV2.backstage.health
 
                 if (list == null || list.Count == 0)
                 {
-                    ShowMessage("警告", "清單目前沒有任何資料，請先加入樹籍後再產製。");
+                    ShowMessage("提示", "清單目前沒有任何資料，請先加入樹籍後再產製。");
                     return;
                 }
 
@@ -385,7 +385,7 @@ namespace protectTreesV2.backstage.health
                 string templatePath = Server.MapPath("~/_doc/受保護樹木健檢資料蒐集用表格.xlsx");
                 if (!File.Exists(templatePath))
                 {
-                    ShowMessage("錯誤", "找不到 Excel 範本檔案。");
+                    ShowMessage("提示", "找不到 Excel 範本檔案。");
                     return;
                 }
 
@@ -486,7 +486,7 @@ namespace protectTreesV2.backstage.health
             }
             catch (Exception ex)
             {
-                ShowMessage("錯誤", "產製失敗：" + ex.Message);
+                ShowMessage("提示", "產製失敗：" + ex.Message);
             }
         }
     }

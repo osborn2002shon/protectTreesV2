@@ -638,3 +638,48 @@ VALUES
 ('research_education', N'九、具有人文、科學研究及自然教育價值。', 9, 1, GETDATE(), 0),
 ('shared_memory', N'十、當地居民之共同記憶場域。', 10, 1, GETDATE(), 0),
 ('other_significance', N'十一、具有其他重要意義。', 11, 1, GETDATE(), 0);
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Tree_HealthBatchSetting](
+	[settingID] [int] IDENTITY(1,1) NOT NULL, --設定流水號
+	[accountID] [int] NOT NULL, --帳號流水號
+	[treeID] [int] NOT NULL, --樹籍流水號
+	[insertDateTime] [datetime] NOT NULL --新增時間
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Tree_HealthBatchSetting] ADD  CONSTRAINT [DF_Tree_HealthBatchSetting_createTime]  DEFAULT (getdate()) FOR [insertDateTime]
+GO
+
+CREATE TABLE Tree_BatchTask (
+    taskID INT IDENTITY(1,1) PRIMARY KEY, -- 任務流水號
+    batchType VARCHAR(20) NOT NULL,       -- 類別代號 (Health, Patrol, Maintain)
+    taskName NVARCHAR(200),               -- 任務名稱 (原始檔名或操作描述)
+    totalCount INT DEFAULT 0,             -- 總筆數
+    successCount INT DEFAULT 0,           -- 成功筆數
+    failCount INT DEFAULT 0,              -- 失敗筆數
+    memo NVARCHAR(500),                   -- 備註說明
+
+    insertAccountID INT NOT NULL,         -- 建立者帳號ID
+    insertDateTime DATETIME,              -- 建立時間 
+    removeAccountID INT,                  -- 刪除者帳號ID 
+    removeDateTime DATETIME               -- 刪除時間 
+);
+GO
+
+CREATE TABLE Tree_BatchTaskLog (
+    logID INT IDENTITY(1,1) PRIMARY KEY,  -- 明細流水號
+    taskID INT NOT NULL,                  -- 關聯主表ID
+    refKey VARCHAR(50),                   -- 樹籍編號 
+    refDate DATE,                         -- 調查/養護日期 
+    sourceItem NVARCHAR(200),             -- 來源描述 (例如: 第5列 或 完整檔名)
+    isSuccess BIT DEFAULT 0,              -- 執行狀態 (1=成功, 0=失敗)
+    resultMsg NVARCHAR(500)                 -- 詳細訊息 (錯誤原因或處理結果)
+);
+GO
+

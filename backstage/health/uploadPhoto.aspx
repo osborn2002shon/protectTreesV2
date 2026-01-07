@@ -1,8 +1,38 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="uploadPhoto.aspx.cs" Inherits="protectTreesV2.backstage.health.uploadPhoto" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
+    <style>
+        /* 拖曳區樣式 */
+        .photo-drop {
+            border: 2px dashed #6c757d;
+            border-radius: 6px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #6c757d;
+            cursor: pointer;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+
+        .photo-drop:hover, .photo-drop.dragging {
+            background-color: #f8f9fa; 
+            border-color: #6c757d;     
+        }
+
+        /* 狀態提示區塊 */
+        .upload-status-bar {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    健檢資料管理 / 上傳多筆健檢附件
+    健檢資料管理 / 上傳多筆健檢照片
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     上傳多筆健檢附件
@@ -15,6 +45,173 @@
         <a class="nav-link active" href="uploadPhoto.aspx">上傳多筆健檢照片</a>
         <a class="nav-link text-dark" href="uploadFile.aspx">上傳多筆健檢附件</a>
     </nav>
+   <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-dark">
+                <div class="card-header bg-white fw-bold border-bottom-0 pt-3">
+                    上傳說明
+                </div>
+                <div class="card-body pt-0">
+                    <p class="card-text">
+                        請使用系統的命名規則來命名檔案並且上傳，系統將自動解析檔名以關聯至正確的調查資料。
+                    </p>
+                
+                    <ul>
+                        <li>命名規則：系統樹籍編號_調查日期_xxxx.jpg</li>
+                        <li>檔案限制：僅接受 *.jpg、*.jpeg、*.png 格式，單一檔案大小限制 10MB，每筆健檢紀錄最多上傳 5 張。</li>
+                        <li>範例說明：若需要上傳系統樹籍編號為 A0001、調查日期為 2025-01-01 的照片，請將該照片命名為 A0001_20250101_001.jpg 即可。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+        
+            <%-- 1. 拖曳上傳區 --%>
+            <div id="batchDropArea" class="photo-drop mb-3" title="點擊選取或拖曳檔案">
+                <div class="mb-2">
+                    <i class="fa-solid fa-cloud-arrow-up fa-3x"></i>
+                </div>
+                <div class="fs-5 fw-bold">點擊選取 或 將照片拖曳至此</div>
+                <div class="small mt-1 text-muted">
+                    支援多檔選取 (JPG, JPEG, PNG)<br/>
+                    <span class="text-danger">※ 單一檔案限制 10MB，若超過系統將自動阻擋</span>
+                </div>
+                <asp:FileUpload ID="FileUpload_Batch" runat="server" AllowMultiple="true" CssClass="d-none" accept=".jpg,.jpeg,.png" />
+            </div>
+
+           <div id="statusBar" class="text-center">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <i id="statusIcon" class="fa-solid fa-circle-info me-2 text-secondary"></i>
+                    <span id="statusText" class="fw-bold text-dark">尚未選取檔案</span>
+                    <span id="sizeText" class="text-muted small ms-2"></span>
+                </div>
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="form-check">
+                        <asp:CheckBox ID="CheckBox_AutoCreateDraft" runat="server"/>
+                        <label class="form-check-label text-dark fw-bold" for="CheckBox_AutoCreateDraft" style="cursor: pointer;">
+                            指定日期若無紀錄則自動新增一筆（草稿）
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <asp:Button ID="Button_StartUpload" runat="server" Text="上傳照片" 
+                        CssClass="btn btn-primary disabled" 
+                        OnClick="Button_StartUpload_Click" 
+                        ClientIDMode="Static" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function () {
+        // --- 變數 ---
+        const $dropArea = $('#batchDropArea');
+        const $fileInput = $('#<%= FileUpload_Batch.ClientID %>');
+        
+        // UI 元件
+        const $statusText = $('#statusText');
+        const $sizeText = $('#sizeText');
+        const $statusIcon = $('#statusIcon');
+        const $btnUpload = $('#Button_StartUpload');
+        
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+
+        // --- 事件監聽 ---
+        $fileInput.on('click', function (e) {
+            e.stopPropagation();
+        });
+        // 1. 點擊區塊 -> 觸發 File Input
+        $dropArea.on('click', function () {
+            // 點擊後重新選取，自然會覆蓋舊的，不需額外清除
+            $fileInput.trigger('click');
+        });
+
+        // 2. 檔案選擇後處理
+        $fileInput.on('change', function () {
+            validateAndSetFiles(this.files);
+        });
+
+        // 3. 拖曳效果
+        $dropArea.on('dragover', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            $(this).addClass('dragging');
+        });
+        $dropArea.on('dragleave', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            $(this).removeClass('dragging');
+        });
+        
+        // 4. 拖曳放下 (Drop)
+        $dropArea.on('drop', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            $(this).removeClass('dragging');
+            
+            const dt = e.originalEvent.dataTransfer;
+            if (dt.files && dt.files.length > 0) {
+                if (validateAndSetFiles(dt.files)) {
+                    $fileInput[0].files = dt.files;
+                }
+            }
+        });
+
+        // --- 邏輯函數 ---
+
+        function clearAll() {
+            $fileInput.val(''); 
+            updateUI([]); 
+        }
+
+        function validateAndSetFiles(files) {
+            if (!files || files.length === 0) {
+                clearAll();
+                return false;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size > maxFileSize) {
+                    alert(`檔案「${files[i].name}」超過 10MB！\n系統已自動阻擋，請重新選取符合大小的檔案。`);
+                    clearAll();
+                    return false;
+                }
+            }
+
+            updateUI(files);
+            return true;
+        }
+
+        function updateUI(files) {
+            const count = files ? files.length : 0;
+            
+            if (count > 0) {
+                let totalBytes = 0;
+                for (let i = 0; i < count; i++) {
+                    totalBytes += files[i].size;
+                }
+                const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2);
+
+                $statusText.text(`已選取 ${count} 個檔案`);
+                $sizeText.text(`(共 ${sizeMB} MB)`);
+                
+                // 變更圖示
+                $statusIcon.removeClass('fa-circle-info text-secondary').addClass('fa-check-circle text-success');
+                // 啟用按鈕
+                $btnUpload.removeClass('disabled');
+            } else {
+                $statusText.text('尚未選取檔案');
+                $sizeText.text('');
+                
+                // 重置圖示
+                $statusIcon.removeClass('fa-check-circle text-success').addClass('fa-circle-info text-secondary');
+                // 禁用按鈕
+                $btnUpload.addClass('disabled');
+            }
+        }
+    });
+    </script>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">
 </asp:Content>

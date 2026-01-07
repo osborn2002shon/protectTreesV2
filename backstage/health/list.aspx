@@ -131,7 +131,7 @@
                 <asp:TemplateField HeaderText="紀錄狀態" SortExpression="dataStatus">
                     <ItemTemplate>
                         <%-- 狀態文字 (1=完稿, 0=草稿) --%>
-                        <%# Convert.ToInt32(Eval("dataStatus")) == 1 ? "完稿" : "草稿" %>
+                        <%# Convert.ToInt32(Eval("dataStatus")) == 1 ? "定稿" : "草稿" %>
         
                         <%-- 最後更新時間 --%>
                         <%# Eval("lastUpdate") == null ? "" : 
@@ -156,6 +156,15 @@
                                 Text="編輯"
                                 CommandName="_EditHealth" 
                                 CommandArgument='<%# Eval("healthID") %>' />
+
+                            <%-- (C) 刪除 --%>
+                            <asp:LinkButton ID="LinkButton_del" runat="server" 
+                                Text="刪除"
+                                CommandName="_DeleteHealth" 
+                                CommandArgument='<%# Eval("healthID") %>'
+                                CssClass='<%# Convert.ToInt32(Eval("dataStatus")) == 0 ? "btn btn-sm btn-danger" : "btn btn-sm btn-secondary disabled" %>'
+                                Enabled='<%# Convert.ToInt32(Eval("dataStatus")) == 0 %>'
+                                OnClientClick="return confirm('確定要刪除這筆健檢紀錄嗎？\n此動作無法復原。');" />
                         </div>
                     </ItemTemplate>
                 </asp:TemplateField>

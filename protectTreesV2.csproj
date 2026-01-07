@@ -180,6 +180,7 @@
     <Compile Include="App_Code\Base.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="App_Code\Batch.cs" />
     <Compile Include="App_Code\DataAccess_MS_SQL.cs" />
     <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />

@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using static protectTreesV2.Health.Health;
 using System.IO;
 using protectTreesV2.Log;
+using protectTreesV2.User;
+using protectTreesV2.backstage.Manage;
 
 namespace protectTreesV2.backstage.health
 {
@@ -134,12 +136,20 @@ namespace protectTreesV2.backstage.health
         }
 
         /// <summary>
-        /// 初始化下拉選單
+        /// 初始化頁面下拉選單
         /// </summary>
         private void InitDropdowns()
         {
-            // TODO: 載入縣市、樹種、狀態(草稿/完稿)等下拉選單
+            // 樹牌狀態
+            Base.DropdownBinder.Bind_enum_treeSignStatus(ref DropDownList_treeSignStatus, true);
+
+            // 錯誤修剪傷害
+            Base.DropdownBinder.Bind_enum_pruningDamageType(ref DropDownList_pruningWrongDamage, true);
+
+            // 建議處理優先順序
+            Base.DropdownBinder.Bind_enum_treatmentPriority(ref DropDownList_priority, true);
         }
+
         public TreeHealthRecord GetNewRecordByTreeID(int treeId)
         {
             var treeInfo = TreeCatalog.TreeService.GetTree(treeId);
@@ -203,6 +213,9 @@ namespace protectTreesV2.backstage.health
                     // 編輯模式：反查並更新 TreeID
                     this.CurrentTreeID = record.treeID;
                     Literal_btnSaveText.Text = "儲存";
+
+                    //載入編輯紀錄
+                    BindLogs();
                 }
                 else
                 {
@@ -210,8 +223,7 @@ namespace protectTreesV2.backstage.health
                     Literal_btnSaveText.Text = "新增";
                 }
 
-                //載入編輯紀錄
-                BindLogs(this.CurrentTreeID);
+               
 
                 // 綁定樹籍 Header (唯讀)
                 Label_systemTreeNo.Text = record.systemTreeNo;
@@ -268,53 +280,21 @@ namespace protectTreesV2.backstage.health
                 ShowMessage("系統提示", "系統錯誤：" + ex.Message);
             }
         }
-        private int LogPageIndex
-        {
-            get => ViewState[nameof(LogPageIndex)] as int? ?? 0;
-            set => ViewState[nameof(LogPageIndex)] = value;
-        }
 
-        private const int LogsPageSize = 5;
-        private void BindLogs(int treeId)
+        private void BindLogs()
         {
-            var logs = FunctionLogService.GetLogs(LogFunctionTypes.Health, treeId) ?? new List<FunctionLogEntry>();
+            var logs = FunctionLogService.GetLogs(LogFunctionTypes.Health,this.CurrentHealthID ) ?? new List<FunctionLogEntry>();
             Panel_logs.Visible = true;
-            lblLogEmpty.Visible = logs.Count == 0;
-            rptLogs.Visible = logs.Count > 0;
-
-            if (logs.Count == 0)
-            {
-                lnkLogPrev.Enabled = false;
-                lnkLogNext.Enabled = false;
-                lblLogPageInfo.Text = "0/0";
-                return;
-            }
-
-            int totalPages = (int)Math.Ceiling(logs.Count / (double)LogsPageSize);
-            LogPageIndex = Math.Max(0, Math.Min(LogPageIndex, totalPages - 1));
-
-            var pagedLogs = logs.Skip(LogPageIndex * LogsPageSize).Take(LogsPageSize).ToList();
-            rptLogs.DataSource = pagedLogs;
-            rptLogs.DataBind();
-
-            lnkLogPrev.Enabled = LogPageIndex > 0;
-            lnkLogNext.Enabled = LogPageIndex < totalPages - 1;
-            lblLogPageInfo.Text = string.Format("{0}/{1}", LogPageIndex + 1, totalPages);
+            GridView_logs.DataSource = logs;
+            GridView_logs.DataBind();
         }
-        protected void lnkLogPrev_Click(object sender, EventArgs e)
+
+        protected void gvLogs_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            if (LogPageIndex > 0)
-            {
-                LogPageIndex--;
-                BindLogs(this.CurrentTreeID);
-            }
+            GridView_logs.PageIndex = e.NewPageIndex;
+            BindLogs();
         }
 
-        protected void lnkLogNext_Click(object sender, EventArgs e)
-        {
-            LogPageIndex++;
-            BindLogs(this.CurrentTreeID);
-        }
         private void BindFormFields(TreeHealthRecord data)
         {
             // A. 一般調查
@@ -521,17 +501,18 @@ namespace protectTreesV2.backstage.health
                 TreeHealthRecord record = GetFormData();
 
                 // 儲存主檔 (Service 會自動判斷 healthID <= 0 做 Insert)
-                int accountId = 1;
-                int savedHealthID = system_health.SaveHealthRecord(record, accountId);
+                var user = UserService.GetCurrentUser();
+                int accountID = user?.userID ?? 0;
+                int savedHealthID = system_health.SaveHealthRecord(record, accountID);
 
                 // 更新 CurrentHealthID，確保後續照片存檔有 ID
                 this.CurrentHealthID = savedHealthID;
 
                 // 處理照片
-                ProcessPhotos(savedHealthID, accountId);
+                ProcessPhotos(savedHealthID, accountID);
 
                 // 處理附件
-                ProcessAttachment(savedHealthID, accountId);
+                ProcessAttachment(savedHealthID, accountID);
 
                 ShowMessage("系統提示", "資料儲存成功！");
 
@@ -741,8 +722,18 @@ namespace protectTreesV2.backstage.health
                 errors.Add("調查人姓名 (必填且長度須小於50字)");
 
             // 樹牌狀態: 必填
-            if (isFinalized && string.IsNullOrWhiteSpace(DropDownList_treeSignStatus.SelectedValue))
+            string treeSignVal = DropDownList_treeSignStatus.SelectedValue;
+            if (isFinalized && string.IsNullOrWhiteSpace(treeSignVal))
                 errors.Add("樹牌狀態 (必填)");
+            else if (!string.IsNullOrWhiteSpace(treeSignVal))
+            {
+                // 檢查是否為有效的 int，且存在於 Enum 中
+                // 因為 enum_treeSignStatus 的 Value 是數字 (1, 2, 3)
+                if (!int.TryParse(treeSignVal, out int tsId) || !Enum.IsDefined(typeof(enum_treeSignStatus), tsId))
+                {
+                    errors.Add("樹牌狀態 (選項數值不合法)");
+                }
+            }
 
             // ==============================================================================
             // 2. 數值與範圍檢查
@@ -845,8 +836,17 @@ namespace protectTreesV2.backstage.health
             // ==============================================================================
             // 6. 修剪與支撐
             // ==============================================================================
-            if (isFinalized && string.IsNullOrWhiteSpace(DropDownList_pruningWrongDamage.SelectedValue))
+            string pruningVal = DropDownList_pruningWrongDamage.SelectedValue;
+            if (isFinalized && string.IsNullOrWhiteSpace(pruningVal))
                 errors.Add("錯誤修剪傷害 (必填)");
+            else if (!string.IsNullOrWhiteSpace(pruningVal))
+            {
+                // 因為 enum_pruningDamageType 的 Value 是文字 ("截幹"...)
+                if (!Enum.IsDefined(typeof(enum_pruningDamageType), pruningVal))
+                {
+                    errors.Add("錯誤修剪傷害 (選項數值不合法)");
+                }
+            }
 
             if (!CheckStringLength(TextBox_pruningOtherNote.Text, 200, false)) errors.Add("修剪備註 (長度須小於200字)");
 
@@ -872,8 +872,17 @@ namespace protectTreesV2.backstage.health
             // 8. 管理建議
             // ==============================================================================
             //if (!CheckStringLength(TextBox_managementStatus.Text, 100, isFinalized)) errors.Add("管理情況 (必填且長度須小於100字)");
-
-            if (isFinalized && string.IsNullOrWhiteSpace(DropDownList_priority.SelectedValue)) errors.Add("建議處理優先順序 (必填)");
+            string priorityVal = DropDownList_priority.SelectedValue;
+            if (isFinalized && string.IsNullOrWhiteSpace(priorityVal)) 
+                errors.Add("建議處理優先順序 (必填)");
+            else if (!string.IsNullOrWhiteSpace(priorityVal))
+            {
+                // 因為 enum_treatmentPriority 的 Value 是文字 ("緊急處理"...)
+                if (!Enum.IsDefined(typeof(enum_treatmentPriority), priorityVal))
+                {
+                    errors.Add("建議處理優先順序 (選項數值不合法)");
+                }
+            }
 
             //if (!CheckStringLength(TextBox_treatmentDescription.Text, 500, isFinalized)) errors.Add("處理情形說明 (必填且長度須小於500字)");
             // ==============================================================================

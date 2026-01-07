@@ -257,6 +257,31 @@ namespace protectTreesV2.backstage.health
                 // 跳轉至編輯頁
                 base.RedirectState("edit.aspx", this.CurrentFilter);
             }
+            else if (e.CommandName == "_DeleteHealth")
+            {
+                if (int.TryParse(healthStr, out int targetID))
+                {
+                    // 取得當前操作者 ID
+                    var user = UserService.GetCurrentUser();
+                    int userID = user?.userID ?? 0;
+
+                    // 執行刪除
+                    bool isDeleted = system_health.DeleteHealthRecord(targetID, userID);
+
+                    // 處理結果
+                    if (isDeleted)
+                    {
+                        // 成功
+                        ShowMessage("提示", "刪除成功！");
+                        BindResult();
+                    }
+                    else
+                    {
+                        // 失敗
+                        ShowMessage("提示", "刪除失敗！<br/>可能原因：資料已定稿(無法刪除) 或 資料已被他人刪除。");
+                    }
+                }
+            }
         }
 
         protected void GridView_healthList_Sorting(object sender, GridViewSortEventArgs e)

@@ -13,5 +13,10 @@ namespace protectTreesV2.backstage.health
         {
 
         }
+
+        protected void Button_StartUpload_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

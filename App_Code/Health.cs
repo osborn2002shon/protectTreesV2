@@ -8,16 +8,47 @@ using System.Text;
 using DataAccess;
 using protectTreesV2.Base;
 using protectTreesV2.TreeCatalog;
+using protectTreesV2.User;
 using static protectTreesV2.Base.DataRowHelper;
 
 namespace protectTreesV2.Health
 {
     public class Health
     {
-        public enum HealthRecordStatus
+        public enum enum_healthRecordStatus
         {
             草稿 = 0,
             定稿 = 1
+        }
+
+        /// <summary>
+        /// 樹牌狀態 
+        /// </summary>
+        public enum enum_treeSignStatus
+        {
+            有 = 1,
+            沒有 = 2,
+            毀損 = 3
+        }
+
+        /// <summary>
+        /// 錯誤修剪傷害
+        /// </summary>
+        public enum enum_pruningDamageType
+        {
+            截幹,
+            截頂,
+            不當縮剪
+        }
+
+        /// <summary>
+        /// 建議處理優先順序 
+        /// </summary>
+        public enum enum_treatmentPriority
+        {
+            緊急處理,
+            優先處理,
+            例行養護
         }
 
         public class TreeHealthRecord
@@ -278,7 +309,7 @@ namespace protectTreesV2.Health
             public string SystemTreeNo { get; set; }
             public DateTime? SurveyDateStart { get; set; }
             public DateTime? SurveyDateEnd { get; set; }
-            public HealthRecordStatus? DataStatus { get; set; }
+            public enum_healthRecordStatus? DataStatus { get; set; }
         }
 
         [Serializable]
@@ -312,7 +343,7 @@ namespace protectTreesV2.Health
 
             public DateTime? surveyDate { get; set; }
             public string surveyor { get; set; }
-            public HealthRecordStatus? dataStatus { get; set; }
+            public enum_healthRecordStatus? dataStatus { get; set; }
             public DateTime? lastUpdate { get; set; }
 
             public bool hasHealthRecord => healthID.HasValue;
@@ -379,7 +410,7 @@ namespace protectTreesV2.Health
             return TreeStatus.其他;
         }
 
-        public  List<HealthMainQueryResult> GetHealthMainList(HealthMainQueryFilter filter, int currentUserId)
+        public  List<HealthMainQueryResult> GetHealthMainList(HealthMainQueryFilter filter, int currentUserID)
         {
             var parameters = new List<SqlParameter>();
             var whereClauses = new List<string>();
@@ -428,7 +459,7 @@ namespace protectTreesV2.Health
                 OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = record.cityID) cityInfo
                 LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = record.areaID
                 LEFT JOIN Tree_Species species ON species.speciesID = record.speciesID
-                LEFT JOIN Tree_HealthBatchSetting batch ON record.treeID = batch.treeID AND batch.accountID = @currentUserId
+                LEFT JOIN Tree_HealthBatchSetting batch ON record.treeID = batch.treeID AND batch.accountID = @currentUserID
             ";
 
             // 加入草稿參數
@@ -436,7 +467,7 @@ namespace protectTreesV2.Health
             parameters.Add(new SqlParameter("@incDraft", filter.includeDraft ? 1 : 0));
 
             //使用者ID檢查設定檔
-            parameters.Add(new SqlParameter("@currentUserId", currentUserId));
+            parameters.Add(new SqlParameter("@currentUserID", currentUserID));
 
             // ==========================================
             // 2. WHERE 篩選條件
@@ -547,8 +578,8 @@ namespace protectTreesV2.Health
                         item.treeStatus = ts;
 
                     int? dStatus = DataRowHelper.GetNullableInt(row, "dataStatus");
-                    if (dStatus.HasValue && Enum.IsDefined(typeof(HealthRecordStatus), dStatus.Value))
-                        item.dataStatus = (HealthRecordStatus)dStatus.Value;
+                    if (dStatus.HasValue && Enum.IsDefined(typeof(enum_healthRecordStatus), dStatus.Value))
+                        item.dataStatus = (enum_healthRecordStatus)dStatus.Value;
 
                     item.lastUpdate = DataRowHelper.GetNullableDateTime(row, "lastUpdate");
                     item.isAdded = DataRowHelper.GetNullableInt(row, "isAdded") == 1;
@@ -562,9 +593,9 @@ namespace protectTreesV2.Health
         /// <summary>
         /// 取得某使用者的批次設定清單
         /// </summary>
-        /// <param name="accountId"></param>
+        /// <param name="accountID"></param>
         /// <returns></returns>
-        public  List<HealthBatchSettingResult> GetHealthBatchSetting(int accountId)
+        public List<HealthBatchSettingResult> GetHealthBatchSetting(int accountID)
         {
             string sql = @"
                 SELECT s.settingID, s.insertDateTime,
@@ -596,7 +627,7 @@ namespace protectTreesV2.Health
 
             using (var da = new MS_SQL())
             {
-                DataTable dt = da.GetDataTable(sql, new SqlParameter("@accountID", accountId));
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@accountID", accountID));
                 foreach (DataRow row in dt.Rows)
                 {
                     var item = new HealthBatchSettingResult();
@@ -623,9 +654,9 @@ namespace protectTreesV2.Health
         /// <summary>
         /// 加入批次設定 (若已存在則忽略)
         /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="treeId"></param>
-        public  void AddToHealthBatchSetting(int accountId, int treeId)
+        /// <param name="accountID"></param>
+        /// <param name="treeID"></param>
+        public void AddToHealthBatchSetting(int accountID, int treeID)
         {
             string sql = @"
             IF NOT EXISTS (SELECT 1 FROM Tree_HealthBatchSetting WHERE accountID = @accountID AND treeID = @treeID)
@@ -638,27 +669,27 @@ namespace protectTreesV2.Health
             using (var da = new MS_SQL())
             {
                 da.ExecNonQuery(sql,
-                    new SqlParameter("@accountID", accountId),
-                    new SqlParameter("@treeID", treeId));
+                    new SqlParameter("@accountID", accountID),
+                    new SqlParameter("@treeID", treeID));
             }
         }
 
         /// <summary>
         ///  移除批次設定 (硬刪除)
         /// </summary>
-        /// <param name="accountId"></param>
-        /// <param name="treeId"></param>
-        public void RemoveFromHealthBatchSetting(int accountId, int? treeId = null)
+        /// <param name="accountID"></param>
+        /// <param name="treeID"></param>
+        public void RemoveFromHealthBatchSetting(int accountID, int? treeID = null)
         {
             string sql = "";
             var parameters = new List<SqlParameter>();
-            parameters.Add(new SqlParameter("@accountID", accountId));
+            parameters.Add(new SqlParameter("@accountID", accountID));
 
-            if (treeId.HasValue)
+            if (treeID.HasValue)
             {
                 // 移除單筆
                 sql = "DELETE FROM Tree_HealthBatchSetting WHERE accountID = @accountID AND treeID = @treeID";
-                parameters.Add(new SqlParameter("@treeID", treeId.Value));
+                parameters.Add(new SqlParameter("@treeID", treeID.Value));
             }
             else
             {
@@ -672,7 +703,7 @@ namespace protectTreesV2.Health
             }
         }
 
-        public List<HealthMainQueryResult> GetHealthRecordList(HealthRecordListFilter filter, int currentUserId)
+        public List<HealthMainQueryResult> GetHealthRecordList(HealthRecordListFilter filter, int currentUserID)
         {
             var parameters = new List<SqlParameter>();
             var whereClauses = new List<string>();
@@ -725,7 +756,7 @@ namespace protectTreesV2.Health
             if (filter.scope == "My")
             {
                 whereClauses.Add("health.insertAccountID = @userID");
-                parameters.Add(new SqlParameter("@userID", currentUserId));
+                parameters.Add(new SqlParameter("@userID", currentUserID));
             }
             // 若是 Unit (單位全部)，不加額外過濾，顯示所有
 
@@ -826,7 +857,7 @@ namespace protectTreesV2.Health
                     item.lastUpdate = DataRowHelper.GetNullableDateTime(row, "lastUpdate");
 
                     int? dStatus = DataRowHelper.GetNullableInt(row, "dataStatus");
-                    if (dStatus.HasValue) item.dataStatus = (HealthRecordStatus)dStatus.Value;
+                    if (dStatus.HasValue) item.dataStatus = (enum_healthRecordStatus)dStatus.Value;
 
                     // Record 資訊
                     item.treeID = DataRowHelper.GetNullableInt(row, "treeID") ?? 0;
@@ -846,7 +877,7 @@ namespace protectTreesV2.Health
         /// <summary>
         /// 取得健檢紀錄
         /// </summary>
-        public TreeHealthRecord GetHealthRecord(int healthId)
+        public TreeHealthRecord GetHealthRecord(int healthID)
         {
             TreeHealthRecord record = null;
 
@@ -870,7 +901,7 @@ namespace protectTreesV2.Health
 
             using (var da = new MS_SQL())
             {
-                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthID));
                 if (dt.Rows.Count > 0)
                 {
                     record = ToHealthRecord(dt.Rows[0]);
@@ -880,26 +911,26 @@ namespace protectTreesV2.Health
             // 2. 如果主檔存在，順便撈取照片與附件
             if (record != null)
             {
-                record.photos = GetHealthPhotos(healthId);
-                record.attachments = GetHealthAttachments(healthId);
+                record.photos = GetHealthPhotos(healthID);
+                record.attachments = GetHealthAttachments(healthID);
             }
 
             return record;
         }
 
-        public bool CheckSurveyDateDuplicate(int treeId, DateTime surveyDate, int excludeHealthId)
+        public bool CheckSurveyDateDuplicate(int treeID, DateTime surveyDate, int excludeHealthID)
         {
             // SQL 邏輯：
             // 1. 樹木 ID 相同
             // 2. 日期相同
-            // 3. 排除目前正在編輯的 ID (新增時 excludeHealthId 為 0，不影響)
+            // 3. 排除目前正在編輯的 ID (新增時 excludeHealthID 為 0，不影響)
             // 4. 排除已刪除的資料
             string sql = @"
                 SELECT COUNT(1)
                 FROM Tree_HealthRecord
-                WHERE treeID = @treeId
+                WHERE treeID = @treeID
                   AND surveyDate = @surveyDate
-                  AND healthID <> @excludeId 
+                  AND healthID <> @excludeHealthID 
                   AND removeDateTime IS NULL";
 
             using (var da = new MS_SQL())
@@ -907,9 +938,9 @@ namespace protectTreesV2.Health
                 // 參數設定
                 var parameters = new SqlParameter[]
                 {
-                    new SqlParameter("@treeId", treeId),
+                    new SqlParameter("@treeID", treeID),
                     new SqlParameter("@surveyDate", surveyDate.Date), 
-                    new SqlParameter("@excludeId", excludeHealthId)
+                    new SqlParameter("@excludeHealthID", excludeHealthID)
                 };
 
                 object result = da.ExcuteScalar(sql, parameters);
@@ -922,7 +953,7 @@ namespace protectTreesV2.Health
         /// <summary>
         /// 自動判斷是新增 (Insert) 還是編輯 (Update)
         /// </summary>
-        public int SaveHealthRecord(TreeHealthRecord record, int accountId)
+        public int SaveHealthRecord(TreeHealthRecord record, int accountID)
         {
             if (record == null) throw new ArgumentNullException(nameof(record));
 
@@ -932,7 +963,7 @@ namespace protectTreesV2.Health
                 var parameters = new List<SqlParameter>
                 {
                     new SqlParameter("@treeID", record.treeID),
-                    new SqlParameter("@accountId", accountId)
+                    new SqlParameter("@accountID", accountID)
                 };
                 parameters.AddRange(GetRecordParameters(record));
 
@@ -993,7 +1024,7 @@ namespace protectTreesV2.Health
                             @siteCementPercent, @siteAsphaltPercent, @sitePlanter, @siteRecreationFacility, @siteDebrisStack, @siteBetweenBuildings, @siteSoilCompaction, @siteOverburiedSoil, @siteOtherNote,
                             @soilPh, @soilOrganicMatter, @soilEc,
                             @managementStatus, @priority, @treatmentDescription,
-                            @sourceUnit, @sourceUnitID, @accountId, GETDATE()
+                            @sourceUnit, @sourceUnitID, @accountID, GETDATE()
                         )";
 
                     return Convert.ToInt32(da.ExcuteScalar(insertSql, parameters.ToArray()));
@@ -1039,7 +1070,7 @@ namespace protectTreesV2.Health
                             managementStatus=@managementStatus, priority=@priority, treatmentDescription=@treatmentDescription,
                             sourceUnit=@sourceUnit, sourceUnitID=@sourceUnitID,
                             
-                            updateAccountID=@accountId, updateDateTime=GETDATE()
+                            updateAccountID=@accountID, updateDateTime=GETDATE()
                         WHERE healthID=@id AND removeDateTime IS NULL";
 
                     da.ExecNonQuery(updateSql, parameters.ToArray());
@@ -1047,8 +1078,37 @@ namespace protectTreesV2.Health
                 }
             }
         }
+        /// <summary>
+        /// 刪除健檢紀錄
+        /// </summary>
+        /// <param name="healthID">健檢紀錄 ID</param>
+        /// <param name="accountID">帳號ID</param>
+        /// <returns>是否成功</returns>
+        public  bool DeleteHealthRecord(int healthID, int accountID)
+        {
+            //只有草稿才能刪除
+            string sql = @"
+                UPDATE Tree_HealthRecord 
+                SET 
+                    removeDateTime = GETDATE(),    
+                    removeAccountID = @accountID    
+                WHERE healthID = @healthID 
+                  AND removeDateTime IS NULL
+                  AND dataStatus = 0;  
+            ";
 
-        public int InsertHealthPhoto(TreeHealthPhoto photo, int accountId)
+            var parameters = new System.Data.SqlClient.SqlParameter[] {
+                new System.Data.SqlClient.SqlParameter("@healthID", healthID),
+                new System.Data.SqlClient.SqlParameter("@accountID", accountID)
+            };
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                int rows = da.ExecNonQuery(sql, parameters);
+                return rows > 0;
+            }
+        }
+        public int InsertHealthPhoto(TreeHealthPhoto photo, int accountID)
         {
             if (photo == null) throw new ArgumentNullException(nameof(photo));
 
@@ -1057,7 +1117,7 @@ namespace protectTreesV2.Health
                 (healthID, fileName, filePath, fileSize, caption, insertAccountID, insertDateTime)
                 OUTPUT INSERTED.photoID
                 VALUES
-                (@healthID, @fileName, @filePath, @fileSize, @caption, @accountId, GETDATE())";
+                (@healthID, @fileName, @filePath, @fileSize, @caption, @accountID, GETDATE())";
 
             using (var da = new MS_SQL())
             {
@@ -1067,28 +1127,28 @@ namespace protectTreesV2.Health
                     new SqlParameter("@filePath", ToDbValue(photo.filePath)),
                     new SqlParameter("@fileSize", ToDbValue(photo.fileSize)),
                     new SqlParameter("@caption", ToDbValue(photo.caption)),
-                    new SqlParameter("@accountId", accountId)));
+                    new SqlParameter("@accountID", accountID)));
             }
         }
 
-        public void DeleteHealthPhotos(int healthId, List<int> photoIds, int accountId)
+        public void DeleteHealthPhotos(int healthID, List<int> photoIDs, int accountID)
         {
-            if (photoIds == null || photoIds.Count == 0) return;
+            if (photoIDs == null || photoIDs.Count == 0) return;
 
             // 將 int list 轉成 "1,2,3" 字串
-            string idList = string.Join(",", photoIds);
+            string idList = string.Join(",", photoIDs);
 
-            string sql = $"UPDATE Tree_HealthPhoto SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE photoID IN ({idList}) AND healthID=@healthID";
+            string sql = $"UPDATE Tree_HealthPhoto SET removeDateTime=GETDATE(), removeAccountID=@accountID WHERE photoID IN ({idList}) AND healthID=@healthID";
 
             using (var da = new MS_SQL())
             {
                 da.ExecNonQuery(sql,
-                    new SqlParameter("@accountId", accountId),
-                    new SqlParameter("@healthID", healthId));
+                    new SqlParameter("@accountID", accountID),
+                    new SqlParameter("@healthID", healthID));
             }
         }
 
-        public void UpdateHealthPhotoCaptions(int healthId, List<TreeHealthPhoto> updates)
+        public void UpdateHealthPhotoCaptions(int healthID, List<TreeHealthPhoto> updates)
         {
             if (updates == null || updates.Count == 0) return;
 
@@ -1104,7 +1164,7 @@ namespace protectTreesV2.Health
                 List<SqlParameter> parameters = new List<SqlParameter>();
 
                 // 加入共用參數 (注意：每次 Execute 都要重新加入，因為參數物件不能跨 Command 重用)
-                parameters.Add(new SqlParameter("@healthID", healthId));
+                parameters.Add(new SqlParameter("@healthID", healthID));
 
                 for (int j = 0; j < currentBatch.Count; j++)
                 {
@@ -1136,13 +1196,13 @@ namespace protectTreesV2.Health
         /// <summary>
         /// 取得照片列表
         /// </summary>
-        public List<TreeHealthPhoto> GetHealthPhotos(int healthId)
+        public List<TreeHealthPhoto> GetHealthPhotos(int healthID)
         {
             string sql = "SELECT photoID, healthID, fileName, filePath, fileSize, caption, insertDateTime FROM Tree_HealthPhoto WHERE healthID=@id AND removeDateTime IS NULL ORDER BY insertDateTime DESC, photoID DESC";
 
             using (var da = new MS_SQL())
             {
-                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthID));
                 List<TreeHealthPhoto> list = new List<TreeHealthPhoto>();
                 foreach (DataRow row in dt.Rows)
                 {
@@ -1161,7 +1221,7 @@ namespace protectTreesV2.Health
             }
         }
 
-        public int InsertHealthAttachment(TreeHealthAttachment attachment, int accountId)
+        public int InsertHealthAttachment(TreeHealthAttachment attachment, int accountID)
         {
             if (attachment == null) throw new ArgumentNullException(nameof(attachment));
 
@@ -1170,7 +1230,7 @@ namespace protectTreesV2.Health
                 (healthID, fileName, filePath, fileSize, description, insertAccountID, insertDateTime)
                 OUTPUT INSERTED.attachmentID
                 VALUES
-                (@healthID, @fileName, @filePath, @fileSize, @description, @accountId, GETDATE())";
+                (@healthID, @fileName, @filePath, @fileSize, @description, @accountID, GETDATE())";
 
             using (var da = new MS_SQL())
             {
@@ -1180,32 +1240,32 @@ namespace protectTreesV2.Health
                     new SqlParameter("@filePath", ToDbValue(attachment.filePath)),
                     new SqlParameter("@fileSize", ToDbValue(attachment.fileSize)),
                     new SqlParameter("@description", ToDbValue(attachment.description)),
-                    new SqlParameter("@accountId", accountId)));
+                    new SqlParameter("@accountID", accountID)));
             }
         }
 
-        public void DeleteHealthAttachment(int healthId, int attachmentId, int accountId)
+        public void DeleteHealthAttachment(int healthID, int attachmentID, int accountID)
         {
-            string sql = "UPDATE Tree_HealthAttachment SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE attachmentID=@id AND healthID=@healthID";
+            string sql = "UPDATE Tree_HealthAttachment SET removeDateTime=GETDATE(), removeAccountID=@accountID WHERE attachmentID=@id AND healthID=@healthID";
             using (var da = new MS_SQL())
             {
                 da.ExecNonQuery(sql,
-                    new SqlParameter("@accountId", accountId),
-                    new SqlParameter("@id", attachmentId),
-                    new SqlParameter("@healthID", healthId));
+                    new SqlParameter("@accountID", accountID),
+                    new SqlParameter("@id", attachmentID),
+                    new SqlParameter("@healthID", healthID));
             }
         }
 
         /// <summary>
         /// 取得附件列表
         /// </summary>
-        public List<TreeHealthAttachment> GetHealthAttachments(int healthId)
+        public List<TreeHealthAttachment> GetHealthAttachments(int healthID)
         {
             string sql = "SELECT attachmentID, healthID, fileName, filePath, fileSize, description, insertDateTime FROM Tree_HealthAttachment WHERE healthID=@id AND removeDateTime IS NULL ORDER BY insertDateTime DESC, attachmentID DESC";
 
             using (var da = new MS_SQL())
             {
-                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthID));
                 List<TreeHealthAttachment> list = new List<TreeHealthAttachment>();
                 foreach (DataRow row in dt.Rows)
                 {

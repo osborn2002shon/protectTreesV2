@@ -175,6 +175,7 @@ namespace protectTreesV2.TreeCatalog
     /// <summary>
     /// 查詢條件
     /// </summary>
+    [Serializable]
     public class TreeFilter
     {
         public int? CityID { get; set; }

@@ -114,7 +114,7 @@ namespace protectTreesV2.Base
         /// </summary>
         public void ReturnState()
         {
-            if (ViewState[PageStateInfo.sessionKey] is PageStateInfo state)
+            if (ViewState[PageStateInfo.viewStateKey] is PageStateInfo state)
             {
                 Session[PageStateInfo.sessionKey] = state; // 丟回 Session
                 Response.Redirect(state.sourcePage);       // 跳回來源頁
@@ -336,6 +336,76 @@ namespace protectTreesV2.Base
                 {
                     ddl.Items.Add(new System.Web.UI.WebControls.ListItem(row["area"].ToString(), row["twID"].ToString()));
                 }
+            }
+        }
+
+        /// <summary>
+        /// 綁定樹牌狀態
+        /// </summary>
+        /// <param name="ddl">下拉選單</param>
+        /// <param name="showSelect">是否顯示「請選擇」，預設 true</param>
+        public static void Bind_enum_treeSignStatus(ref DropDownList ddl, bool showSelect = true)
+        {
+            ddl.Items.Clear();
+
+            if (showSelect)
+            {
+                ddl.Items.Add(new ListItem("請選擇", ""));
+            }
+
+            // 遍歷 Enum
+            foreach (Health.Health.enum_treeSignStatus item in Enum.GetValues(typeof(Health.Health.enum_treeSignStatus)))
+            {
+                string text = item.ToString();
+                string value = ((int)item).ToString(); 
+
+                ddl.Items.Add(new ListItem(text, value));
+            }
+        }
+
+        /// <summary>
+        /// 綁定錯誤修剪傷害
+        /// </summary>
+        /// <param name="ddl">下拉選單</param>
+        /// <param name="showSelect">是否顯示「請選擇」，預設 true</param>
+        public static void Bind_enum_pruningDamageType(ref DropDownList ddl, bool showSelect = true)
+        {
+            ddl.Items.Clear();
+
+            if (showSelect)
+            {
+                ddl.Items.Add(new ListItem("請選擇", ""));
+            }
+
+            foreach (Health.Health.enum_pruningDamageType item in Enum.GetValues(typeof(Health.Health.enum_pruningDamageType)))
+            {
+                string text = item.ToString();
+                string value = text; 
+
+                ddl.Items.Add(new ListItem(text, value));
+            }
+        }
+
+        /// <summary>
+        /// 綁定建議處理優先順序
+        /// </summary>
+        /// <param name="ddl">下拉選單</param>
+        /// <param name="showSelect">是否顯示「請選擇」，預設 true</param>
+        public static void Bind_enum_treatmentPriority(ref DropDownList ddl, bool showSelect = true)
+        {
+            ddl.Items.Clear();
+
+            if (showSelect)
+            {
+                ddl.Items.Add(new ListItem("請選擇", ""));
+            }
+
+            foreach (Health.Health.enum_treatmentPriority item in Enum.GetValues(typeof(Health.Health.enum_treatmentPriority)))
+            {
+                string text = item.ToString();
+                string value = text; 
+
+                ddl.Items.Add(new ListItem(text, value));
             }
         }
     }

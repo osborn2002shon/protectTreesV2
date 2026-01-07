@@ -219,12 +219,7 @@
                         </div>
                         <div class="col">
                             <label class="form-label">樹牌 <span class="text-danger">*</span></label>
-                            <asp:DropDownList ID="DropDownList_treeSignStatus" runat="server" CssClass="form-select">
-                                <asp:ListItem Text="--" Value="" />
-                                <asp:ListItem Text="有" Value="1" />
-                                <asp:ListItem Text="沒有" Value="2" />
-                                <asp:ListItem Text="毀損" Value="3" />
-                            </asp:DropDownList>
+                            <asp:DropDownList ID="DropDownList_treeSignStatus" runat="server" CssClass="form-select"></asp:DropDownList>
                         </div>
                     </div>
 
@@ -664,12 +659,7 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label">錯誤修剪傷害 <span class="text-danger">*</span></label>
-                            <asp:DropDownList ID="DropDownList_pruningWrongDamage" runat="server" CssClass="form-select">
-                                <asp:ListItem Text="--" Value="" />
-                                <asp:ListItem Text="截幹" Value="截幹" />
-                                <asp:ListItem Text="截頂" Value="截頂" />
-                                <asp:ListItem Text="不當縮剪" Value="不當縮剪" />
-                            </asp:DropDownList>
+                            <asp:DropDownList ID="DropDownList_pruningWrongDamage" runat="server" CssClass="form-select"></asp:DropDownList>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -821,12 +811,7 @@
                         <%-- 建議處理優先順序 --%>
                         <div class="col">
                             <label class="form-label">建議處理優先順序 <span class="text-danger">*</span></label>
-                            <asp:DropDownList ID="DropDownList_priority" runat="server" CssClass="form-select">
-                                <asp:ListItem Text="--" Value="" />
-                                <asp:ListItem Text="緊急處理" Value="緊急處理" />
-                                <asp:ListItem Text="優先處理" Value="優先處理" />
-                                <asp:ListItem Text="例行養護" Value="例行養護" />
-                            </asp:DropDownList>
+                            <asp:DropDownList ID="DropDownList_priority" runat="server" CssClass="form-select"></asp:DropDownList>
                         </div>
 
                         <%-- 處理情形說明 --%>
@@ -959,49 +944,35 @@
         </asp:LinkButton>
     </div>
 
-    <asp:Panel ID="Panel_logs" runat="server" Visible="false">
-        <div class="row">
-            <div class="col">
-                <div class="formCard card">
-                    <div class="card-header">編輯紀錄</div>
-                    <div class="card-body">
-                        <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
-                        <asp:Repeater ID="rptLogs" runat="server">
-                            <HeaderTemplate>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>動作</th>
-                                            <th>說明</th>
-                                            <th>時間</th>
-                                            <th>帳號</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                            </HeaderTemplate>
-                            <ItemTemplate>
-                                <tr>
-                                    <td><%# Eval("ActionType") %></td>
-                                    <td><%# Eval("Memo") %></td>
-                                    <td><%# Eval("LogDateTime", "{0:yyyy-MM-dd HH:mm}") %></td>
-                                    <td><%# Eval("AccountName") %> (<%# Eval("Account") %>) <%# Eval("AccountUnit") %></td>
-                                </tr>
-                            </ItemTemplate>
-                            <FooterTemplate>
-                                    </tbody>
-                                </table>
-                            </FooterTemplate>
-                        </asp:Repeater>
-                        <div>
-                            <asp:LinkButton ID="lnkLogPrev" runat="server" Text="上一頁" OnClick="lnkLogPrev_Click" CssClass="btn btn-link" />
-                            <asp:Label ID="lblLogPageInfo" runat="server" />
-                            <asp:LinkButton ID="lnkLogNext" runat="server" Text="下一頁" OnClick="lnkLogNext_Click" CssClass="btn btn-link" />
+        <asp:Panel ID="Panel_logs" runat="server" Visible="false">
+            <div class="row">
+                <div class="col">
+                    <div class="formCard card">
+                        <div class="card-header">編輯紀錄</div>
+                        <div class="card-body">
+                            <asp:GridView ID="GridView_logs" runat="server" AutoGenerateColumns="false" CssClass="gv" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging"  ShowHeaderWhenEmpty="true" >
+                                <PagerSettings Mode="Numeric" />
+                                <Columns>
+                                    <asp:BoundField DataField="ActionType" HeaderText="動作" />
+                                    <asp:BoundField DataField="Memo" HeaderText="說明" />
+                                    <asp:BoundField DataField="LogDateTime" HeaderText="時間" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
+                                    <asp:TemplateField HeaderText="帳號">
+                                        <ItemTemplate>
+                                            <%# Eval("AccountName") %> (<%# Eval("Account") %>) <%# Eval("AccountUnit") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                                 <EmptyDataTemplate>
+                                     <div class="text-center py-3 text-muted">
+                                         <p>尚無編輯紀錄。</p>
+                                     </div>
+                                 </EmptyDataTemplate>
+                            </asp:GridView>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </asp:Panel>
+        </asp:Panel>
 
    <script>
        $(document).ready(function () {
