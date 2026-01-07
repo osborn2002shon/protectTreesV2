@@ -575,7 +575,6 @@ namespace protectTreesV2.backstage.tree
             lblLogEmpty.Visible = logs.Count == 0;
             gvLogs.Visible = logs.Count > 0;
 
-            dpLogs.Visible = logs.Count > 0;
             if (logs.Count == 0)
             {
                 return;

@@ -139,6 +139,7 @@
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
+    <Content Include="backstage\patrol\edit.aspx" />
     <Content Include="backstage\patrol\list.aspx" />
     <Content Include="backstage\patrol\main.aspx" />
     <Content Include="backstage\health\upload.aspx" />
@@ -183,6 +184,13 @@
     <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />
     <Compile Include="App_Code\Patrol.cs" />
+    <Compile Include="backstage\patrol\edit.aspx.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\patrol\edit.aspx.designer.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+    </Compile>
     <Compile Include="backstage\patrol\main.aspx.cs">
       <DependentUpon>main.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
