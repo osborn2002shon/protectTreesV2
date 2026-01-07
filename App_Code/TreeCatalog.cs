@@ -26,7 +26,7 @@ namespace protectTreesV2.TreeCatalog
     public enum TreeEditState
     {
         草稿 = 0,
-        完稿 = 1
+        定稿 = 1
     }
 
     /// <summary>
@@ -515,7 +515,7 @@ WHERE r.systemTreeNo=@systemTreeNo AND r.removeDateTime IS NULL";
                                 r.announcementDate AS [公告日期],
                                 r.isAnnounced AS [是否公告列管],
                                 r.treeStatus AS [樹籍狀態],
-                                CASE WHEN r.editStatus=1 THEN N'完稿' ELSE N'草稿' END AS [編輯狀態],
+                                CASE WHEN r.editStatus=1 THEN N'定稿' ELSE N'草稿' END AS [編輯狀態],
                                 r.treeCount AS [數量],
                                 r.site AS [坐落地點],
                                 r.latitude AS [座標(WGS84)_緯度(N)],
@@ -1189,7 +1189,7 @@ VALUES(@treeID, @fileName, @filePath, @caption, @isCover, @accountId, GETDATE())
 
         public static string GetEditStatusText(TreeEditState state)
         {
-            return state == TreeEditState.完稿 ? "完稿" : "草稿";
+            return state == TreeEditState.定稿 ? "定稿" : "草稿";
         }
     }
 }

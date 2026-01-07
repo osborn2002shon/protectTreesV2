@@ -119,7 +119,7 @@
                 <%-- 7. 巡查人 --%>
                 <asp:BoundField DataField="patroller" HeaderText="巡查人" SortExpression="patroller" />
 
-                <%-- 8. 巡查紀錄狀態 (草稿/完稿) + 最後更新時間 --%>
+                <%-- 8. 巡查紀錄狀態 (草稿/定稿) + 最後更新時間 --%>
                 <asp:TemplateField HeaderText="紀錄狀態" SortExpression="dataStatus">
                     <ItemTemplate>
                         <%# Eval("dataStatusText") %>
