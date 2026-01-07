@@ -40,7 +40,18 @@ namespace protectTreesV2.backstage.patrol
             if (!IsPostBack)
             {
                 InitSearchFilters();
-                CollectFilterFromUI();
+
+                var savedFilter = base.GetState<PatrolMainQueryFilter>();
+                if (savedFilter != null)
+                {
+                    PopulateFilterToUI(savedFilter);
+                    CurrentFilter = savedFilter;
+                }
+                else
+                {
+                    CollectFilterFromUI();
+                }
+
                 BindResult();
                 BindSelectedList();
             }
@@ -65,6 +76,49 @@ namespace protectTreesV2.backstage.patrol
             filter.queryOption = RadioButtonList_queryOption.SelectedValue;
 
             CurrentFilter = filter;
+        }
+
+        private void PopulateFilterToUI(PatrolMainQueryFilter filter)
+        {
+            if (filter == null) return;
+
+            if (filter.cityID.HasValue)
+            {
+                string cityVal = filter.cityID.ToString();
+                if (DropDownList_city.Items.FindByValue(cityVal) != null)
+                {
+                    DropDownList_city.SelectedValue = cityVal;
+                    Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, cityVal);
+                }
+            }
+
+            if (filter.areaID.HasValue)
+            {
+                string areaVal = filter.areaID.ToString();
+                if (DropDownList_area.Items.FindByValue(areaVal) != null)
+                {
+                    DropDownList_area.SelectedValue = areaVal;
+                }
+            }
+
+            if (filter.speciesID.HasValue)
+            {
+                string speciesVal = filter.speciesID.ToString();
+                if (DropDownList_species.Items.FindByValue(speciesVal) != null)
+                {
+                    DropDownList_species.SelectedValue = speciesVal;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.queryOption))
+            {
+                if (RadioButtonList_queryOption.Items.FindByValue(filter.queryOption) != null)
+                {
+                    RadioButtonList_queryOption.SelectedValue = filter.queryOption;
+                }
+            }
+
+            TextBox_keyword.Text = filter.keyword ?? string.Empty;
         }
 
         private void BindResult()
@@ -144,7 +198,8 @@ namespace protectTreesV2.backstage.patrol
             if (e.CommandName == "_AddRecord")
             {
                 setTreeID = arg;
-                Response.Redirect("edit.aspx");
+                setPatrolID = null;
+                base.RedirectState("edit.aspx", this.CurrentFilter);
             }
 
             if (e.CommandName == "_ViewTree")
@@ -158,7 +213,7 @@ namespace protectTreesV2.backstage.patrol
             if (e.CommandName == "_ViewRecord")
             {
                 setTreeID = arg;
-                Response.Redirect("list.aspx");
+                base.RedirectState("list.aspx", this.CurrentFilter);
             }
         }
 
