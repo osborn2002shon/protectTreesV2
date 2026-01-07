@@ -39,9 +39,17 @@ namespace protectTreesV2.backstage.patrol
             {
                 InitSearchFilters();
 
-                CheckExternalRequest();
-
-                CollectFilterFromUI();
+                var savedFilter = base.GetState<PatrolRecordListFilter>();
+                if (savedFilter != null)
+                {
+                    PopulateFilterToUI(savedFilter);
+                    CurrentFilter = savedFilter;
+                }
+                else
+                {
+                    CheckExternalRequest();
+                    CollectFilterFromUI();
+                }
 
                 BindResult();
             }
@@ -106,6 +114,51 @@ namespace protectTreesV2.backstage.patrol
             CurrentFilter = filter;
         }
 
+        private void PopulateFilterToUI(PatrolRecordListFilter filter)
+        {
+            if (filter == null) return;
+
+            if (!string.IsNullOrEmpty(filter.scope))
+            {
+                if (RadioButtonList_scope.Items.FindByValue(filter.scope) != null)
+                {
+                    RadioButtonList_scope.SelectedValue = filter.scope;
+                }
+            }
+
+            if (filter.cityID.HasValue)
+            {
+                string cityVal = filter.cityID.Value.ToString();
+                if (DropDownList_city.Items.FindByValue(cityVal) != null)
+                {
+                    DropDownList_city.SelectedValue = cityVal;
+                    Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, cityVal);
+                }
+            }
+
+            if (filter.areaID.HasValue)
+            {
+                string areaVal = filter.areaID.Value.ToString();
+                if (DropDownList_area.Items.FindByValue(areaVal) != null)
+                {
+                    DropDownList_area.SelectedValue = areaVal;
+                }
+            }
+
+            if (filter.speciesID.HasValue)
+            {
+                string speciesVal = filter.speciesID.Value.ToString();
+                if (DropDownList_species.Items.FindByValue(speciesVal) != null)
+                {
+                    DropDownList_species.SelectedValue = speciesVal;
+                }
+            }
+
+            TextBox_dateStart.Text = filter.dateStart?.ToString("yyyy-MM-dd") ?? string.Empty;
+            TextBox_dateEnd.Text = filter.dateEnd?.ToString("yyyy-MM-dd") ?? string.Empty;
+            TextBox_keyword.Text = filter.keyword ?? string.Empty;
+        }
+
         private void BindResult()
         {
             var filter = CurrentFilter;
@@ -155,7 +208,7 @@ namespace protectTreesV2.backstage.patrol
                 {
                     setPatrolID = patrolId.ToString();
                     setTreeID = null;
-                    Response.Redirect("edit.aspx");
+                    base.RedirectState("edit.aspx", this.CurrentFilter);
                 }
             }
             else if (e.CommandName == "_DeletePatrol")

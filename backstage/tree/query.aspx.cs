@@ -18,11 +18,30 @@ namespace protectTreesV2.backstage.tree
         private const string SortExpressionKey = "TreeQuery_SortExpression";
         private const string SortDirectionKey = "TreeQuery_SortDirection";
 
+        protected TreeFilter CurrentFilter
+        {
+            get
+            {
+                return ViewState["CurrentFilter"] as TreeFilter ?? new TreeFilter();
+            }
+            set { ViewState["CurrentFilter"] = value; }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
                 BindDropdowns();
+                var savedFilter = base.GetState<TreeFilter>();
+                if (savedFilter != null)
+                {
+                    PopulateFilterToUI(savedFilter);
+                    CurrentFilter = savedFilter;
+                }
+                else
+                {
+                    CollectFilterFromUI();
+                }
                 BindTrees();
             }
         }
@@ -94,6 +113,68 @@ namespace protectTreesV2.backstage.tree
             };
         }
 
+        private void CollectFilterFromUI()
+        {
+            CurrentFilter = BuildFilter();
+        }
+
+        private void PopulateFilterToUI(TreeFilter filter)
+        {
+            if (filter == null) return;
+
+            if (filter.CityID.HasValue)
+            {
+                var cityVal = filter.CityID.Value.ToString();
+                if (ddlCity.Items.FindByValue(cityVal) != null)
+                {
+                    ddlCity.SelectedValue = cityVal;
+                    BindAreas();
+                }
+            }
+
+            if (filter.AreaID.HasValue)
+            {
+                var areaVal = filter.AreaID.Value.ToString();
+                if (ddlArea.Items.FindByValue(areaVal) != null)
+                {
+                    ddlArea.SelectedValue = areaVal;
+                }
+            }
+
+            if (filter.EditStatus.HasValue)
+            {
+                var editStatusVal = ((int)filter.EditStatus.Value).ToString();
+                if (ddlEditStatus.Items.FindByValue(editStatusVal) != null)
+                {
+                    ddlEditStatus.SelectedValue = editStatusVal;
+                }
+            }
+
+            if (filter.Status.HasValue)
+            {
+                var statusVal = ((int)filter.Status.Value).ToString();
+                if (ddlTreeStatus.Items.FindByValue(statusVal) != null)
+                {
+                    ddlTreeStatus.SelectedValue = statusVal;
+                }
+            }
+
+            if (filter.SpeciesID.HasValue)
+            {
+                var speciesVal = filter.SpeciesID.Value.ToString();
+                if (ddlSpecies.Items.FindByValue(speciesVal) != null)
+                {
+                    ddlSpecies.SelectedValue = speciesVal;
+                }
+            }
+
+            txtSurveyStart.Text = filter.SurveyDateStart?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtSurveyEnd.Text = filter.SurveyDateEnd?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtAnnouncementStart.Text = filter.AnnouncementDateStart?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtAnnouncementEnd.Text = filter.AnnouncementDateEnd?.ToString("yyyy-MM-dd") ?? string.Empty;
+            txtKeyword.Text = filter.Keyword ?? string.Empty;
+        }
+
         private void BindAreas()
         {
             ddlArea.Items.Clear();
@@ -113,7 +194,7 @@ namespace protectTreesV2.backstage.tree
 
         private void BindTrees()
         {
-            var filter = BuildFilter();
+            var filter = CurrentFilter;
             var records = TreeService.SearchTrees(filter) ?? new List<TreeRecord>();
 
             var sortExpression = ViewState[SortExpressionKey] as string;
@@ -161,6 +242,7 @@ namespace protectTreesV2.backstage.tree
 
         protected void btnSearch_Click(object sender, EventArgs e)
         {
+            CollectFilterFromUI();
             BindTrees();
         }
 
@@ -177,6 +259,7 @@ namespace protectTreesV2.backstage.tree
             txtAnnouncementStart.Text = string.Empty;
             txtAnnouncementEnd.Text = string.Empty;
             txtKeyword.Text = string.Empty;
+            CollectFilterFromUI();
             BindTrees();
         }
 
@@ -205,16 +288,18 @@ namespace protectTreesV2.backstage.tree
         {
             if (e.CommandName == "EditTree" || e.CommandName == "ViewTree")
             {
+                CollectFilterFromUI();
                 setTreeID = e.CommandArgument.ToString();
                 string target = e.CommandName == "EditTree" ? "edit.aspx" : "detail.aspx";
-                Response.Redirect(target);
+                base.RedirectState(target, CurrentFilter);
             }
         }
 
         protected void btnAdd_Click(object sender, EventArgs e)
         {
+            CollectFilterFromUI();
             setTreeID = string.Empty;
-            Response.Redirect("edit.aspx");
+            base.RedirectState("edit.aspx", CurrentFilter);
         }
 
         protected void btnExport_Click(object sender, EventArgs e)
