@@ -319,32 +319,18 @@
                 <div class="card-header">編輯紀錄</div>
                 <div class="card-body">
                     <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
-                    <asp:Repeater ID="rptLogs" runat="server">
-                        <HeaderTemplate>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>動作</th>
-                                        <th>說明</th>
-                                        <th>時間</th>
-                                        <th>帳號</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <tr>
-                                <td><%# Eval("ActionType") %></td>
-                                <td><%# Eval("Memo") %></td>
-                                <td><%# Eval("LogDateTime", "{0:yyyy-MM-dd HH:mm}") %></td>
-                                <td><%# Eval("AccountName") %> (<%# Eval("Account") %>) <%# Eval("AccountUnit") %></td>
-                            </tr>
-                        </ItemTemplate>
-                        <FooterTemplate>
-                                </tbody>
-                            </table>
-                        </FooterTemplate>
-                    </asp:Repeater>
+                    <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="gv">
+                        <Columns>
+                            <asp:BoundField DataField="ActionType" HeaderText="動作" />
+                            <asp:BoundField DataField="Memo" HeaderText="說明" />
+                            <asp:BoundField DataField="LogDateTime" HeaderText="時間" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
+                            <asp:TemplateField HeaderText="帳號">
+                                <ItemTemplate>
+                                    <%# Eval("AccountName") %> (<%# Eval("Account") %>) <%# Eval("AccountUnit") %>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                        </Columns>
+                    </asp:GridView>
                     <div>
                         <asp:LinkButton ID="lnkLogPrev" runat="server" Text="上一頁" OnClick="lnkLogPrev_Click" CssClass="btn btn-link" />
                         <asp:Label ID="lblLogPageInfo" runat="server" />
