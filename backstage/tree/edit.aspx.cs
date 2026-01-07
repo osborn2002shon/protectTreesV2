@@ -581,7 +581,7 @@ namespace protectTreesV2.backstage.tree
             var logs = FunctionLogService.GetLogs(LogFunctionTypes.TreeCatalog, treeId) ?? new List<FunctionLogEntry>();
             pnlLogs.Visible = true;
             lblLogEmpty.Visible = logs.Count == 0;
-            rptLogs.Visible = logs.Count > 0;
+            gvLogs.Visible = logs.Count > 0;
 
             if (logs.Count == 0)
             {
@@ -595,8 +595,8 @@ namespace protectTreesV2.backstage.tree
             LogPageIndex = Math.Max(0, Math.Min(LogPageIndex, totalPages - 1));
 
             var pagedLogs = logs.Skip(LogPageIndex * LogsPageSize).Take(LogsPageSize).ToList();
-            rptLogs.DataSource = pagedLogs;
-            rptLogs.DataBind();
+            gvLogs.DataSource = pagedLogs;
+            gvLogs.DataBind();
 
             lnkLogPrev.Enabled = LogPageIndex > 0;
             lnkLogNext.Enabled = LogPageIndex < totalPages - 1;
