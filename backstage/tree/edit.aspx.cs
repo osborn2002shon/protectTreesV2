@@ -134,7 +134,7 @@ namespace protectTreesV2.backstage.tree
                     BindLogs(tree.TreeID);
                     SetEditModeLabel(isNew: false, tree.EditStatus);
                     ConfigureFinalState(tree.EditStatus);
-                    hfIsFinal.Value = tree.EditStatus == TreeEditState.完稿 ? "1" : "0";
+                    hfIsFinal.Value = tree.EditStatus == TreeEditState.定稿 ? "1" : "0";
                 }
             }
             else
@@ -225,9 +225,9 @@ namespace protectTreesV2.backstage.tree
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            var requestedState = chkFinalConfirm.Checked ? TreeEditState.完稿 : TreeEditState.草稿;
+            var requestedState = chkFinalConfirm.Checked ? TreeEditState.定稿 : TreeEditState.草稿;
             bool isFinalLocked = hfIsFinal.Value == "1";
-            bool requiresFinalValidation = requestedState == TreeEditState.完稿 || isFinalLocked;
+            bool requiresFinalValidation = requestedState == TreeEditState.定稿 || isFinalLocked;
             bool requiresDraftMinimum = !requiresFinalValidation && requestedState == TreeEditState.草稿;
             if (!ValidateForm(requiresFinalValidation, requiresDraftMinimum))
             {
@@ -343,9 +343,9 @@ namespace protectTreesV2.backstage.tree
                 record.AnnouncementDate = null;
             }
             record.IsAnnounced = record.Status == TreeStatus.已公告列管 && record.AnnouncementDate.HasValue;
-            if (record.TreeID > 0 && record.EditStatus == TreeEditState.完稿)
+            if (record.TreeID > 0 && record.EditStatus == TreeEditState.定稿)
             {
-                state = TreeEditState.完稿;
+                state = TreeEditState.定稿;
             }
             record.EditStatus = state;
             record.TreeCount = int.TryParse(txtTreeCount.Text, out int count) && count > 0 ? count : 1;
@@ -371,7 +371,7 @@ namespace protectTreesV2.backstage.tree
             record.CulturalHistoryIntro = txtCulturalHistory.Text.Trim();
             record.HealthCondition = txtHealth.Text.Trim();
 
-            if (state == TreeEditState.完稿 && string.IsNullOrWhiteSpace(record.SystemTreeNo))
+            if (state == TreeEditState.定稿 && string.IsNullOrWhiteSpace(record.SystemTreeNo))
             {
                 record.SystemTreeNo = TreeService.GenerateSystemTreeNo(record.CityID, record.AreaID, record.AnnouncementDate ?? record.SurveyDate ?? DateTime.Today);
             }
@@ -427,13 +427,13 @@ namespace protectTreesV2.backstage.tree
         private void SetEditModeLabel(bool isNew, TreeEditState editState)
         {
             string mode = isNew ? "新增" : "編輯";
-            string status = editState == TreeEditState.完稿 ? "定稿" : "草稿";
+            string status = editState == TreeEditState.定稿 ? "定稿" : "草稿";
             lblEditMode.Text = $"目前為{mode}（{status}）";
         }
 
         private void ConfigureFinalState(TreeEditState editState)
         {
-            if (editState == TreeEditState.完稿)
+            if (editState == TreeEditState.定稿)
             {
                 chkFinalConfirm.Checked = true;
                 chkFinalConfirm.Enabled = false;

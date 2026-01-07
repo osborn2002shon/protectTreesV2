@@ -198,7 +198,7 @@ CREATE TABLE [dbo].[Tree_PatrolRecord](
         [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
         [patrolDate] [date] NOT NULL, -- 巡查日期
         [patroller] [nvarchar](100) NULL, -- 巡查人姓名
-        [dataStatus] [tinyint] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_dataStatus] DEFAULT ((0)), -- 資料狀態代碼 (0=草稿,1=完稿)
+        [dataStatus] [tinyint] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_dataStatus] DEFAULT ((0)), -- 資料狀態代碼 (0=草稿,1=定稿)
         [memo] [nvarchar](max) NULL, -- 巡查備註
         [hasPublicSafetyRisk] [bit] NOT NULL CONSTRAINT [DF_Tree_PatrolRecord_hasPublicSafetyRisk] DEFAULT ((0)), -- 是否有危害公共安全風險或緊急狀況
         [sourceUnit] [nvarchar](200) NULL, -- 資料來源單位名稱
@@ -523,7 +523,7 @@ CREATE TABLE [dbo].[Tree_Record](
         [announcementDate] [datetime] NULL, -- 公告日期（已公告列管才會有公告日期）
         [isAnnounced] [bit] NOT NULL CONSTRAINT [DF_Tree_Record_isAnnounced] DEFAULT ((0)), -- 是否已公告列管（樹籍狀態為已公告列管才為1）
         [treeStatus] [nvarchar](20) NOT NULL CONSTRAINT [DF_Tree_Record_treeStatus] DEFAULT (N'其他'), -- 樹籍狀態（已公告列管／符合標準／其他）
-        [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 編輯狀態（草稿／完稿）
+        [editStatus] [int] NOT NULL CONSTRAINT [DF_Tree_Record_editStatus] DEFAULT ((0)), -- 編輯狀態（草稿／定稿）
         [treeCount] [int] NOT NULL CONSTRAINT [DF_Tree_Record_treeCount] DEFAULT ((1)), -- 數量
         [site] [nvarchar](200) NULL, -- 坐落地點
         [latitude] [nvarchar](max) NULL, -- 座標(WGS84)：緯度(N)

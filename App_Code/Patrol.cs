@@ -14,7 +14,7 @@ namespace protectTreesV2.Patrol
         public enum PatrolRecordStatus
         {
             草稿 = 0,
-            完稿 = 1
+            定稿 = 1
         }
 
         [Serializable]
@@ -53,7 +53,7 @@ namespace protectTreesV2.Patrol
             public string patrolRecordStatusText =>
                 !patrolID.HasValue || patrolID.Value == 0
                     ? "--"
-                    : (dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.完稿 ? "完稿" : "草稿");
+                    : (dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿");
         }
 
         public class PatrolBatchSettingResult
@@ -104,7 +104,7 @@ namespace protectTreesV2.Patrol
             public int? areaID { get; set; }
 
             public string dataStatusText
-                => dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.完稿 ? "完稿" : "草稿";
+                => dataStatus.GetValueOrDefault() == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿";
         }
 
         public class PatrolRecord
