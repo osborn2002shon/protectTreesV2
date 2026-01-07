@@ -38,6 +38,7 @@ namespace protectTreesV2.backstage.tree
             }
             else
             {
+                base.KeepState();
                 ClearPendingUploads();
                 BindDropdowns();
                 LoadData();
@@ -235,7 +236,7 @@ namespace protectTreesV2.backstage.tree
             }
             if (Save(requestedState))
             {
-                Response.Redirect("query.aspx");
+                base.ReturnState();
             }
         }
 
@@ -443,7 +444,7 @@ namespace protectTreesV2.backstage.tree
         protected void btnCancel_Click(object sender, EventArgs e)
         {
             ClearPendingUploads();
-            Response.Redirect("query.aspx");
+            base.ReturnState();
         }
 
         private bool ValidatePhotoChanges(int treeId)

@@ -83,6 +83,8 @@ namespace protectTreesV2.backstage.patrol
 
         private void InitIdsFromSession()
         {
+            base.KeepState();
+
             if (!string.IsNullOrEmpty(this.setPatrolID))
             {
                 if (int.TryParse(this.setPatrolID, out int patrolId))
@@ -425,13 +427,13 @@ namespace protectTreesV2.backstage.patrol
             }
 
             ClearPendingUploads();
-            Response.Redirect("list.aspx");
+            base.ReturnState();
         }
 
         protected void LinkButton_cancel_Click(object sender, EventArgs e)
         {
             ClearPendingUploads();
-            Response.Redirect("list.aspx");
+            base.ReturnState();
         }
 
         private bool ValidateForm(out DateTime? patrolDate, bool isFinal)
