@@ -320,6 +320,7 @@
                 <div class="card-body">
                     <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
                     <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="gv" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging">
+                        <PagerSettings Mode="Numeric" />
                         <Columns>
                             <asp:BoundField DataField="ActionType" HeaderText="動作" />
                             <asp:BoundField DataField="Memo" HeaderText="說明" />
@@ -331,12 +332,6 @@
                             </asp:TemplateField>
                         </Columns>
                     </asp:GridView>
-                    <asp:DataPager ID="dpLogs" runat="server" PagedControlID="gvLogs" PageSize="5">
-                        <Fields>
-                            <asp:NextPreviousPagerField ShowPreviousPageButton="true" ShowNextPageButton="true" PreviousPageText="上一頁" NextPageText="下一頁" ButtonType="Link" />
-                            <asp:NumericPagerField ButtonCount="5" />
-                        </Fields>
-                    </asp:DataPager>
                 </div>
             </div>
         </div>
