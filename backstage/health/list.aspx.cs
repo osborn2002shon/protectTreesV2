@@ -48,11 +48,22 @@ namespace protectTreesV2.backstage.health
                 //初始化
                 InitSearchFilters();
 
-                //檢查跨頁傳值
-                CheckExternalRequest();
+                var savedFilter = base.GetState<HealthRecordListFilter>();
 
-                // 第一次載入時，收集 UI 預設值
-                CollectFilterFromUI();
+                if (savedFilter != null)
+                {
+                    // 從編輯頁返回 -> 還原舊條件
+                    PopulateFilterToUI(savedFilter);
+                    CurrentFilter = savedFilter;
+                }
+                else
+                {
+                    // 從健檢紀錄:樹籍帶參數進入
+                    CheckExternalRequest();
+
+                    // 收集 UI 目前的值
+                    CollectFilterFromUI();
+                }
 
                 // 載入資料
                 BindResult();
@@ -76,10 +87,10 @@ namespace protectTreesV2.backstage.health
                         // 將編號填入 "關鍵字" 欄位
                         TextBox_keyword.Text = treeNo;
 
-                        // 將查詢範圍切換為 "單位全部" (確保能查到)
+                        // 將查詢範圍切換為 "單位全部" 
                         RadioButtonList_scope.SelectedValue = "Unit";
 
-                        // 清空日期 (查歷史紀錄通常不限日期)
+                        // 清空日期
                         TextBox_dateStart.Text = "";
                         TextBox_dateEnd.Text = "";
                     }
@@ -102,6 +113,56 @@ namespace protectTreesV2.backstage.health
 
             //樹種
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
+        }
+
+        /// <summary>
+        /// 將 Filter 的值填回 UI 控制項 (還原搜尋條件)
+        /// </summary>
+        private void PopulateFilterToUI(HealthRecordListFilter filter)
+        {
+            // 查詢範圍
+            if (!string.IsNullOrEmpty(filter.scope))
+            {
+                if (RadioButtonList_scope.Items.FindByValue(filter.scope) != null)
+                    RadioButtonList_scope.SelectedValue = filter.scope;
+            }
+
+            // 縣市
+            if (filter.cityID.HasValue)
+            {
+                string cityVal = filter.cityID.ToString();
+                if (DropDownList_city.Items.FindByValue(cityVal) != null)
+                {
+                    DropDownList_city.SelectedValue = cityVal;
+                    Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, cityVal);
+                }
+            }
+
+            // 鄉鎮
+            if (filter.areaID.HasValue)
+            {
+                string areaVal = filter.areaID.ToString();
+                if (DropDownList_area.Items.FindByValue(areaVal) != null)
+                    DropDownList_area.SelectedValue = areaVal;
+            }
+
+            // 樹種
+            if (filter.speciesID.HasValue)
+            {
+                string speciesVal = filter.speciesID.ToString();
+                if (DropDownList_species.Items.FindByValue(speciesVal) != null)
+                    DropDownList_species.SelectedValue = speciesVal;
+            }
+
+            // 日期區間
+            if (filter.dateStart.HasValue)
+                TextBox_dateStart.Text = filter.dateStart.Value.ToString("yyyy-MM-dd");
+
+            if (filter.dateEnd.HasValue)
+                TextBox_dateEnd.Text = filter.dateEnd.Value.ToString("yyyy-MM-dd");
+
+            // 關鍵字
+            TextBox_keyword.Text = filter.keyword;
         }
         private void CollectFilterFromUI()
         {
@@ -173,18 +234,18 @@ namespace protectTreesV2.backstage.health
 
         protected void GridView_healthList_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            // 取得 CommandArgument (HealthID)
+            // 取得ID
             string healthStr = e.CommandArgument.ToString();
 
-            // A. 檢視 (開新視窗)
+            // 檢視 (開新視窗)
             if (e.CommandName == "_ViewHealth")
             {
                 int healthId = Convert.ToInt32(healthStr);
-                var record = TreeService.GetHealthRecord(healthId);
+                var record = system_health.GetHealthRecord(healthId);
                 uc_healthRecordModal.BindRecord(record);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModal", "showHealthRecordModal();", true);
             }
-            // B. 編輯 (跳轉)
+            // 編輯 (跳轉)
             else if (e.CommandName == "_EditHealth")
             {
                 // 設定健檢 ID 
@@ -194,7 +255,7 @@ namespace protectTreesV2.backstage.health
                 setTreeID = null;
 
                 // 跳轉至編輯頁
-                Response.Redirect("edit.aspx");
+                base.RedirectState("edit.aspx", this.CurrentFilter);
             }
         }
 

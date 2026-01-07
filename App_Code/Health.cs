@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using DataAccess;
 using protectTreesV2.Base;
@@ -16,7 +17,7 @@ namespace protectTreesV2.Health
         public enum HealthRecordStatus
         {
             草稿 = 0,
-            完稿 = 1
+            定稿 = 1
         }
 
         public class TreeHealthRecord
@@ -35,6 +36,7 @@ namespace protectTreesV2.Health
             public string cityName { get; set; }
             public string areaName { get; set; }
             public string speciesName { get; set; }
+            public string manager { get; set; }
 
             // ==========================================
             // 基本資料
@@ -54,10 +56,10 @@ namespace protectTreesV2.Health
             public decimal? canopyArea { get; set; }
 
             // 樹圍與直徑
-            public decimal? girth100 { get; set; }
-            public decimal? diameter100 { get; set; }
-            public decimal? girth130 { get; set; }
-            public decimal? diameter130 { get; set; }
+            public string girth100 { get; set; }
+            public string diameter100 { get; set; }
+            public string girth130 { get; set; }
+            public string diameter130 { get; set; }
             public string measureNote { get; set; }
 
             // ==========================================
@@ -190,9 +192,9 @@ namespace protectTreesV2.Health
             public bool? siteOverburiedSoil { get; set; }
             public string siteOtherNote { get; set; }
 
-            public decimal? soilPh { get; set; }
-            public decimal? soilOrganicMatter { get; set; }
-            public decimal? soilEc { get; set; }
+            public string soilPh { get; set; }
+            public string soilOrganicMatter { get; set; }
+            public string soilEc { get; set; }
 
             // ==========================================
             // 11. 管理建議 (Management)
@@ -212,6 +214,9 @@ namespace protectTreesV2.Health
             public int? updateAccountID { get; set; }
             public DateTime? updateDateTime { get; set; }
 
+            public List<TreeHealthPhoto> photos { get; set; }
+            public List<TreeHealthAttachment> attachments { get; set; }
+
             // ==========================================
             // 輔助顯示屬性 
             // ==========================================
@@ -222,7 +227,7 @@ namespace protectTreesV2.Health
 
             // 顯示狀態
             public string dataStatusText
-                => dataStatus == 1 ? "完稿" : "草稿";
+                => dataStatus == 1 ? "定稿" : "草稿";
 
             // 顯示最後更新時間
             public string lastUpdateDisplay
@@ -236,28 +241,34 @@ namespace protectTreesV2.Health
                     return insertDateTime == DateTime.MinValue ? string.Empty : insertDateTime.ToString("yyyy/MM/dd HH:mm");
                 }
             }
+
+            public TreeHealthRecord()
+            {
+                photos = new List<TreeHealthPhoto>();
+                attachments = new List<TreeHealthAttachment>();
+            }
         }
 
         public class TreeHealthPhoto
         {
-            public int PhotoID { get; set; }
-            public int HealthID { get; set; }
-            public string FileName { get; set; }
-            public string FilePath { get; set; }
-            public int? FileSize { get; set; }
-            public string Caption { get; set; }
-            public DateTime InsertDateTime { get; set; }
+            public int photoID { get; set; }
+            public int healthID { get; set; }
+            public string fileName { get; set; }
+            public string filePath { get; set; }
+            public int? fileSize { get; set; }
+            public string caption { get; set; }
+            public DateTime insertDateTime { get; set; }
         }
 
         public class TreeHealthAttachment
         {
-            public int AttachmentID { get; set; }
-            public int HealthID { get; set; }
-            public string FileName { get; set; }
-            public string FilePath { get; set; }
-            public int? FileSize { get; set; }
-            public string Description { get; set; }
-            public DateTime InsertDateTime { get; set; }
+            public int attachmentID { get; set; }
+            public int healthID { get; set; }
+            public string fileName { get; set; }
+            public string filePath { get; set; }
+            public int? fileSize { get; set; }
+            public string description { get; set; }
+            public DateTime insertDateTime { get; set; }
         }
 
         public class TreeHealthFilter
@@ -373,9 +384,6 @@ namespace protectTreesV2.Health
             var parameters = new List<SqlParameter>();
             var whereClauses = new List<string>();
 
-            // ==========================================
-            // 1. SQL 架構：Tree_Record (主) + Top 1 HealthRecord
-            // ==========================================
             // 注意：這裡使用 OUTER APPLY 來抓取「符合條件的最新一筆」
             // @includeDraft 的邏輯放在 APPLY 裡面：
             //   - 如果包含草稿：不加篩選，直接依日期排，抓最新。
@@ -405,7 +413,7 @@ namespace protectTreesV2.Health
 
                 FROM Tree_Record record
         
-                /* [核心修改] 抓取最新一筆健檢紀錄 */
+                /* 抓取最新一筆健檢紀錄 */
                 OUTER APPLY (
                     SELECT TOP 1 h.*
                     FROM Tree_HealthRecord h
@@ -474,7 +482,7 @@ namespace protectTreesV2.Health
             string finalSql = $"{baseSql} WHERE {string.Join(" AND ", whereClauses)}";
 
             // ==========================================
-            // 3. 排序邏輯 (包含特殊預設排序)
+            // 3. 排序邏輯 
             // ==========================================
             string sortSql = "";
             string dir = (filter.sortDirection == "DESC") ? "DESC" : "ASC";
@@ -482,13 +490,13 @@ namespace protectTreesV2.Health
             // 處理特殊排序需求
             if (filter.sortExpression == "DefaultSort" || string.IsNullOrEmpty(filter.sortExpression))
             {
-                // 題目要求：無健檢紀錄排最上方 (healthID IS NULL -> 0, ELSE -> 1)
+                // 無健檢紀錄排最上方 (healthID IS NULL -> 0, ELSE -> 1)
                 // 接著依 systemTreeNo ASC
                 sortSql = "ORDER BY (CASE WHEN latest_health.healthID IS NULL THEN 0 ELSE 1 END) ASC, record.systemTreeNo ASC";
             }
             else if (filter.sortExpression == "areaID")
             {
-                // 題目要求：縣市鄉鎮排序要用 areaID
+                // 縣市鄉鎮排序
                 sortSql = $"ORDER BY record.areaID {dir}";
             }
             else
@@ -502,7 +510,7 @@ namespace protectTreesV2.Health
                 else if (!sortField.Contains(".")) // 若不是別名欄位(如 speciesName)，加上 table alias
                     sortField = "record." + sortField;
 
-                // 白名單檢查 (略，建議加上)
+                // 白名單檢查 
                 sortSql = $"ORDER BY {sortField} {dir}";
             }
 
@@ -528,7 +536,7 @@ namespace protectTreesV2.Health
                     item.speciesName = DataRowHelper.GetString(row, "speciesName");
                     item.manager = DataRowHelper.GetString(row, "manager");
 
-                    // 健檢資料 (若無紀錄，這些 GetString 會回傳 null，符合要求)
+                    // 健檢資料 
                     item.healthID = DataRowHelper.GetNullableInt(row, "healthID");
                     item.surveyDate = DataRowHelper.GetNullableDateTime(row, "surveyDate");
                     item.surveyor = DataRowHelper.GetString(row, "surveyor");
@@ -835,776 +843,681 @@ namespace protectTreesV2.Health
             return result;
         }
 
-        public static partial class TreeService
+        /// <summary>
+        /// 取得健檢紀錄
+        /// </summary>
+        public TreeHealthRecord GetHealthRecord(int healthId)
         {
-            private const string HealthRecordSelectColumns = @"
- h.healthID, h.treeID, h.surveyDate, h.surveyor, h.dataStatus, h.memo,
- h.treeSignStatus, h.latitude, h.longitude, h.treeHeight, h.canopyArea,
- h.girth100, h.diameter100, h.girth130, h.diameter130, h.measureNote,
- h.majorDiseaseBrownRoot, h.majorDiseaseGanoderma, h.majorDiseaseWoodDecayFungus, h.majorDiseaseCanker, h.majorDiseaseOther, h.majorDiseaseOtherNote,
- h.majorPestRootTunnel, h.majorPestRootChew, h.majorPestRootLive,
- h.majorPestBaseTunnel, h.majorPestBaseChew, h.majorPestBaseLive,
- h.majorPestTrunkTunnel, h.majorPestTrunkChew, h.majorPestTrunkLive,
- h.majorPestBranchTunnel, h.majorPestBranchChew, h.majorPestBranchLive,
- h.majorPestCrownTunnel, h.majorPestCrownChew, h.majorPestCrownLive,
- h.majorPestOtherTunnel, h.majorPestOtherChew, h.majorPestOtherLive,
- h.generalPestRoot, h.generalPestBase, h.generalPestTrunk, h.generalPestBranch, h.generalPestCrown, h.generalPestOther,
- h.generalDiseaseRoot, h.generalDiseaseBase, h.generalDiseaseTrunk, h.generalDiseaseBranch, h.generalDiseaseCrown, h.generalDiseaseOther,
- h.pestOtherNote,
- h.rootDecayPercent, h.rootCavityMaxDiameter, h.rootWoundMaxDiameter, h.rootMechanicalDamage, h.rootMowingInjury, h.rootInjury, h.rootGirdling, h.rootOtherNote,
- h.baseDecayPercent, h.baseCavityMaxDiameter, h.baseWoundMaxDiameter, h.baseMechanicalDamage, h.baseMowingInjury, h.baseOtherNote,
- h.trunkDecayPercent, h.trunkCavityMaxDiameter, h.trunkWoundMaxDiameter, h.trunkMechanicalDamage, h.trunkIncludedBark, h.trunkOtherNote,
- h.branchDecayPercent, h.branchCavityMaxDiameter, h.branchWoundMaxDiameter, h.branchMechanicalDamage, h.branchIncludedBark, h.branchDrooping, h.branchOtherNote,
- h.crownLeafCoveragePercent, h.crownDeadBranchPercent, h.crownHangingBranch, h.crownOtherNote,
- h.pruningWrongDamage, h.pruningWoundHealing, h.pruningEpiphyte, h.pruningParasite, h.pruningVine, h.pruningOtherNote,
- h.supportCount, h.supportEmbedded, h.supportOtherNote,
- h.siteCementPercent, h.siteAsphaltPercent, h.sitePlanter, h.siteRecreationFacility, h.siteDebrisStack, h.siteBetweenBuildings, h.siteSoilCompaction, h.siteOverburiedSoil, h.siteOtherNote,
- h.soilPh, h.soilOrganicMatter, h.soilEc,
- h.managementStatus, h.priority, h.treatmentDescription,
- h.sourceUnit, h.sourceUnitID, h.insertAccountID, h.insertDateTime,
- h.updateAccountID, h.updateDateTime,
- t.systemTreeNo, t.agencyTreeNo, t.cityName, t.areaName,
- t.speciesCommonName";
+            TreeHealthRecord record = null;
 
-            private static TreeHealthRecord ToHealthRecord(DataRow row)
+            // 1. 查詢主檔並 JOIN 樹籍資料
+            string sql = @"
+               SELECT 
+                h.*, 
+                t.systemTreeNo, 
+                t.agencyTreeNo, 
+                t.manager,
+                COALESCE(areaInfo.city, cityInfo.city, t.cityName) AS cityName,
+                COALESCE(areaInfo.area, t.areaName) AS areaName,
+                COALESCE(species.commonName, t.speciesCommonName) AS speciesCommonName
+            FROM Tree_HealthRecord h
+            INNER JOIN Tree_Record t ON h.treeID = t.treeID
+            OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = t.cityID) cityInfo
+            LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = t.areaID
+            LEFT JOIN Tree_Species species ON species.speciesID = t.speciesID
+
+            WHERE h.healthID = @id";
+
+            using (var da = new MS_SQL())
             {
-                if (row == null)
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
+                if (dt.Rows.Count > 0)
                 {
-                    return null;
+                    record = ToHealthRecord(dt.Rows[0]);
                 }
+            }
 
-                // 預先取得狀態值，方便後面使用
-                int statusValue = GetNullableInt(row, "dataStatus") ?? 0;
+            // 2. 如果主檔存在，順便撈取照片與附件
+            if (record != null)
+            {
+                record.photos = GetHealthPhotos(healthId);
+                record.attachments = GetHealthAttachments(healthId);
+            }
 
-                return new TreeHealthRecord
+            return record;
+        }
+
+        public bool CheckSurveyDateDuplicate(int treeId, DateTime surveyDate, int excludeHealthId)
+        {
+            // SQL 邏輯：
+            // 1. 樹木 ID 相同
+            // 2. 日期相同
+            // 3. 排除目前正在編輯的 ID (新增時 excludeHealthId 為 0，不影響)
+            // 4. 排除已刪除的資料
+            string sql = @"
+                SELECT COUNT(1)
+                FROM Tree_HealthRecord
+                WHERE treeID = @treeId
+                  AND surveyDate = @surveyDate
+                  AND healthID <> @excludeId 
+                  AND removeDateTime IS NULL";
+
+            using (var da = new MS_SQL())
+            {
+                // 參數設定
+                var parameters = new SqlParameter[]
                 {
-                    // 1. PK & FK
-                    healthID = GetNullableInt(row, "healthID") ?? 0,
-                    treeID = GetNullableInt(row, "treeID") ?? 0,
-
-                    // 2. JOIN 欄位
-                    systemTreeNo = GetString(row, "systemTreeNo"),
-                    agencyTreeNo = GetString(row, "agencyTreeNo"),
-                    cityName = GetString(row, "cityName"),
-                    areaName = GetString(row, "areaName"),
-                    speciesName = GetString(row, "speciesCommonName"), 
-
-                    // 3. 基本資料
-                    surveyDate = GetNullableDateTime(row, "surveyDate"),
-                    surveyor = GetString(row, "surveyor"),
-                    dataStatus = statusValue,
-
-                    memo = GetString(row, "memo"),
-                    treeSignStatus = (byte?)GetNullableInt(row, "treeSignStatus"),
-
-                    // 4. 樹木規格
-                    latitude = GetNullableDecimal(row, "latitude"),
-                    longitude = GetNullableDecimal(row, "longitude"),
-                    treeHeight = GetNullableDecimal(row, "treeHeight"),
-                    canopyArea = GetNullableDecimal(row, "canopyArea"),
-                    girth100 = GetNullableDecimal(row, "girth100"),
-                    diameter100 = GetNullableDecimal(row, "diameter100"),
-                    girth130 = GetNullableDecimal(row, "girth130"),
-                    diameter130 = GetNullableDecimal(row, "diameter130"),
-                    measureNote = GetString(row, "measureNote"),
-
-                    // 5. 主要病害
-                    majorDiseaseBrownRoot = GetNullableBoolean(row, "majorDiseaseBrownRoot"),
-                    majorDiseaseGanoderma = GetNullableBoolean(row, "majorDiseaseGanoderma"),
-                    majorDiseaseWoodDecayFungus = GetNullableBoolean(row, "majorDiseaseWoodDecayFungus"),
-                    majorDiseaseCanker = GetNullableBoolean(row, "majorDiseaseCanker"),
-                    majorDiseaseOther = GetNullableBoolean(row, "majorDiseaseOther"),
-                    majorDiseaseOtherNote = GetString(row, "majorDiseaseOtherNote"),
-
-                    // 6. 主要害蟲
-                    majorPestRootTunnel = GetNullableBoolean(row, "majorPestRootTunnel"),
-                    majorPestRootChew = GetNullableBoolean(row, "majorPestRootChew"),
-                    majorPestRootLive = GetNullableBoolean(row, "majorPestRootLive"),
-                    majorPestBaseTunnel = GetNullableBoolean(row, "majorPestBaseTunnel"),
-                    majorPestBaseChew = GetNullableBoolean(row, "majorPestBaseChew"),
-                    majorPestBaseLive = GetNullableBoolean(row, "majorPestBaseLive"),
-                    majorPestTrunkTunnel = GetNullableBoolean(row, "majorPestTrunkTunnel"),
-                    majorPestTrunkChew = GetNullableBoolean(row, "majorPestTrunkChew"),
-                    majorPestTrunkLive = GetNullableBoolean(row, "majorPestTrunkLive"),
-                    majorPestBranchTunnel = GetNullableBoolean(row, "majorPestBranchTunnel"),
-                    majorPestBranchChew = GetNullableBoolean(row, "majorPestBranchChew"),
-                    majorPestBranchLive = GetNullableBoolean(row, "majorPestBranchLive"),
-                    majorPestCrownTunnel = GetNullableBoolean(row, "majorPestCrownTunnel"),
-                    majorPestCrownChew = GetNullableBoolean(row, "majorPestCrownChew"),
-                    majorPestCrownLive = GetNullableBoolean(row, "majorPestCrownLive"),
-                    majorPestOtherTunnel = GetNullableBoolean(row, "majorPestOtherTunnel"),
-                    majorPestOtherChew = GetNullableBoolean(row, "majorPestOtherChew"),
-                    majorPestOtherLive = GetNullableBoolean(row, "majorPestOtherLive"),
-
-                    // 7. 一般病蟲害
-                    generalPestRoot = GetString(row, "generalPestRoot"),
-                    generalPestBase = GetString(row, "generalPestBase"),
-                    generalPestTrunk = GetString(row, "generalPestTrunk"),
-                    generalPestBranch = GetString(row, "generalPestBranch"),
-                    generalPestCrown = GetString(row, "generalPestCrown"),
-                    generalPestOther = GetString(row, "generalPestOther"),
-                    generalDiseaseRoot = GetString(row, "generalDiseaseRoot"),
-                    generalDiseaseBase = GetString(row, "generalDiseaseBase"),
-                    generalDiseaseTrunk = GetString(row, "generalDiseaseTrunk"),
-                    generalDiseaseBranch = GetString(row, "generalDiseaseBranch"),
-                    generalDiseaseCrown = GetString(row, "generalDiseaseCrown"),
-                    generalDiseaseOther = GetString(row, "generalDiseaseOther"),
-                    pestOtherNote = GetString(row, "pestOtherNote"),
-
-                    // 8. 各部位細節
-                    rootDecayPercent = GetNullableDecimal(row, "rootDecayPercent"),
-                    rootCavityMaxDiameter = GetNullableDecimal(row, "rootCavityMaxDiameter"),
-                    rootWoundMaxDiameter = GetNullableDecimal(row, "rootWoundMaxDiameter"),
-                    rootMechanicalDamage = GetNullableBoolean(row, "rootMechanicalDamage"),
-                    rootMowingInjury = GetNullableBoolean(row, "rootMowingInjury"),
-                    rootInjury = GetNullableBoolean(row, "rootInjury"),
-                    rootGirdling = GetNullableBoolean(row, "rootGirdling"),
-                    rootOtherNote = GetString(row, "rootOtherNote"),
-
-                    baseDecayPercent = GetNullableDecimal(row, "baseDecayPercent"),
-                    baseCavityMaxDiameter = GetNullableDecimal(row, "baseCavityMaxDiameter"),
-                    baseWoundMaxDiameter = GetNullableDecimal(row, "baseWoundMaxDiameter"),
-                    baseMechanicalDamage = GetNullableBoolean(row, "baseMechanicalDamage"),
-                    baseMowingInjury = GetNullableBoolean(row, "baseMowingInjury"),
-                    baseOtherNote = GetString(row, "baseOtherNote"),
-
-                    trunkDecayPercent = GetNullableDecimal(row, "trunkDecayPercent"),
-                    trunkCavityMaxDiameter = GetNullableDecimal(row, "trunkCavityMaxDiameter"),
-                    trunkWoundMaxDiameter = GetNullableDecimal(row, "trunkWoundMaxDiameter"),
-                    trunkMechanicalDamage = GetNullableBoolean(row, "trunkMechanicalDamage"),
-                    trunkIncludedBark = GetNullableBoolean(row, "trunkIncludedBark"),
-                    trunkOtherNote = GetString(row, "trunkOtherNote"),
-
-                    branchDecayPercent = GetNullableDecimal(row, "branchDecayPercent"),
-                    branchCavityMaxDiameter = GetNullableDecimal(row, "branchCavityMaxDiameter"),
-                    branchWoundMaxDiameter = GetNullableDecimal(row, "branchWoundMaxDiameter"),
-                    branchMechanicalDamage = GetNullableBoolean(row, "branchMechanicalDamage"),
-                    branchIncludedBark = GetNullableBoolean(row, "branchIncludedBark"),
-                    branchDrooping = GetNullableBoolean(row, "branchDrooping"),
-                    branchOtherNote = GetString(row, "branchOtherNote"),
-
-                    crownLeafCoveragePercent = GetNullableDecimal(row, "crownLeafCoveragePercent"),
-                    crownDeadBranchPercent = GetNullableDecimal(row, "crownDeadBranchPercent"),
-                    crownHangingBranch = GetNullableBoolean(row, "crownHangingBranch"),
-                    crownOtherNote = GetString(row, "crownOtherNote"),
-
-                    // 9. 修剪與支撐
-                    pruningWrongDamage = GetString(row, "pruningWrongDamage"),
-                    pruningWoundHealing = GetNullableBoolean(row, "pruningWoundHealing"),
-                    pruningEpiphyte = GetNullableBoolean(row, "pruningEpiphyte"),
-                    pruningParasite = GetNullableBoolean(row, "pruningParasite"),
-                    pruningVine = GetNullableBoolean(row, "pruningVine"),
-                    pruningOtherNote = GetString(row, "pruningOtherNote"),
-
-                    supportCount = GetNullableInt(row, "supportCount"),
-                    supportEmbedded = GetNullableBoolean(row, "supportEmbedded"),
-                    supportOtherNote = GetString(row, "supportOtherNote"),
-
-                    // 10. 棲地與土壤
-                    siteCementPercent = GetNullableDecimal(row, "siteCementPercent"),
-                    siteAsphaltPercent = GetNullableDecimal(row, "siteAsphaltPercent"),
-                    sitePlanter = GetNullableBoolean(row, "sitePlanter"),
-                    siteRecreationFacility = GetNullableBoolean(row, "siteRecreationFacility"),
-                    siteDebrisStack = GetNullableBoolean(row, "siteDebrisStack"),
-                    siteBetweenBuildings = GetNullableBoolean(row, "siteBetweenBuildings"),
-                    siteSoilCompaction = GetNullableBoolean(row, "siteSoilCompaction"),
-                    siteOverburiedSoil = GetNullableBoolean(row, "siteOverburiedSoil"),
-                    siteOtherNote = GetString(row, "siteOtherNote"),
-
-                    soilPh = GetNullableDecimal(row, "soilPh"),
-                    soilOrganicMatter = GetNullableDecimal(row, "soilOrganicMatter"),
-                    soilEc = GetNullableDecimal(row, "soilEc"),
-
-                    // 11. 管理建議
-                    managementStatus = GetString(row, "managementStatus"),
-                    priority = GetString(row, "priority"),
-                    treatmentDescription = GetString(row, "treatmentDescription"),
-
-                    // 12. 系統資訊
-                    sourceUnit = GetString(row, "sourceUnit"),
-                    sourceUnitID = GetNullableInt(row, "sourceUnitID"),
-                    insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
-                    insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
-                    updateAccountID = GetNullableInt(row, "updateAccountID"),
-                    updateDateTime = GetNullableDateTime(row, "updateDateTime")
+                    new SqlParameter("@treeId", treeId),
+                    new SqlParameter("@surveyDate", surveyDate.Date), 
+                    new SqlParameter("@excludeId", excludeHealthId)
                 };
-            }
-            private static TreeHealthPhoto ToHealthPhoto(DataRow row)
-            {
-                if (row == null)
-                {
-                    return null;
-                }
 
-                return new TreeHealthPhoto
+                object result = da.ExcuteScalar(sql, parameters);
+                int count = result != null ? Convert.ToInt32(result) : 0;
+
+                return count > 0; // 大於 0 代表有重複
+            }
+        }
+
+        /// <summary>
+        /// 自動判斷是新增 (Insert) 還是編輯 (Update)
+        /// </summary>
+        public int SaveHealthRecord(TreeHealthRecord record, int accountId)
+        {
+            if (record == null) throw new ArgumentNullException(nameof(record));
+
+            using (var da = new MS_SQL())
+            {
+                // 準備參數 (共用)
+                var parameters = new List<SqlParameter>
                 {
-                    PhotoID = GetNullableInt(row, "photoID") ?? 0,
-                    HealthID = GetNullableInt(row, "healthID") ?? 0,
-                    FileName = GetString(row, "fileName"),
-                    FilePath = GetString(row, "filePath"),
-                    FileSize = GetNullableInt(row, "fileSize"),
-                    Caption = GetString(row, "caption"),
-                    InsertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue
+                    new SqlParameter("@treeID", record.treeID),
+                    new SqlParameter("@accountId", accountId)
                 };
-            }
-
-            private static TreeHealthAttachment ToHealthAttachment(DataRow row)
-            {
-                if (row == null)
-                {
-                    return null;
-                }
-
-                return new TreeHealthAttachment
-                {
-                    AttachmentID = GetNullableInt(row, "attachmentID") ?? 0,
-                    HealthID = GetNullableInt(row, "healthID") ?? 0,
-                    FileName = GetString(row, "fileName"),
-                    FilePath = GetString(row, "filePath"),
-                    FileSize = GetNullableInt(row, "fileSize"),
-                    Description = GetString(row, "description"),
-                    InsertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue
-                };
-            }
-
-            public static List<TreeHealthRecord> GetHealthRecordsByTree(int treeId)
-            {
-                const string sql = @"SELECT " + HealthRecordSelectColumns + @"
-FROM Tree_HealthRecord h
-JOIN Tree_Record t ON h.treeID=t.treeID
-WHERE h.treeID=@treeID AND h.removeDateTime IS NULL AND t.removeDateTime IS NULL
-ORDER BY h.surveyDate DESC, h.healthID DESC";
-
-                using (var da = new MS_SQL())
-                {
-                    var dt = da.GetDataTable(sql, new SqlParameter("@treeID", treeId));
-                    return dt.Rows.Cast<DataRow>().Select(ToHealthRecord).ToList();
-                }
-            }
-
-            public static TreeHealthRecord GetHealthRecord(int healthId)
-            {
-                const string sql = @"SELECT " + HealthRecordSelectColumns + @"
-FROM Tree_HealthRecord h
-JOIN Tree_Record t ON h.treeID=t.treeID
-WHERE h.healthID=@id AND h.removeDateTime IS NULL AND t.removeDateTime IS NULL";
-
-                using (var da = new MS_SQL())
-                {
-                    var dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
-                    return dt.Rows.Count > 0 ? ToHealthRecord(dt.Rows[0]) : null;
-                }
-            }
-
-            public static TreeHealthRecord GetHealthRecordByTreeAndDate(int treeId, DateTime surveyDate)
-            {
-                const string sql = @"SELECT TOP 1 " + HealthRecordSelectColumns + @"
-FROM Tree_HealthRecord h
-JOIN Tree_Record t ON h.treeID=t.treeID
-WHERE h.treeID=@treeID AND h.removeDateTime IS NULL AND t.removeDateTime IS NULL AND CAST(h.surveyDate AS DATE)=@surveyDate";
-
-                using (var da = new MS_SQL())
-                {
-                    var dt = da.GetDataTable(sql,
-                        new SqlParameter("@treeID", treeId),
-                        new SqlParameter("@surveyDate", surveyDate.Date));
-                    return dt.Rows.Count > 0 ? ToHealthRecord(dt.Rows[0]) : null;
-                }
-            }
-
-            public static List<TreeHealthRecord> SearchHealthRecords(TreeHealthFilter filter)
-            {
-                var sql = new StringBuilder();
-                sql.Append("SELECT ").Append(HealthRecordSelectColumns).Append(@"
-FROM Tree_HealthRecord h
-JOIN Tree_Record t ON h.treeID=t.treeID
-WHERE h.removeDateTime IS NULL AND t.removeDateTime IS NULL");
-
-                var parameters = new List<SqlParameter>();
-
-                if (filter != null)
-                {
-                    if (filter.CityID.HasValue)
-                    {
-                        sql.Append(" AND t.cityID=@cityID");
-                        parameters.Add(new SqlParameter("@cityID", filter.CityID.Value));
-                    }
-
-                    if (filter.AreaID.HasValue)
-                    {
-                        sql.Append(" AND t.areaID=@areaID");
-                        parameters.Add(new SqlParameter("@areaID", filter.AreaID.Value));
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(filter.SystemTreeNo))
-                    {
-                        sql.Append(" AND t.systemTreeNo LIKE @systemTreeNo");
-                        parameters.Add(new SqlParameter("@systemTreeNo", "%" + filter.SystemTreeNo.Trim() + "%"));
-                    }
-
-                    if (filter.SurveyDateStart.HasValue)
-                    {
-                        sql.Append(" AND h.surveyDate>=@surveyDateStart");
-                        parameters.Add(new SqlParameter("@surveyDateStart", filter.SurveyDateStart.Value.Date));
-                    }
-
-                    if (filter.SurveyDateEnd.HasValue)
-                    {
-                        sql.Append(" AND h.surveyDate<=@surveyDateEnd");
-                        parameters.Add(new SqlParameter("@surveyDateEnd", filter.SurveyDateEnd.Value.Date));
-                    }
-
-                    if (filter.DataStatus.HasValue)
-                    {
-                        sql.Append(" AND h.dataStatus=@dataStatus");
-                        parameters.Add(new SqlParameter("@dataStatus", (int)filter.DataStatus.Value));
-                    }
-                }
-
-                sql.Append(" ORDER BY h.surveyDate DESC, h.healthID DESC");
-
-                using (var da = new MS_SQL())
-                {
-                    var dt = da.GetDataTable(sql.ToString(), parameters.ToArray());
-                    return dt.Rows.Cast<DataRow>().Select(ToHealthRecord).ToList();
-                }
-            }
-
-            public static int SaveHealthRecord(TreeHealthRecord record, int accountId)
-            {
-                if (record == null) throw new ArgumentNullException(nameof(record));
+                parameters.AddRange(GetRecordParameters(record));
 
                 if (record.healthID <= 0)
                 {
-                    const string insertSql = @"INSERT INTO Tree_HealthRecord
-(treeID, surveyDate, surveyor, dataStatus, memo, treeSignStatus, latitude, longitude, treeHeight, canopyArea,
- girth100, diameter100, girth130, diameter130, measureNote,
- majorDiseaseBrownRoot, majorDiseaseGanoderma, majorDiseaseWoodDecayFungus, majorDiseaseCanker, majorDiseaseOther, majorDiseaseOtherNote,
- majorPestRootTunnel, majorPestRootChew, majorPestRootLive,
- majorPestBaseTunnel, majorPestBaseChew, majorPestBaseLive,
- majorPestTrunkTunnel, majorPestTrunkChew, majorPestTrunkLive,
- majorPestBranchTunnel, majorPestBranchChew, majorPestBranchLive,
- majorPestCrownTunnel, majorPestCrownChew, majorPestCrownLive,
- majorPestOtherTunnel, majorPestOtherChew, majorPestOtherLive,
- generalPestRoot, generalPestBase, generalPestTrunk, generalPestBranch, generalPestCrown, generalPestOther,
- generalDiseaseRoot, generalDiseaseBase, generalDiseaseTrunk, generalDiseaseBranch, generalDiseaseCrown, generalDiseaseOther,
- pestOtherNote,
- rootDecayPercent, rootCavityMaxDiameter, rootWoundMaxDiameter, rootMechanicalDamage, rootMowingInjury, rootInjury, rootGirdling, rootOtherNote,
- baseDecayPercent, baseCavityMaxDiameter, baseWoundMaxDiameter, baseMechanicalDamage, baseMowingInjury, baseOtherNote,
- trunkDecayPercent, trunkCavityMaxDiameter, trunkWoundMaxDiameter, trunkMechanicalDamage, trunkIncludedBark, trunkOtherNote,
- branchDecayPercent, branchCavityMaxDiameter, branchWoundMaxDiameter, branchMechanicalDamage, branchIncludedBark, branchDrooping, branchOtherNote,
- crownLeafCoveragePercent, crownDeadBranchPercent, crownHangingBranch, crownOtherNote,
- pruningWrongDamage, pruningWoundHealing, pruningEpiphyte, pruningParasite, pruningVine, pruningOtherNote,
- supportCount, supportEmbedded, supportOtherNote,
- siteCementPercent, siteAsphaltPercent, sitePlanter, siteRecreationFacility, siteDebrisStack, siteBetweenBuildings, siteSoilCompaction, siteOverburiedSoil, siteOtherNote,
- soilPh, soilOrganicMatter, soilEc,
- managementStatus, priority, treatmentDescription,
- sourceUnit, sourceUnitID, insertAccountID, insertDateTime)
-OUTPUT INSERTED.healthID
-VALUES
-(@treeID, @surveyDate, @surveyor, @dataStatus, @memo, @treeSignStatus, @latitude, @longitude, @treeHeight, @canopyArea,
- @girth100, @diameter100, @girth130, @diameter130, @measureNote,
- @majorDiseaseBrownRoot, @majorDiseaseGanoderma, @majorDiseaseWoodDecayFungus, @majorDiseaseCanker, @majorDiseaseOther, @majorDiseaseOtherNote,
- @majorPestRootTunnel, @majorPestRootChew, @majorPestRootLive,
- @majorPestBaseTunnel, @majorPestBaseChew, @majorPestBaseLive,
- @majorPestTrunkTunnel, @majorPestTrunkChew, @majorPestTrunkLive,
- @majorPestBranchTunnel, @majorPestBranchChew, @majorPestBranchLive,
- @majorPestCrownTunnel, @majorPestCrownChew, @majorPestCrownLive,
- @majorPestOtherTunnel, @majorPestOtherChew, @majorPestOtherLive,
- @generalPestRoot, @generalPestBase, @generalPestTrunk, @generalPestBranch, @generalPestCrown, @generalPestOther,
- @generalDiseaseRoot, @generalDiseaseBase, @generalDiseaseTrunk, @generalDiseaseBranch, @generalDiseaseCrown, @generalDiseaseOther,
- @pestOtherNote,
- @rootDecayPercent, @rootCavityMaxDiameter, @rootWoundMaxDiameter, @rootMechanicalDamage, @rootMowingInjury, @rootInjury, @rootGirdling, @rootOtherNote,
- @baseDecayPercent, @baseCavityMaxDiameter, @baseWoundMaxDiameter, @baseMechanicalDamage, @baseMowingInjury, @baseOtherNote,
- @trunkDecayPercent, @trunkCavityMaxDiameter, @trunkWoundMaxDiameter, @trunkMechanicalDamage, @trunkIncludedBark, @trunkOtherNote,
- @branchDecayPercent, @branchCavityMaxDiameter, @branchWoundMaxDiameter, @branchMechanicalDamage, @branchIncludedBark, @branchDrooping, @branchOtherNote,
- @crownLeafCoveragePercent, @crownDeadBranchPercent, @crownHangingBranch, @crownOtherNote,
- @pruningWrongDamage, @pruningWoundHealing, @pruningEpiphyte, @pruningParasite, @pruningVine, @pruningOtherNote,
- @supportCount, @supportEmbedded, @supportOtherNote,
- @siteCementPercent, @siteAsphaltPercent, @sitePlanter, @siteRecreationFacility, @siteDebrisStack, @siteBetweenBuildings, @siteSoilCompaction, @siteOverburiedSoil, @siteOtherNote,
- @soilPh, @soilOrganicMatter, @soilEc,
- @managementStatus, @priority, @treatmentDescription,
- @sourceUnit, @sourceUnitID, @accountId, GETDATE())";
+                    // --- INSERT ---
+                    string insertSql = @"
+                        INSERT INTO Tree_HealthRecord
+                        (
+                            treeID, surveyDate, surveyor, dataStatus, memo, treeSignStatus, 
+                            latitude, longitude, treeHeight, canopyArea,
+                            girth100, diameter100, girth130, diameter130, measureNote,
+                            majorDiseaseBrownRoot, majorDiseaseGanoderma, majorDiseaseWoodDecayFungus, majorDiseaseCanker, majorDiseaseOther, majorDiseaseOtherNote,
+                            majorPestRootTunnel, majorPestRootChew, majorPestRootLive,
+                            majorPestBaseTunnel, majorPestBaseChew, majorPestBaseLive,
+                            majorPestTrunkTunnel, majorPestTrunkChew, majorPestTrunkLive,
+                            majorPestBranchTunnel, majorPestBranchChew, majorPestBranchLive,
+                            majorPestCrownTunnel, majorPestCrownChew, majorPestCrownLive,
+                            majorPestOtherTunnel, majorPestOtherChew, majorPestOtherLive,
+                            generalPestRoot, generalPestBase, generalPestTrunk, generalPestBranch, generalPestCrown, generalPestOther,
+                            generalDiseaseRoot, generalDiseaseBase, generalDiseaseTrunk, generalDiseaseBranch, generalDiseaseCrown, generalDiseaseOther,
+                            pestOtherNote,
+                            rootDecayPercent, rootCavityMaxDiameter, rootWoundMaxDiameter, rootMechanicalDamage, rootMowingInjury, rootInjury, rootGirdling, rootOtherNote,
+                            baseDecayPercent, baseCavityMaxDiameter, baseWoundMaxDiameter, baseMechanicalDamage, baseMowingInjury, baseOtherNote,
+                            trunkDecayPercent, trunkCavityMaxDiameter, trunkWoundMaxDiameter, trunkMechanicalDamage, trunkIncludedBark, trunkOtherNote,
+                            branchDecayPercent, branchCavityMaxDiameter, branchWoundMaxDiameter, branchMechanicalDamage, branchIncludedBark, branchDrooping, branchOtherNote,
+                            crownLeafCoveragePercent, crownDeadBranchPercent, crownHangingBranch, crownOtherNote, growthNote,
+                            pruningWrongDamage, pruningWoundHealing, pruningEpiphyte, pruningParasite, pruningVine, pruningOtherNote,
+                            supportCount, supportEmbedded, supportOtherNote,
+                            siteCementPercent, siteAsphaltPercent, sitePlanter, siteRecreationFacility, siteDebrisStack, siteBetweenBuildings, siteSoilCompaction, siteOverburiedSoil, siteOtherNote,
+                            soilPh, soilOrganicMatter, soilEc,
+                            managementStatus, priority, treatmentDescription,
+                            sourceUnit, sourceUnitID, insertAccountID, insertDateTime
+                        )
+                        OUTPUT INSERTED.healthID
+                        VALUES
+                        (
+                            @treeID, @surveyDate, @surveyor, @dataStatus, @memo, @treeSignStatus, 
+                            @latitude, @longitude, @treeHeight, @canopyArea,
+                            @girth100, @diameter100, @girth130, @diameter130, @measureNote,
+                            @majorDiseaseBrownRoot, @majorDiseaseGanoderma, @majorDiseaseWoodDecayFungus, @majorDiseaseCanker, @majorDiseaseOther, @majorDiseaseOtherNote,
+                            @majorPestRootTunnel, @majorPestRootChew, @majorPestRootLive,
+                            @majorPestBaseTunnel, @majorPestBaseChew, @majorPestBaseLive,
+                            @majorPestTrunkTunnel, @majorPestTrunkChew, @majorPestTrunkLive,
+                            @majorPestBranchTunnel, @majorPestBranchChew, @majorPestBranchLive,
+                            @majorPestCrownTunnel, @majorPestCrownChew, @majorPestCrownLive,
+                            @majorPestOtherTunnel, @majorPestOtherChew, @majorPestOtherLive,
+                            @generalPestRoot, @generalPestBase, @generalPestTrunk, @generalPestBranch, @generalPestCrown, @generalPestOther,
+                            @generalDiseaseRoot, @generalDiseaseBase, @generalDiseaseTrunk, @generalDiseaseBranch, @generalDiseaseCrown, @generalDiseaseOther,
+                            @pestOtherNote,
+                            @rootDecayPercent, @rootCavityMaxDiameter, @rootWoundMaxDiameter, @rootMechanicalDamage, @rootMowingInjury, @rootInjury, @rootGirdling, @rootOtherNote,
+                            @baseDecayPercent, @baseCavityMaxDiameter, @baseWoundMaxDiameter, @baseMechanicalDamage, @baseMowingInjury, @baseOtherNote,
+                            @trunkDecayPercent, @trunkCavityMaxDiameter, @trunkWoundMaxDiameter, @trunkMechanicalDamage, @trunkIncludedBark, @trunkOtherNote,
+                            @branchDecayPercent, @branchCavityMaxDiameter, @branchWoundMaxDiameter, @branchMechanicalDamage, @branchIncludedBark, @branchDrooping, @branchOtherNote,
+                            @crownLeafCoveragePercent, @crownDeadBranchPercent, @crownHangingBranch, @crownOtherNote, @growthNote,
+                            @pruningWrongDamage, @pruningWoundHealing, @pruningEpiphyte, @pruningParasite, @pruningVine, @pruningOtherNote,
+                            @supportCount, @supportEmbedded, @supportOtherNote,
+                            @siteCementPercent, @siteAsphaltPercent, @sitePlanter, @siteRecreationFacility, @siteDebrisStack, @siteBetweenBuildings, @siteSoilCompaction, @siteOverburiedSoil, @siteOtherNote,
+                            @soilPh, @soilOrganicMatter, @soilEc,
+                            @managementStatus, @priority, @treatmentDescription,
+                            @sourceUnit, @sourceUnitID, @accountId, GETDATE()
+                        )";
 
-                    using (var da = new MS_SQL())
-                    {
-                        var parameters = new List<SqlParameter>
-                    {
-                        new SqlParameter("@treeID", record.treeID),
-                        new SqlParameter("@accountId", accountId)
-                    };
-                        parameters.AddRange(GetHealthRecordFieldParameters(record));
-
-                        return Convert.ToInt32(da.ExcuteScalar(insertSql, parameters.ToArray()));
-                    }
+                    return Convert.ToInt32(da.ExcuteScalar(insertSql, parameters.ToArray()));
                 }
                 else
                 {
-                    const string updateSql = @"UPDATE Tree_HealthRecord
-SET surveyDate=@surveyDate,
-    surveyor=@surveyor,
-    dataStatus=@dataStatus,
-    memo=@memo,
-    treeSignStatus=@treeSignStatus,
-    latitude=@latitude,
-    longitude=@longitude,
-    treeHeight=@treeHeight,
-    canopyArea=@canopyArea,
-    girth100=@girth100,
-    diameter100=@diameter100,
-    girth130=@girth130,
-    diameter130=@diameter130,
-    measureNote=@measureNote,
-    majorDiseaseBrownRoot=@majorDiseaseBrownRoot,
-    majorDiseaseGanoderma=@majorDiseaseGanoderma,
-    majorDiseaseWoodDecayFungus=@majorDiseaseWoodDecayFungus,
-    majorDiseaseCanker=@majorDiseaseCanker,
-    majorDiseaseOther=@majorDiseaseOther,
-    majorDiseaseOtherNote=@majorDiseaseOtherNote,
-    majorPestRootTunnel=@majorPestRootTunnel,
-    majorPestRootChew=@majorPestRootChew,
-    majorPestRootLive=@majorPestRootLive,
-    majorPestBaseTunnel=@majorPestBaseTunnel,
-    majorPestBaseChew=@majorPestBaseChew,
-    majorPestBaseLive=@majorPestBaseLive,
-    majorPestTrunkTunnel=@majorPestTrunkTunnel,
-    majorPestTrunkChew=@majorPestTrunkChew,
-    majorPestTrunkLive=@majorPestTrunkLive,
-    majorPestBranchTunnel=@majorPestBranchTunnel,
-    majorPestBranchChew=@majorPestBranchChew,
-    majorPestBranchLive=@majorPestBranchLive,
-    majorPestCrownTunnel=@majorPestCrownTunnel,
-    majorPestCrownChew=@majorPestCrownChew,
-    majorPestCrownLive=@majorPestCrownLive,
-    majorPestOtherTunnel=@majorPestOtherTunnel,
-    majorPestOtherChew=@majorPestOtherChew,
-    majorPestOtherLive=@majorPestOtherLive,
-    generalPestRoot=@generalPestRoot,
-    generalPestBase=@generalPestBase,
-    generalPestTrunk=@generalPestTrunk,
-    generalPestBranch=@generalPestBranch,
-    generalPestCrown=@generalPestCrown,
-    generalPestOther=@generalPestOther,
-    generalDiseaseRoot=@generalDiseaseRoot,
-    generalDiseaseBase=@generalDiseaseBase,
-    generalDiseaseTrunk=@generalDiseaseTrunk,
-    generalDiseaseBranch=@generalDiseaseBranch,
-    generalDiseaseCrown=@generalDiseaseCrown,
-    generalDiseaseOther=@generalDiseaseOther,
-    pestOtherNote=@pestOtherNote,
-    rootDecayPercent=@rootDecayPercent,
-    rootCavityMaxDiameter=@rootCavityMaxDiameter,
-    rootWoundMaxDiameter=@rootWoundMaxDiameter,
-    rootMechanicalDamage=@rootMechanicalDamage,
-    rootMowingInjury=@rootMowingInjury,
-    rootInjury=@rootInjury,
-    rootGirdling=@rootGirdling,
-    rootOtherNote=@rootOtherNote,
-    baseDecayPercent=@baseDecayPercent,
-    baseCavityMaxDiameter=@baseCavityMaxDiameter,
-    baseWoundMaxDiameter=@baseWoundMaxDiameter,
-    baseMechanicalDamage=@baseMechanicalDamage,
-    baseMowingInjury=@baseMowingInjury,
-    baseOtherNote=@baseOtherNote,
-    trunkDecayPercent=@trunkDecayPercent,
-    trunkCavityMaxDiameter=@trunkCavityMaxDiameter,
-    trunkWoundMaxDiameter=@trunkWoundMaxDiameter,
-    trunkMechanicalDamage=@trunkMechanicalDamage,
-    trunkIncludedBark=@trunkIncludedBark,
-    trunkOtherNote=@trunkOtherNote,
-    branchDecayPercent=@branchDecayPercent,
-    branchCavityMaxDiameter=@branchCavityMaxDiameter,
-    branchWoundMaxDiameter=@branchWoundMaxDiameter,
-    branchMechanicalDamage=@branchMechanicalDamage,
-    branchIncludedBark=@branchIncludedBark,
-    branchDrooping=@branchDrooping,
-    branchOtherNote=@branchOtherNote,
-    crownLeafCoveragePercent=@crownLeafCoveragePercent,
-    crownDeadBranchPercent=@crownDeadBranchPercent,
-    crownHangingBranch=@crownHangingBranch,
-    crownOtherNote=@crownOtherNote,
-    pruningWrongDamage=@pruningWrongDamage,
-    pruningWoundHealing=@pruningWoundHealing,
-    pruningEpiphyte=@pruningEpiphyte,
-    pruningParasite=@pruningParasite,
-    pruningVine=@pruningVine,
-    pruningOtherNote=@pruningOtherNote,
-    supportCount=@supportCount,
-    supportEmbedded=@supportEmbedded,
-    supportOtherNote=@supportOtherNote,
-    siteCementPercent=@siteCementPercent,
-    siteAsphaltPercent=@siteAsphaltPercent,
-    sitePlanter=@sitePlanter,
-    siteRecreationFacility=@siteRecreationFacility,
-    siteDebrisStack=@siteDebrisStack,
-    siteBetweenBuildings=@siteBetweenBuildings,
-    siteSoilCompaction=@siteSoilCompaction,
-    siteOverburiedSoil=@siteOverburiedSoil,
-    siteOtherNote=@siteOtherNote,
-    soilPh=@soilPh,
-    soilOrganicMatter=@soilOrganicMatter,
-    soilEc=@soilEc,
-    managementStatus=@managementStatus,
-    priority=@priority,
-    treatmentDescription=@treatmentDescription,
-    sourceUnit=@sourceUnit,
-    sourceUnitID=@sourceUnitID,
-    updateAccountID=@accountId,
-    updateDateTime=GETDATE()
-WHERE healthID=@id AND removeDateTime IS NULL";
+                    // --- UPDATE ---
+                    parameters.Add(new SqlParameter("@id", record.healthID));
 
-                    using (var da = new MS_SQL())
-                    {
-                        var parameters = new List<SqlParameter>
-                    {
-                        new SqlParameter("@accountId", accountId),
-                        new SqlParameter("@id", record.healthID)
-                    };
-                        parameters.AddRange(GetHealthRecordFieldParameters(record));
+                    string updateSql = @"
+                        UPDATE Tree_HealthRecord
+                        SET 
+                            surveyDate=@surveyDate, surveyor=@surveyor, dataStatus=@dataStatus, memo=@memo, treeSignStatus=@treeSignStatus,
+                            latitude=@latitude, longitude=@longitude, treeHeight=@treeHeight, canopyArea=@canopyArea,
+                            girth100=@girth100, diameter100=@diameter100, girth130=@girth130, diameter130=@diameter130, measureNote=@measureNote,
+                            
+                            majorDiseaseBrownRoot=@majorDiseaseBrownRoot, majorDiseaseGanoderma=@majorDiseaseGanoderma, majorDiseaseWoodDecayFungus=@majorDiseaseWoodDecayFungus, 
+                            majorDiseaseCanker=@majorDiseaseCanker, majorDiseaseOther=@majorDiseaseOther, majorDiseaseOtherNote=@majorDiseaseOtherNote,
+                            
+                            majorPestRootTunnel=@majorPestRootTunnel, majorPestRootChew=@majorPestRootChew, majorPestRootLive=@majorPestRootLive,
+                            majorPestBaseTunnel=@majorPestBaseTunnel, majorPestBaseChew=@majorPestBaseChew, majorPestBaseLive=@majorPestBaseLive,
+                            majorPestTrunkTunnel=@majorPestTrunkTunnel, majorPestTrunkChew=@majorPestTrunkChew, majorPestTrunkLive=@majorPestTrunkLive,
+                            majorPestBranchTunnel=@majorPestBranchTunnel, majorPestBranchChew=@majorPestBranchChew, majorPestBranchLive=@majorPestBranchLive,
+                            majorPestCrownTunnel=@majorPestCrownTunnel, majorPestCrownChew=@majorPestCrownChew, majorPestCrownLive=@majorPestCrownLive,
+                            majorPestOtherTunnel=@majorPestOtherTunnel, majorPestOtherChew=@majorPestOtherChew, majorPestOtherLive=@majorPestOtherLive,
+                            
+                            generalPestRoot=@generalPestRoot, generalPestBase=@generalPestBase, generalPestTrunk=@generalPestTrunk, generalPestBranch=@generalPestBranch, generalPestCrown=@generalPestCrown, generalPestOther=@generalPestOther,
+                            generalDiseaseRoot=@generalDiseaseRoot, generalDiseaseBase=@generalDiseaseBase, generalDiseaseTrunk=@generalDiseaseTrunk, generalDiseaseBranch=@generalDiseaseBranch, generalDiseaseCrown=@generalDiseaseCrown, generalDiseaseOther=@generalDiseaseOther,
+                            pestOtherNote=@pestOtherNote,
+                            
+                            rootDecayPercent=@rootDecayPercent, rootCavityMaxDiameter=@rootCavityMaxDiameter, rootWoundMaxDiameter=@rootWoundMaxDiameter, rootMechanicalDamage=@rootMechanicalDamage, rootMowingInjury=@rootMowingInjury, rootInjury=@rootInjury, rootGirdling=@rootGirdling, rootOtherNote=@rootOtherNote,
+                            baseDecayPercent=@baseDecayPercent, baseCavityMaxDiameter=@baseCavityMaxDiameter, baseWoundMaxDiameter=@baseWoundMaxDiameter, baseMechanicalDamage=@baseMechanicalDamage, baseMowingInjury=@baseMowingInjury, baseOtherNote=@baseOtherNote,
+                            trunkDecayPercent=@trunkDecayPercent, trunkCavityMaxDiameter=@trunkCavityMaxDiameter, trunkWoundMaxDiameter=@trunkWoundMaxDiameter, trunkMechanicalDamage=@trunkMechanicalDamage, trunkIncludedBark=@trunkIncludedBark, trunkOtherNote=@trunkOtherNote,
+                            branchDecayPercent=@branchDecayPercent, branchCavityMaxDiameter=@branchCavityMaxDiameter, branchWoundMaxDiameter=@branchWoundMaxDiameter, branchMechanicalDamage=@branchMechanicalDamage, branchIncludedBark=@branchIncludedBark, branchDrooping=@branchDrooping, branchOtherNote=@branchOtherNote,
+                            crownLeafCoveragePercent=@crownLeafCoveragePercent, crownDeadBranchPercent=@crownDeadBranchPercent, crownHangingBranch=@crownHangingBranch, crownOtherNote=@crownOtherNote, growthNote=@growthNote,
+                            
+                            pruningWrongDamage=@pruningWrongDamage, pruningWoundHealing=@pruningWoundHealing, pruningEpiphyte=@pruningEpiphyte, pruningParasite=@pruningParasite, pruningVine=@pruningVine, pruningOtherNote=@pruningOtherNote,
+                            supportCount=@supportCount, supportEmbedded=@supportEmbedded, supportOtherNote=@supportOtherNote,
+                            
+                            siteCementPercent=@siteCementPercent, siteAsphaltPercent=@siteAsphaltPercent, sitePlanter=@sitePlanter, siteRecreationFacility=@siteRecreationFacility, siteDebrisStack=@siteDebrisStack, siteBetweenBuildings=@siteBetweenBuildings, siteSoilCompaction=@siteSoilCompaction, siteOverburiedSoil=@siteOverburiedSoil, siteOtherNote=@siteOtherNote,
+                            soilPh=@soilPh, soilOrganicMatter=@soilOrganicMatter, soilEc=@soilEc,
+                            
+                            managementStatus=@managementStatus, priority=@priority, treatmentDescription=@treatmentDescription,
+                            sourceUnit=@sourceUnit, sourceUnitID=@sourceUnitID,
+                            
+                            updateAccountID=@accountId, updateDateTime=GETDATE()
+                        WHERE healthID=@id AND removeDateTime IS NULL";
 
-                        da.ExecNonQuery(updateSql, parameters.ToArray());
-                    }
-
+                    da.ExecNonQuery(updateSql, parameters.ToArray());
                     return record.healthID;
                 }
             }
+        }
 
-            private static IEnumerable<SqlParameter> GetHealthRecordFieldParameters(TreeHealthRecord record)
+        public int InsertHealthPhoto(TreeHealthPhoto photo, int accountId)
+        {
+            if (photo == null) throw new ArgumentNullException(nameof(photo));
+
+            string sql = @"
+                INSERT INTO Tree_HealthPhoto
+                (healthID, fileName, filePath, fileSize, caption, insertAccountID, insertDateTime)
+                OUTPUT INSERTED.photoID
+                VALUES
+                (@healthID, @fileName, @filePath, @fileSize, @caption, @accountId, GETDATE())";
+
+            using (var da = new MS_SQL())
             {
-                // 基本資料
-                yield return new SqlParameter("@surveyDate", record.surveyDate?.Date ?? (object)DBNull.Value);
-                yield return new SqlParameter("@surveyor", ToDbValue(record.surveyor));
-                yield return new SqlParameter("@dataStatus", record.dataStatus); // 屬性已是 int，不需轉型
-                yield return new SqlParameter("@memo", ToDbValue(record.memo));
-                yield return new SqlParameter("@treeSignStatus", ToDbValue(record.treeSignStatus));
-
-                // 樹木規格
-                yield return new SqlParameter("@latitude", ToDbValue(record.latitude));
-                yield return new SqlParameter("@longitude", ToDbValue(record.longitude));
-                yield return new SqlParameter("@treeHeight", ToDbValue(record.treeHeight));
-                yield return new SqlParameter("@canopyArea", ToDbValue(record.canopyArea));
-                yield return new SqlParameter("@girth100", ToDbValue(record.girth100));
-                yield return new SqlParameter("@diameter100", ToDbValue(record.diameter100));
-                yield return new SqlParameter("@girth130", ToDbValue(record.girth130));
-                yield return new SqlParameter("@diameter130", ToDbValue(record.diameter130));
-                yield return new SqlParameter("@measureNote", ToDbValue(record.measureNote));
-
-                // 主要病害
-                yield return new SqlParameter("@majorDiseaseBrownRoot", ToDbValue(record.majorDiseaseBrownRoot));
-                yield return new SqlParameter("@majorDiseaseGanoderma", ToDbValue(record.majorDiseaseGanoderma));
-                yield return new SqlParameter("@majorDiseaseWoodDecayFungus", ToDbValue(record.majorDiseaseWoodDecayFungus));
-                yield return new SqlParameter("@majorDiseaseCanker", ToDbValue(record.majorDiseaseCanker));
-                yield return new SqlParameter("@majorDiseaseOther", ToDbValue(record.majorDiseaseOther));
-                yield return new SqlParameter("@majorDiseaseOtherNote", ToDbValue(record.majorDiseaseOtherNote));
-
-                // 主要害蟲
-                yield return new SqlParameter("@majorPestRootTunnel", ToDbValue(record.majorPestRootTunnel));
-                yield return new SqlParameter("@majorPestRootChew", ToDbValue(record.majorPestRootChew));
-                yield return new SqlParameter("@majorPestRootLive", ToDbValue(record.majorPestRootLive));
-                yield return new SqlParameter("@majorPestBaseTunnel", ToDbValue(record.majorPestBaseTunnel));
-                yield return new SqlParameter("@majorPestBaseChew", ToDbValue(record.majorPestBaseChew));
-                yield return new SqlParameter("@majorPestBaseLive", ToDbValue(record.majorPestBaseLive));
-                yield return new SqlParameter("@majorPestTrunkTunnel", ToDbValue(record.majorPestTrunkTunnel));
-                yield return new SqlParameter("@majorPestTrunkChew", ToDbValue(record.majorPestTrunkChew));
-                yield return new SqlParameter("@majorPestTrunkLive", ToDbValue(record.majorPestTrunkLive));
-                yield return new SqlParameter("@majorPestBranchTunnel", ToDbValue(record.majorPestBranchTunnel));
-                yield return new SqlParameter("@majorPestBranchChew", ToDbValue(record.majorPestBranchChew));
-                yield return new SqlParameter("@majorPestBranchLive", ToDbValue(record.majorPestBranchLive));
-                yield return new SqlParameter("@majorPestCrownTunnel", ToDbValue(record.majorPestCrownTunnel));
-                yield return new SqlParameter("@majorPestCrownChew", ToDbValue(record.majorPestCrownChew));
-                yield return new SqlParameter("@majorPestCrownLive", ToDbValue(record.majorPestCrownLive));
-                yield return new SqlParameter("@majorPestOtherTunnel", ToDbValue(record.majorPestOtherTunnel));
-                yield return new SqlParameter("@majorPestOtherChew", ToDbValue(record.majorPestOtherChew));
-                yield return new SqlParameter("@majorPestOtherLive", ToDbValue(record.majorPestOtherLive));
-
-                // 一般病蟲害
-                yield return new SqlParameter("@generalPestRoot", ToDbValue(record.generalPestRoot));
-                yield return new SqlParameter("@generalPestBase", ToDbValue(record.generalPestBase));
-                yield return new SqlParameter("@generalPestTrunk", ToDbValue(record.generalPestTrunk));
-                yield return new SqlParameter("@generalPestBranch", ToDbValue(record.generalPestBranch));
-                yield return new SqlParameter("@generalPestCrown", ToDbValue(record.generalPestCrown));
-                yield return new SqlParameter("@generalPestOther", ToDbValue(record.generalPestOther));
-                yield return new SqlParameter("@generalDiseaseRoot", ToDbValue(record.generalDiseaseRoot));
-                yield return new SqlParameter("@generalDiseaseBase", ToDbValue(record.generalDiseaseBase));
-                yield return new SqlParameter("@generalDiseaseTrunk", ToDbValue(record.generalDiseaseTrunk));
-                yield return new SqlParameter("@generalDiseaseBranch", ToDbValue(record.generalDiseaseBranch));
-                yield return new SqlParameter("@generalDiseaseCrown", ToDbValue(record.generalDiseaseCrown));
-                yield return new SqlParameter("@generalDiseaseOther", ToDbValue(record.generalDiseaseOther));
-                yield return new SqlParameter("@pestOtherNote", ToDbValue(record.pestOtherNote));
-
-                // 根部細節
-                yield return new SqlParameter("@rootDecayPercent", ToDbValue(record.rootDecayPercent));
-                yield return new SqlParameter("@rootCavityMaxDiameter", ToDbValue(record.rootCavityMaxDiameter));
-                yield return new SqlParameter("@rootWoundMaxDiameter", ToDbValue(record.rootWoundMaxDiameter));
-                yield return new SqlParameter("@rootMechanicalDamage", ToDbValue(record.rootMechanicalDamage));
-                yield return new SqlParameter("@rootMowingInjury", ToDbValue(record.rootMowingInjury));
-                yield return new SqlParameter("@rootInjury", ToDbValue(record.rootInjury));
-                yield return new SqlParameter("@rootGirdling", ToDbValue(record.rootGirdling));
-                yield return new SqlParameter("@rootOtherNote", ToDbValue(record.rootOtherNote));
-
-                // 基部細節
-                yield return new SqlParameter("@baseDecayPercent", ToDbValue(record.baseDecayPercent));
-                yield return new SqlParameter("@baseCavityMaxDiameter", ToDbValue(record.baseCavityMaxDiameter));
-                yield return new SqlParameter("@baseWoundMaxDiameter", ToDbValue(record.baseWoundMaxDiameter));
-                yield return new SqlParameter("@baseMechanicalDamage", ToDbValue(record.baseMechanicalDamage));
-                yield return new SqlParameter("@baseMowingInjury", ToDbValue(record.baseMowingInjury));
-                yield return new SqlParameter("@baseOtherNote", ToDbValue(record.baseOtherNote));
-
-                // 樹幹細節
-                yield return new SqlParameter("@trunkDecayPercent", ToDbValue(record.trunkDecayPercent));
-                yield return new SqlParameter("@trunkCavityMaxDiameter", ToDbValue(record.trunkCavityMaxDiameter));
-                yield return new SqlParameter("@trunkWoundMaxDiameter", ToDbValue(record.trunkWoundMaxDiameter));
-                yield return new SqlParameter("@trunkMechanicalDamage", ToDbValue(record.trunkMechanicalDamage));
-                yield return new SqlParameter("@trunkIncludedBark", ToDbValue(record.trunkIncludedBark));
-                yield return new SqlParameter("@trunkOtherNote", ToDbValue(record.trunkOtherNote));
-
-                // 枝條細節
-                yield return new SqlParameter("@branchDecayPercent", ToDbValue(record.branchDecayPercent));
-                yield return new SqlParameter("@branchCavityMaxDiameter", ToDbValue(record.branchCavityMaxDiameter));
-                yield return new SqlParameter("@branchWoundMaxDiameter", ToDbValue(record.branchWoundMaxDiameter));
-                yield return new SqlParameter("@branchMechanicalDamage", ToDbValue(record.branchMechanicalDamage));
-                yield return new SqlParameter("@branchIncludedBark", ToDbValue(record.branchIncludedBark));
-                yield return new SqlParameter("@branchDrooping", ToDbValue(record.branchDrooping));
-                yield return new SqlParameter("@branchOtherNote", ToDbValue(record.branchOtherNote));
-
-                // 樹冠細節
-                yield return new SqlParameter("@crownLeafCoveragePercent", ToDbValue(record.crownLeafCoveragePercent));
-                yield return new SqlParameter("@crownDeadBranchPercent", ToDbValue(record.crownDeadBranchPercent));
-                yield return new SqlParameter("@crownHangingBranch", ToDbValue(record.crownHangingBranch));
-                yield return new SqlParameter("@crownOtherNote", ToDbValue(record.crownOtherNote));
-
-                // 修剪與支撐
-                yield return new SqlParameter("@pruningWrongDamage", ToDbValue(record.pruningWrongDamage));
-                yield return new SqlParameter("@pruningWoundHealing", ToDbValue(record.pruningWoundHealing));
-                yield return new SqlParameter("@pruningEpiphyte", ToDbValue(record.pruningEpiphyte));
-                yield return new SqlParameter("@pruningParasite", ToDbValue(record.pruningParasite));
-                yield return new SqlParameter("@pruningVine", ToDbValue(record.pruningVine));
-                yield return new SqlParameter("@pruningOtherNote", ToDbValue(record.pruningOtherNote));
-                yield return new SqlParameter("@supportCount", ToDbValue(record.supportCount));
-                yield return new SqlParameter("@supportEmbedded", ToDbValue(record.supportEmbedded));
-                yield return new SqlParameter("@supportOtherNote", ToDbValue(record.supportOtherNote));
-
-                // 棲地與土壤
-                yield return new SqlParameter("@siteCementPercent", ToDbValue(record.siteCementPercent));
-                yield return new SqlParameter("@siteAsphaltPercent", ToDbValue(record.siteAsphaltPercent));
-                yield return new SqlParameter("@sitePlanter", ToDbValue(record.sitePlanter));
-                yield return new SqlParameter("@siteRecreationFacility", ToDbValue(record.siteRecreationFacility));
-                yield return new SqlParameter("@siteDebrisStack", ToDbValue(record.siteDebrisStack));
-                yield return new SqlParameter("@siteBetweenBuildings", ToDbValue(record.siteBetweenBuildings));
-                yield return new SqlParameter("@siteSoilCompaction", ToDbValue(record.siteSoilCompaction));
-                yield return new SqlParameter("@siteOverburiedSoil", ToDbValue(record.siteOverburiedSoil));
-                yield return new SqlParameter("@siteOtherNote", ToDbValue(record.siteOtherNote));
-                yield return new SqlParameter("@soilPh", ToDbValue(record.soilPh));
-                yield return new SqlParameter("@soilOrganicMatter", ToDbValue(record.soilOrganicMatter));
-                yield return new SqlParameter("@soilEc", ToDbValue(record.soilEc));
-
-                // 管理建議與系統資訊
-                yield return new SqlParameter("@managementStatus", ToDbValue(record.managementStatus));
-                yield return new SqlParameter("@priority", ToDbValue(record.priority));
-                yield return new SqlParameter("@treatmentDescription", ToDbValue(record.treatmentDescription));
-                yield return new SqlParameter("@sourceUnit", ToDbValue(record.sourceUnit));
-                yield return new SqlParameter("@sourceUnitID", ToDbValue(record.sourceUnitID));
+                return Convert.ToInt32(da.ExcuteScalar(sql,
+                    new SqlParameter("@healthID", photo.healthID),
+                    new SqlParameter("@fileName", ToDbValue(photo.fileName)),
+                    new SqlParameter("@filePath", ToDbValue(photo.filePath)),
+                    new SqlParameter("@fileSize", ToDbValue(photo.fileSize)),
+                    new SqlParameter("@caption", ToDbValue(photo.caption)),
+                    new SqlParameter("@accountId", accountId)));
             }
+        }
 
-            public static void DeleteHealthRecord(int healthId, int accountId)
+        public void DeleteHealthPhotos(int healthId, List<int> photoIds, int accountId)
+        {
+            if (photoIds == null || photoIds.Count == 0) return;
+
+            // 將 int list 轉成 "1,2,3" 字串
+            string idList = string.Join(",", photoIds);
+
+            string sql = $"UPDATE Tree_HealthPhoto SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE photoID IN ({idList}) AND healthID=@healthID";
+
+            using (var da = new MS_SQL())
             {
-                const string sql = "UPDATE Tree_HealthRecord SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE healthID=@id";
-                using (var da = new MS_SQL())
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@accountId", accountId),
+                    new SqlParameter("@healthID", healthId));
+            }
+        }
+
+        public void UpdateHealthPhotoCaptions(int healthId, List<TreeHealthPhoto> updates)
+        {
+            if (updates == null || updates.Count == 0) return;
+
+            // 設定每批次處理的數量
+            int batchSize = 100;
+            for (int i = 0; i < updates.Count; i += batchSize)
+            {
+                // 取出這一批要處理的資料 (例如第 0~99 筆)
+                var currentBatch = updates.Skip(i).Take(batchSize).ToList();
+
+                // 建立這一批次的 SQL 與 參數
+                StringBuilder sqlBuilder = new StringBuilder();
+                List<SqlParameter> parameters = new List<SqlParameter>();
+
+                // 加入共用參數 (注意：每次 Execute 都要重新加入，因為參數物件不能跨 Command 重用)
+                parameters.Add(new SqlParameter("@healthID", healthId));
+
+                for (int j = 0; j < currentBatch.Count; j++)
                 {
-                    da.ExecNonQuery(sql,
-                        new SqlParameter("@accountId", accountId),
-                        new SqlParameter("@id", healthId));
+                    // 
+                    string captionParam = $"@caption{j}";
+                    string idParam = $"@id{j}";
+
+                    // 拼接 SQL：加上 healthID 雙重保險
+                    sqlBuilder.Append($@"
+                        UPDATE Tree_HealthPhoto 
+                        SET caption = {captionParam} 
+                        WHERE photoID = {idParam} AND healthID = @healthID;");
+
+                    parameters.Add(new SqlParameter(captionParam, ToDbValue(currentBatch[j].caption)));
+                    parameters.Add(new SqlParameter(idParam, currentBatch[j].photoID));
                 }
-            }
 
-            public static List<TreeHealthPhoto> GetHealthPhotos(int healthId)
-            {
-                const string sql = "SELECT photoID, healthID, fileName, filePath, fileSize, caption, insertDateTime FROM Tree_HealthPhoto WHERE healthID=@id AND removeDateTime IS NULL ORDER BY insertDateTime DESC, photoID DESC";
-
-                using (var da = new MS_SQL())
+                // 執行這一批次
+                if (sqlBuilder.Length > 0)
                 {
-                    var dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
-                    return dt.Rows.Cast<DataRow>().Select(ToHealthPhoto).ToList();
-                }
-            }
-
-            public static List<TreeHealthAttachment> GetHealthAttachments(int healthId)
-            {
-                const string sql = "SELECT attachmentID, healthID, fileName, filePath, fileSize, description, insertDateTime FROM Tree_HealthAttachment WHERE healthID=@id AND removeDateTime IS NULL ORDER BY insertDateTime DESC, attachmentID DESC";
-
-                using (var da = new MS_SQL())
-                {
-                    var dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
-                    return dt.Rows.Cast<DataRow>().Select(ToHealthAttachment).ToList();
-                }
-            }
-
-            public static int InsertHealthPhoto(TreeHealthPhoto photo, int accountId)
-            {
-                if (photo == null) throw new ArgumentNullException(nameof(photo));
-
-                const string sql = @"INSERT INTO Tree_HealthPhoto
-(healthID, fileName, filePath, fileSize, caption, insertAccountID, insertDateTime)
-OUTPUT INSERTED.photoID
-VALUES
-(@healthID, @fileName, @filePath, @fileSize, @caption, @accountId, GETDATE())";
-
-                using (var da = new MS_SQL())
-                {
-                    return Convert.ToInt32(da.ExcuteScalar(sql,
-                        new SqlParameter("@healthID", photo.HealthID),
-                        new SqlParameter("@fileName", ToDbValue(photo.FileName)),
-                        new SqlParameter("@filePath", ToDbValue(photo.FilePath)),
-                        new SqlParameter("@fileSize", ToDbValue(photo.FileSize)),
-                        new SqlParameter("@caption", ToDbValue(photo.Caption)),
-                        new SqlParameter("@accountId", accountId)));
-                }
-            }
-
-            public static int InsertHealthAttachment(TreeHealthAttachment attachment, int accountId)
-            {
-                if (attachment == null) throw new ArgumentNullException(nameof(attachment));
-
-                const string sql = @"INSERT INTO Tree_HealthAttachment
-(healthID, fileName, filePath, fileSize, description, insertAccountID, insertDateTime)
-OUTPUT INSERTED.attachmentID
-VALUES
-(@healthID, @fileName, @filePath, @fileSize, @description, @accountId, GETDATE())";
-
-                using (var da = new MS_SQL())
-                {
-                    return Convert.ToInt32(da.ExcuteScalar(sql,
-                        new SqlParameter("@healthID", attachment.HealthID),
-                        new SqlParameter("@fileName", ToDbValue(attachment.FileName)),
-                        new SqlParameter("@filePath", ToDbValue(attachment.FilePath)),
-                        new SqlParameter("@fileSize", ToDbValue(attachment.FileSize)),
-                        new SqlParameter("@description", ToDbValue(attachment.Description)),
-                        new SqlParameter("@accountId", accountId)));
-                }
-            }
-
-            public static void DeleteHealthPhoto(int photoId, int accountId)
-            {
-                const string sql = "UPDATE Tree_HealthPhoto SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE photoID=@id";
-                using (var da = new MS_SQL())
-                {
-                    da.ExecNonQuery(sql,
-                        new SqlParameter("@accountId", accountId),
-                        new SqlParameter("@id", photoId));
-                }
-            }
-
-            public static void DeleteHealthAttachment(int attachmentId, int accountId)
-            {
-                const string sql = "UPDATE Tree_HealthAttachment SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE attachmentID=@id";
-                using (var da = new MS_SQL())
-                {
-                    da.ExecNonQuery(sql,
-                        new SqlParameter("@accountId", accountId),
-                        new SqlParameter("@id", attachmentId));
+                    using (var da = new MS_SQL())
+                    {
+                        da.ExecNonQuery(sqlBuilder.ToString(), parameters.ToArray());
+                    }
                 }
             }
         }
+
+        /// <summary>
+        /// 取得照片列表
+        /// </summary>
+        public List<TreeHealthPhoto> GetHealthPhotos(int healthId)
+        {
+            string sql = "SELECT photoID, healthID, fileName, filePath, fileSize, caption, insertDateTime FROM Tree_HealthPhoto WHERE healthID=@id AND removeDateTime IS NULL ORDER BY insertDateTime DESC, photoID DESC";
+
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
+                List<TreeHealthPhoto> list = new List<TreeHealthPhoto>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    list.Add(new TreeHealthPhoto
+                    {
+                        photoID = GetNullableInt(row, "photoID") ?? 0,
+                        healthID = GetNullableInt(row, "healthID") ?? 0,
+                        fileName = GetString(row, "fileName"),
+                        filePath = GetString(row, "filePath"),
+                        fileSize = GetNullableInt(row, "fileSize"),
+                        caption = GetString(row, "caption"),
+                        insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue
+                    });
+                }
+                return list;
+            }
+        }
+
+        public int InsertHealthAttachment(TreeHealthAttachment attachment, int accountId)
+        {
+            if (attachment == null) throw new ArgumentNullException(nameof(attachment));
+
+            string sql = @"
+                INSERT INTO Tree_HealthAttachment
+                (healthID, fileName, filePath, fileSize, description, insertAccountID, insertDateTime)
+                OUTPUT INSERTED.attachmentID
+                VALUES
+                (@healthID, @fileName, @filePath, @fileSize, @description, @accountId, GETDATE())";
+
+            using (var da = new MS_SQL())
+            {
+                return Convert.ToInt32(da.ExcuteScalar(sql,
+                    new SqlParameter("@healthID", attachment.healthID),
+                    new SqlParameter("@fileName", ToDbValue(attachment.fileName)),
+                    new SqlParameter("@filePath", ToDbValue(attachment.filePath)),
+                    new SqlParameter("@fileSize", ToDbValue(attachment.fileSize)),
+                    new SqlParameter("@description", ToDbValue(attachment.description)),
+                    new SqlParameter("@accountId", accountId)));
+            }
+        }
+
+        public void DeleteHealthAttachment(int healthId, int attachmentId, int accountId)
+        {
+            string sql = "UPDATE Tree_HealthAttachment SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE attachmentID=@id AND healthID=@healthID";
+            using (var da = new MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@accountId", accountId),
+                    new SqlParameter("@id", attachmentId),
+                    new SqlParameter("@healthID", healthId));
+            }
+        }
+
+        /// <summary>
+        /// 取得附件列表
+        /// </summary>
+        public List<TreeHealthAttachment> GetHealthAttachments(int healthId)
+        {
+            string sql = "SELECT attachmentID, healthID, fileName, filePath, fileSize, description, insertDateTime FROM Tree_HealthAttachment WHERE healthID=@id AND removeDateTime IS NULL ORDER BY insertDateTime DESC, attachmentID DESC";
+
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@id", healthId));
+                List<TreeHealthAttachment> list = new List<TreeHealthAttachment>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    list.Add(new TreeHealthAttachment
+                    {
+                        attachmentID = GetNullableInt(row, "attachmentID") ?? 0,
+                        healthID = GetNullableInt(row, "healthID") ?? 0,
+                        fileName = GetString(row, "fileName"),
+                        filePath = GetString(row, "filePath"),
+                        fileSize = GetNullableInt(row, "fileSize"),
+                        description = GetString(row, "description"),
+                        insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue
+                    });
+                }
+                return list;
+            }
+        }
+
+        private TreeHealthRecord ToHealthRecord(DataRow row)
+        {
+            if (row == null) return null;
+
+            int statusValue = GetNullableInt(row, "dataStatus") ?? 0;
+
+            return new TreeHealthRecord
+            {
+                // PK & FK
+                healthID = GetNullableInt(row, "healthID") ?? 0,
+                treeID = GetNullableInt(row, "treeID") ?? 0,
+
+                // 樹籍資訊
+                systemTreeNo = GetString(row, "systemTreeNo"),
+                agencyTreeNo = GetString(row, "agencyTreeNo"),
+                cityName = GetString(row, "cityName"),
+                areaName = GetString(row, "areaName"),
+                speciesName = GetString(row, "speciesCommonName"),
+                manager = GetString(row, "manager"),
+
+                // 基本資料
+                surveyDate = GetNullableDateTime(row, "surveyDate"),
+                surveyor = GetString(row, "surveyor"),
+                dataStatus = statusValue,
+                memo = GetString(row, "memo"),
+                treeSignStatus = (byte?)GetNullableInt(row, "treeSignStatus"),
+
+                // 樹木規格
+                latitude = GetNullableDecimal(row, "latitude"),
+                longitude = GetNullableDecimal(row, "longitude"),
+                treeHeight = GetNullableDecimal(row, "treeHeight"),
+                canopyArea = GetNullableDecimal(row, "canopyArea"),
+                girth100 = GetString(row, "girth100"),
+                diameter100 = GetString(row, "diameter100"),
+                girth130 = GetString(row, "girth130"),
+                diameter130 = GetString(row, "diameter130"),
+                measureNote = GetString(row, "measureNote"),
+
+                // 病害
+                majorDiseaseBrownRoot = GetNullableBoolean(row, "majorDiseaseBrownRoot"),
+                majorDiseaseGanoderma = GetNullableBoolean(row, "majorDiseaseGanoderma"),
+                majorDiseaseWoodDecayFungus = GetNullableBoolean(row, "majorDiseaseWoodDecayFungus"),
+                majorDiseaseCanker = GetNullableBoolean(row, "majorDiseaseCanker"),
+                majorDiseaseOther = GetNullableBoolean(row, "majorDiseaseOther"),
+                majorDiseaseOtherNote = GetString(row, "majorDiseaseOtherNote"),
+
+                // 蟲害
+                majorPestRootTunnel = GetNullableBoolean(row, "majorPestRootTunnel"),
+                majorPestRootChew = GetNullableBoolean(row, "majorPestRootChew"),
+                majorPestRootLive = GetNullableBoolean(row, "majorPestRootLive"),
+                majorPestBaseTunnel = GetNullableBoolean(row, "majorPestBaseTunnel"),
+                majorPestBaseChew = GetNullableBoolean(row, "majorPestBaseChew"),
+                majorPestBaseLive = GetNullableBoolean(row, "majorPestBaseLive"),
+                majorPestTrunkTunnel = GetNullableBoolean(row, "majorPestTrunkTunnel"),
+                majorPestTrunkChew = GetNullableBoolean(row, "majorPestTrunkChew"),
+                majorPestTrunkLive = GetNullableBoolean(row, "majorPestTrunkLive"),
+                majorPestBranchTunnel = GetNullableBoolean(row, "majorPestBranchTunnel"),
+                majorPestBranchChew = GetNullableBoolean(row, "majorPestBranchChew"),
+                majorPestBranchLive = GetNullableBoolean(row, "majorPestBranchLive"),
+                majorPestCrownTunnel = GetNullableBoolean(row, "majorPestCrownTunnel"),
+                majorPestCrownChew = GetNullableBoolean(row, "majorPestCrownChew"),
+                majorPestCrownLive = GetNullableBoolean(row, "majorPestCrownLive"),
+                majorPestOtherTunnel = GetNullableBoolean(row, "majorPestOtherTunnel"),
+                majorPestOtherChew = GetNullableBoolean(row, "majorPestOtherChew"),
+                majorPestOtherLive = GetNullableBoolean(row, "majorPestOtherLive"),
+
+                // 一般描述
+                generalPestRoot = GetString(row, "generalPestRoot"),
+                generalPestBase = GetString(row, "generalPestBase"),
+                generalPestTrunk = GetString(row, "generalPestTrunk"),
+                generalPestBranch = GetString(row, "generalPestBranch"),
+                generalPestCrown = GetString(row, "generalPestCrown"),
+                generalPestOther = GetString(row, "generalPestOther"),
+                generalDiseaseRoot = GetString(row, "generalDiseaseRoot"),
+                generalDiseaseBase = GetString(row, "generalDiseaseBase"),
+                generalDiseaseTrunk = GetString(row, "generalDiseaseTrunk"),
+                generalDiseaseBranch = GetString(row, "generalDiseaseBranch"),
+                generalDiseaseCrown = GetString(row, "generalDiseaseCrown"),
+                generalDiseaseOther = GetString(row, "generalDiseaseOther"),
+                pestOtherNote = GetString(row, "pestOtherNote"),
+
+                // 細節檢測
+                rootDecayPercent = GetNullableDecimal(row, "rootDecayPercent"),
+                rootCavityMaxDiameter = GetNullableDecimal(row, "rootCavityMaxDiameter"),
+                rootWoundMaxDiameter = GetNullableDecimal(row, "rootWoundMaxDiameter"),
+                rootMechanicalDamage = GetNullableBoolean(row, "rootMechanicalDamage"),
+                rootMowingInjury = GetNullableBoolean(row, "rootMowingInjury"),
+                rootInjury = GetNullableBoolean(row, "rootInjury"),
+                rootGirdling = GetNullableBoolean(row, "rootGirdling"),
+                rootOtherNote = GetString(row, "rootOtherNote"),
+
+                baseDecayPercent = GetNullableDecimal(row, "baseDecayPercent"),
+                baseCavityMaxDiameter = GetNullableDecimal(row, "baseCavityMaxDiameter"),
+                baseWoundMaxDiameter = GetNullableDecimal(row, "baseWoundMaxDiameter"),
+                baseMechanicalDamage = GetNullableBoolean(row, "baseMechanicalDamage"),
+                baseMowingInjury = GetNullableBoolean(row, "baseMowingInjury"),
+                baseOtherNote = GetString(row, "baseOtherNote"),
+
+                trunkDecayPercent = GetNullableDecimal(row, "trunkDecayPercent"),
+                trunkCavityMaxDiameter = GetNullableDecimal(row, "trunkCavityMaxDiameter"),
+                trunkWoundMaxDiameter = GetNullableDecimal(row, "trunkWoundMaxDiameter"),
+                trunkMechanicalDamage = GetNullableBoolean(row, "trunkMechanicalDamage"),
+                trunkIncludedBark = GetNullableBoolean(row, "trunkIncludedBark"),
+                trunkOtherNote = GetString(row, "trunkOtherNote"),
+
+                branchDecayPercent = GetNullableDecimal(row, "branchDecayPercent"),
+                branchCavityMaxDiameter = GetNullableDecimal(row, "branchCavityMaxDiameter"),
+                branchWoundMaxDiameter = GetNullableDecimal(row, "branchWoundMaxDiameter"),
+                branchMechanicalDamage = GetNullableBoolean(row, "branchMechanicalDamage"),
+                branchIncludedBark = GetNullableBoolean(row, "branchIncludedBark"),
+                branchDrooping = GetNullableBoolean(row, "branchDrooping"),
+                branchOtherNote = GetString(row, "branchOtherNote"),
+
+                crownLeafCoveragePercent = GetNullableDecimal(row, "crownLeafCoveragePercent"),
+                crownDeadBranchPercent = GetNullableDecimal(row, "crownDeadBranchPercent"),
+                crownHangingBranch = GetNullableBoolean(row, "crownHangingBranch"),
+                crownOtherNote = GetString(row, "crownOtherNote"),
+                growthNote = GetString(row, "growthNote"),
+
+                // 修剪與支撐
+                pruningWrongDamage = GetString(row, "pruningWrongDamage"),
+                pruningWoundHealing = GetNullableBoolean(row, "pruningWoundHealing"),
+                pruningEpiphyte = GetNullableBoolean(row, "pruningEpiphyte"),
+                pruningParasite = GetNullableBoolean(row, "pruningParasite"),
+                pruningVine = GetNullableBoolean(row, "pruningVine"),
+                pruningOtherNote = GetString(row, "pruningOtherNote"),
+                supportCount = GetNullableInt(row, "supportCount"),
+                supportEmbedded = GetNullableBoolean(row, "supportEmbedded"),
+                supportOtherNote = GetString(row, "supportOtherNote"),
+
+                // 棲地與土壤
+                siteCementPercent = GetNullableDecimal(row, "siteCementPercent"),
+                siteAsphaltPercent = GetNullableDecimal(row, "siteAsphaltPercent"),
+                sitePlanter = GetNullableBoolean(row, "sitePlanter"),
+                siteRecreationFacility = GetNullableBoolean(row, "siteRecreationFacility"),
+                siteDebrisStack = GetNullableBoolean(row, "siteDebrisStack"),
+                siteBetweenBuildings = GetNullableBoolean(row, "siteBetweenBuildings"),
+                siteSoilCompaction = GetNullableBoolean(row, "siteSoilCompaction"),
+                siteOverburiedSoil = GetNullableBoolean(row, "siteOverburiedSoil"),
+                siteOtherNote = GetString(row, "siteOtherNote"),
+                soilPh = GetString(row, "soilPh"),
+                soilOrganicMatter = GetString(row, "soilOrganicMatter"),
+                soilEc = GetString(row, "soilEc"),
+
+                // 管理建議
+                managementStatus = GetString(row, "managementStatus"),
+                priority = GetString(row, "priority"),
+                treatmentDescription = GetString(row, "treatmentDescription"),
+
+                // 系統
+                sourceUnit = GetString(row, "sourceUnit"),
+                sourceUnitID = GetNullableInt(row, "sourceUnitID"),
+                insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
+                insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
+                updateAccountID = GetNullableInt(row, "updateAccountID"),
+                updateDateTime = GetNullableDateTime(row, "updateDateTime")
+            };
+        }
+
+        private IEnumerable<SqlParameter> GetRecordParameters(TreeHealthRecord record)
+        {
+            // 基本資料
+            yield return new SqlParameter("@surveyDate", record.surveyDate.HasValue ? (object)record.surveyDate.Value : DBNull.Value);
+            yield return new SqlParameter("@surveyor", ToDbValue(record.surveyor));
+            yield return new SqlParameter("@dataStatus", record.dataStatus);
+            yield return new SqlParameter("@memo", ToDbValue(record.memo));
+            yield return new SqlParameter("@treeSignStatus", ToDbValue(record.treeSignStatus));
+
+            // 樹木規格
+            yield return new SqlParameter("@latitude", ToDbValue(record.latitude));
+            yield return new SqlParameter("@longitude", ToDbValue(record.longitude));
+            yield return new SqlParameter("@treeHeight", ToDbValue(record.treeHeight));
+            yield return new SqlParameter("@canopyArea", ToDbValue(record.canopyArea));
+            yield return new SqlParameter("@girth100", ToDbValue(record.girth100));
+            yield return new SqlParameter("@diameter100", ToDbValue(record.diameter100));
+            yield return new SqlParameter("@girth130", ToDbValue(record.girth130));
+            yield return new SqlParameter("@diameter130", ToDbValue(record.diameter130));
+            yield return new SqlParameter("@measureNote", ToDbValue(record.measureNote));
+
+            // 病害
+            yield return new SqlParameter("@majorDiseaseBrownRoot", ToDbValue(record.majorDiseaseBrownRoot));
+            yield return new SqlParameter("@majorDiseaseGanoderma", ToDbValue(record.majorDiseaseGanoderma));
+            yield return new SqlParameter("@majorDiseaseWoodDecayFungus", ToDbValue(record.majorDiseaseWoodDecayFungus));
+            yield return new SqlParameter("@majorDiseaseCanker", ToDbValue(record.majorDiseaseCanker));
+            yield return new SqlParameter("@majorDiseaseOther", ToDbValue(record.majorDiseaseOther));
+            yield return new SqlParameter("@majorDiseaseOtherNote", ToDbValue(record.majorDiseaseOtherNote));
+
+            // 蟲害
+            yield return new SqlParameter("@majorPestRootTunnel", ToDbValue(record.majorPestRootTunnel));
+            yield return new SqlParameter("@majorPestRootChew", ToDbValue(record.majorPestRootChew));
+            yield return new SqlParameter("@majorPestRootLive", ToDbValue(record.majorPestRootLive));
+            yield return new SqlParameter("@majorPestBaseTunnel", ToDbValue(record.majorPestBaseTunnel));
+            yield return new SqlParameter("@majorPestBaseChew", ToDbValue(record.majorPestBaseChew));
+            yield return new SqlParameter("@majorPestBaseLive", ToDbValue(record.majorPestBaseLive));
+            yield return new SqlParameter("@majorPestTrunkTunnel", ToDbValue(record.majorPestTrunkTunnel));
+            yield return new SqlParameter("@majorPestTrunkChew", ToDbValue(record.majorPestTrunkChew));
+            yield return new SqlParameter("@majorPestTrunkLive", ToDbValue(record.majorPestTrunkLive));
+            yield return new SqlParameter("@majorPestBranchTunnel", ToDbValue(record.majorPestBranchTunnel));
+            yield return new SqlParameter("@majorPestBranchChew", ToDbValue(record.majorPestBranchChew));
+            yield return new SqlParameter("@majorPestBranchLive", ToDbValue(record.majorPestBranchLive));
+            yield return new SqlParameter("@majorPestCrownTunnel", ToDbValue(record.majorPestCrownTunnel));
+            yield return new SqlParameter("@majorPestCrownChew", ToDbValue(record.majorPestCrownChew));
+            yield return new SqlParameter("@majorPestCrownLive", ToDbValue(record.majorPestCrownLive));
+            yield return new SqlParameter("@majorPestOtherTunnel", ToDbValue(record.majorPestOtherTunnel));
+            yield return new SqlParameter("@majorPestOtherChew", ToDbValue(record.majorPestOtherChew));
+            yield return new SqlParameter("@majorPestOtherLive", ToDbValue(record.majorPestOtherLive));
+
+            // 一般描述
+            yield return new SqlParameter("@generalPestRoot", ToDbValue(record.generalPestRoot));
+            yield return new SqlParameter("@generalPestBase", ToDbValue(record.generalPestBase));
+            yield return new SqlParameter("@generalPestTrunk", ToDbValue(record.generalPestTrunk));
+            yield return new SqlParameter("@generalPestBranch", ToDbValue(record.generalPestBranch));
+            yield return new SqlParameter("@generalPestCrown", ToDbValue(record.generalPestCrown));
+            yield return new SqlParameter("@generalPestOther", ToDbValue(record.generalPestOther));
+            yield return new SqlParameter("@generalDiseaseRoot", ToDbValue(record.generalDiseaseRoot));
+            yield return new SqlParameter("@generalDiseaseBase", ToDbValue(record.generalDiseaseBase));
+            yield return new SqlParameter("@generalDiseaseTrunk", ToDbValue(record.generalDiseaseTrunk));
+            yield return new SqlParameter("@generalDiseaseBranch", ToDbValue(record.generalDiseaseBranch));
+            yield return new SqlParameter("@generalDiseaseCrown", ToDbValue(record.generalDiseaseCrown));
+            yield return new SqlParameter("@generalDiseaseOther", ToDbValue(record.generalDiseaseOther));
+            yield return new SqlParameter("@pestOtherNote", ToDbValue(record.pestOtherNote));
+
+            // 細節
+            yield return new SqlParameter("@rootDecayPercent", ToDbValue(record.rootDecayPercent));
+            yield return new SqlParameter("@rootCavityMaxDiameter", ToDbValue(record.rootCavityMaxDiameter));
+            yield return new SqlParameter("@rootWoundMaxDiameter", ToDbValue(record.rootWoundMaxDiameter));
+            yield return new SqlParameter("@rootMechanicalDamage", ToDbValue(record.rootMechanicalDamage));
+            yield return new SqlParameter("@rootMowingInjury", ToDbValue(record.rootMowingInjury));
+            yield return new SqlParameter("@rootInjury", ToDbValue(record.rootInjury));
+            yield return new SqlParameter("@rootGirdling", ToDbValue(record.rootGirdling));
+            yield return new SqlParameter("@rootOtherNote", ToDbValue(record.rootOtherNote));
+
+            yield return new SqlParameter("@baseDecayPercent", ToDbValue(record.baseDecayPercent));
+            yield return new SqlParameter("@baseCavityMaxDiameter", ToDbValue(record.baseCavityMaxDiameter));
+            yield return new SqlParameter("@baseWoundMaxDiameter", ToDbValue(record.baseWoundMaxDiameter));
+            yield return new SqlParameter("@baseMechanicalDamage", ToDbValue(record.baseMechanicalDamage));
+            yield return new SqlParameter("@baseMowingInjury", ToDbValue(record.baseMowingInjury));
+            yield return new SqlParameter("@baseOtherNote", ToDbValue(record.baseOtherNote));
+
+            yield return new SqlParameter("@trunkDecayPercent", ToDbValue(record.trunkDecayPercent));
+            yield return new SqlParameter("@trunkCavityMaxDiameter", ToDbValue(record.trunkCavityMaxDiameter));
+            yield return new SqlParameter("@trunkWoundMaxDiameter", ToDbValue(record.trunkWoundMaxDiameter));
+            yield return new SqlParameter("@trunkMechanicalDamage", ToDbValue(record.trunkMechanicalDamage));
+            yield return new SqlParameter("@trunkIncludedBark", ToDbValue(record.trunkIncludedBark));
+            yield return new SqlParameter("@trunkOtherNote", ToDbValue(record.trunkOtherNote));
+
+            yield return new SqlParameter("@branchDecayPercent", ToDbValue(record.branchDecayPercent));
+            yield return new SqlParameter("@branchCavityMaxDiameter", ToDbValue(record.branchCavityMaxDiameter));
+            yield return new SqlParameter("@branchWoundMaxDiameter", ToDbValue(record.branchWoundMaxDiameter));
+            yield return new SqlParameter("@branchMechanicalDamage", ToDbValue(record.branchMechanicalDamage));
+            yield return new SqlParameter("@branchIncludedBark", ToDbValue(record.branchIncludedBark));
+            yield return new SqlParameter("@branchDrooping", ToDbValue(record.branchDrooping));
+            yield return new SqlParameter("@branchOtherNote", ToDbValue(record.branchOtherNote));
+
+            yield return new SqlParameter("@crownLeafCoveragePercent", ToDbValue(record.crownLeafCoveragePercent));
+            yield return new SqlParameter("@crownDeadBranchPercent", ToDbValue(record.crownDeadBranchPercent));
+            yield return new SqlParameter("@crownHangingBranch", ToDbValue(record.crownHangingBranch));
+            yield return new SqlParameter("@crownOtherNote", ToDbValue(record.crownOtherNote));
+            yield return new SqlParameter("@growthNote", ToDbValue(record.growthNote));
+
+            // 修剪與支撐
+            yield return new SqlParameter("@pruningWrongDamage", ToDbValue(record.pruningWrongDamage));
+            yield return new SqlParameter("@pruningWoundHealing", ToDbValue(record.pruningWoundHealing));
+            yield return new SqlParameter("@pruningEpiphyte", ToDbValue(record.pruningEpiphyte));
+            yield return new SqlParameter("@pruningParasite", ToDbValue(record.pruningParasite));
+            yield return new SqlParameter("@pruningVine", ToDbValue(record.pruningVine));
+            yield return new SqlParameter("@pruningOtherNote", ToDbValue(record.pruningOtherNote));
+            yield return new SqlParameter("@supportCount", ToDbValue(record.supportCount));
+            yield return new SqlParameter("@supportEmbedded", ToDbValue(record.supportEmbedded));
+            yield return new SqlParameter("@supportOtherNote", ToDbValue(record.supportOtherNote));
+
+            // 棲地與土壤
+            yield return new SqlParameter("@siteCementPercent", ToDbValue(record.siteCementPercent));
+            yield return new SqlParameter("@siteAsphaltPercent", ToDbValue(record.siteAsphaltPercent));
+            yield return new SqlParameter("@sitePlanter", ToDbValue(record.sitePlanter));
+            yield return new SqlParameter("@siteRecreationFacility", ToDbValue(record.siteRecreationFacility));
+            yield return new SqlParameter("@siteDebrisStack", ToDbValue(record.siteDebrisStack));
+            yield return new SqlParameter("@siteBetweenBuildings", ToDbValue(record.siteBetweenBuildings));
+            yield return new SqlParameter("@siteSoilCompaction", ToDbValue(record.siteSoilCompaction));
+            yield return new SqlParameter("@siteOverburiedSoil", ToDbValue(record.siteOverburiedSoil));
+            yield return new SqlParameter("@siteOtherNote", ToDbValue(record.siteOtherNote));
+            yield return new SqlParameter("@soilPh", ToDbValue(record.soilPh));
+            yield return new SqlParameter("@soilOrganicMatter", ToDbValue(record.soilOrganicMatter));
+            yield return new SqlParameter("@soilEc", ToDbValue(record.soilEc));
+
+            // 管理建議與系統資訊
+            yield return new SqlParameter("@managementStatus", ToDbValue(record.managementStatus));
+            yield return new SqlParameter("@priority", ToDbValue(record.priority));
+            yield return new SqlParameter("@treatmentDescription", ToDbValue(record.treatmentDescription));
+            yield return new SqlParameter("@sourceUnit", ToDbValue(record.sourceUnit));
+            yield return new SqlParameter("@sourceUnitID", ToDbValue(record.sourceUnitID));
+        }
+
+        
     }
     
 

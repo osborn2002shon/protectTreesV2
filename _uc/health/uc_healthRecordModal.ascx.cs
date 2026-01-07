@@ -40,10 +40,10 @@ namespace protectTreesV2._uc.health
             litTreeHeight.Text = FormatNumber(record.treeHeight);
             litCanopyArea.Text = FormatNumber(record.canopyArea);
 
-            litGirth100.Text = FormatNumber(record.girth100);
-            litDiameter100.Text = FormatNumber(record.diameter100);
-            litGirth130.Text = FormatNumber(record.girth130);
-            litDiameter130.Text = FormatNumber(record.diameter130);
+            litGirth100.Text = FormatText(record.girth100);
+            litDiameter100.Text = FormatText(record.diameter100);
+            litGirth130.Text = FormatText(record.girth130);
+            litDiameter130.Text = FormatText(record.diameter130);
             litMeasureNote.Text = FormatText(record.measureNote);
 
             // 3. 病蟲害摘要
@@ -129,8 +129,8 @@ namespace protectTreesV2._uc.health
             litTreatmentDescription.Text = FormatText(record.treatmentDescription);
 
             // 7. 附件與照片
-            BindAttachments(TreeService.GetHealthAttachments(record.healthID));
-            BindPhotos(TreeService.GetHealthPhotos(record.healthID));
+            BindAttachments(record.attachments);
+            BindPhotos(record.photos);
         }
 
         private void ClearContent()
@@ -427,15 +427,10 @@ namespace protectTreesV2._uc.health
         private static string BuildSoilSummary(TreeHealthRecord record)
         {
             var details = new List<string>();
-
-            if (record.soilPh.HasValue)
-                details.Add($"pH值 {FormatDecimal(record.soilPh)}");
-
-            if (record.soilOrganicMatter.HasValue)
-                details.Add($"有機質含量 {FormatDecimal(record.soilOrganicMatter)}");
-
-            if (record.soilEc.HasValue)
-                details.Add($"電導度 {FormatDecimal(record.soilEc)}");
+            details.Add($"pH值 {FormatText(record.soilPh)}");
+            details.Add($"有機質含量 {FormatText(record.soilOrganicMatter)}");
+            details.Add($"電導度 {FormatText(record.soilEc)}");
+               
 
             return details.Count > 0 ? string.Join("；", details) : "無";
         }

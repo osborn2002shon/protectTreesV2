@@ -17,10 +17,10 @@ CREATE TABLE [dbo].[Tree_HealthRecord](
         [longitude] [decimal](10, 6) NULL, -- 經度
         [treeHeight] [decimal](8, 2) NULL, -- 樹高(公尺)
         [canopyArea] [decimal](8, 2) NULL, -- 樹冠投影面積(平方公尺)
-        [girth100] [decimal](8, 2) NULL, -- 離地100公分處樹圍(公分)
-        [diameter100] [decimal](8, 2) NULL, -- 離地100公分處直徑(公分)
-        [girth130] [decimal](8, 2) NULL, -- 離地130公分處樹圍(公分)
-        [diameter130] [decimal](8, 2) NULL, -- 離地130公分處直徑(公分)
+        [girth100] [nvarchar](200) NULL, -- 離地100公分處樹圍(公分)
+        [diameter100] [nvarchar](200) NULL, -- 離地100公分處直徑(公分)
+        [girth130] [nvarchar](200) NULL, -- 離地130公分處樹圍(公分)
+        [diameter130] [nvarchar](200) NULL, -- 離地130公分處直徑(公分)
         [measureNote] [nvarchar](200) NULL, -- 量測備註
         [majorDiseaseBrownRoot] [bit] NULL, -- 主要病害-褐根病
         [majorDiseaseGanoderma] [bit] NULL, -- 主要病害-菇類/靈芝感染
@@ -90,6 +90,7 @@ CREATE TABLE [dbo].[Tree_HealthRecord](
         [crownDeadBranchPercent] [decimal](5, 2) NULL, -- 樹冠枯枝比例(%)
         [crownHangingBranch] [bit] NULL, -- 樹冠掛枝
         [crownOtherNote] [nvarchar](200) NULL, -- 樹冠其他說明
+		[growthNote] [nvarchar](200) NULL, --　生長其他詳加說明
         [pruningWrongDamage] [nvarchar](50) NULL, -- 修剪不當損傷描述
         [pruningWoundHealing] [bit] NULL, -- 修剪傷口癒合狀況
         [pruningEpiphyte] [bit] NULL, -- 樹幹附生植物
@@ -108,9 +109,9 @@ CREATE TABLE [dbo].[Tree_HealthRecord](
         [siteSoilCompaction] [bit] NULL, -- 土壤壓實情形
         [siteOverburiedSoil] [bit] NULL, -- 覆土過高情形
         [siteOtherNote] [nvarchar](200) NULL, -- 棲地其他說明
-        [soilPh] [decimal](5, 2) NULL, -- 土壤pH值
-        [soilOrganicMatter] [decimal](6, 2) NULL, -- 土壤有機質含量
-        [soilEc] [decimal](6, 2) NULL, -- 土壤電導度
+        [soilPh] [nvarchar](200) NULL, -- 土壤pH值
+        [soilOrganicMatter] [nvarchar](200) NULL, -- 土壤有機質含量
+        [soilEc] [nvarchar](200) NULL, -- 土壤電導度
         [managementStatus] [nvarchar](max) NULL, -- 管理狀態說明
         [priority] [nvarchar](50) NULL, -- 處置優先順序
         [treatmentDescription] [nvarchar](max) NULL, -- 處置或維護建議

@@ -14,6 +14,7 @@ namespace protectTreesV2.Base
 {
     public class BasePage : System.Web.UI.Page
     {
+
         public string setTreeID
         {
             get
@@ -37,7 +38,6 @@ namespace protectTreesV2.Base
                 Session["setHealthID"] = value;
             }
         }
-
         public string setPatrolID
         {
             get
@@ -47,6 +47,81 @@ namespace protectTreesV2.Base
             set
             {
                 Session["setPatrolID"] = value;
+            }
+        }
+
+        [Serializable]
+        public class PageStateInfo
+        {
+            public const string sessionKey = "__PageState_Session";
+            public const string viewStateKey = "__PageState_View";
+            public string sourcePage { get; set; }
+            public object filterData { get; set; }
+        }
+        /// <summary>
+        /// 存狀態並跳轉
+        /// </summary>
+        public void RedirectState(string url, object filter)
+        {
+            // 直接使用 PageStateInfo 裡的 Key
+            Session[PageStateInfo.sessionKey] = new PageStateInfo
+            {
+                sourcePage = Request.Url.PathAndQuery,
+                filterData = filter
+            };
+            Response.Redirect(url);
+        }
+
+        /// <summary>
+        ///  取回頁面紀錄
+        /// </summary>
+        public T GetState<T>() where T : class
+        {
+            if (Session[PageStateInfo.sessionKey] is PageStateInfo state)
+            {
+                string currentPath = Request.Url.AbsolutePath;
+
+                if (state.sourcePage != null &&
+                 state.sourcePage.StartsWith(currentPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    Session.Remove(PageStateInfo.sessionKey);
+                    return state.filterData as T;
+                }
+                else
+                {
+                    // 路徑不對
+                    Session.Remove(PageStateInfo.sessionKey);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 保存頁面紀錄
+        /// </summary>
+        public void KeepState()
+        {
+            if (Session[PageStateInfo.sessionKey] is PageStateInfo state)
+            {
+                ViewState[PageStateInfo.viewStateKey] = state;
+                Session.Remove(PageStateInfo.sessionKey);
+            }
+        }
+
+        /// <summary>
+        /// 返回頁面
+        /// </summary>
+        public void ReturnState()
+        {
+            if (ViewState[PageStateInfo.sessionKey] is PageStateInfo state)
+            {
+                Session[PageStateInfo.sessionKey] = state; // 丟回 Session
+                Response.Redirect(state.sourcePage);       // 跳回來源頁
+            }
+            else
+            {
+                Response.Redirect("/Login.aspx");
             }
         }
 
@@ -100,7 +175,7 @@ namespace protectTreesV2.Base
                     }}
 
                     if (bodyElement) {{
-                        bodyElement.textContent = data.text || '';
+                        bodyElement.innerHTML = data.text || '';
                     }}
 
                     var modal = bootstrap.Modal.getOrCreateInstance(modalElement);

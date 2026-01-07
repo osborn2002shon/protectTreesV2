@@ -42,6 +42,18 @@ namespace protectTreesV2.backstage.health
             if (!IsPostBack)
             {
                 InitSearchFilters();
+
+                //取得搜尋紀錄
+                var savedFilter = base.GetState<HealthMainQueryFilter>();
+                if (savedFilter != null)
+                {
+                    // 把值填回 UI 
+                    PopulateFilterToUI(savedFilter);
+
+                    // 同步更新 CurrentFilter
+                    CurrentFilter = savedFilter;
+                }
+
                 BindResult();
                 BindSelectedList(); // 載入下方已加入的暫存清單
             }
@@ -62,7 +74,43 @@ namespace protectTreesV2.backstage.health
             //樹種
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
         }
+        private void PopulateFilterToUI(HealthMainQueryFilter filter)
+        {
+            // 還原縣市
+            if (filter.cityID.HasValue)
+            {
+                string cityVal = filter.cityID.ToString();
+                if (DropDownList_city.Items.FindByValue(cityVal) != null)
+                {
+                    DropDownList_city.SelectedValue = cityVal;
+                    Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, cityVal);
+                }
+            }
 
+            // 還原鄉鎮
+            if (filter.areaID.HasValue)
+            {
+                // 檢查選單內是否有該值
+                if (DropDownList_area.Items.FindByValue(filter.areaID.ToString()) != null)
+                {
+                    DropDownList_area.SelectedValue = filter.areaID.ToString();
+                }
+            }
+
+            // 還原樹種
+            if (filter.speciesID.HasValue)
+            {
+                string speciesVal = filter.speciesID.ToString();
+                if (DropDownList_species.Items.FindByValue(speciesVal) != null)
+                {
+                    DropDownList_species.SelectedValue = speciesVal;
+                }
+            }
+
+            TextBox_keyword.Text = filter.keyword;
+            CheckBox_onlyNoRecord.Checked = filter.onlyNoRecord;
+            CheckBox_includeDraft.Checked = filter.includeDraft;
+        }
         private void CollectFilterFromUI()
         {
             var filter = new HealthMainQueryFilter();
@@ -86,22 +134,22 @@ namespace protectTreesV2.backstage.health
 
         private void BindResult()
         {
-            // 1. 從 ViewState 拿出上次的篩選條件
+            // 從 ViewState 拿出上次的篩選條件
             var filter = CurrentFilter;
 
-            // 2. 把目前的排序狀態填進去 
+            // 把目前的排序狀態填進去 
             filter.sortExpression = SortExpression;
             filter.sortDirection = SortDirection;
 
-            // 3. 取得資料
+            // 取得資料
             var user = UserService.GetCurrentUser();
             int accountID = user?.userID ?? 0;
             List<HealthMainQueryResult> data = system_health.GetHealthMainList(filter, accountID);
 
-            // 4. 更新筆數顯示
+            // 更新筆數顯示
             Label_recordCount.Text = data != null ? data.Count.ToString() : "0";
 
-            // 5. 綁定
+            //  綁定
             GridView_list.DataSource = data;
             GridView_list.DataBind();
         }
@@ -183,8 +231,8 @@ namespace protectTreesV2.backstage.health
                 // 清空健檢 ID 
                 setHealthID = null;
 
-                // 跳轉至編輯頁
-                Response.Redirect("edit.aspx");
+                // 跳轉至新增頁
+                base.RedirectState("edit.aspx", this.CurrentFilter);
             }
 
             // C. 檢視樹籍 (開新視窗)
