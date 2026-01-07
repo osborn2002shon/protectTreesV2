@@ -320,7 +320,7 @@ namespace protectTreesV2.backstage.Manage
 
         private static string GetEditStatusColor(TreeEditState state)
         {
-            return state == TreeEditState.完稿 ? "#f6ad49" : "#00bfff";
+            return state == TreeEditState.定稿 ? "#f6ad49" : "#00bfff";
         }
 
         protected void chkSelectAll_CheckedChanged(object sender, EventArgs e)

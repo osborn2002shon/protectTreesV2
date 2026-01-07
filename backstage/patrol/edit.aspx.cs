@@ -135,11 +135,11 @@ namespace protectTreesV2.backstage.patrol
                 TextBox_patrolDate.Text = record.patrolDate?.ToString("yyyy-MM-dd");
                 TextBox_patroller.Text = record.patroller;
                 TextBox_memo.Text = record.memo;
-                CheckBox_isFinal.Checked = record.dataStatus == (int)PatrolRecordStatus.完稿;
+                CheckBox_isFinal.Checked = record.dataStatus == (int)PatrolRecordStatus.定稿;
                 CheckBox_hasPublicSafetyRisk.Checked = record.hasPublicSafetyRisk;
 
-                Label_recordStatus.CssClass = record.dataStatus == (int)PatrolRecordStatus.完稿 ? "badge bg-success" : "badge bg-warning text-dark";
-                Label_recordStatus.Text = record.dataStatus == (int)PatrolRecordStatus.完稿 ? "定稿" : "草稿";
+                Label_recordStatus.CssClass = record.dataStatus == (int)PatrolRecordStatus.定稿 ? "badge bg-success" : "badge bg-warning text-dark";
+                Label_recordStatus.Text = record.dataStatus == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿";
             }
             else
             {
@@ -390,7 +390,7 @@ namespace protectTreesV2.backstage.patrol
             record.patroller = TextBox_patroller.Text.Trim();
             record.memo = TextBox_memo.Text.Trim();
             record.hasPublicSafetyRisk = hasRisk;
-            record.dataStatus = isFinal ? (int)PatrolRecordStatus.完稿 : (int)PatrolRecordStatus.草稿;
+            record.dataStatus = isFinal ? (int)PatrolRecordStatus.定稿 : (int)PatrolRecordStatus.草稿;
 
             var tree = TreeService.GetTree(CurrentTreeID);
             if (record.patrolID == 0 && tree != null)

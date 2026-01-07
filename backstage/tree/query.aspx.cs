@@ -43,7 +43,7 @@ namespace protectTreesV2.backstage.tree
             ddlEditStatus.Items.Clear();
             ddlEditStatus.Items.Add(new ListItem("不拘", string.Empty));
             ddlEditStatus.Items.Add(new ListItem("草稿", ((int)TreeEditState.草稿).ToString()));
-            ddlEditStatus.Items.Add(new ListItem("完稿", ((int)TreeEditState.完稿).ToString()));
+            ddlEditStatus.Items.Add(new ListItem("定稿", ((int)TreeEditState.定稿).ToString()));
 
             ddlTreeStatus.Items.Clear();
             ddlTreeStatus.Items.Add(new ListItem("不拘", string.Empty));
