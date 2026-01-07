@@ -456,30 +456,12 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.GridView gvLogs;
 
         /// <summary>
-        /// lnkLogPrev 控制項。
+        /// dpLogs 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton lnkLogPrev;
-
-        /// <summary>
-        /// lblLogPageInfo 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLogPageInfo;
-
-        /// <summary>
-        /// lnkLogNext 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton lnkLogNext;
+        protected global::System.Web.UI.WebControls.DataPager dpLogs;
     }
 }

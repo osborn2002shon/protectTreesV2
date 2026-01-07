@@ -52,14 +52,6 @@ namespace protectTreesV2.backstage.tree
             BindPhotoJson(treeId);
         }
 
-        private int LogPageIndex
-        {
-            get => ViewState[nameof(LogPageIndex)] as int? ?? 0;
-            set => ViewState[nameof(LogPageIndex)] = value;
-        }
-
-        private const int LogsPageSize = 5;
-
         protected string PhotoJson { get; private set; } = "[]";
 
         private void BindDropdowns()
@@ -583,40 +575,21 @@ namespace protectTreesV2.backstage.tree
             lblLogEmpty.Visible = logs.Count == 0;
             gvLogs.Visible = logs.Count > 0;
 
+            dpLogs.Visible = logs.Count > 0;
             if (logs.Count == 0)
             {
-                lnkLogPrev.Enabled = false;
-                lnkLogNext.Enabled = false;
-                lblLogPageInfo.Text = "0/0";
                 return;
             }
 
-            int totalPages = (int)Math.Ceiling(logs.Count / (double)LogsPageSize);
-            LogPageIndex = Math.Max(0, Math.Min(LogPageIndex, totalPages - 1));
-
-            var pagedLogs = logs.Skip(LogPageIndex * LogsPageSize).Take(LogsPageSize).ToList();
-            gvLogs.DataSource = pagedLogs;
+            gvLogs.DataSource = logs;
             gvLogs.DataBind();
-
-            lnkLogPrev.Enabled = LogPageIndex > 0;
-            lnkLogNext.Enabled = LogPageIndex < totalPages - 1;
-            lblLogPageInfo.Text = string.Format("{0}/{1}", LogPageIndex + 1, totalPages);
         }
 
-        protected void lnkLogPrev_Click(object sender, EventArgs e)
+        protected void gvLogs_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
-            if (LogPageIndex > 0 && int.TryParse(hfTreeID.Value, out int treeId))
-            {
-                LogPageIndex--;
-                BindLogs(treeId);
-            }
-        }
-
-        protected void lnkLogNext_Click(object sender, EventArgs e)
-        {
+            gvLogs.PageIndex = e.NewPageIndex;
             if (int.TryParse(hfTreeID.Value, out int treeId))
             {
-                LogPageIndex++;
                 BindLogs(treeId);
             }
         }
