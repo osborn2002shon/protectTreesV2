@@ -1,6 +1,15 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="list.aspx.cs" Inherits="protectTreesV2.backstage.patrol.list" MaintainScrollPositionOnPostback="true" %>
 
+<%@ Register Src="~/_uc/patrol/uc_patrolRecordModal.ascx" TagPrefix="uc1" TagName="uc_patrolRecordModal" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
+    <script>
+        function showPatrolRecordModal() {
+            var modalEl = document.getElementById('patrolRecordModal');
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
     巡查資料管理 / 巡查紀錄
@@ -135,19 +144,19 @@
                             <asp:LinkButton ID="LinkButton_viewTree" runat="server"
                                 CssClass="btn btn-sm btn-info text-white"
                                 Text="檢視"
-                                CommandName="_ViewTree"
-                                CommandArgument='<%# Eval("treeID") %>' />
+                                CommandName="_ViewPatrol"
+                                CommandArgument='<%# Eval("patrolID") %>' />
                             <asp:LinkButton ID="LinkButton_edit" runat="server"
                                 CssClass="btn btn-sm btn-primary"
                                 Text="編輯"
                                 CommandName="_EditPatrol"
                                 CommandArgument='<%# Eval("patrolID") %>' />
                             <asp:LinkButton ID="LinkButton_delete" runat="server"
-                                CssClass="btn btn-sm btn-outline-danger"
                                 Text="刪除"
                                 CommandName="_DeletePatrol"
                                 CommandArgument='<%# Eval("patrolID") %>'
-                                Visible='<%# IsDraft(Eval("dataStatus")) %>'
+                                CssClass='<%# Convert.ToInt32(Eval("dataStatus")) == 0 ? "btn btn-sm btn-danger" : "btn btn-sm btn-secondary disabled" %>'
+                                Enabled='<%# Convert.ToInt32(Eval("dataStatus")) == 0 %>'
                                 OnClientClick="return confirm('確認刪除草稿紀錄？');" />
                         </div>
                     </ItemTemplate>
@@ -160,6 +169,93 @@
                 </div>
             </EmptyDataTemplate>
         </asp:GridView>
+    </div>
+
+    <div class="modal fade" id="patrolRecordModal" tabindex="-1" aria-hidden="true" style="color:#000;">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    巡查紀錄
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="formCard card mb-4">
+                        <div class="card-header">基本資料</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">系統紀錄編號</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litPatrolId" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">系統樹籍編號</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litSystemTreeNo" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">機關樹木編號</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litAgencyTreeNo" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">資料狀態</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litStatus" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">所在地</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litLocation" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">樹種</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litSpecies" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">管理人</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litManager" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">最後更新</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litLastUpdate" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">巡查日期</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litPatrolDate" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">巡查人姓名</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litPatroller" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12">
+                                    <label class="form-label text-muted">來源單位</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litSourceUnit" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <uc1:uc_patrolRecordModal runat="server" id="uc_patrolRecordModal" />
+                </div>
+            </div>
+        </div>
     </div>
 </asp:Content>
 <asp:Content ID="Content5" ContentPlaceHolderID="ContentPlaceHolder_msg_title" runat="server">

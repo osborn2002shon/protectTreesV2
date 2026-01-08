@@ -195,12 +195,18 @@ namespace protectTreesV2.backstage.patrol
         {
             string arg = e.CommandArgument?.ToString();
 
-            if (e.CommandName == "_ViewTree")
+            if (e.CommandName == "_ViewPatrol")
             {
-                setTreeID = arg;
-                string targetUrl = ResolveUrl("~/Backstage/tree/detail.aspx");
-                string script = $"window.open('{targetUrl}', '_blank');";
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenTreeWindow", script, true);
+                if (int.TryParse(arg, out int patrolId))
+                {
+                    var record = system_patrol.GetPatrolRecord(patrolId);
+                    var tree = record != null ? TreeService.GetTree(record.treeID) : null;
+                    var photos = record != null ? system_patrol.GetPatrolPhotos(patrolId) : null;
+
+                    BindBasicInfo(record, tree);
+                    uc_patrolRecordModal.BindRecord(record, photos);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowPatrolModal", "showPatrolRecordModal();", true);
+                }
             }
             else if (e.CommandName == "_EditPatrol")
             {
@@ -258,12 +264,74 @@ namespace protectTreesV2.backstage.patrol
             Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
         }
 
-        protected bool IsDraft(object dataStatus)
+        private void BindBasicInfo(protectTreesV2.Patrol.Patrol.PatrolRecord record, TreeRecord tree)
         {
-            int status;
-            return dataStatus != null
-                && int.TryParse(dataStatus.ToString(), out status)
-                && status == (int)PatrolRecordStatus.草稿;
+            if (record == null)
+            {
+                litPatrolId.Text = string.Empty;
+                litStatus.Text = string.Empty;
+                litPatrolDate.Text = string.Empty;
+                litPatroller.Text = string.Empty;
+                litLastUpdate.Text = string.Empty;
+                litSourceUnit.Text = string.Empty;
+                litSystemTreeNo.Text = string.Empty;
+                litAgencyTreeNo.Text = string.Empty;
+                litLocation.Text = string.Empty;
+                litSpecies.Text = string.Empty;
+                litManager.Text = string.Empty;
+                return;
+            }
+
+            litPatrolId.Text = record.patrolID.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            litStatus.Text = FormatText(GetStatusText(record.dataStatus));
+            litPatrolDate.Text = FormatDate(record.patrolDate);
+            litPatroller.Text = FormatText(record.patroller);
+            litLastUpdate.Text = FormatDateTime(record.updateDateTime ?? record.insertDateTime);
+            litSourceUnit.Text = FormatText(record.sourceUnit);
+
+            if (tree == null)
+            {
+                litSystemTreeNo.Text = "--";
+                litAgencyTreeNo.Text = "--";
+                litLocation.Text = "--";
+                litSpecies.Text = "--";
+                litManager.Text = "--";
+            }
+            else
+            {
+                litSystemTreeNo.Text = FormatText(tree.SystemTreeNo);
+                litAgencyTreeNo.Text = FormatText(tree.AgencyTreeNo);
+                litLocation.Text = FormatText(CombineLocation(tree.CityName, tree.AreaName));
+                litSpecies.Text = FormatText(tree.SpeciesDisplayName);
+                litManager.Text = FormatText(tree.Manager);
+            }
+        }
+
+        private static string FormatText(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "--" : value.Trim();
+        }
+
+        private static string FormatDate(DateTime? value)
+        {
+            return value.HasValue ? value.Value.ToString("yyyy/MM/dd", System.Globalization.CultureInfo.InvariantCulture) : "--";
+        }
+
+        private static string FormatDateTime(DateTime? value)
+        {
+            return value.HasValue ? value.Value.ToString("yyyy/MM/dd HH:mm", System.Globalization.CultureInfo.InvariantCulture) : "--";
+        }
+
+        private static string CombineLocation(string city, string area)
+        {
+            if (string.IsNullOrWhiteSpace(city)) return string.IsNullOrWhiteSpace(area) ? string.Empty : area;
+            if (string.IsNullOrWhiteSpace(area)) return city;
+            return city + area;
+        }
+
+        private static string GetStatusText(int status)
+        {
+            return status == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿";
         }
     }
 }

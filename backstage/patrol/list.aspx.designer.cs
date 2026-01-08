@@ -103,5 +103,69 @@ namespace protectTreesV2.backstage.patrol
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView GridView_patrolList;
+
+        /// <summary>
+        /// litPatrolId 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litPatrolId;
+
+        /// <summary>
+        /// litSystemTreeNo 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litSystemTreeNo;
+
+        /// <summary>
+        /// litAgencyTreeNo 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litAgencyTreeNo;
+
+        /// <summary>
+        /// litStatus 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litStatus;
+
+        /// <summary>
+        /// litLocation 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litLocation;
+
+        /// <summary>
+        /// litSpecies 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litSpecies;
+
+        /// <summary>
+        /// litManager 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litManager;
+
+        /// <summary>
+        /// litLastUpdate 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litLastUpdate;
+
+        /// <summary>
+        /// litPatrolDate 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litPatrolDate;
+
+        /// <summary>
+        /// litPatroller 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litPatroller;
+
+        /// <summary>
+        /// litSourceUnit 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Literal litSourceUnit;
+
+        /// <summary>
+        /// uc_patrolRecordModal 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::protectTreesV2._uc.patrol.uc_patrolRecordModal uc_patrolRecordModal;
     }
 }
