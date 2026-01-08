@@ -1,4 +1,5 @@
 ﻿using protectTreesV2.Base;
+using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
 using protectTreesV2.User;
 using System;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using static protectTreesV2.Patrol.Patrol;
 
 namespace protectTreesV2.backstage.patrol
@@ -142,6 +144,8 @@ namespace protectTreesV2.backstage.patrol
 
                 Label_recordStatus.CssClass = record.dataStatus == (int)PatrolRecordStatus.定稿 ? "badge bg-success" : "badge bg-warning text-dark";
                 Label_recordStatus.Text = record.dataStatus == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿";
+
+                BindLogs(this.CurrentPatrolID);
             }
             else
             {
@@ -386,6 +390,7 @@ namespace protectTreesV2.backstage.patrol
             var record = this.Action == "edit"
                 ? system_patrol.GetPatrolRecord(this.CurrentPatrolID) ?? new PatrolRecord()
                 : new PatrolRecord();
+            bool isNew = record.patrolID == 0;
 
             record.treeID = this.CurrentTreeID;
             record.patrolDate = patrolDate;
@@ -425,6 +430,19 @@ namespace protectTreesV2.backstage.patrol
             {
                 TrySendRiskNotification(record, tree);
             }
+
+            string actionText = isNew ? "新增" : "編輯";
+            string logMemo = isNew ? "新增巡查" : "編輯巡查";
+            OperationLogger.InsertLog("巡查管理", actionText, logMemo);
+            FunctionLogService.InsertLog(LogFunctionTypes.Patrol,
+                record.patrolID,
+                logMemo,
+                $"系統樹籍編號：{tree?.SystemTreeNo ?? "無"}，巡查日期：{record.patrolDate:yyyy-MM-dd}，狀態：{(record.dataStatus == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿")}",
+                Request?.UserHostAddress,
+                user?.userID,
+                user?.account,
+                user?.name,
+                user?.unit);
 
             ClearPendingUploads();
             base.ReturnState();
@@ -639,6 +657,31 @@ namespace protectTreesV2.backstage.patrol
                 }
             }
             return ids;
+        }
+
+        private void BindLogs(int patrolId)
+        {
+            var logs = FunctionLogService.GetLogs(LogFunctionTypes.Patrol, patrolId) ?? new List<FunctionLogEntry>();
+            pnlLogs.Visible = true;
+            lblLogEmpty.Visible = logs.Count == 0;
+            gvLogs.Visible = logs.Count > 0;
+
+            if (logs.Count == 0)
+            {
+                return;
+            }
+
+            gvLogs.DataSource = logs;
+            gvLogs.DataBind();
+        }
+
+        protected void gvLogs_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvLogs.PageIndex = e.NewPageIndex;
+            if (int.TryParse(HiddenField_patrolId.Value, out int patrolId))
+            {
+                BindLogs(patrolId);
+            }
         }
 
         private List<HttpPostedFile> GetPostedFiles()
