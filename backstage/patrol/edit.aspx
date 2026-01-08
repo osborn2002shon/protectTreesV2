@@ -212,6 +212,32 @@
         </asp:LinkButton>
     </div>
 
+    <asp:Panel ID="pnlLogs" runat="server" Visible="false">
+    <div class="row">
+        <div class="col">
+            <div class="formCard card">
+                <div class="card-header">編輯紀錄</div>
+                <div class="card-body">
+                    <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
+                    <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="gv" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging">
+                        <PagerSettings Mode="Numeric" />
+                        <Columns>
+                            <asp:BoundField DataField="ActionType" HeaderText="動作" />
+                            <asp:BoundField DataField="Memo" HeaderText="說明" />
+                            <asp:BoundField DataField="LogDateTime" HeaderText="時間" DataFormatString="{0:yyyy-MM-dd HH:mm}" />
+                            <asp:TemplateField HeaderText="帳號">
+                                <ItemTemplate>
+                                    <%# Eval("AccountName") %> (<%# Eval("Account") %>) <%# Eval("AccountUnit") %>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                        </Columns>
+                    </asp:GridView>
+                </div>
+            </div>
+        </div>
+    </div>
+</asp:Panel>
+
     <script>
         function confirmPatrolRisk() {
             var isFinal = document.getElementById('<%= CheckBox_isFinal.ClientID %>').checked;
