@@ -41,7 +41,7 @@
                 <div class="col">
                     <asp:Label runat="server" AssociatedControlID="RadioButtonList_queryOption" Text="查詢選項" />
                     <div class="pt-1">
-                        <asp:RadioButtonList ID="RadioButtonList_queryOption" runat="server" RepeatDirection="Horizontal" CssClass="d-flex gap-3 flex-wrap">
+                        <asp:RadioButtonList ID="RadioButtonList_queryOption" runat="server" RepeatDirection="Horizontal" RepeatLayout="Flow" CssClass="d-flex gap-3">
                             <asp:ListItem Text="近180天無紀錄" Value="NoRecord180" Selected="True"></asp:ListItem>
                             <asp:ListItem Text="全部樹籍" Value="All"></asp:ListItem>
                             <asp:ListItem Text="從未有紀錄" Value="Never"></asp:ListItem>

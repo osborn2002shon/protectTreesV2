@@ -287,6 +287,13 @@
     <Compile Include="backstage\tree\query.aspx.designer.cs">
       <DependentUpon>query.aspx</DependentUpon>
     </Compile>
+    <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.cs">
+      <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.designer.cs">
+      <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+    </Compile>
     <Compile Include="_uc\TreePhotoAlbum.ascx.cs">
       <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -335,6 +342,7 @@
     <Content Include="_fonts\bootstrap-icons.woff" />
     <Content Include="_fonts\bootstrap-icons.woff2" />
     <Content Include="_uc\captcha.ashx" />
+    <Content Include="_uc\patrol\uc_patrolRecordModal.ascx" />
     <Content Include="_uc\TreePhotoAlbum.ascx" />
     <Content Include="_fonts\fa-brands-400.woff2" />
     <Content Include="_fonts\fa-regular-400.woff2" />

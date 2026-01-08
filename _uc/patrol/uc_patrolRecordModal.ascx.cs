@@ -5,7 +5,7 @@ namespace protectTreesV2._uc.patrol
 {
     public partial class uc_patrolRecordModal : System.Web.UI.UserControl
     {
-        public void BindRecord(Patrol.PatrolRecord record, List<Patrol.PatrolPhoto> photos)
+        public void BindRecord(protectTreesV2.Patrol.Patrol.PatrolRecord record, List<Patrol.Patrol.PatrolPhoto> photos)
         {
             if (record == null)
             {
@@ -24,7 +24,7 @@ namespace protectTreesV2._uc.patrol
             BindPhotos(photos);
         }
 
-        private void BindPhotos(List<Patrol.PatrolPhoto> photos)
+        private void BindPhotos(List<Patrol.Patrol.PatrolPhoto> photos)
         {
             if (photos == null || photos.Count == 0)
             {
