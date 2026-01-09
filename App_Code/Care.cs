@@ -97,10 +97,70 @@ namespace protectTreesV2.Care
             public string recorder { get; set; }
             public string reviewer { get; set; }
             public int dataStatus { get; set; }
+            public int? crownStatus { get; set; }
+            public bool? crownSeasonalDormant { get; set; }
+            public bool? crownDeadBranch { get; set; }
+            public decimal? crownDeadBranchPercent { get; set; }
+            public bool? crownPest { get; set; }
+            public bool? crownForeignObject { get; set; }
+            public string crownOtherNote { get; set; }
+            public int? trunkStatus { get; set; }
+            public bool? trunkBarkDamage { get; set; }
+            public bool? trunkDecay { get; set; }
+            public bool? trunkTermiteTrail { get; set; }
+            public bool? trunkLean { get; set; }
+            public bool? trunkFungus { get; set; }
+            public bool? trunkGummosis { get; set; }
+            public bool? trunkVine { get; set; }
+            public string trunkOtherNote { get; set; }
+            public int? rootStatus { get; set; }
+            public bool? rootDamage { get; set; }
+            public bool? rootDecay { get; set; }
+            public bool? rootExpose { get; set; }
+            public bool? rootRot { get; set; }
+            public bool? rootSucker { get; set; }
+            public string rootOtherNote { get; set; }
+            public int? envStatus { get; set; }
+            public bool? envPitSmall { get; set; }
+            public bool? envPaved { get; set; }
+            public bool? envDebris { get; set; }
+            public bool? envSoilCover { get; set; }
+            public bool? envCompaction { get; set; }
+            public bool? envWaterlog { get; set; }
+            public bool? envNearFacility { get; set; }
+            public string envOtherNote { get; set; }
+            public int? adjacentStatus { get; set; }
+            public bool? adjacentBuilding { get; set; }
+            public bool? adjacentWire { get; set; }
+            public bool? adjacentSignal { get; set; }
+            public string adjacentOtherNote { get; set; }
+            public int? task1Status { get; set; }
+            public string task1Note { get; set; }
+            public int? task2Status { get; set; }
+            public string task2Note { get; set; }
+            public int? task3Status { get; set; }
+            public string task3Note { get; set; }
+            public int? task4Status { get; set; }
+            public string task4Note { get; set; }
+            public int? task5Status { get; set; }
+            public string task5Note { get; set; }
             public int insertAccountID { get; set; }
             public DateTime insertDateTime { get; set; }
             public int? updateAccountID { get; set; }
             public DateTime? updateDateTime { get; set; }
+        }
+
+        public class CarePhotoRecord
+        {
+            public int photoID { get; set; }
+            public int careID { get; set; }
+            public string itemName { get; set; }
+            public string beforeFileName { get; set; }
+            public string beforeFilePath { get; set; }
+            public int? beforeFileSize { get; set; }
+            public string afterFileName { get; set; }
+            public string afterFilePath { get; set; }
+            public int? afterFileSize { get; set; }
         }
 
         public List<CareMainQueryResult> GetCareMainList(CareMainQueryFilter filter, int currentUserId)
@@ -415,12 +475,367 @@ namespace protectTreesV2.Care
                     recorder = GetString(row, "recorder"),
                     reviewer = GetString(row, "reviewer"),
                     dataStatus = GetNullableInt(row, "dataStatus") ?? 0,
+                    crownStatus = GetNullableInt(row, "crownStatus"),
+                    crownSeasonalDormant = GetNullableBoolean(row, "crownSeasonalDormant"),
+                    crownDeadBranch = GetNullableBoolean(row, "crownDeadBranch"),
+                    crownDeadBranchPercent = GetNullableDecimal(row, "crownDeadBranchPercent"),
+                    crownPest = GetNullableBoolean(row, "crownPest"),
+                    crownForeignObject = GetNullableBoolean(row, "crownForeignObject"),
+                    crownOtherNote = GetString(row, "crownOtherNote"),
+                    trunkStatus = GetNullableInt(row, "trunkStatus"),
+                    trunkBarkDamage = GetNullableBoolean(row, "trunkBarkDamage"),
+                    trunkDecay = GetNullableBoolean(row, "trunkDecay"),
+                    trunkTermiteTrail = GetNullableBoolean(row, "trunkTermiteTrail"),
+                    trunkLean = GetNullableBoolean(row, "trunkLean"),
+                    trunkFungus = GetNullableBoolean(row, "trunkFungus"),
+                    trunkGummosis = GetNullableBoolean(row, "trunkGummosis"),
+                    trunkVine = GetNullableBoolean(row, "trunkVine"),
+                    trunkOtherNote = GetString(row, "trunkOtherNote"),
+                    rootStatus = GetNullableInt(row, "rootStatus"),
+                    rootDamage = GetNullableBoolean(row, "rootDamage"),
+                    rootDecay = GetNullableBoolean(row, "rootDecay"),
+                    rootExpose = GetNullableBoolean(row, "rootExpose"),
+                    rootRot = GetNullableBoolean(row, "rootRot"),
+                    rootSucker = GetNullableBoolean(row, "rootSucker"),
+                    rootOtherNote = GetString(row, "rootOtherNote"),
+                    envStatus = GetNullableInt(row, "envStatus"),
+                    envPitSmall = GetNullableBoolean(row, "envPitSmall"),
+                    envPaved = GetNullableBoolean(row, "envPaved"),
+                    envDebris = GetNullableBoolean(row, "envDebris"),
+                    envSoilCover = GetNullableBoolean(row, "envSoilCover"),
+                    envCompaction = GetNullableBoolean(row, "envCompaction"),
+                    envWaterlog = GetNullableBoolean(row, "envWaterlog"),
+                    envNearFacility = GetNullableBoolean(row, "envNearFacility"),
+                    envOtherNote = GetString(row, "envOtherNote"),
+                    adjacentStatus = GetNullableInt(row, "adjacentStatus"),
+                    adjacentBuilding = GetNullableBoolean(row, "adjacentBuilding"),
+                    adjacentWire = GetNullableBoolean(row, "adjacentWire"),
+                    adjacentSignal = GetNullableBoolean(row, "adjacentSignal"),
+                    adjacentOtherNote = GetString(row, "adjacentOtherNote"),
+                    task1Status = GetNullableInt(row, "task1Status"),
+                    task1Note = GetString(row, "task1Note"),
+                    task2Status = GetNullableInt(row, "task2Status"),
+                    task2Note = GetString(row, "task2Note"),
+                    task3Status = GetNullableInt(row, "task3Status"),
+                    task3Note = GetString(row, "task3Note"),
+                    task4Status = GetNullableInt(row, "task4Status"),
+                    task4Note = GetString(row, "task4Note"),
+                    task5Status = GetNullableInt(row, "task5Status"),
+                    task5Note = GetString(row, "task5Note"),
                     insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
                     insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
                     updateAccountID = GetNullableInt(row, "updateAccountID"),
                     updateDateTime = GetNullableDateTime(row, "updateDateTime")
                 };
             }
+        }
+
+        public int InsertCareRecord(CareRecord record, int accountId)
+        {
+            const string sql = @"
+INSERT INTO Tree_CareRecord(
+    treeID, careDate, recorder, reviewer, dataStatus,
+    crownStatus, crownSeasonalDormant, crownDeadBranch, crownDeadBranchPercent, crownPest, crownForeignObject, crownOtherNote,
+    trunkStatus, trunkBarkDamage, trunkDecay, trunkTermiteTrail, trunkLean, trunkFungus, trunkGummosis, trunkVine, trunkOtherNote,
+    rootStatus, rootDamage, rootDecay, rootExpose, rootRot, rootSucker, rootOtherNote,
+    envStatus, envPitSmall, envPaved, envDebris, envSoilCover, envCompaction, envWaterlog, envNearFacility, envOtherNote,
+    adjacentStatus, adjacentBuilding, adjacentWire, adjacentSignal, adjacentOtherNote,
+    task1Status, task1Note, task2Status, task2Note, task3Status, task3Note, task4Status, task4Note, task5Status, task5Note,
+    insertAccountID
+)
+VALUES(
+    @treeID, @careDate, @recorder, @reviewer, @dataStatus,
+    @crownStatus, @crownSeasonalDormant, @crownDeadBranch, @crownDeadBranchPercent, @crownPest, @crownForeignObject, @crownOtherNote,
+    @trunkStatus, @trunkBarkDamage, @trunkDecay, @trunkTermiteTrail, @trunkLean, @trunkFungus, @trunkGummosis, @trunkVine, @trunkOtherNote,
+    @rootStatus, @rootDamage, @rootDecay, @rootExpose, @rootRot, @rootSucker, @rootOtherNote,
+    @envStatus, @envPitSmall, @envPaved, @envDebris, @envSoilCover, @envCompaction, @envWaterlog, @envNearFacility, @envOtherNote,
+    @adjacentStatus, @adjacentBuilding, @adjacentWire, @adjacentSignal, @adjacentOtherNote,
+    @task1Status, @task1Note, @task2Status, @task2Note, @task3Status, @task3Note, @task4Status, @task4Note, @task5Status, @task5Note,
+    @insertAccountID
+);
+SELECT SCOPE_IDENTITY();";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var id = da.ExcuteScalar(sql,
+                    new SqlParameter("@treeID", record.treeID),
+                    new SqlParameter("@careDate", record.careDate),
+                    new SqlParameter("@recorder", ToDbValue(record.recorder)),
+                    new SqlParameter("@reviewer", ToDbValue(record.reviewer)),
+                    new SqlParameter("@dataStatus", record.dataStatus),
+                    new SqlParameter("@crownStatus", ToDbValue(record.crownStatus)),
+                    new SqlParameter("@crownSeasonalDormant", ToDbValue(record.crownSeasonalDormant)),
+                    new SqlParameter("@crownDeadBranch", ToDbValue(record.crownDeadBranch)),
+                    new SqlParameter("@crownDeadBranchPercent", ToDbValue(record.crownDeadBranchPercent)),
+                    new SqlParameter("@crownPest", ToDbValue(record.crownPest)),
+                    new SqlParameter("@crownForeignObject", ToDbValue(record.crownForeignObject)),
+                    new SqlParameter("@crownOtherNote", ToDbValue(record.crownOtherNote)),
+                    new SqlParameter("@trunkStatus", ToDbValue(record.trunkStatus)),
+                    new SqlParameter("@trunkBarkDamage", ToDbValue(record.trunkBarkDamage)),
+                    new SqlParameter("@trunkDecay", ToDbValue(record.trunkDecay)),
+                    new SqlParameter("@trunkTermiteTrail", ToDbValue(record.trunkTermiteTrail)),
+                    new SqlParameter("@trunkLean", ToDbValue(record.trunkLean)),
+                    new SqlParameter("@trunkFungus", ToDbValue(record.trunkFungus)),
+                    new SqlParameter("@trunkGummosis", ToDbValue(record.trunkGummosis)),
+                    new SqlParameter("@trunkVine", ToDbValue(record.trunkVine)),
+                    new SqlParameter("@trunkOtherNote", ToDbValue(record.trunkOtherNote)),
+                    new SqlParameter("@rootStatus", ToDbValue(record.rootStatus)),
+                    new SqlParameter("@rootDamage", ToDbValue(record.rootDamage)),
+                    new SqlParameter("@rootDecay", ToDbValue(record.rootDecay)),
+                    new SqlParameter("@rootExpose", ToDbValue(record.rootExpose)),
+                    new SqlParameter("@rootRot", ToDbValue(record.rootRot)),
+                    new SqlParameter("@rootSucker", ToDbValue(record.rootSucker)),
+                    new SqlParameter("@rootOtherNote", ToDbValue(record.rootOtherNote)),
+                    new SqlParameter("@envStatus", ToDbValue(record.envStatus)),
+                    new SqlParameter("@envPitSmall", ToDbValue(record.envPitSmall)),
+                    new SqlParameter("@envPaved", ToDbValue(record.envPaved)),
+                    new SqlParameter("@envDebris", ToDbValue(record.envDebris)),
+                    new SqlParameter("@envSoilCover", ToDbValue(record.envSoilCover)),
+                    new SqlParameter("@envCompaction", ToDbValue(record.envCompaction)),
+                    new SqlParameter("@envWaterlog", ToDbValue(record.envWaterlog)),
+                    new SqlParameter("@envNearFacility", ToDbValue(record.envNearFacility)),
+                    new SqlParameter("@envOtherNote", ToDbValue(record.envOtherNote)),
+                    new SqlParameter("@adjacentStatus", ToDbValue(record.adjacentStatus)),
+                    new SqlParameter("@adjacentBuilding", ToDbValue(record.adjacentBuilding)),
+                    new SqlParameter("@adjacentWire", ToDbValue(record.adjacentWire)),
+                    new SqlParameter("@adjacentSignal", ToDbValue(record.adjacentSignal)),
+                    new SqlParameter("@adjacentOtherNote", ToDbValue(record.adjacentOtherNote)),
+                    new SqlParameter("@task1Status", ToDbValue(record.task1Status)),
+                    new SqlParameter("@task1Note", ToDbValue(record.task1Note)),
+                    new SqlParameter("@task2Status", ToDbValue(record.task2Status)),
+                    new SqlParameter("@task2Note", ToDbValue(record.task2Note)),
+                    new SqlParameter("@task3Status", ToDbValue(record.task3Status)),
+                    new SqlParameter("@task3Note", ToDbValue(record.task3Note)),
+                    new SqlParameter("@task4Status", ToDbValue(record.task4Status)),
+                    new SqlParameter("@task4Note", ToDbValue(record.task4Note)),
+                    new SqlParameter("@task5Status", ToDbValue(record.task5Status)),
+                    new SqlParameter("@task5Note", ToDbValue(record.task5Note)),
+                    new SqlParameter("@insertAccountID", accountId));
+
+                return Convert.ToInt32(id);
+            }
+        }
+
+        public void UpdateCareRecord(CareRecord record, int accountId)
+        {
+            const string sql = @"
+UPDATE Tree_CareRecord SET
+    careDate=@careDate,
+    recorder=@recorder,
+    reviewer=@reviewer,
+    dataStatus=@dataStatus,
+    crownStatus=@crownStatus,
+    crownSeasonalDormant=@crownSeasonalDormant,
+    crownDeadBranch=@crownDeadBranch,
+    crownDeadBranchPercent=@crownDeadBranchPercent,
+    crownPest=@crownPest,
+    crownForeignObject=@crownForeignObject,
+    crownOtherNote=@crownOtherNote,
+    trunkStatus=@trunkStatus,
+    trunkBarkDamage=@trunkBarkDamage,
+    trunkDecay=@trunkDecay,
+    trunkTermiteTrail=@trunkTermiteTrail,
+    trunkLean=@trunkLean,
+    trunkFungus=@trunkFungus,
+    trunkGummosis=@trunkGummosis,
+    trunkVine=@trunkVine,
+    trunkOtherNote=@trunkOtherNote,
+    rootStatus=@rootStatus,
+    rootDamage=@rootDamage,
+    rootDecay=@rootDecay,
+    rootExpose=@rootExpose,
+    rootRot=@rootRot,
+    rootSucker=@rootSucker,
+    rootOtherNote=@rootOtherNote,
+    envStatus=@envStatus,
+    envPitSmall=@envPitSmall,
+    envPaved=@envPaved,
+    envDebris=@envDebris,
+    envSoilCover=@envSoilCover,
+    envCompaction=@envCompaction,
+    envWaterlog=@envWaterlog,
+    envNearFacility=@envNearFacility,
+    envOtherNote=@envOtherNote,
+    adjacentStatus=@adjacentStatus,
+    adjacentBuilding=@adjacentBuilding,
+    adjacentWire=@adjacentWire,
+    adjacentSignal=@adjacentSignal,
+    adjacentOtherNote=@adjacentOtherNote,
+    task1Status=@task1Status,
+    task1Note=@task1Note,
+    task2Status=@task2Status,
+    task2Note=@task2Note,
+    task3Status=@task3Status,
+    task3Note=@task3Note,
+    task4Status=@task4Status,
+    task4Note=@task4Note,
+    task5Status=@task5Status,
+    task5Note=@task5Note,
+    updateAccountID=@updateAccountID,
+    updateDateTime=GETDATE()
+WHERE careID=@careID AND removeDateTime IS NULL;";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@careID", record.careID),
+                    new SqlParameter("@careDate", record.careDate),
+                    new SqlParameter("@recorder", ToDbValue(record.recorder)),
+                    new SqlParameter("@reviewer", ToDbValue(record.reviewer)),
+                    new SqlParameter("@dataStatus", record.dataStatus),
+                    new SqlParameter("@crownStatus", ToDbValue(record.crownStatus)),
+                    new SqlParameter("@crownSeasonalDormant", ToDbValue(record.crownSeasonalDormant)),
+                    new SqlParameter("@crownDeadBranch", ToDbValue(record.crownDeadBranch)),
+                    new SqlParameter("@crownDeadBranchPercent", ToDbValue(record.crownDeadBranchPercent)),
+                    new SqlParameter("@crownPest", ToDbValue(record.crownPest)),
+                    new SqlParameter("@crownForeignObject", ToDbValue(record.crownForeignObject)),
+                    new SqlParameter("@crownOtherNote", ToDbValue(record.crownOtherNote)),
+                    new SqlParameter("@trunkStatus", ToDbValue(record.trunkStatus)),
+                    new SqlParameter("@trunkBarkDamage", ToDbValue(record.trunkBarkDamage)),
+                    new SqlParameter("@trunkDecay", ToDbValue(record.trunkDecay)),
+                    new SqlParameter("@trunkTermiteTrail", ToDbValue(record.trunkTermiteTrail)),
+                    new SqlParameter("@trunkLean", ToDbValue(record.trunkLean)),
+                    new SqlParameter("@trunkFungus", ToDbValue(record.trunkFungus)),
+                    new SqlParameter("@trunkGummosis", ToDbValue(record.trunkGummosis)),
+                    new SqlParameter("@trunkVine", ToDbValue(record.trunkVine)),
+                    new SqlParameter("@trunkOtherNote", ToDbValue(record.trunkOtherNote)),
+                    new SqlParameter("@rootStatus", ToDbValue(record.rootStatus)),
+                    new SqlParameter("@rootDamage", ToDbValue(record.rootDamage)),
+                    new SqlParameter("@rootDecay", ToDbValue(record.rootDecay)),
+                    new SqlParameter("@rootExpose", ToDbValue(record.rootExpose)),
+                    new SqlParameter("@rootRot", ToDbValue(record.rootRot)),
+                    new SqlParameter("@rootSucker", ToDbValue(record.rootSucker)),
+                    new SqlParameter("@rootOtherNote", ToDbValue(record.rootOtherNote)),
+                    new SqlParameter("@envStatus", ToDbValue(record.envStatus)),
+                    new SqlParameter("@envPitSmall", ToDbValue(record.envPitSmall)),
+                    new SqlParameter("@envPaved", ToDbValue(record.envPaved)),
+                    new SqlParameter("@envDebris", ToDbValue(record.envDebris)),
+                    new SqlParameter("@envSoilCover", ToDbValue(record.envSoilCover)),
+                    new SqlParameter("@envCompaction", ToDbValue(record.envCompaction)),
+                    new SqlParameter("@envWaterlog", ToDbValue(record.envWaterlog)),
+                    new SqlParameter("@envNearFacility", ToDbValue(record.envNearFacility)),
+                    new SqlParameter("@envOtherNote", ToDbValue(record.envOtherNote)),
+                    new SqlParameter("@adjacentStatus", ToDbValue(record.adjacentStatus)),
+                    new SqlParameter("@adjacentBuilding", ToDbValue(record.adjacentBuilding)),
+                    new SqlParameter("@adjacentWire", ToDbValue(record.adjacentWire)),
+                    new SqlParameter("@adjacentSignal", ToDbValue(record.adjacentSignal)),
+                    new SqlParameter("@adjacentOtherNote", ToDbValue(record.adjacentOtherNote)),
+                    new SqlParameter("@task1Status", ToDbValue(record.task1Status)),
+                    new SqlParameter("@task1Note", ToDbValue(record.task1Note)),
+                    new SqlParameter("@task2Status", ToDbValue(record.task2Status)),
+                    new SqlParameter("@task2Note", ToDbValue(record.task2Note)),
+                    new SqlParameter("@task3Status", ToDbValue(record.task3Status)),
+                    new SqlParameter("@task3Note", ToDbValue(record.task3Note)),
+                    new SqlParameter("@task4Status", ToDbValue(record.task4Status)),
+                    new SqlParameter("@task4Note", ToDbValue(record.task4Note)),
+                    new SqlParameter("@task5Status", ToDbValue(record.task5Status)),
+                    new SqlParameter("@task5Note", ToDbValue(record.task5Note)),
+                    new SqlParameter("@updateAccountID", accountId));
+            }
+        }
+
+        public List<CarePhotoRecord> GetCarePhotos(int careId)
+        {
+            const string sql = @"SELECT * FROM Tree_CarePhoto WHERE careID=@careID AND removeDateTime IS NULL ORDER BY photoID";
+            var photos = new List<CarePhotoRecord>();
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var dt = da.GetDataTable(sql, new SqlParameter("@careID", careId));
+                foreach (DataRow row in dt.Rows)
+                {
+                    photos.Add(new CarePhotoRecord
+                    {
+                        photoID = GetNullableInt(row, "photoID") ?? 0,
+                        careID = GetNullableInt(row, "careID") ?? 0,
+                        itemName = GetString(row, "itemName"),
+                        beforeFileName = GetString(row, "beforeFileName"),
+                        beforeFilePath = GetString(row, "beforeFilePath"),
+                        beforeFileSize = GetNullableInt(row, "beforeFileSize"),
+                        afterFileName = GetString(row, "afterFileName"),
+                        afterFilePath = GetString(row, "afterFilePath"),
+                        afterFileSize = GetNullableInt(row, "afterFileSize")
+                    });
+                }
+            }
+
+            return photos;
+        }
+
+        public int InsertCarePhoto(CarePhotoRecord photo, int accountId)
+        {
+            const string sql = @"
+INSERT INTO Tree_CarePhoto(
+    careID, itemName,
+    beforeFileName, beforeFilePath, beforeFileSize,
+    afterFileName, afterFilePath, afterFileSize,
+    insertAccountID
+)
+VALUES(
+    @careID, @itemName,
+    @beforeFileName, @beforeFilePath, @beforeFileSize,
+    @afterFileName, @afterFilePath, @afterFileSize,
+    @insertAccountID
+);
+SELECT SCOPE_IDENTITY();";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var id = da.ExcuteScalar(sql,
+                    new SqlParameter("@careID", photo.careID),
+                    new SqlParameter("@itemName", ToDbValue(photo.itemName)),
+                    new SqlParameter("@beforeFileName", ToDbValue(photo.beforeFileName)),
+                    new SqlParameter("@beforeFilePath", ToDbValue(photo.beforeFilePath)),
+                    new SqlParameter("@beforeFileSize", ToDbValue(photo.beforeFileSize)),
+                    new SqlParameter("@afterFileName", ToDbValue(photo.afterFileName)),
+                    new SqlParameter("@afterFilePath", ToDbValue(photo.afterFilePath)),
+                    new SqlParameter("@afterFileSize", ToDbValue(photo.afterFileSize)),
+                    new SqlParameter("@insertAccountID", accountId));
+
+                return Convert.ToInt32(id);
+            }
+        }
+
+        public void UpdateCarePhoto(CarePhotoRecord photo)
+        {
+            const string sql = @"
+UPDATE Tree_CarePhoto SET
+    itemName=@itemName,
+    beforeFileName=@beforeFileName,
+    beforeFilePath=@beforeFilePath,
+    beforeFileSize=@beforeFileSize,
+    afterFileName=@afterFileName,
+    afterFilePath=@afterFilePath,
+    afterFileSize=@afterFileSize
+WHERE photoID=@photoID AND removeDateTime IS NULL;";
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@photoID", photo.photoID),
+                    new SqlParameter("@itemName", ToDbValue(photo.itemName)),
+                    new SqlParameter("@beforeFileName", ToDbValue(photo.beforeFileName)),
+                    new SqlParameter("@beforeFilePath", ToDbValue(photo.beforeFilePath)),
+                    new SqlParameter("@beforeFileSize", ToDbValue(photo.beforeFileSize)),
+                    new SqlParameter("@afterFileName", ToDbValue(photo.afterFileName)),
+                    new SqlParameter("@afterFilePath", ToDbValue(photo.afterFilePath)),
+                    new SqlParameter("@afterFileSize", ToDbValue(photo.afterFileSize)));
+            }
+        }
+
+        public void SoftDeleteCarePhoto(int photoId, int accountId)
+        {
+            const string sql = @"UPDATE Tree_CarePhoto SET removeDateTime=GETDATE(), removeAccountID=@accountId WHERE photoID=@photoID AND removeDateTime IS NULL;";
+            using (var da = new DataAccess.MS_SQL())
+            {
+                da.ExecNonQuery(sql,
+                    new SqlParameter("@accountId", accountId),
+                    new SqlParameter("@photoID", photoId));
+            }
+        }
+
+        private static object ToDbValue(object value)
+        {
+            return value ?? DBNull.Value;
         }
 
         public void DeleteCareRecord(int careId, int accountId)
