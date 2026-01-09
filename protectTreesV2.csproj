@@ -136,9 +136,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="backstage\care\edit.aspx" />
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
+    <Content Include="backstage\Manage\TreeManage_Care.aspx" />
     <Content Include="backstage\patrol\edit.aspx" />
     <Content Include="backstage\patrol\list.aspx" />
     <Content Include="backstage\patrol\main.aspx" />
@@ -185,6 +187,17 @@
     <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />
     <Compile Include="App_Code\Patrol.cs" />
+    <Compile Include="backstage\care\edit.aspx.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\care\edit.aspx.designer.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\Manage\TreeManage_Care.aspx.cs">
+      <DependentUpon>TreeManage_Care.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="backstage\patrol\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

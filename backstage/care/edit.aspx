@@ -428,7 +428,7 @@
         $(function () {
             function toggleOptions(radioName, optionsId) {
                 function update() {
-                    var isOther = $('input[name="' + radioName + '"]:checked').val() === 'other';
+                    var isOther = $('input[name="' + radioName + '"]:checked').val() === '2';
                     console.log($('input[name="' + radioName + '"]:checked').val())
                     $('#' + optionsId + ' :input').prop('disabled', !isOther);
                 }
