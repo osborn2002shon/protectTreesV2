@@ -1,4 +1,4 @@
-using protectTreesV2.TreeCatalog;
+﻿using protectTreesV2.TreeCatalog;
 using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ namespace protectTreesV2.backstage.care
 {
     public partial class list : protectTreesV2.Base.BasePage
     {
+
         public protectTreesV2.Care.Care system_care = new protectTreesV2.Care.Care();
 
         protected CareRecordListFilter CurrentFilter
