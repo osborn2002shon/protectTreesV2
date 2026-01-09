@@ -683,3 +683,109 @@ CREATE TABLE Tree_BatchTaskLog (
 );
 GO
 
+/****** Object:  Table [dbo].[Tree_CareRecord]    Script Date: 2025/8/21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tree_CareRecord](
+        [careID] [int] IDENTITY(1,1) NOT NULL, -- 養護紀錄主鍵
+        [treeID] [int] NOT NULL, -- 對應樹木基本資料編號
+        [careDate] [date] NOT NULL, -- 養護日期
+        [recorder] [nvarchar](100) NULL, -- 記錄人員
+        [reviewer] [nvarchar](100) NULL, -- 覆核人員
+        [dataStatus] [tinyint] NOT NULL CONSTRAINT [DF_Tree_CareRecord_dataStatus] DEFAULT ((0)), -- 資料狀態代碼
+        [crownStatus] [tinyint] NULL, -- 樹冠枝葉狀態
+        [crownSeasonalDormant] [bit] NULL, -- 季節性休眠落葉
+        [crownDeadBranch] [bit] NULL, -- 有枯枝
+        [crownDeadBranchPercent] [decimal](5, 2) NULL, -- 現存枝葉量(%)
+        [crownPest] [bit] NULL, -- 明顯病蟲害
+        [crownForeignObject] [bit] NULL, -- 樹冠接觸電線或異物
+        [crownOtherNote] [nvarchar](200) NULL, -- 樹冠其他說明
+        [trunkStatus] [tinyint] NULL, -- 主莖幹狀態
+        [trunkBarkDamage] [bit] NULL, -- 樹皮破損
+        [trunkDecay] [bit] NULL, -- 莖幹損傷
+        [trunkTermiteTrail] [bit] NULL, -- 有白蟻蟻道
+        [trunkLean] [bit] NULL, -- 主莖傾斜搖晃
+        [trunkFungus] [bit] NULL, -- 莖基部真菌子實體
+        [trunkGummosis] [bit] NULL, -- 流膠或潰瘍
+        [trunkVine] [bit] NULL, -- 纏勒植物
+        [trunkOtherNote] [nvarchar](200) NULL, -- 主莖幹其他說明
+        [rootStatus] [tinyint] NULL, -- 根部狀態
+        [rootDamage] [bit] NULL, -- 根部損傷
+        [rootDecay] [bit] NULL, -- 根部腐朽
+        [rootExpose] [bit] NULL, -- 盤根或浮根
+        [rootRot] [bit] NULL, -- 根部潰爛
+        [rootSucker] [bit] NULL, -- 大量萌櫱
+        [rootOtherNote] [nvarchar](200) NULL, -- 根部其他說明
+        [envStatus] [tinyint] NULL, -- 生育地環境狀態
+        [envPitSmall] [bit] NULL, -- 樹穴過小
+        [envPaved] [bit] NULL, -- 鋪面封固
+        [envDebris] [bit] NULL, -- 石塊或廢棄物推積
+        [envSoilCover] [bit] NULL, -- 根領覆土過高
+        [envCompaction] [bit] NULL, -- 土壤壓實
+        [envWaterlog] [bit] NULL, -- 環境積水
+        [envNearFacility] [bit] NULL, -- 緊鄰設施或建物
+        [envOtherNote] [nvarchar](200) NULL, -- 生育地環境其他說明
+        [adjacentStatus] [tinyint] NULL, -- 鄰接物狀態
+        [adjacentBuilding] [bit] NULL, -- 接觸建築物
+        [adjacentWire] [bit] NULL, -- 接觸電線或管線
+        [adjacentSignal] [bit] NULL, -- 遮蔽路燈或號誌
+        [adjacentOtherNote] [nvarchar](200) NULL, -- 鄰接物其他說明
+        [task1Status] [tinyint] NULL, -- 危險枯枝清除完成情形
+        [task1Note] [nvarchar](500) NULL, -- 危險枯枝清除說明
+        [task2Status] [tinyint] NULL, -- 植栽基盤維護完成情形
+        [task2Note] [nvarchar](500) NULL, -- 植栽基盤維護說明
+        [task3Status] [tinyint] NULL, -- 樹木健康管理完成情形
+        [task3Note] [nvarchar](500) NULL, -- 樹木健康管理說明
+        [task4Status] [tinyint] NULL, -- 營養評估追肥完成情形
+        [task4Note] [nvarchar](500) NULL, -- 營養評估追肥說明
+        [task5Status] [tinyint] NULL, -- 安全衛生防護完成情形
+        [task5Note] [nvarchar](500) NULL, -- 安全衛生防護說明
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_CareRecord_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [updateAccountID] [int] NULL, -- 最後更新者帳號ID
+        [updateDateTime] [datetime] NULL, -- 最後更新時間
+        [removeDateTime] [datetime] NULL, -- 移除時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
+ CONSTRAINT [PK_Tree_CareRecord] PRIMARY KEY CLUSTERED
+(
+        [careID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Tree_CareRecord]  WITH CHECK ADD  CONSTRAINT [FK_Tree_CareRecord_Tree_Record] FOREIGN KEY([treeID])
+REFERENCES [dbo].[Tree_Record] ([treeID])
+GO
+ALTER TABLE [dbo].[Tree_CareRecord] CHECK CONSTRAINT [FK_Tree_CareRecord_Tree_Record]
+GO
+/****** Object:  Table [dbo].[Tree_CarePhoto]    Script Date: 2025/8/21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tree_CarePhoto](
+        [photoID] [int] IDENTITY(1,1) NOT NULL, -- 照片主鍵編號
+        [careID] [int] NOT NULL, -- 養護紀錄主鍵
+        [itemName] [nvarchar](200) NULL, -- 施作項目名稱
+        [beforeFileName] [nvarchar](260) NULL, -- 施作前檔案名稱
+        [beforeFilePath] [nvarchar](500) NULL, -- 施作前檔案路徑
+        [beforeFileSize] [int] NULL, -- 施作前檔案大小
+        [afterFileName] [nvarchar](260) NULL, -- 施作後檔案名稱
+        [afterFilePath] [nvarchar](500) NULL, -- 施作後檔案路徑
+        [afterFileSize] [int] NULL, -- 施作後檔案大小
+        [insertAccountID] [int] NOT NULL, -- 建立者帳號ID
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_CarePhoto_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+        [removeDateTime] [datetime] NULL, -- 移除時間
+        [removeAccountID] [int] NULL, -- 移除者帳號ID
+ CONSTRAINT [PK_Tree_CarePhoto] PRIMARY KEY CLUSTERED
+(
+        [photoID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Tree_CarePhoto]  WITH CHECK ADD  CONSTRAINT [FK_Tree_CarePhoto_Tree_CareRecord] FOREIGN KEY([careID])
+REFERENCES [dbo].[Tree_CareRecord] ([careID])
+GO
+ALTER TABLE [dbo].[Tree_CarePhoto] CHECK CONSTRAINT [FK_Tree_CarePhoto_Tree_CareRecord]
+GO
