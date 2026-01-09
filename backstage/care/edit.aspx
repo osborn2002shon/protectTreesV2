@@ -415,47 +415,59 @@
                 </div>
             </div>
 
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="form-check">
+                        <asp:CheckBox ID="CheckBox_isFinal" runat="server" />
+                        <label class="form-check-label fw-bold" for="<%= CheckBox_isFinal.ClientID %>">
+                            是否定稿
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <div class="text-center">
                 <asp:Button ID="Button_save" runat="server" Text="儲存" CssClass="btn btn-primary me-2" />
-                <asp:Button ID="Button_temp" runat="server" Text="暫存" CssClass="btn btn-secondary me-2" />
-                <asp:Button ID="Button_delete" runat="server" Text="刪除" CssClass="btn btn-outline-danger me-2" />
-                <asp:Button ID="Button_cancel" runat="server" Text="返回列表" CssClass="btn btn-outline-secondary" />
+                <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn-secondary" OnClick="LinkButton_cancel_Click">
+                    取消
+                </asp:LinkButton>
             </div>
         </div>
     </div>
 
     <script>
         $(function () {
-            function toggleOptions(radioName, optionsId) {
+            function toggleOptions(listId, optionsId) {
+                var $radios = $('#' + listId + ' input[type="radio"]');
                 function update() {
-                    var isOther = $('input[name="' + radioName + '"]:checked').val() === '2';
-                    console.log($('input[name="' + radioName + '"]:checked').val())
+                    var isOther = $radios.filter(':checked').val() === '2';
                     $('#' + optionsId + ' :input').prop('disabled', !isOther);
                 }
-                $('input[name="' + radioName + '"]').on('change', update);
+                $radios.on('change', update);
                 update();
             }
 
-            toggleOptions('crownStatus', 'crownOptions');
-            toggleOptions('trunkStatus', 'trunkOptions');
-            toggleOptions('rootStatus', 'rootOptions');
-            toggleOptions('envStatus', 'envOptions');
-            toggleOptions('adjacentStatus', 'adjacentOptions');
+            toggleOptions('<%= RadioButtonList_crownStatus.ClientID %>', 'crownOptions');
+            toggleOptions('<%= RadioButtonList_trunkStatus.ClientID %>', 'trunkOptions');
+            toggleOptions('<%= RadioButtonList_rootStatus.ClientID %>', 'rootOptions');
+            toggleOptions('<%= RadioButtonList_envStatus.ClientID %>', 'envOptions');
+            toggleOptions('<%= RadioButtonList_adjacentStatus.ClientID %>', 'adjacentOptions');
 
-            function toggleTask(radioName, inputId) {
+            function toggleTask(noneRadioId, doRadioId, inputId) {
+                var selector = '#' + noneRadioId + ', #' + doRadioId;
                 function update() {
-                    var isDo = $('input[name="' + radioName + '"]:checked').val() === 'do';
+                    var isDo = $('#' + doRadioId).is(':checked');
                     $('#' + inputId).prop('disabled', !isDo);
                 }
-                $('input[name="' + radioName + '"]').on('change', update);
+                $(selector).on('change', update);
                 update();
             }
 
-            toggleTask('task1Status', 'task1Note');
-            toggleTask('task2Status', 'task2Note');
-            toggleTask('task3Status', 'task3Note');
-            toggleTask('task4Status', 'task4Note');
-            toggleTask('task5Status', 'task5Note');
+            toggleTask('<%= RadioButton_task1None.ClientID %>', '<%= RadioButton_task1Do.ClientID %>', 'task1Note');
+            toggleTask('<%= RadioButton_task2None.ClientID %>', '<%= RadioButton_task2Do.ClientID %>', 'task2Note');
+            toggleTask('<%= RadioButton_task3None.ClientID %>', '<%= RadioButton_task3Do.ClientID %>', 'task3Note');
+            toggleTask('<%= RadioButton_task4None.ClientID %>', '<%= RadioButton_task4Do.ClientID %>', 'task4Note');
+            toggleTask('<%= RadioButton_task5None.ClientID %>', '<%= RadioButton_task5Do.ClientID %>', 'task5Note');
         });
     </script>
 </asp:Content>
