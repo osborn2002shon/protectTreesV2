@@ -49,6 +49,17 @@ namespace protectTreesV2.Base
                 Session["setPatrolID"] = value;
             }
         }
+        public string setCareID
+        {
+            get
+            {
+                return Session["setCareID"] != null ? Session["setCareID"].ToString() : string.Empty;
+            }
+            set
+            {
+                Session["setCareID"] = value;
+            }
+        }
 
         [Serializable]
         public class PageStateInfo

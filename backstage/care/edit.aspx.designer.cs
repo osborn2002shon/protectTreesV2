@@ -132,94 +132,49 @@ namespace protectTreesV2.backstage.care
         protected global::System.Web.UI.WebControls.TextBox TextBox_reviewer;
 
         /// <summary>
-        /// RadioButton_crownStatusNormal 控制項。
+        /// RadioButtonList_crownStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_crownStatusNormal;
+        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_crownStatus;
 
         /// <summary>
-        /// RadioButton_crownStatusOther 控制項。
+        /// RadioButtonList_trunkStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_crownStatusOther;
+        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_trunkStatus;
 
         /// <summary>
-        /// RadioButton_trunkStatusNormal 控制項。
+        /// RadioButtonList_rootStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_trunkStatusNormal;
+        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_rootStatus;
 
         /// <summary>
-        /// RadioButton_trunkStatusOther 控制項。
+        /// RadioButtonList_envStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_trunkStatusOther;
+        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_envStatus;
 
         /// <summary>
-        /// RadioButton_rootStatusNormal 控制項。
+        /// RadioButtonList_adjacentStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_rootStatusNormal;
-
-        /// <summary>
-        /// RadioButton_rootStatusOther 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_rootStatusOther;
-
-        /// <summary>
-        /// RadioButton_envStatusNormal 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_envStatusNormal;
-
-        /// <summary>
-        /// RadioButton_envStatusOther 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_envStatusOther;
-
-        /// <summary>
-        /// RadioButton_adjacentStatusNormal 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_adjacentStatusNormal;
-
-        /// <summary>
-        /// RadioButton_adjacentStatusOther 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton RadioButton_adjacentStatusOther;
+        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_adjacentStatus;
 
         /// <summary>
         /// RadioButton_task1None 控制項。
