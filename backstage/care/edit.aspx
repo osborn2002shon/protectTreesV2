@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="edit.aspx.cs" Inherits="protectTreesV2.backstage.care.edit" MaintainScrollPositionOnPostback="true" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="edit.aspx.cs" Inherits="protectTreesV2.backstage.care.edit" MaintainScrollPositionOnPostback="true" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <style>
         .section-title {
@@ -121,11 +121,11 @@
                     <div class="col-md-2 fw-semibold">1. 樹冠枝葉</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_crownStatusNormal" runat="server" GroupName="crownStatus" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_crownStatusNormal" runat="server" GroupName="crownStatus" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_crownStatusNormal.ClientID %>">枝葉茂密無枯枝</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_crownStatusOther" runat="server" GroupName="crownStatus" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_crownStatusOther" runat="server" GroupName="crownStatus" />
                             <label class="form-check-label" for="<%= RadioButton_crownStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="crownOptions" class="option-group mt-2">
@@ -159,11 +159,11 @@
                     <div class="col-md-2 fw-semibold">2. 主莖幹</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_trunkStatusNormal" runat="server" GroupName="trunkStatus" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_trunkStatusNormal" runat="server" GroupName="trunkStatus" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_trunkStatusNormal.ClientID %>">完好健康無異狀</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_trunkStatusOther" runat="server" GroupName="trunkStatus" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_trunkStatusOther" runat="server" GroupName="trunkStatus" />
                             <label class="form-check-label" for="<%= RadioButton_trunkStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="trunkOptions" class="option-group mt-2">
@@ -207,11 +207,11 @@
                     <div class="col-md-2 fw-semibold">3. 根部及地際部</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_rootStatusNormal" runat="server" GroupName="rootStatus" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_rootStatusNormal" runat="server" GroupName="rootStatus" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_rootStatusNormal.ClientID %>">根部完好無異狀</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_rootStatusOther" runat="server" GroupName="rootStatus" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_rootStatusOther" runat="server" GroupName="rootStatus" />
                             <label class="form-check-label" for="<%= RadioButton_rootStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="rootOptions" class="option-group mt-2">
@@ -247,11 +247,11 @@
                     <div class="col-md-2 fw-semibold">4. 生育地環境</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_envStatusNormal" runat="server" GroupName="envStatus" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_envStatusNormal" runat="server" GroupName="envStatus" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_envStatusNormal.ClientID %>">良好無異狀</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_envStatusOther" runat="server" GroupName="envStatus" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_envStatusOther" runat="server" GroupName="envStatus" />
                             <label class="form-check-label" for="<%= RadioButton_envStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="envOptions" class="option-group mt-2">
@@ -295,11 +295,11 @@
                     <div class="col-md-2 fw-semibold">5. 樹冠或主莖幹與鄰接物</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_adjacentStatusNormal" runat="server" GroupName="adjacentStatus" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_adjacentStatusNormal" runat="server" GroupName="adjacentStatus" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_adjacentStatusNormal.ClientID %>">無鄰接物</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_adjacentStatusOther" runat="server" GroupName="adjacentStatus" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_adjacentStatusOther" runat="server" GroupName="adjacentStatus" />
                             <label class="form-check-label" for="<%= RadioButton_adjacentStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="adjacentOptions" class="option-group mt-2">
@@ -449,6 +449,7 @@
             function toggleOptions(radioName, optionsId) {
                 function update() {
                     var isOther = $('input[name="' + radioName + '"]:checked').val() === 'other';
+                    console.log($('input[name="' + radioName + '"]:checked').val())
                     $('#' + optionsId + ' :input').prop('disabled', !isOther);
                 }
                 $('input[name="' + radioName + '"]').on('change', update);
