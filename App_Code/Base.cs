@@ -80,7 +80,28 @@ namespace protectTreesV2.Base
                 sourcePage = Request.Url.PathAndQuery,
                 filterData = filter
             };
-            Response.Redirect(url);
+            Response.Redirect(url, false);
+            Context.ApplicationInstance.CompleteRequest();
+        }
+
+        /// <summary>
+        /// 重新載入當前頁面(或跳轉至指定頁)，並保留原本的來源狀態。
+        /// </summary>
+        /// <param name="targetUrl">要跳轉的網址，若為 null 則由系統自動重整當前頁面</param>
+        public void ReloadWithState(string targetUrl = null)
+        {
+            // 從 ViewState 取出當前的狀態
+            if (ViewState[PageStateInfo.viewStateKey] is PageStateInfo state)
+            {
+                Session[PageStateInfo.sessionKey] = state;
+            }
+
+            // 決定要跳轉的網址
+            string url = string.IsNullOrEmpty(targetUrl) ? Request.Url.PathAndQuery : targetUrl;
+
+            // 執行跳轉
+            Response.Redirect(url, false);
+            Context.ApplicationInstance.CompleteRequest();
         }
 
         /// <summary>
@@ -155,16 +176,46 @@ namespace protectTreesV2.Base
                 return cities;
             }
         }
+        private const string FLASH_MSG_KEY = "__FlashMessage";
 
+        /// <summary>
+        /// 訊息結構
+        /// </summary>
+        [Serializable]
+        private class FlashMessageInfo
+        {
+            public string title { get; set; }
+            public string text { get; set; }
+            public string icon { get; set; }
+        }
+        /// <summary>
+        /// 顯示訊息 
+        /// </summary>
         public void ShowMessage(string title, string text, string icon = "info")
         {
-            var serializer = new JavaScriptSerializer();
-            var options = new { title, text, icon };
+            Session[FLASH_MSG_KEY] = new FlashMessageInfo
+            {
+                title = title,
+                text = text,
+                icon = icon
+            };
+        }
+
+        /// <summary>
+        /// 註冊訊息
+        /// </summary>
+        private void InjectAlertScript(FlashMessageInfo data)
+        {
+            var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+            // 序列化物件供 JS 使用
+            var options = new { title = data.title, text = data.text, icon = data.icon };
 
             string script = $@"
-                (function() {{
+            (function() {{
+                var initMsg = function() {{
                     var data = {serializer.Serialize(options)};
                     var modalElement = document.getElementById('divMSG');
+                    // 檢查元素與 Bootstrap 是否存在
                     if (!modalElement || typeof bootstrap === 'undefined') return;
 
                     var titleElement = modalElement.querySelector('.modal-title');
@@ -191,9 +242,19 @@ namespace protectTreesV2.Base
 
                     var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
                     modal.show();
-                }})();";
+                }};
+                
+                // 嘗試立即執行或綁定到載入事件
+                if (document.readyState === 'loading') {{
+                    document.addEventListener('DOMContentLoaded', initMsg);
+                }} else {{
+                    initMsg();
+                }}
+            }})();";
+
             string key = "BootstrapModal_" + Guid.NewGuid().ToString("N");
 
+            // 判斷是否在 UpdatePanel 內
             if (ScriptManager.GetCurrent(Page) != null)
             {
                 ScriptManager.RegisterStartupScript(Page, Page.GetType(), key, script, true);
@@ -201,6 +262,26 @@ namespace protectTreesV2.Base
             else
             {
                 Page.ClientScript.RegisterStartupScript(Page.GetType(), key, script, true);
+            }
+        }
+
+        /// <summary>
+        /// 頁面渲染前，統一檢查並輸出訊息
+        /// </summary>
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+
+            if (Response.IsRequestBeingRedirected) return;
+
+            // 檢查 Session 是否有待顯示的訊息
+            if (Session[FLASH_MSG_KEY] is FlashMessageInfo msg)
+            {
+                // 執行 JavaScript 注入
+                InjectAlertScript(msg);
+
+                // 顯示完後立刻清除，避免重新整理或下一頁重複顯示
+                Session.Remove(FLASH_MSG_KEY);
             }
         }
     }

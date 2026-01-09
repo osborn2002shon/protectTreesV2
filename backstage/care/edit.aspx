@@ -312,11 +312,11 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">受保護樹木若有枝條枯損或懸掛等危害公共安全疑慮之情形，宜立即回報並盡速清除</div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task1None" runat="server" GroupName="task1Status" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_task1None" runat="server" GroupName="task1Status" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_task1None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task1Do" runat="server" GroupName="task1Status" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_task1Do" runat="server" GroupName="task1Status" />
                             <label class="form-check-label" for="<%= RadioButton_task1Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task1Note" class="form-control mt-2" placeholder="請填寫說明" />
@@ -328,11 +328,11 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">包含改良土壤結構通透氣及排水、清除過度覆土、拓展植穴空間等作業</div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task2None" runat="server" GroupName="task2Status" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_task2None" runat="server" GroupName="task2Status" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_task2None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task2Do" runat="server" GroupName="task2Status" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_task2Do" runat="server" GroupName="task2Status" />
                             <label class="form-check-label" for="<%= RadioButton_task2Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task2Note" class="form-control mt-2" placeholder="請填寫說明" />
@@ -344,11 +344,11 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">受保護樹木如有病害、蟲害等情況，須進一步診斷查明原因後再進行治療</div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task3None" runat="server" GroupName="task3Status" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_task3None" runat="server" GroupName="task3Status" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_task3None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task3Do" runat="server" GroupName="task3Status" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_task3Do" runat="server" GroupName="task3Status" />
                             <label class="form-check-label" for="<%= RadioButton_task3Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task3Note" class="form-control mt-2" placeholder="請填寫說明" />
@@ -360,11 +360,11 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">受保護樹木若經評估建議追給適量緩效性有機質肥料，宜配合調查進行</div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task4None" runat="server" GroupName="task4Status" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_task4None" runat="server" GroupName="task4Status" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_task4None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task4Do" runat="server" GroupName="task4Status" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_task4Do" runat="server" GroupName="task4Status" />
                             <label class="form-check-label" for="<%= RadioButton_task4Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task4Note" class="form-control mt-2" placeholder="請填寫說明" />
@@ -376,11 +376,11 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">當受保護樹木進行維護作業時，應設立相關安全衛生防護措施</div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task5None" runat="server" GroupName="task5Status" CssClass="form-check-input" Checked="true" />
+                            <asp:RadioButton ID="RadioButton_task5None" runat="server" GroupName="task5Status" Checked="true" />
                             <label class="form-check-label" for="<%= RadioButton_task5None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <asp:RadioButton ID="RadioButton_task5Do" runat="server" GroupName="task5Status" CssClass="form-check-input" />
+                            <asp:RadioButton ID="RadioButton_task5Do" runat="server" GroupName="task5Status" />
                             <label class="form-check-label" for="<%= RadioButton_task5Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task5Note" class="form-control mt-2" placeholder="請填寫說明" />

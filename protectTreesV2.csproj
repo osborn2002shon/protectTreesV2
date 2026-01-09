@@ -137,6 +137,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="backstage\care\edit.aspx" />
+    <Content Include="backstage\care\list.aspx" />
+    <Content Include="backstage\care\main.aspx" />
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
@@ -183,6 +185,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="App_Code\Batch.cs" />
+    <Compile Include="App_Code\Care.cs" />
     <Compile Include="App_Code\DataAccess_MS_SQL.cs" />
     <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />
@@ -193,6 +196,20 @@
     </Compile>
     <Compile Include="backstage\care\edit.aspx.designer.cs">
       <DependentUpon>edit.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\care\list.aspx.cs">
+      <DependentUpon>list.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\care\list.aspx.designer.cs">
+      <DependentUpon>list.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\care\main.aspx.cs">
+      <DependentUpon>main.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\care\main.aspx.designer.cs">
+      <DependentUpon>main.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\Manage\TreeManage_Care.aspx.cs">
       <DependentUpon>TreeManage_Care.aspx</DependentUpon>

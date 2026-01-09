@@ -24,13 +24,13 @@ namespace protectTreesV2.backstage.health
         protected global::System.Web.UI.WebControls.FileUpload FileUpload_Batch;
 
         /// <summary>
-        /// CheckBox_AutoCreateDraft 控制項。
+        /// CheckBox_autoCreateDraft 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox CheckBox_AutoCreateDraft;
+        protected global::System.Web.UI.WebControls.CheckBox CheckBox_autoCreateDraft;
 
         /// <summary>
         /// Button_StartUpload 控制項。
@@ -40,5 +40,32 @@ namespace protectTreesV2.backstage.health
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button Button_StartUpload;
+
+        /// <summary>
+        /// Label_LastStatus 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_LastStatus;
+
+        /// <summary>
+        /// GridView_Detail 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridView_Detail;
+
+        /// <summary>
+        /// GridView_History 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView GridView_History;
     }
 }

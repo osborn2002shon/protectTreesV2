@@ -1,6 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="uploadPhoto.aspx.cs" Inherits="protectTreesV2.backstage.health.uploadPhoto" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <style>
+
         /* 拖曳區樣式 */
         .photo-drop {
             border: 2px dashed #6c757d;
@@ -28,6 +29,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .gv-tb {
+            max-height: 500px;  
+            overflow-y: auto;   
+            position: relative; 
+        }
+
+        .gv-tb .gv th {
+            position: sticky;   
+            top: 0;            
+            z-index: 10;
+            background-color: #fff; 
         }
     </style>
 </asp:Content>
@@ -87,13 +101,9 @@
                     <span id="statusText" class="fw-bold text-dark">尚未選取檔案</span>
                     <span id="sizeText" class="text-muted small ms-2"></span>
                 </div>
-                <div class="d-flex justify-content-center mb-3">
-                    <div class="form-check">
-                        <asp:CheckBox ID="CheckBox_AutoCreateDraft" runat="server"/>
-                        <label class="form-check-label text-dark fw-bold" for="CheckBox_AutoCreateDraft" style="cursor: pointer;">
-                            指定日期若無紀錄則自動新增一筆（草稿）
-                        </label>
-                    </div>
+               <div class="d-flex justify-content-center mb-3">
+                    <asp:CheckBox ID="CheckBox_autoCreateDraft" runat="server" Text="指定日期若無紀錄則自動新增一筆（草稿）" 
+                        CssClass="fw-bold text-dark" Style="cursor: pointer;" />
                 </div>
                 <div>
                     <asp:Button ID="Button_StartUpload" runat="server" Text="上傳照片" 
@@ -103,6 +113,126 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <hr class="my-5" />
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold">
+                            <i class="fa-solid fa-list-check me-2"></i>最新上傳結果明細
+                        </h5>
+                        <asp:Label ID="Label_LastStatus" runat="server" CssClass="badge bg-secondary rounded-pill fs-6"></asp:Label>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive gv-tb">
+                        <asp:GridView ID="GridView_Detail" runat="server" 
+                            CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" UseAccessibleHeader="true">
+                        
+                            <Columns>
+                                <%-- 狀態圖示 --%>
+                                <asp:TemplateField HeaderText="狀態" ItemStyle-Width="80px">
+                                    <ItemTemplate>
+                                        <%# (bool)Eval("isSuccess") 
+                                            ? "<i class='fa-solid fa-circle-check text-success fs-5'></i>" 
+                                            : "<i class='fa-solid fa-circle-xmark text-danger fs-5'></i>" %>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 樹籍編號 --%>
+                                <asp:BoundField DataField="refKey" HeaderText="樹籍編號" ItemStyle-Width="120px" />
+
+                                <%-- 調查日期 --%>
+                                <asp:BoundField DataField="refDate" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" ItemStyle-Width="120px" />
+
+                                <%-- 來源項目 (檔名) --%>
+                                <asp:BoundField DataField="sourceItem" HeaderText="檔案名稱" />
+
+                                <%-- 處理結果訊息 (失敗原因) --%>
+                                <asp:TemplateField HeaderText="處理結果">
+                                    <ItemTemplate>
+                                        <span class='<%# (bool)Eval("isSuccess") ? "text-success" : "text-danger fw-bold" %>'>
+                                            <%# Eval("resultMsg") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+
+                            <EmptyDataTemplate>
+                                <div class="text-center py-4 text-muted">
+                                    尚無上傳明細資料。
+                                </div>
+                            </EmptyDataTemplate>
+                        </asp:GridView>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light py-3 border-0">
+                    <h5 class="m-0 fw-bold text-dark">
+                        <i class="fa-solid fa-clock-rotate-left me-2"></i>歷史上傳紀錄（近五筆）
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive gv-tb">
+                        <asp:GridView ID="GridView_History" runat="server" CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true">
+                            <Columns>
+                               <%-- 1. 上傳時間 --%>
+                                <asp:BoundField DataField="insertDateTime" HeaderText="上傳時間" 
+                                    DataFormatString="{0:yyyy/MM/dd HH:mm}" ItemStyle-Width="160px" />
+
+                                <%-- 2. 上傳者 --%>
+                                <asp:BoundField DataField="userName" HeaderText="上傳者" ItemStyle-Width="200px" />
+
+                                <%-- 3. 總筆數  --%>
+                                <asp:TemplateField HeaderText="總筆數" ItemStyle-Width="120px">
+                                    <ItemTemplate>
+                                        <span class="badge bg-secondary fs-6"><%# Eval("totalCount") %></span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 4. 成功筆數 --%>
+                                <asp:TemplateField HeaderText="成功" ItemStyle-Width="120px" >
+                                    <ItemTemplate>
+                                        <span class="badge bg-success fs-6"><%# Eval("successCount") %></span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 5. 失敗筆數  --%>
+                                <asp:TemplateField HeaderText="失敗" ItemStyle-Width="120px">
+                                    <ItemTemplate>
+                                        <%-- 如果失敗數大於0，顯示紅色，否則顯示淺灰色或隱藏 --%>
+                                        <span class='<%# Convert.ToInt32(Eval("failCount")) > 0 ? "badge bg-danger fs-6" : "badge bg-light text-secondary border fs-6" %>'>
+                                            <%# Eval("failCount") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                              <%--  <asp:TemplateField HeaderText="備註">
+                                    <ItemTemplate>
+                                        <span class="text-muted small"><%# Eval("memo") %></span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>--%>
+                            </Columns>
+                            <EmptyDataTemplate>
+                                <div class="text-center py-4 text-muted">
+                                    目前尚無歷史上傳紀錄。
+                                </div>
+                            </EmptyDataTemplate>
+                        </asp:GridView>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -33,69 +33,6 @@ namespace protectTreesV2._uc.health
         protected global::System.Web.UI.WebControls.PlaceHolder phContent;
 
         /// <summary>
-        /// litHealthId 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litHealthId;
-
-        /// <summary>
-        /// litSystemTreeNo 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litSystemTreeNo;
-
-        /// <summary>
-        /// litStatus 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litStatus;
-
-        /// <summary>
-        /// litLocation 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litLocation;
-
-        /// <summary>
-        /// litSpecies 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litSpecies;
-
-        /// <summary>
-        /// litTreeSign 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litTreeSign;
-
-        /// <summary>
-        /// litLastUpdate 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litLastUpdate;
-
-        /// <summary>
         /// litSurveyDate 控制項。
         /// </summary>
         /// <remarks>
@@ -114,13 +51,13 @@ namespace protectTreesV2._uc.health
         protected global::System.Web.UI.WebControls.Literal litSurveyor;
 
         /// <summary>
-        /// litMemo 控制項。
+        /// litTreeSign 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litMemo;
+        protected global::System.Web.UI.WebControls.Literal litTreeSign;
 
         /// <summary>
         /// litLatitude 控制項。

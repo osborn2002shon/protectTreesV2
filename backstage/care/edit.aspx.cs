@@ -9,7 +9,7 @@ namespace protectTreesV2.backstage.care
 {
     public partial class edit : BasePage
     {
-        private readonly Care system_care = new Care();
+        private readonly Care.Care system_care = new Care.Care();
         public int CurrentCareID
         {
             get { return (int)(ViewState["CurrentCareID"] ?? 0); }
@@ -51,9 +51,9 @@ namespace protectTreesV2.backstage.care
                     TextBox_careDate.Text = record.careDate?.ToString("yyyy-MM-dd");
                     TextBox_recorder.Text = record.recorder;
                     TextBox_reviewer.Text = record.reviewer;
-                    CheckBox_isFinal.Checked = record.dataStatus == (int)Care.CareRecordStatus.定稿;
-                    Label_recordStatus.CssClass = record.dataStatus == (int)Care.CareRecordStatus.定稿 ? "badge bg-success" : "badge bg-warning text-dark";
-                    Label_recordStatus.Text = record.dataStatus == (int)Care.CareRecordStatus.定稿 ? "定稿" : "草稿";
+                    CheckBox_isFinal.Checked = record.dataStatus == (int)Care.Care.CareRecordStatus.定稿;
+                    Label_recordStatus.CssClass = record.dataStatus == (int)Care.Care.CareRecordStatus.定稿 ? "badge bg-success" : "badge bg-warning text-dark";
+                    Label_recordStatus.Text = record.dataStatus == (int)Care.Care.CareRecordStatus.定稿 ? "定稿" : "草稿";
                 }
                 else
                 {
@@ -63,7 +63,7 @@ namespace protectTreesV2.backstage.care
 
                 if (CurrentTreeID <= 0)
                 {
-                    Response.Redirect("/backstage/patrol/main.aspx");
+                    Response.Redirect("/backstage/care/main.aspx");
                     return;
                 }
 
@@ -94,7 +94,7 @@ namespace protectTreesV2.backstage.care
             if (tree == null)
             {
                 ShowMessage("錯誤", "無法取得樹籍資料");
-                Response.Redirect("/backstage/patrol/main.aspx");
+                Response.Redirect("/backstage/care/main.aspx");
                 return;
             }
 

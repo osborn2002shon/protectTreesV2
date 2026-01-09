@@ -105,6 +105,60 @@ namespace protectTreesV2.backstage.health
         protected global::System.Web.UI.WebControls.GridView GridView_healthList;
 
         /// <summary>
+        /// lblModal_healthId 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModal_healthId;
+
+        /// <summary>
+        /// lblModal_systemTreeNo 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModal_systemTreeNo;
+
+        /// <summary>
+        /// lblModal_status 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModal_status;
+
+        /// <summary>
+        /// lblModal_location 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModal_location;
+
+        /// <summary>
+        /// lblModal_species 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModal_species;
+
+        /// <summary>
+        /// lblModal_lastUpdate 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblModal_lastUpdate;
+
+        /// <summary>
         /// uc_healthRecordModal 控制項。
         /// </summary>
         /// <remarks>

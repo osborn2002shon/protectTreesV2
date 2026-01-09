@@ -1059,7 +1059,7 @@
             function handlePhotoFiles(files) {
                 if (!files || files.length === 0) return;
 
-                const currentCount = existingPhotos.filter(p => !p.deleted).length + newPhotos.length;
+                let currentCount = existingPhotos.filter(p => !p.deleted).length + newPhotos.length;
 
                 // 檢查照片數量
                 if (currentCount + files.length > maxPhotos) {
@@ -1279,6 +1279,10 @@
                 updateFileUI();
             });
 
+
+           $('#<%= LinkButton_save.ClientID %>').on('click', function () {
+               updateMetadataField();
+           });
         });
    </script>
 </asp:Content>

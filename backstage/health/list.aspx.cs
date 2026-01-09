@@ -1,9 +1,6 @@
-﻿using protectTreesV2.backstage.Manage;
-using protectTreesV2.User;
+﻿using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static protectTreesV2.Health.Health;
@@ -242,6 +239,42 @@ namespace protectTreesV2.backstage.health
             {
                 int healthId = Convert.ToInt32(healthStr);
                 var record = system_health.GetHealthRecord(healthId);
+
+                if(record != null)
+                {
+                    lblModal_healthId.Text = record.healthID.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    lblModal_systemTreeNo.Text = string.IsNullOrWhiteSpace(record.systemTreeNo)
+                                                 ? "--"
+                                                 : record.systemTreeNo.Trim();
+                    lblModal_status.Text = string.IsNullOrWhiteSpace(record.dataStatusText)
+                                           ? "--"
+                                           : record.dataStatusText.Trim();
+                    string loc = (record.cityName ?? "") + (record.areaName ?? "");
+                    lblModal_location.Text = string.IsNullOrWhiteSpace(loc)
+                                             ? "--"
+                                             : loc.Trim();
+
+                    lblModal_species.Text = string.IsNullOrWhiteSpace(record.speciesName)
+                                            ? "--"
+                                            : record.speciesName.Trim();
+                    lblModal_lastUpdate.Text = string.IsNullOrWhiteSpace(record.lastUpdateDisplay)
+                                               ? "--"
+                                               : record.lastUpdateDisplay.Trim();
+                    //lblModal_Memo.Text = string.IsNullOrWhiteSpace(record.memo)
+                    //                     ? "--"
+                    //                     : record.memo.Trim();
+                }
+                else
+                {
+                    lblModal_healthId.Text = "";
+                    lblModal_systemTreeNo.Text = "";
+                    lblModal_status.Text = "";
+                    lblModal_location.Text = "";
+                    lblModal_species.Text = "";
+                    lblModal_lastUpdate.Text = "";
+                    //lblModal_Memo.Text = "";
+                }
+
                 uc_healthRecordModal.BindRecord(record);
                 ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowModal", "showHealthRecordModal();", true);
             }

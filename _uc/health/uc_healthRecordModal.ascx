@@ -4,53 +4,12 @@
         <div class="text-center text-muted py-4">尚未載入健檢紀錄。</div>
     </asp:PlaceHolder>
     <asp:PlaceHolder ID="phContent" runat="server" Visible="false">
-        <%-- 1. 基本資料 --%>
+
+        <%-- 2. 一般調查 --%>
         <div class="formCard card mb-4">
-            <div class="card-header">基本資料</div>
+            <div class="card-header">一般調查</div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">系統紀錄編號</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litHealthId" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">系統樹籍編號</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litSystemTreeNo" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">資料狀態</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litStatus" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">所在地</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litLocation" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">樹種及學名</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litSpecies" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">樹牌</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litTreeSign" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
-                    <div class="col-md-4 col-sm-6">
-                        <label class="form-label text-muted">最後更新</label>
-                        <div class="fw-bold">
-                            <asp:Literal ID="litLastUpdate" runat="server" Mode="Encode" />
-                        </div>
-                    </div>
                     <div class="col-md-4 col-sm-6">
                         <label class="form-label text-muted">調查日期</label>
                         <div class="fw-bold">
@@ -63,21 +22,12 @@
                             <asp:Literal ID="litSurveyor" runat="server" Mode="Encode" />
                         </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label text-muted">備註</label>
+                    <div class="col-md-4 col-sm-6">
+                        <label class="form-label text-muted">樹牌</label>
                         <div class="fw-bold">
-                            <asp:Literal ID="litMemo" runat="server" Mode="Encode" />
+                            <asp:Literal ID="litTreeSign" runat="server" Mode="Encode" />
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <%-- 2. 一般調查 --%>
-        <div class="formCard card mb-4">
-            <div class="card-header">一般調查</div>
-            <div class="card-body">
-                <div class="row g-3">
                     <div class="col-md-3 col-sm-6">
                         <label class="form-label text-muted">座標(WGS84)：緯度(N)</label>
                         <div class="fw-bold">
@@ -321,7 +271,7 @@
 
                 <%-- 照片區塊 --%>
                 <div class="mt-4 mb-3">
-                     <label class="form-label fw-bold mb-2">照片列表</label>
+                    <label class="form-label fw-bold mb-2">照片列表</label>
                     <asp:PlaceHolder ID="phPhotoEmpty" runat="server" Visible="false">
                         <div class="text-muted">無照片。</div>
                     </asp:PlaceHolder>
@@ -331,10 +281,39 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                                <%-- 1. 圖片--%>
                                 <a href='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "#" : ResolveUrl(Eval("FilePath").ToString()) %>' target="_blank" rel="noopener">
-                                    <img src='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" : ResolveUrl(Eval("FilePath").ToString()) %>' alt='<%# Eval("FileName") %>' class="img-fluid rounded border shadow-sm" />
+                                    <img src='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" : ResolveUrl(Eval("FilePath").ToString()) %>' 
+                                         alt='<%# Eval("FileName") %>' 
+                                         class="img-fluid rounded border shadow-sm" />
                                 </a>
-                                <div class="small text-muted mt-2 text-truncate" title='<%# Eval("FileName") %>'><%# Eval("FileName") %></div>
+
+                                <%-- 2. 檔名 (維持原樣) --%>
+                                <div class="small text-muted mt-2 text-truncate" title='<%# Eval("FileName") %>'>
+                                    <%# Eval("FileName") %>
+                                </div>
+
+                                <%-- 3. 備註 (新增：只加在檔名下面，若無值則不顯示) --%>
+                                <asp:PlaceHolder ID="phCaption" runat="server" Visible='<%# !string.IsNullOrWhiteSpace(Eval("caption") as string) %>'>
+                                    <%-- 
+                                        style 說明：
+                                        1. display: -webkit-box;           啟用彈性盒模型來處理截斷
+                                        2. -webkit-line-clamp: 2;          設定最多顯示 2 行 (想顯示 3 行就把 2 改成 3)
+                                        3. -webkit-box-orient: vertical;   設定垂直排列
+                                        4. overflow: hidden;               隱藏超出的部分
+                                        5. word-break: break-all;          避免長單字(如網址)撐破版面
+                                    --%>
+                                    <div class="small text-dark mt-1" 
+                                         title='<%# Eval("caption") %>'
+                                         style="
+                                            display: -webkit-box; 
+                                            -webkit-line-clamp: 2; 
+                                            -webkit-box-orient: vertical; 
+                                            overflow: hidden; 
+                                            word-break: break-all;">
+                                        <%# Eval("caption") %>
+                                    </div>
+                                </asp:PlaceHolder>
                             </div>
                         </ItemTemplate>
                         <FooterTemplate>

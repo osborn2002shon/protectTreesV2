@@ -18,6 +18,14 @@ namespace protectTreesV2.backstage.health
     {
         public protectTreesV2.Health.Health system_health = new protectTreesV2.Health.Health();
 
+        // --- 全域設定：照片 (Photo) ---
+        private readonly string[] PhotoAllowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+        private const int PhotoMaxSizeBytes = 10 * 1024 * 1024; // 10MB
+
+        // --- 全域設定：附件 (Attachment) ---
+        private readonly string[] AttachAllowedExtensions = new[] { ".zip" };
+        private const int AttachMaxSizeBytes = 30 * 1024 * 1024; // 30MB
+
         [Serializable]
         public class AttachmentJsonModel
         {
@@ -27,12 +35,23 @@ namespace protectTreesV2.backstage.health
         }
 
         [Serializable]
+        public class PhotoJsonModel
+        {
+            public string key { get; set; }
+            public string filePath { get; set; }
+            public string caption { get; set; }
+            public string fileName { get; set; }
+        }
+
+        [Serializable]
         public class PhotoMeta
         {
             public string key { get; set; }
             public string fileName { get; set; }
             public string caption { get; set; }
         }
+
+
 
         /// <summary>
         /// 目前編輯的健檢 ID (若為 0 代表新增)
@@ -242,7 +261,7 @@ namespace protectTreesV2.backstage.health
                 // 綁定照片 (轉成 JSON 給前端)
                 if (record.photos != null && record.photos.Count > 0)
                 {
-                    var photoList = record.photos.Select(p => new
+                    var photoList = record.photos.Select(p => new PhotoJsonModel
                     {
                         key = p.photoID.ToString(),
                         filePath = ResolveUrl(p.filePath), // 網頁相對路徑
@@ -448,6 +467,194 @@ namespace protectTreesV2.backstage.health
             cb.Checked = val.HasValue && val.Value;
         }
 
+        private void TrySaveTempFile()
+        {
+            // 1) 讀取現有 JSON
+            List<PhotoJsonModel> currentList = new List<PhotoJsonModel>();
+            string existingJson = HiddenField_existingPhotosData.Value;
+            if (!string.IsNullOrEmpty(existingJson))
+            {
+                try
+                {
+                    currentList = JsonConvert.DeserializeObject<List<PhotoJsonModel>>(existingJson) ?? new List<PhotoJsonModel>();
+                }
+                catch { }
+            }
+
+            // 2) 讀取 Metadata JSON（caption / 新檔對照）
+            List<PhotoMeta> metaList = new List<PhotoMeta>();
+            string metaJson = HiddenField_photoMetadata.Value;
+            if (!string.IsNullOrEmpty(metaJson))
+            {
+                try
+                {
+                    metaList = JsonConvert.DeserializeObject<List<PhotoMeta>>(metaJson) ?? new List<PhotoMeta>();
+                }
+                catch { }
+            }
+
+            // 3) 讀取刪除清單
+            HashSet<string> deletedKeySet = new HashSet<string>();
+            string deletedIdsStr = HiddenField_deletedPhotoIds.Value;
+            if (!string.IsNullOrEmpty(deletedIdsStr))
+            {
+                foreach (var id in deletedIdsStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    deletedKeySet.Add(id.Trim());
+                }
+            }
+
+            // 4) 先把「舊照片」最新 caption 回寫進 currentList
+            if (currentList.Any() && metaList.Any())
+            {
+                var captionByKey = metaList
+                    .Where(m => !string.IsNullOrWhiteSpace(m.key))
+                    .GroupBy(m => m.key)
+                    .ToDictionary(g => g.Key, g => g.Last().caption ?? "");
+
+                foreach (var p in currentList)
+                {
+                    if (!string.IsNullOrWhiteSpace(p.key) && captionByKey.TryGetValue(p.key, out var latestCaption))
+                    {
+                        p.caption = latestCaption;
+                    }
+                }
+            }
+
+            // 5) 把刪除狀態同步到 existingPhotosData
+            if (deletedKeySet.Count > 0 && currentList.Any())
+            {
+                currentList = currentList
+                    .Where(p => p != null && !deletedKeySet.Contains(p.key))
+                    .ToList();
+            }
+
+            // 先更新 HiddenField
+            HiddenField_existingPhotosData.Value = JsonConvert.SerializeObject(currentList);
+
+            // 如果沒有新上傳檔案，到此結束（但 caption/刪除都已被保存）
+            if (!FileUpload_pendingPhotos.HasFiles) return;
+
+            // 7) 計算最小 Key（給新 temp key 用）
+            long minKey = 0;
+            foreach (var p in currentList)
+            {
+                if (long.TryParse(p.key, out long k) && k < minKey) minKey = k;
+            }
+
+            // 8) 準備暫存目錄
+            string tempVirtualDir = "~/_file/health/temp/";
+            string tempPhysicalDir = Server.MapPath(tempVirtualDir);
+            if (!Directory.Exists(tempPhysicalDir)) Directory.CreateDirectory(tempPhysicalDir);
+
+            // 9) 新檔 Metadata Queue（只取 key<0 且 fileName 有值）
+            var metaLookup = metaList
+                .Where(m => !string.IsNullOrWhiteSpace(m.fileName)
+                         && int.TryParse(m.key, out var k) && k < 0)
+                .GroupBy(m => Path.GetFileName(m.fileName.Trim()))
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var postedFiles = FileUpload_pendingPhotos.PostedFiles;
+
+            // 10) 存 temp
+            for (int i = postedFiles.Count - 1; i >= 0; i--)
+            {
+                var file = postedFiles[i];
+
+                if (file == null || file.ContentLength == 0) continue;
+
+                string clientFileName = Path.GetFileName(file.FileName);
+                string ext = Path.GetExtension(clientFileName).ToLowerInvariant();
+
+                if (!PhotoAllowedExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase)) continue;
+                if (file.ContentLength > PhotoMaxSizeBytes) continue;
+
+                // 產生 GUID 檔名
+                string safeName = $"{Guid.NewGuid():N}{ext}";
+                string fullPath = Path.Combine(tempPhysicalDir, safeName);
+                while (File.Exists(fullPath))
+                {
+                    safeName = $"{Guid.NewGuid():N}{ext}";
+                    fullPath = Path.Combine(tempPhysicalDir, safeName);
+                }
+                file.SaveAs(fullPath);
+
+                // caption 對應（Queue 消耗）
+                string caption = "";
+                if (metaLookup.TryGetValue(clientFileName, out var candidates) && candidates.Count > 0)
+                {
+                    caption = candidates[0].caption ?? "";
+                    candidates.RemoveAt(0);
+                }
+
+                minKey--;
+
+                // 若這個 temp key 已被刪除，則不加入清單
+                if (deletedKeySet.Contains(minKey.ToString())) continue;
+
+                currentList.Add(new PhotoJsonModel
+                {
+                    key = minKey.ToString(),
+                    filePath = ResolveUrl(tempVirtualDir + safeName),
+                    fileName = clientFileName,
+                    caption = caption
+                });
+            }
+
+            // 11) 最後再更新 HiddenField
+            HiddenField_existingPhotosData.Value = JsonConvert.SerializeObject(currentList);
+        }
+        private void TrySaveTempAttachment()
+        {
+            // 1) 如果使用者已按刪除，就不要暫存
+            if (HiddenField_isFileDeleted.Value == "true")
+            {
+                HiddenField_existingFileData.Value = "";
+                return;
+            }
+
+            // 2) 沒有新檔就不用動
+            if (!FileUpload_attachment.HasFile) return;
+
+            var file = FileUpload_attachment.PostedFile;
+            if (file == null || file.ContentLength == 0) return;
+
+            string originalName = Path.GetFileName(file.FileName);
+            string ext = Path.GetExtension(originalName).ToLowerInvariant();
+
+            // 3) zip only 驗證
+            if (!AttachAllowedExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            // 4) 大小限制
+            if (file.ContentLength > AttachMaxSizeBytes) return;
+
+            // 5) 暫存資料夾
+            string tempVirtualDir = "~/_file/health/temp/";
+            string tempPhysicalDir = Server.MapPath(tempVirtualDir);
+            if (!Directory.Exists(tempPhysicalDir)) Directory.CreateDirectory(tempPhysicalDir);
+
+            // 6) 用 GUID 存成安全檔名（避免覆蓋）
+            string safeName = $"{Guid.NewGuid():N}{ext}";
+            string fullPath = Path.Combine(tempPhysicalDir, safeName);
+            file.SaveAs(fullPath);
+
+            // 7) 回寫 HiddenField_existingFileData（isTemp=true）
+            var tempJson = new AttachmentJsonModel
+            {
+                fileName = originalName,                         // 使用者看到的原始檔名
+                filePath = ResolveUrl(tempVirtualDir + safeName), // temp 檔路徑
+                isTemp = true
+            };
+
+            HiddenField_existingFileData.Value = JsonConvert.SerializeObject(tempJson);
+
+            // 8) 有新檔就代表不是刪除
+            HiddenField_isFileDeleted.Value = "false";
+        }
+
         /// <summary>
         /// 儲存按鈕事件 
         /// </summary>
@@ -461,12 +668,16 @@ namespace protectTreesV2.backstage.health
                 // 必填檢查: 調查日期
                 if (string.IsNullOrEmpty(surveyDateStr) || !DateTime.TryParse(surveyDateStr, out DateTime surveyDate))
                 {
+                    TrySaveTempFile();
+                    TrySaveTempAttachment();
                     ShowMessage("系統提示", "「調查日期」為必填欄位。");
                     return;
                 }
 
                 if (system_health.CheckSurveyDateDuplicate(this.CurrentTreeID, surveyDate, this.CurrentHealthID))
                 {
+                    TrySaveTempFile();
+                    TrySaveTempAttachment();
                     ShowMessage("系統提示", $"該樹木在 {surveyDate:yyyy/MM/dd} 已經有其他的調查紀錄，請勿重複建立。");
                     return;
                 }
@@ -475,6 +686,8 @@ namespace protectTreesV2.backstage.health
                 string errorMsg = ValidateFormData(isFinalized);
                 if (!string.IsNullOrEmpty(errorMsg))
                 {
+                    TrySaveTempFile();
+                    TrySaveTempAttachment();
                     ShowMessage("系統提示", errorMsg);
                     return;
                 }
@@ -488,6 +701,8 @@ namespace protectTreesV2.backstage.health
                     // 如果資料庫裡已經是定稿 (1)，但前端傳來的卻是未勾選 (false)
                     if (currentRecord != null && currentRecord.dataStatus == 1 && !CheckBox_dataStatus.Checked)
                     {
+                        TrySaveTempFile();
+                        TrySaveTempAttachment();
                         ShowMessage("系統提示", "此紀錄已經定稿，不允許變更回草稿狀態。");
 
                         // 強制把畫面勾選回去並鎖定，避免誤會
@@ -518,10 +733,14 @@ namespace protectTreesV2.backstage.health
 
                 setHealthID = savedHealthID.ToString();
                 setTreeID = null;
-                Response.Redirect("edit.aspx", false); 
+                ReloadWithState("edit.aspx");
+
+                return;
             }
             catch (Exception ex)
             {
+                TrySaveTempFile();
+                TrySaveTempAttachment();
                 ShowMessage("系統提示", "系統錯誤："+ex.Message);
             }
         }
@@ -889,59 +1108,74 @@ namespace protectTreesV2.backstage.health
             // 9. 照片檢查 (數量、格式、大小)
             // ==============================================================================
 
-            int dbPhotoCount = 0;
-            List<int> dbPhotoIds = new List<int>(); // 用來存 DB 裡真正的 ID
+            // --- 步驟 A: 準備刪除清單 ---
+            HashSet<string> deletedIds = new HashSet<string>();
+            if (!string.IsNullOrEmpty(HiddenField_deletedPhotoIds.Value))
+            {
+                var ids = HiddenField_deletedPhotoIds.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var id in ids) deletedIds.Add(id.Trim());
+            }
 
+            // --- 步驟 B: 計算「DB 有效照片數」 ---
+            int dbValidCount = 0;
             // 嘗試解析目前 Session 中的 ID
             if (int.TryParse(this.setHealthID, out int hid) && hid > 0)
             {
                 var list = system_health.GetHealthPhotos(hid);
-                dbPhotoCount = list.Count;
-                // 取出這筆健檢紀錄下，所有真正的照片 ID
-                dbPhotoIds = list.Select(p => p.photoID).ToList();
+
+                // DB 裡有的照片，且「不在」刪除清單裡的，才算有效
+                dbValidCount = list.Count(p => !deletedIds.Contains(p.photoID.ToString()));
             }
 
-            // 計算 "有效" 刪除數量
-            int validDeleteCount = 0;
-            if (!string.IsNullOrEmpty(HiddenField_deletedPhotoIds.Value))
+            // --- 步驟 C: 計算「暫存 (HiddenField) 有效照片數」---
+            int tempValidCount = 0;
+            string existingJson = HiddenField_existingPhotosData.Value;
+            if (!string.IsNullOrEmpty(existingJson))
             {
-                // 1. 解析前端傳來的 ID 字串
-                string[] rawIds = HiddenField_deletedPhotoIds.Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (string rawId in rawIds)
+                try
                 {
-                    if (int.TryParse(rawId, out int id))
+                    var jsonList = JsonConvert.DeserializeObject<List<PhotoJsonModel>>(existingJson);
+                    if (jsonList != null)
                     {
-                        // 防止有人亂傳假 ID 來騙過數量檢查
-                        if (dbPhotoIds.Contains(id))
-                        {
-                            validDeleteCount++;
-                        }
+                        // 邏輯：
+                        // 1. Key 是負數 (代表是暫存檔)
+                        // 2. Key 不在刪除清單裡
+                        tempValidCount = jsonList.Count(p =>
+                            long.TryParse(p.key, out long k) && k < 0 &&
+                            !deletedIds.Contains(p.key));
                     }
                 }
+                catch { }
             }
 
+            // --- 步驟 D: 計算「這次新上傳」 ---
             int newUploadCount = FileUpload_pendingPhotos.HasFiles ? FileUpload_pendingPhotos.PostedFiles.Count : 0;
 
-            // 計算結果 
-            int finalCount = (dbPhotoCount - validDeleteCount) + newUploadCount;
+            // --- 步驟 E: 總結算 ---
+            int finalCount = dbValidCount + tempValidCount + newUploadCount;
 
             if (finalCount > 5)
             {
-                errors.Add($"照片數量限制為 5 張 (現有{dbPhotoCount} - 刪除{validDeleteCount} + 新增{newUploadCount} = {finalCount} 張)。請確認您的刪除操作是否正確。");
+                int existingCount = dbValidCount + tempValidCount;
+                errors.Add($"照片數量限制為 5 張 (現有 {existingCount} + 新增 {newUploadCount} = {finalCount} 張)。");
             }
+
+            // --- 步驟 F: 檢查新檔案格式 (維持您原本邏輯) ---
             if (FileUpload_pendingPhotos.HasFiles)
             {
                 foreach (HttpPostedFile file in FileUpload_pendingPhotos.PostedFiles)
                 {
+                    // 檢查副檔名 
                     string ext = System.IO.Path.GetExtension(file.FileName).ToLower();
-                    // 檢查副檔名
-                    if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
+                    if (!PhotoAllowedExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
                     {
-                        errors.Add($"照片格式錯誤：{file.FileName} (僅支援 .jpg, .jpeg, .png)");
+
+                        string allowedExtMsg = string.Join(", ", PhotoAllowedExtensions);
+                        errors.Add($"照片格式錯誤：{file.FileName} (僅支援 {allowedExtMsg})");
                     }
-                    // 檢查大小 (10MB = 10 * 1024 * 1024 bytes)
-                    if (file.ContentLength > 10 * 1024 * 1024)
+
+                    // 檢查大小
+                    if (file.ContentLength > PhotoMaxSizeBytes)
                     {
                         double sizeMB = (double)file.ContentLength / (1024 * 1024);
                         errors.Add($"照片大小超限：{file.FileName} ({sizeMB:0.00} MB，上限為 10 MB)");
@@ -958,16 +1192,16 @@ namespace protectTreesV2.backstage.health
                 string ext = System.IO.Path.GetExtension(file.FileName).ToLower();
 
                 // 檢查副檔名
-                if (ext != ".zip")
+                if (!AttachAllowedExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase))
                 {
                     errors.Add($"附件格式錯誤：{file.FileName} (僅支援 .zip)");
                 }
 
                 // 檢查大小 (30MB = 30 * 1024 * 1024 bytes)
-                if (file.ContentLength > 30 * 1024 * 1024)
+                if (file.ContentLength > AttachMaxSizeBytes)
                 {
                     double sizeMB = (double)file.ContentLength / (1024 * 1024);
-                    errors.Add($"附件大小超限：{file.FileName} ({sizeMB:0.00} MB，上限為 30 MB)");
+                    errors.Add($"附件大小超限：{file.FileName} ({sizeMB:0.00} MB，上限為 {AttachMaxSizeBytes} MB)");
                 }
             }
 
@@ -1057,47 +1291,62 @@ namespace protectTreesV2.backstage.health
 
         private void ProcessPhotos(int healthId, int accountId)
         {
-            // -----------------------------------------------------------
-            // 批次刪除 (Batch Delete)
-            // -----------------------------------------------------------
+            
+            // 解析前端傳來的 Metadata 
+            string jsonMeta = HiddenField_photoMetadata.Value;
+            List<PhotoJsonModel> metaList = new List<PhotoJsonModel>();
+            if (!string.IsNullOrEmpty(jsonMeta))
+            {
+                try { metaList = JsonConvert.DeserializeObject<List<PhotoJsonModel>>(jsonMeta) ?? new List<PhotoJsonModel>(); } catch { }
+            }
+
+            // 解析刪除清單 
+            HashSet<string> deletedKeySet = new HashSet<string>();
             string deletedIdsStr = HiddenField_deletedPhotoIds.Value;
             if (!string.IsNullOrEmpty(deletedIdsStr))
             {
-                List<int> idsToDelete = new List<int>();
-                string[] rawIds = deletedIdsStr.Split(',');
-
-                foreach (string idStr in rawIds)
-                {
-                    if (int.TryParse(idStr, out int pid) && pid > 0)
-                    {
-                        idsToDelete.Add(pid);
-                    }
-                }
-
-                // 如果有要刪除的 ID，一次送進 Service 處理
-                if (idsToDelete.Count > 0)
-                {
-                    system_health.DeleteHealthPhotos(healthId, idsToDelete, accountId);
-                }
+                var rawIds = deletedIdsStr.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var id in rawIds) deletedKeySet.Add(id.Trim());
             }
 
-            // -----------------------------------------------------------
-            // 解析前端 Metadata (用於更新備註與對應新上傳檔案)
-            // -----------------------------------------------------------
-            string jsonMeta = HiddenField_photoMetadata.Value;
-            if (string.IsNullOrEmpty(jsonMeta)) return;
+            // 建立 Metadata 查找表
+            // Lookup A: 給「舊照片」與「暫存檔」用 (用 Key 找 Caption)
+            var captionByKeyLookup = metaList.ToDictionary(m => m.key, m => m.caption);
 
-            var metaList = JsonConvert.DeserializeObject<List<PhotoMeta>>(jsonMeta);
+            // Lookup B: 給「新上傳檔案 (FileUpload)」用 (用 檔名 找 Metadata Queue)
+            // 只找 Key < 0 的新資料，並依檔名分組排隊，解決同名對應問題
+            var newFileMetaLookup = metaList
+                .Where(m => int.TryParse(m.key, out int k) && k < 0)
+                .GroupBy(m => Path.GetFileName(m.fileName ?? ""))
+                .ToDictionary(g => g.Key, g => new Queue<PhotoJsonModel>(g));
 
-            // -----------------------------------------------------------
-            // 批次更新舊照片備註 (Batch Update Captions)
-            // -----------------------------------------------------------
+            // 1-4. 準備目標資料夾
+            string targetVirtualDir = $@"~/_file/health/img/{healthId}/";
+            string targetPhysicalDir = Server.MapPath(targetVirtualDir);
+            if (!Directory.Exists(targetPhysicalDir)) Directory.CreateDirectory(targetPhysicalDir);
+
+
+            //刪除照片
+            List<int> dbIdsToDelete = new List<int>();
+            foreach (string key in deletedKeySet)
+            {
+                if (int.TryParse(key, out int pid) && pid > 0)
+                {
+                    dbIdsToDelete.Add(pid);
+                }
+            }
+            if (dbIdsToDelete.Count > 0)
+            {
+                system_health.DeleteHealthPhotos(healthId, dbIdsToDelete, accountId);
+            }
+
+
+            //更新備註
             List<TreeHealthPhoto> updates = new List<TreeHealthPhoto>();
-
             foreach (var item in metaList)
             {
-                // key > 0 代表是資料庫已存在的舊照片
-                if (int.TryParse(item.key, out int pid) && pid > 0)
+                // 條件：Key > 0 且 不在刪除名單中
+                if (int.TryParse(item.key, out int pid) && pid > 0 && !deletedKeySet.Contains(item.key))
                 {
                     updates.Add(new TreeHealthPhoto
                     {
@@ -1106,68 +1355,122 @@ namespace protectTreesV2.backstage.health
                     });
                 }
             }
-
-            // 若有變更，一次送出更新
             if (updates.Count > 0)
             {
                 system_health.UpdateHealthPhotoCaptions(healthId, updates);
             }
 
-            // -----------------------------------------------------------
-            // 處理新照片上傳 (Insert)
-            // -----------------------------------------------------------
+
+            //處理暫存檔
+            string existingJson = HiddenField_existingPhotosData.Value;
+            if (!string.IsNullOrEmpty(existingJson))
+            {
+                try
+                {
+                    var existingList = JsonConvert.DeserializeObject<List<PhotoJsonModel>>(existingJson);
+                    if (existingList != null)
+                    {
+                        foreach (var p in existingList)
+                        {
+                            // 條件：是暫存檔 (Key < 0) 且 沒有被刪除
+                            if (long.TryParse(p.key, out long key) && key < 0 && !deletedKeySet.Contains(p.key))
+                            {
+                                // p.filePath 是 "~/_file/health/temp/GUID_xxx.jpg"
+                                string tempPath = Server.MapPath(p.filePath);
+
+                                if (File.Exists(tempPath))
+                                {
+                                    // 取得最新的 Caption
+                                    string caption = captionByKeyLookup.ContainsKey(p.key) ? captionByKeyLookup[p.key] : p.caption;
+                                    string baseFileName = $"{DateTime.Now.Ticks}_{p.fileName}";
+                                    string fullPath = Path.Combine(targetPhysicalDir, baseFileName);
+                                    string finalSaveName = baseFileName;
+
+                                    int counter = 1;
+                                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(baseFileName);
+                                    string fileExt = Path.GetExtension(baseFileName);
+
+                                    while (File.Exists(fullPath))
+                                    {
+                                        finalSaveName = $"{fileNameWithoutExt}_({counter}){fileExt}";
+                                        fullPath = Path.Combine(targetPhysicalDir, finalSaveName);
+                                        counter++;
+                                    }
+                                    try
+                                    {
+                                        File.Move(tempPath, fullPath);
+                                        TreeHealthPhoto photo = new TreeHealthPhoto
+                                        {
+                                            healthID = healthId,
+                                            fileName = p.fileName,
+                                            filePath = targetVirtualDir + finalSaveName,
+                                            fileSize = (int)new FileInfo(fullPath).Length,
+                                            caption = caption
+                                        };
+                                        system_health.InsertHealthPhoto(photo, accountId);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // 搬移失敗處理 (Log or Ignore)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { /* JSON 解析失敗忽略 */ }
+            }
+
+
+            //處理新的上傳
             if (FileUpload_pendingPhotos.HasFiles)
             {
-                // 路徑結構：~/_file/health/img/{healthID}/
-                string virtualDir = $@"~/_file/health/img/{healthId}/";
-                string physicalPath = Server.MapPath(virtualDir);
-
-                // 如果資料夾不存在則建立
-                if (!Directory.Exists(physicalPath)) Directory.CreateDirectory(physicalPath);
-
-                var postedFiles = FileUpload_pendingPhotos.PostedFiles;
-                int fileCount = postedFiles.Count;
-
-                for (int i = fileCount - 1; i >= 0; i--)
+                var files = FileUpload_pendingPhotos.PostedFiles;
+                for (int i = files.Count - 1; i >= 0; i--)
                 {
-                    HttpPostedFile file = postedFiles[i];
-                    // 從 metaList 找出對應的 caption (key < 0 且 fileName 吻合)
-                    // 前端 JS 生成的新照片 key 都是負數
-                    var meta = metaList.FirstOrDefault(m =>
-                        (int.TryParse(m.key, out int k) && k < 0) &&
-                        m.fileName == file.FileName);
+                    HttpPostedFile file = files[i];
+                    // 找出對應的 Metadata (Caption)
+                    // 使用 Queue 模式，避免同檔名對應錯誤
+                    string caption = "";
+                    string currentKey = "";
 
-                    string caption = meta != null ? meta.caption : "";
+                    var clientFileName = Path.GetFileName(file.FileName);
+                    if (newFileMetaLookup.ContainsKey(clientFileName) && newFileMetaLookup[clientFileName].Count > 0)
+                    {
+                        // 取出並消耗一個 Metadata
+                        var meta = newFileMetaLookup[clientFileName].Dequeue();
+                        caption = meta.caption;
+                        currentKey = meta.key;
 
+                        // 如果這個 Key 已經被標記刪除，這張檔案就不存了！
+                        if (deletedKeySet.Contains(currentKey)) continue;
+                    }
+
+                    // --- 處理檔名重複邏輯 ---
                     string baseFileName = $"{DateTime.Now.Ticks}_{file.FileName}";
-                    string fullPath = Path.Combine(physicalPath, baseFileName);
-
-                    // 最後確定的檔名
+                    string fullPath = Path.Combine(targetPhysicalDir, baseFileName);
                     string finalSaveName = baseFileName;
 
-                    //防止檔名重複(若存在則自動改名)
                     int counter = 1;
                     string fileNameWithoutExt = Path.GetFileNameWithoutExtension(baseFileName);
                     string fileExt = Path.GetExtension(baseFileName);
 
                     while (File.Exists(fullPath))
                     {
-                        // 發現重複！改名為: {Ticks}_{OriginalName}_(1).jpg
                         finalSaveName = $"{fileNameWithoutExt}_({counter}){fileExt}";
-                        fullPath = Path.Combine(physicalPath, finalSaveName);
+                        fullPath = Path.Combine(targetPhysicalDir, finalSaveName);
                         counter++;
                     }
-                    // -----------------------------------------------------------
 
-                    // 存檔
+                    // 存檔 
                     file.SaveAs(fullPath);
 
-                    // 寫入 DB
+                    // 寫入 DB 
                     TreeHealthPhoto photo = new TreeHealthPhoto
                     {
                         healthID = healthId,
-                        fileName = file.FileName,        // 原始檔名
-                        filePath = virtualDir + finalSaveName, // 相對路徑
+                        fileName = clientFileName,
+                        filePath = targetVirtualDir + finalSaveName,
                         fileSize = file.ContentLength,
                         caption = caption
                     };
@@ -1186,52 +1489,56 @@ namespace protectTreesV2.backstage.health
             string finalDirPhysical = Server.MapPath(finalDirVirtual);
             if (!Directory.Exists(finalDirPhysical)) Directory.CreateDirectory(finalDirPhysical);
 
-            // 解析 HiddenField (取得暫存檔資訊)
+            bool isDeleted = HiddenField_isFileDeleted.Value == "true";
+
+            // 解析 HiddenField (取得暫存檔資訊) - 只有「未刪除」才需要解析
             AttachmentJsonModel jsonFile = null;
-            if (!string.IsNullOrEmpty(HiddenField_existingFileData.Value))
+            if (!isDeleted && !string.IsNullOrEmpty(HiddenField_existingFileData.Value))
             {
-                try { jsonFile = JsonConvert.DeserializeObject<AttachmentJsonModel>(HiddenField_existingFileData.Value); } catch { }
+                try { jsonFile = JsonConvert.DeserializeObject<AttachmentJsonModel>(HiddenField_existingFileData.Value); }
+                catch { }
             }
 
             // ----------------------------------------------------------------------
-            //  決定資料來源與操作模式
+            // 決定資料來源與操作模式
             // ----------------------------------------------------------------------
             bool hasNewFile = false;
-            string sourceFileName = "";
+            string sourceOriginalName = ""; // 使用者看到的原始檔名
+            string tempPathToMove = null;   // 若是 temp 來源，這裡放實體路徑
 
             // 模式 A: 來自 FileUpload (優先)
             if (FileUpload_attachment.HasFile)
             {
-                sourceFileName = FileUpload_attachment.FileName;
+                sourceOriginalName = Path.GetFileName(FileUpload_attachment.FileName);
                 hasNewFile = true;
             }
             // 模式 B: 來自 Temp 暫存檔
             else if (jsonFile != null && jsonFile.isTemp && !string.IsNullOrEmpty(jsonFile.filePath))
             {
-                string tempPath = Server.MapPath(jsonFile.filePath);
-                if (File.Exists(tempPath))
+                string tempPhysicalPath = Server.MapPath(jsonFile.filePath);
+                if (File.Exists(tempPhysicalPath))
                 {
-                    sourceFileName = jsonFile.fileName;
+                    sourceOriginalName = Path.GetFileName(jsonFile.fileName);
+                    tempPathToMove = tempPhysicalPath;
                     hasNewFile = true;
                 }
             }
 
             // ----------------------------------------------------------------------
-            // 執行處理 (如有新檔 -> 取代舊檔)
+            // Case 1: 有新檔（上傳或 temp） 
             // ----------------------------------------------------------------------
             if (hasNewFile)
             {
-                //刪除該樹的所有舊附件紀錄
+                // 刪除舊 DB 紀錄（你是刪全部，OK）
                 var oldAttachments = system_health.GetHealthAttachments(healthId);
                 foreach (var oldAtt in oldAttachments)
-                {
                     system_health.DeleteHealthAttachment(healthId, oldAtt.attachmentID, accountId);
-                }
 
-                // 產生安全的唯一檔名
-                string baseFileName = $"{DateTime.Now.Ticks}_{sourceFileName}";
+                // 產生安全唯一檔名
+                string baseFileName = $"{DateTime.Now.Ticks}_{sourceOriginalName}";
                 string finalPath = Path.Combine(finalDirPhysical, baseFileName);
                 string finalNameOnly = baseFileName;
+
                 int counter = 1;
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(baseFileName);
                 string fileExt = Path.GetExtension(baseFileName);
@@ -1243,42 +1550,43 @@ namespace protectTreesV2.backstage.health
                     counter++;
                 }
 
-                // 執行存檔 
+                // 存檔/搬移
                 if (FileUpload_attachment.HasFile)
                 {
                     FileUpload_attachment.SaveAs(finalPath);
                 }
-                else
+                else if (tempPathToMove != null)
                 {
-                    string tempPath = Server.MapPath(jsonFile.filePath);
-                    if (File.Exists(tempPath))
-                    {
-                        File.Move(tempPath, finalPath);
-                    }
+                    File.Move(tempPathToMove, finalPath);
                 }
 
-                // 寫入 DB
-                TreeHealthAttachment att = new TreeHealthAttachment
+                // 寫 DB（fileName 放原始檔名，filePath 放系統路徑）
+                var att = new TreeHealthAttachment
                 {
                     healthID = healthId,
-                    fileName = sourceFileName, // 顯示給使用者看的原始檔名
-                    filePath = finalDirVirtual + finalNameOnly, // 系統實際儲存路徑
+                    fileName = sourceOriginalName,
+                    filePath = finalDirVirtual + finalNameOnly,
                     fileSize = (int)new FileInfo(finalPath).Length,
                     description = "健檢附件"
                 };
                 system_health.InsertHealthAttachment(att, accountId);
+
+                return;
             }
+
             // ----------------------------------------------------------------------
-            // 處理單純刪除 (無新檔，但標記刪除)
+            // Case 2: 沒新檔，但標記刪除 -> 刪除舊附件
             // ----------------------------------------------------------------------
-            else if (HiddenField_isFileDeleted.Value == "true")
+            if (isDeleted)
             {
                 var oldAttachments = system_health.GetHealthAttachments(healthId);
                 foreach (var oldAtt in oldAttachments)
-                {
                     system_health.DeleteHealthAttachment(healthId, oldAtt.attachmentID, accountId);
-                }
+
+                return;
             }
+
+            // Case 3: 沒新檔也沒刪除 -> 不動（保留舊附件）
         }
 
         protected void LinkButton_cancel_Click(object sender, EventArgs e)

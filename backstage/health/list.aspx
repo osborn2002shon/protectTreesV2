@@ -186,6 +186,63 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="formCard card mb-4">
+                        <div class="card-header">基本資料</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <%-- 系統紀錄編號 --%>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label text-muted">系統紀錄編號</label>
+                                    <div class="fw-bold ">
+                                        <asp:Label ID="lblModal_healthId" runat="server"></asp:Label>
+                                    </div>
+                                </div>
+                                <%-- 系統樹籍編號 --%>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label text-muted">系統樹籍編號</label>
+                                    <div class="fw-bold">
+                                        <asp:Label ID="lblModal_systemTreeNo" runat="server"></asp:Label>
+                                    </div>
+                                </div>
+                                <%-- 資料狀態 --%>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label text-muted">資料狀態</label>
+                                    <div class="fw-bold">
+                                        <asp:Label ID="lblModal_status" runat="server"></asp:Label>
+                                    </div>
+                                </div>
+                                <%-- 所在地 --%>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label text-muted">所在地</label>
+                                    <div class="fw-bold">
+                                        <asp:Label ID="lblModal_location" runat="server"></asp:Label>
+                                    </div>
+                                </div>
+                                <%-- 樹種及學名 --%>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label text-muted">樹種及學名</label>
+                                    <div class="fw-bold">
+                                        <asp:Label ID="lblModal_species" runat="server"></asp:Label>
+                                    </div>
+                                </div>
+                                <%-- 最後更新 --%>
+                                <div class="col-md-4 col-sm-6">
+                                    <label class="form-label text-muted">最後更新</label>
+                                    <div class="fw-bold">
+                                        <asp:Label ID="lblModal_lastUpdate" runat="server"></asp:Label>
+                                    </div>
+                                </div>
+                                <%-- 備註 --%>
+                              <%--  <div class="col-12">
+                                    <label class="form-label text-muted">備註</label>
+                                    <div class="fw-bold">
+                                        <asp:Label ID="lblModal_Memo" runat="server"></asp:Label>
+                                    </div>
+                                </div>--%>
+                            </div>
+                        </div>
+                    </div>
+
                     <uc1:uc_healthRecordModal runat="server" id="uc_healthRecordModal" />
                 </div>
             </div>

@@ -258,7 +258,7 @@ namespace protectTreesV2.Health
 
             // 顯示狀態
             public string dataStatusText
-                => dataStatus == 1 ? "定稿" : "草稿";
+                => dataStatus == 1 ? enum_healthRecordStatus.定稿.ToString() : enum_healthRecordStatus.草稿.ToString();
 
             // 顯示最後更新時間
             public string lastUpdateDisplay

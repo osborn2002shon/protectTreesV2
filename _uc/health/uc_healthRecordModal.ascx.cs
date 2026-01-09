@@ -23,16 +23,9 @@ namespace protectTreesV2._uc.health
             phEmpty.Visible = false;
 
             // 1. 基本資料
-            litHealthId.Text = record.healthID.ToString(CultureInfo.InvariantCulture);
-            litSystemTreeNo.Text = FormatText(record.systemTreeNo);
-            litLocation.Text = FormatText(CombineLocation(record.cityName, record.areaName));
-            litSpecies.Text = FormatText(record.speciesName);
             litSurveyDate.Text = FormatText(record.surveyDateDisplay);
             litSurveyor.Text = FormatText(record.surveyor);
-            litStatus.Text = FormatText(record.dataStatusText);
             litTreeSign.Text = FormatText(GetTreeSignStatusText(record.treeSignStatus));
-            litLastUpdate.Text = FormatText(record.lastUpdateDisplay);
-            litMemo.Text = FormatText(record.memo);
 
             // 2. 座標與規格
             litLatitude.Text = FormatCoordinate(record.latitude);
@@ -136,16 +129,10 @@ namespace protectTreesV2._uc.health
         private void ClearContent()
         {
             // 將所有 Literal 清空
-            litHealthId.Text = string.Empty;
-            litSystemTreeNo.Text = string.Empty;
-            litLocation.Text = string.Empty;
-            litSpecies.Text = string.Empty;
+           
             litSurveyDate.Text = string.Empty;
             litSurveyor.Text = string.Empty;
-            litStatus.Text = string.Empty;
             litTreeSign.Text = string.Empty;
-            litLastUpdate.Text = string.Empty;
-            litMemo.Text = string.Empty;
             litLatitude.Text = string.Empty;
             litLongitude.Text = string.Empty;
             litTreeHeight.Text = string.Empty;
