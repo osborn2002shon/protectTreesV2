@@ -39,6 +39,50 @@ namespace protectTreesV2.backstage.care
 
         protected global::System.Web.UI.WebControls.TextBox TextBox_reviewer;
 
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_crownStatusNormal;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_crownStatusOther;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_trunkStatusNormal;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_trunkStatusOther;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_rootStatusNormal;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_rootStatusOther;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_envStatusNormal;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_envStatusOther;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_adjacentStatusNormal;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_adjacentStatusOther;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task1None;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task1Do;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task2None;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task2Do;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task3None;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task3Do;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task4None;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task4Do;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task5None;
+
+        protected global::System.Web.UI.WebControls.RadioButton RadioButton_task5Do;
+
+        protected global::System.Web.UI.WebControls.Repeater Repeater_carePhotos;
+
+        protected global::System.Web.UI.WebControls.Button Button_addCarePhotoBlock;
+
         protected global::System.Web.UI.WebControls.Button Button_save;
 
         protected global::System.Web.UI.WebControls.Button Button_temp;

@@ -121,12 +121,12 @@
                     <div class="col-md-2 fw-semibold">1. 樹冠枝葉</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="crownStatus" id="crownStatusNormal" value="normal" checked="checked" />
-                            <label class="form-check-label" for="crownStatusNormal">枝葉茂密無枯枝</label>
+                            <asp:RadioButton ID="RadioButton_crownStatusNormal" runat="server" GroupName="crownStatus" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_crownStatusNormal.ClientID %>">枝葉茂密無枯枝</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="crownStatus" id="crownStatusOther" value="other" />
-                            <label class="form-check-label" for="crownStatusOther">有其他異狀</label>
+                            <asp:RadioButton ID="RadioButton_crownStatusOther" runat="server" GroupName="crownStatus" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_crownStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="crownOptions" class="option-group mt-2">
                             <div class="form-check">
@@ -159,12 +159,12 @@
                     <div class="col-md-2 fw-semibold">2. 主莖幹</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="trunkStatus" id="trunkStatusNormal" value="normal" checked="checked" />
-                            <label class="form-check-label" for="trunkStatusNormal">完好健康無異狀</label>
+                            <asp:RadioButton ID="RadioButton_trunkStatusNormal" runat="server" GroupName="trunkStatus" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_trunkStatusNormal.ClientID %>">完好健康無異狀</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="trunkStatus" id="trunkStatusOther" value="other" />
-                            <label class="form-check-label" for="trunkStatusOther">有其他異狀</label>
+                            <asp:RadioButton ID="RadioButton_trunkStatusOther" runat="server" GroupName="trunkStatus" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_trunkStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="trunkOptions" class="option-group mt-2">
                             <div class="form-check">
@@ -207,12 +207,12 @@
                     <div class="col-md-2 fw-semibold">3. 根部及地際部</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="rootStatus" id="rootStatusNormal" value="normal" checked="checked" />
-                            <label class="form-check-label" for="rootStatusNormal">根部完好無異狀</label>
+                            <asp:RadioButton ID="RadioButton_rootStatusNormal" runat="server" GroupName="rootStatus" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_rootStatusNormal.ClientID %>">根部完好無異狀</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="rootStatus" id="rootStatusOther" value="other" />
-                            <label class="form-check-label" for="rootStatusOther">有其他異狀</label>
+                            <asp:RadioButton ID="RadioButton_rootStatusOther" runat="server" GroupName="rootStatus" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_rootStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="rootOptions" class="option-group mt-2">
                             <div class="form-check">
@@ -247,12 +247,12 @@
                     <div class="col-md-2 fw-semibold">4. 生育地環境</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="envStatus" id="envStatusNormal" value="normal" checked="checked" />
-                            <label class="form-check-label" for="envStatusNormal">良好無異狀</label>
+                            <asp:RadioButton ID="RadioButton_envStatusNormal" runat="server" GroupName="envStatus" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_envStatusNormal.ClientID %>">良好無異狀</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="envStatus" id="envStatusOther" value="other" />
-                            <label class="form-check-label" for="envStatusOther">有其他異狀</label>
+                            <asp:RadioButton ID="RadioButton_envStatusOther" runat="server" GroupName="envStatus" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_envStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="envOptions" class="option-group mt-2">
                             <div class="form-check">
@@ -295,12 +295,12 @@
                     <div class="col-md-2 fw-semibold">5. 樹冠或主莖幹與鄰接物</div>
                     <div class="col-md-10">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="adjacentStatus" id="adjacentStatusNormal" value="normal" checked="checked" />
-                            <label class="form-check-label" for="adjacentStatusNormal">無鄰接物</label>
+                            <asp:RadioButton ID="RadioButton_adjacentStatusNormal" runat="server" GroupName="adjacentStatus" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_adjacentStatusNormal.ClientID %>">無鄰接物</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="adjacentStatus" id="adjacentStatusOther" value="other" />
-                            <label class="form-check-label" for="adjacentStatusOther">有其他異狀</label>
+                            <asp:RadioButton ID="RadioButton_adjacentStatusOther" runat="server" GroupName="adjacentStatus" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_adjacentStatusOther.ClientID %>">有其他異狀</label>
                         </div>
                         <div id="adjacentOptions" class="option-group mt-2">
                             <div class="form-check">
@@ -332,12 +332,12 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">受保護樹木若有枝條枯損或懸掛等危害公共安全疑慮之情形，宜立即回報並盡速清除</div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task1Status" id="task1None" value="none" checked="checked" />
-                            <label class="form-check-label" for="task1None">無須處理</label>
+                            <asp:RadioButton ID="RadioButton_task1None" runat="server" GroupName="task1Status" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_task1None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task1Status" id="task1Do" value="do" />
-                            <label class="form-check-label" for="task1Do">處理方式</label>
+                            <asp:RadioButton ID="RadioButton_task1Do" runat="server" GroupName="task1Status" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_task1Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task1Note" class="form-control mt-2" placeholder="請填寫說明" />
                     </div>
@@ -348,12 +348,12 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">包含改良土壤結構通透氣及排水、清除過度覆土、拓展植穴空間等作業</div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task2Status" id="task2None" value="none" checked="checked" />
-                            <label class="form-check-label" for="task2None">無須處理</label>
+                            <asp:RadioButton ID="RadioButton_task2None" runat="server" GroupName="task2Status" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_task2None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task2Status" id="task2Do" value="do" />
-                            <label class="form-check-label" for="task2Do">處理方式</label>
+                            <asp:RadioButton ID="RadioButton_task2Do" runat="server" GroupName="task2Status" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_task2Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task2Note" class="form-control mt-2" placeholder="請填寫說明" />
                     </div>
@@ -364,12 +364,12 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">受保護樹木如有病害、蟲害等情況，須進一步診斷查明原因後再進行治療</div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task3Status" id="task3None" value="none" checked="checked" />
-                            <label class="form-check-label" for="task3None">無須處理</label>
+                            <asp:RadioButton ID="RadioButton_task3None" runat="server" GroupName="task3Status" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_task3None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task3Status" id="task3Do" value="do" />
-                            <label class="form-check-label" for="task3Do">處理方式</label>
+                            <asp:RadioButton ID="RadioButton_task3Do" runat="server" GroupName="task3Status" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_task3Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task3Note" class="form-control mt-2" placeholder="請填寫說明" />
                     </div>
@@ -380,12 +380,12 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">受保護樹木若經評估建議追給適量緩效性有機質肥料，宜配合調查進行</div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task4Status" id="task4None" value="none" checked="checked" />
-                            <label class="form-check-label" for="task4None">無須處理</label>
+                            <asp:RadioButton ID="RadioButton_task4None" runat="server" GroupName="task4Status" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_task4None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task4Status" id="task4Do" value="do" />
-                            <label class="form-check-label" for="task4Do">處理方式</label>
+                            <asp:RadioButton ID="RadioButton_task4Do" runat="server" GroupName="task4Status" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_task4Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task4Note" class="form-control mt-2" placeholder="請填寫說明" />
                     </div>
@@ -396,12 +396,12 @@
                     <div class="col-md-10">
                         <div class="text-muted mb-2">當受保護樹木進行維護作業時，應設立相關安全衛生防護措施</div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task5Status" id="task5None" value="none" checked="checked" />
-                            <label class="form-check-label" for="task5None">無須處理</label>
+                            <asp:RadioButton ID="RadioButton_task5None" runat="server" GroupName="task5Status" CssClass="form-check-input" Checked="true" />
+                            <label class="form-check-label" for="<%= RadioButton_task5None.ClientID %>">無須處理</label>
                         </div>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="task5Status" id="task5Do" value="do" />
-                            <label class="form-check-label" for="task5Do">處理方式</label>
+                            <asp:RadioButton ID="RadioButton_task5Do" runat="server" GroupName="task5Status" CssClass="form-check-input" />
+                            <label class="form-check-label" for="<%= RadioButton_task5Do.ClientID %>">處理方式</label>
                         </div>
                         <input type="text" id="task5Note" class="form-control mt-2" placeholder="請填寫說明" />
                     </div>
@@ -410,9 +410,28 @@
 
             <div class="section-block">
                 <div class="section-subtitle">養護照片上傳</div>
-                <div id="carePhotoBlocks"></div>
+                <asp:Repeater ID="Repeater_carePhotos" runat="server">
+                    <ItemTemplate>
+                        <div class="photo-block">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">施作項目名稱</label>
+                                    <asp:TextBox ID="TextBox_itemName" runat="server" CssClass="form-control" placeholder="例如：枯枝清除" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">施作前照片</label>
+                                    <asp:FileUpload ID="FileUpload_beforePhoto" runat="server" CssClass="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">施作後照片</label>
+                                    <asp:FileUpload ID="FileUpload_afterPhoto" runat="server" CssClass="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                </asp:Repeater>
                 <div class="text-center">
-                    <button type="button" id="addCarePhotoBlock" class="btn btn-outline-primary">新增照片區塊</button>
+                    <asp:Button ID="Button_addCarePhotoBlock" runat="server" Text="新增照片區塊" CssClass="btn btn-outline-primary" OnClick="Button_addCarePhotoBlock_Click" />
                 </div>
             </div>
 
@@ -456,33 +475,6 @@
             toggleTask('task3Status', 'task3Note');
             toggleTask('task4Status', 'task4Note');
             toggleTask('task5Status', 'task5Note');
-
-            var photoIndex = 0;
-            function addPhotoBlock() {
-                photoIndex += 1;
-                var blockHtml = `
-                    <div class="photo-block">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">施作項目名稱</label>
-                                <input type="text" name="carePhotoItem_${photoIndex}" class="form-control" placeholder="例如：枯枝清除" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">施作前照片</label>
-                                <input type="file" name="carePhotoBefore_${photoIndex}" class="form-control" accept="image/*" />
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">施作後照片</label>
-                                <input type="file" name="carePhotoAfter_${photoIndex}" class="form-control" accept="image/*" />
-                            </div>
-                        </div>
-                    </div>
-                `;
-                $('#carePhotoBlocks').append(blockHtml);
-            }
-
-            $('#addCarePhotoBlock').on('click', addPhotoBlock);
-            addPhotoBlock();
         });
     </script>
 </asp:Content>
