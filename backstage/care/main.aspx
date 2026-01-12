@@ -69,6 +69,23 @@
             ShowHeaderWhenEmpty="true" OnPageIndexChanging="GridView_list_PageIndexChanging" OnRowCommand="GridView_list_RowCommand" OnRowDataBound="GridView_list_RowDataBound"
             OnSorting="GridView_list_Sorting">
             <Columns>
+                <asp:TemplateField HeaderText="上傳<br/>檔案製作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center">
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton_addToUpload" runat="server"
+                            CssClass="btn btn-secondary"
+                            CommandName="_AddToUpload"
+                            CommandArgument='<%# Eval("treeID") %>'
+                            Visible='<%# !(bool)Eval("isAdded") %>'>
+                            加入
+                        </asp:LinkButton>
+
+                        <asp:Label ID="Label_added" runat="server"
+                            Text="已加入"
+                            Visible='<%# (bool)Eval("isAdded") %>'>
+                        </asp:Label>
+                    </ItemTemplate>
+                </asp:TemplateField>
+
                 <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" SortExpression="systemTreeNo" HtmlEncode="false" />
                 <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />
 
@@ -126,6 +143,45 @@
                 <div class="text-center py-3 text-muted">
                     <p>查無符合條件的樹籍資料。</p>
                 </div>
+            </EmptyDataTemplate>
+        </asp:GridView>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col text-center">
+            <asp:LinkButton ID="LinkButton_generateExcel" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_generateExcel_Click">
+               產製多筆上傳Excel
+            </asp:LinkButton>
+
+            <asp:LinkButton ID="LinkButton_clearList" runat="server"
+                CssClass="btn btn-outline-danger" OnClientClick="return confirm('確定要清空所有已加入的樹籍嗎？');" OnClick="LinkButton_clearList_Click">
+                清空列表
+            </asp:LinkButton>
+        </div>
+    </div>
+
+    <div class="table-responsive gv-tb mt-3">
+        <asp:GridView ID="GridView_selectedList" runat="server" CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" OnRowCommand="GridView_selectedList_RowCommand">
+            <Columns>
+                <asp:BoundField HtmlEncode="false" DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" />
+                <asp:BoundField HtmlEncode="false" DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" />
+                <asp:BoundField DataField="cityName" HeaderText="縣市" />
+                <asp:BoundField DataField="areaName" HeaderText="鄉鎮" />
+                <asp:BoundField DataField="speciesName" HeaderText="樹種" />
+                <asp:BoundField DataField="manager" HeaderText="管理人" />
+                <asp:BoundField DataField="careDate" HeaderText="最後養護" DataFormatString="{0:yyyy/MM/dd}" />
+                <asp:BoundField DataField="recorder" HeaderText="記錄人員" />
+                <asp:TemplateField HeaderText="動作" ItemStyle-Width="80px" ItemStyle-HorizontalAlign="Center">
+                    <ItemTemplate>
+                        <asp:LinkButton ID="LinkButton_remove" runat="server" CssClass="btn btn-sm btn-outline-danger"
+                            CommandName="_Remove" CommandArgument='<%# Eval("treeID") %>'>
+                            移除
+                        </asp:LinkButton>
+                    </ItemTemplate>
+                </asp:TemplateField>
+            </Columns>
+            <EmptyDataTemplate>
+                <div class="text-center py-3 text-muted">尚未加入任何樹籍。</div>
             </EmptyDataTemplate>
         </asp:GridView>
     </div>
