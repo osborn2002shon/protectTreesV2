@@ -12,6 +12,8 @@
     <nav class="nav nav-tabs mb-4">
         <a class="nav-link text-dark" href="main.aspx">養護管理</a>
         <a class="nav-link active" href="list.aspx">異動管理</a>
+        <a class="nav-link text-dark" href="upload.aspx">上傳多筆養護紀錄</a>
+        <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆養護照片</a>
     </nav>
 
     <div class="queryBox">

@@ -23,7 +23,7 @@ namespace protectTreesV2.Care
             public int? areaID { get; set; }
             public int? speciesID { get; set; }
             public string keyword { get; set; }
-            public string queryOption { get; set; } = "NoRecord180";
+            public string queryOption { get; set; } = "NoRecord365";
             public string sortExpression { get; set; }
             public string sortDirection { get; set; }
         }
@@ -264,7 +264,8 @@ namespace protectTreesV2.Care
                         whereClauses.Add("latest_care.careID IS NULL");
                         break;
                     case "NoRecord180":
-                        whereClauses.Add("(latest_care.careDate IS NULL OR latest_care.careDate < DATEADD(day, -180, CAST(GETDATE() AS date)))");
+                    case "NoRecord365":
+                        whereClauses.Add("(latest_care.careDate IS NULL OR latest_care.careDate < DATEADD(day, -365, CAST(GETDATE() AS date)))");
                         break;
                     default:
                         break;
