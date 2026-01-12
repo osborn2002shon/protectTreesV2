@@ -56,6 +56,24 @@
             margin-top: 6px;
             word-break: break-all;
         }
+
+        .photo-preview {
+            margin-top: 10px;
+        }
+
+        .photo-preview-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .photo-preview-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
@@ -426,7 +444,16 @@
                                         <div class="mb-2"><i class="fa-solid fa-cloud-arrow-up fa-lg"></i></div>
                                         <div>將照片拖曳到此處或點擊選擇</div>
                                         <asp:FileUpload ID="FileUpload_beforePhoto" runat="server" CssClass="d-none" accept="image/png, image/jpeg, image/jpg" />
-                                        <div class="photo-filename"></div>
+                                        <asp:Label ID="Label_beforeFileName" runat="server" CssClass="photo-filename" />
+                                        <div class="photo-preview d-none">
+                                            <asp:Image ID="Image_beforePreview" runat="server" CssClass="photo-preview-img" />
+                                            <div class="photo-preview-actions">
+                                                <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-clear-photo">刪除照片</button>
+                                            </div>
+                                        </div>
+                                        <asp:HiddenField ID="HiddenField_beforeTempKey" runat="server" CssClass="photo-temp-key" />
+                                        <asp:HiddenField ID="HiddenField_beforeDelete" runat="server" Value="0" CssClass="photo-delete-flag" />
+                                        <asp:HiddenField ID="HiddenField_beforeExistingPath" runat="server" />
                                     </div>
                                     <asp:HyperLink ID="HyperLink_beforePhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
                                 </div>
@@ -436,7 +463,16 @@
                                         <div class="mb-2"><i class="fa-solid fa-cloud-arrow-up fa-lg"></i></div>
                                         <div>將照片拖曳到此處或點擊選擇</div>
                                         <asp:FileUpload ID="FileUpload_afterPhoto" runat="server" CssClass="d-none" accept="image/png, image/jpeg, image/jpg" />
-                                        <div class="photo-filename"></div>
+                                        <asp:Label ID="Label_afterFileName" runat="server" CssClass="photo-filename" />
+                                        <div class="photo-preview d-none">
+                                            <asp:Image ID="Image_afterPreview" runat="server" CssClass="photo-preview-img" />
+                                            <div class="photo-preview-actions">
+                                                <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-clear-photo">刪除照片</button>
+                                            </div>
+                                        </div>
+                                        <asp:HiddenField ID="HiddenField_afterTempKey" runat="server" CssClass="photo-temp-key" />
+                                        <asp:HiddenField ID="HiddenField_afterDelete" runat="server" Value="0" CssClass="photo-delete-flag" />
+                                        <asp:HiddenField ID="HiddenField_afterExistingPath" runat="server" />
                                     </div>
                                     <asp:HyperLink ID="HyperLink_afterPhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
                                 </div>
@@ -539,11 +575,25 @@
             function setupPhotoDrop($dropArea) {
                 var $fileInput = $dropArea.find('input[type="file"]');
                 var $fileName = $dropArea.find('.photo-filename');
+                var $preview = $dropArea.find('.photo-preview');
+                var $previewImg = $dropArea.find('.photo-preview-img');
+                var $clearButton = $dropArea.find('.btn-clear-photo');
+                var $deleteField = $dropArea.find('.photo-delete-flag');
 
                 $fileInput.on('click', function (e) { e.stopPropagation(); });
                 $fileInput.on('change', function () {
                     var file = this.files && this.files[0];
-                    $fileName.text(file ? file.name : '');
+                    if (file) {
+                        var previewUrl = URL.createObjectURL(file);
+                        $previewImg.attr('src', previewUrl);
+                        $preview.removeClass('d-none');
+                        $fileName.text(file.name);
+                        $deleteField.val('0');
+                    } else {
+                        $previewImg.attr('src', '');
+                        $preview.addClass('d-none');
+                        $fileName.text('');
+                    }
                 });
 
                 $dropArea.on('click', function () { $fileInput.trigger('click'); });
@@ -568,6 +618,22 @@
                     $fileInput[0].files = dt.files;
                     $fileInput.trigger('change');
                 });
+
+                $clearButton.on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $fileInput.val('');
+                    $previewImg.attr('src', '');
+                    $preview.addClass('d-none');
+                    $fileName.text('');
+                    $deleteField.val('1');
+                });
+
+                if ($previewImg.attr('src')) {
+                    $preview.removeClass('d-none');
+                } else {
+                    $preview.addClass('d-none');
+                }
             }
 
             $('.photo-drop').each(function () {

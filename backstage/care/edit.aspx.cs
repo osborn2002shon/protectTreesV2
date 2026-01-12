@@ -26,7 +26,26 @@ namespace protectTreesV2.backstage.care
             public string beforeFilePath { get; set; }
             public string afterFileName { get; set; }
             public string afterFilePath { get; set; }
+            public string beforeTempKey { get; set; }
+            public string beforeTempFileName { get; set; }
+            public string beforeTempFilePath { get; set; }
+            public bool beforeDelete { get; set; }
+            public string afterTempKey { get; set; }
+            public string afterTempFileName { get; set; }
+            public string afterTempFilePath { get; set; }
+            public bool afterDelete { get; set; }
         }
+
+        [Serializable]
+        private class TempUploadInfo
+        {
+            public string Key { get; set; }
+            public string FileName { get; set; }
+            public string PhysicalPath { get; set; }
+            public string VirtualPath { get; set; }
+        }
+
+        private const string PendingUploadSessionKey = "CarePendingUploads";
 
         public int CurrentCareID
         {
@@ -46,6 +65,117 @@ namespace protectTreesV2.backstage.care
         {
             get { return ViewState["CarePhotoBlocks"] as List<CarePhotoViewModel> ?? new List<CarePhotoViewModel>(); }
             set { ViewState["CarePhotoBlocks"] = value; }
+        }
+
+        private Dictionary<string, TempUploadInfo> GetPendingUploads()
+        {
+            var pending = Session[PendingUploadSessionKey] as Dictionary<string, TempUploadInfo>;
+            if (pending == null)
+            {
+                pending = new Dictionary<string, TempUploadInfo>();
+                Session[PendingUploadSessionKey] = pending;
+            }
+            return pending;
+        }
+
+        private string GetTempFolderPath()
+        {
+            return Server.MapPath(string.Format(CultureInfo.InvariantCulture, "~/_file/care/temp/{0}/", Session.SessionID));
+        }
+
+        private TempUploadInfo GetTempUpload(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) return null;
+            var pending = GetPendingUploads();
+            return pending.ContainsKey(key) ? pending[key] : null;
+        }
+
+        private void RemoveTempUpload(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) return;
+            var pending = GetPendingUploads();
+            if (!pending.ContainsKey(key)) return;
+
+            var temp = pending[key];
+            try
+            {
+                if (!string.IsNullOrEmpty(temp.PhysicalPath) && File.Exists(temp.PhysicalPath))
+                {
+                    File.Delete(temp.PhysicalPath);
+                }
+            }
+            catch
+            {
+            }
+
+            pending.Remove(key);
+        }
+
+        private string SaveTempUpload(HttpPostedFile file, string existingKey)
+        {
+            if (file == null || file.ContentLength == 0) return existingKey;
+            if (file.ContentLength > 10 * 1024 * 1024) return existingKey;
+
+            string key = string.IsNullOrWhiteSpace(existingKey) ? Guid.NewGuid().ToString("N") : existingKey;
+            var pending = GetPendingUploads();
+            if (pending.ContainsKey(key))
+            {
+                RemoveTempUpload(key);
+            }
+
+            string originalName = Path.GetFileName(file.FileName);
+            string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, originalName);
+            string tempFolder = GetTempFolderPath();
+            Directory.CreateDirectory(tempFolder);
+
+            string physicalPath = Path.Combine(tempFolder, savedName);
+            file.SaveAs(physicalPath);
+            string virtualPath = string.Format(CultureInfo.InvariantCulture, "/_file/care/temp/{0}/{1}", Session.SessionID, savedName);
+
+            pending[key] = new TempUploadInfo
+            {
+                Key = key,
+                FileName = originalName,
+                PhysicalPath = physicalPath,
+                VirtualPath = virtualPath
+            };
+
+            return key;
+        }
+
+        private void ClearPendingUploads()
+        {
+            var pending = Session[PendingUploadSessionKey] as Dictionary<string, TempUploadInfo>;
+            if (pending != null)
+            {
+                foreach (var temp in pending.Values)
+                {
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(temp.PhysicalPath) && File.Exists(temp.PhysicalPath))
+                        {
+                            File.Delete(temp.PhysicalPath);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            Session[PendingUploadSessionKey] = null;
+
+            try
+            {
+                string folder = GetTempFolderPath();
+                if (Directory.Exists(folder))
+                {
+                    Directory.Delete(folder, true);
+                }
+            }
+            catch
+            {
+            }
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -82,7 +212,8 @@ namespace protectTreesV2.backstage.care
 
         protected void Button_addCarePhotoBlock_Click(object sender, EventArgs e)
         {
-            var blocks = CollectPhotoBlocksFromRepeater();
+            SavePendingUploadsFromRepeater();
+            var blocks = PhotoBlocks;
             blocks.Add(new CarePhotoViewModel());
             PhotoBlocks = blocks;
             BindCarePhotoBlocks();
@@ -118,6 +249,7 @@ namespace protectTreesV2.backstage.care
                 PhotoBlocks = blocks;
             }
 
+            AttachTempInfoToBlocks(blocks);
             Repeater_carePhotos.DataSource = blocks;
             Repeater_carePhotos.DataBind();
         }
@@ -138,10 +270,20 @@ namespace protectTreesV2.backstage.care
             var beforeLink = (HyperLink)e.Item.FindControl("HyperLink_beforePhoto");
             var afterLink = (HyperLink)e.Item.FindControl("HyperLink_afterPhoto");
             var deleteCheck = (CheckBox)e.Item.FindControl("CheckBox_deletePhoto");
+            var beforeImage = (Image)e.Item.FindControl("Image_beforePreview");
+            var afterImage = (Image)e.Item.FindControl("Image_afterPreview");
+            var beforeFileLabel = (Label)e.Item.FindControl("Label_beforeFileName");
+            var afterFileLabel = (Label)e.Item.FindControl("Label_afterFileName");
+            var beforeTempKey = (HiddenField)e.Item.FindControl("HiddenField_beforeTempKey");
+            var afterTempKey = (HiddenField)e.Item.FindControl("HiddenField_afterTempKey");
+            var beforeDeleteField = (HiddenField)e.Item.FindControl("HiddenField_beforeDelete");
+            var afterDeleteField = (HiddenField)e.Item.FindControl("HiddenField_afterDelete");
+            var beforeExistingPath = (HiddenField)e.Item.FindControl("HiddenField_beforeExistingPath");
+            var afterExistingPath = (HiddenField)e.Item.FindControl("HiddenField_afterExistingPath");
 
             if (beforeLink != null)
             {
-                bool hasBefore = !string.IsNullOrWhiteSpace(data.beforeFilePath);
+                bool hasBefore = !string.IsNullOrWhiteSpace(data.beforeFilePath) && !data.beforeDelete;
                 beforeLink.Visible = hasBefore;
                 beforeLink.Text = string.IsNullOrWhiteSpace(data.beforeFileName) ? "已上傳" : data.beforeFileName;
                 beforeLink.NavigateUrl = data.beforeFilePath;
@@ -149,7 +291,7 @@ namespace protectTreesV2.backstage.care
 
             if (afterLink != null)
             {
-                bool hasAfter = !string.IsNullOrWhiteSpace(data.afterFilePath);
+                bool hasAfter = !string.IsNullOrWhiteSpace(data.afterFilePath) && !data.afterDelete;
                 afterLink.Visible = hasAfter;
                 afterLink.Text = string.IsNullOrWhiteSpace(data.afterFileName) ? "已上傳" : data.afterFileName;
                 afterLink.NavigateUrl = data.afterFilePath;
@@ -158,6 +300,63 @@ namespace protectTreesV2.backstage.care
             if (deleteCheck != null)
             {
                 deleteCheck.Visible = data.photoID > 0;
+            }
+
+            if (beforeTempKey != null)
+            {
+                beforeTempKey.Value = data.beforeTempKey ?? string.Empty;
+            }
+
+            if (afterTempKey != null)
+            {
+                afterTempKey.Value = data.afterTempKey ?? string.Empty;
+            }
+
+            if (beforeDeleteField != null)
+            {
+                beforeDeleteField.Value = data.beforeDelete ? "1" : "0";
+            }
+
+            if (afterDeleteField != null)
+            {
+                afterDeleteField.Value = data.afterDelete ? "1" : "0";
+            }
+
+            if (beforeExistingPath != null)
+            {
+                beforeExistingPath.Value = data.beforeFilePath ?? string.Empty;
+            }
+
+            if (afterExistingPath != null)
+            {
+                afterExistingPath.Value = data.afterFilePath ?? string.Empty;
+            }
+
+            string beforePreview = data.beforeDelete ? null : (string.IsNullOrWhiteSpace(data.beforeTempFilePath) ? data.beforeFilePath : data.beforeTempFilePath);
+            string afterPreview = data.afterDelete ? null : (string.IsNullOrWhiteSpace(data.afterTempFilePath) ? data.afterFilePath : data.afterTempFilePath);
+
+            if (beforeImage != null)
+            {
+                beforeImage.ImageUrl = beforePreview ?? string.Empty;
+                beforeImage.Visible = !string.IsNullOrWhiteSpace(beforePreview);
+            }
+
+            if (afterImage != null)
+            {
+                afterImage.ImageUrl = afterPreview ?? string.Empty;
+                afterImage.Visible = !string.IsNullOrWhiteSpace(afterPreview);
+            }
+
+            if (beforeFileLabel != null)
+            {
+                var name = data.beforeDelete ? string.Empty : (!string.IsNullOrWhiteSpace(data.beforeTempFileName) ? data.beforeTempFileName : data.beforeFileName);
+                beforeFileLabel.Text = name ?? string.Empty;
+            }
+
+            if (afterFileLabel != null)
+            {
+                var name = data.afterDelete ? string.Empty : (!string.IsNullOrWhiteSpace(data.afterTempFileName) ? data.afterTempFileName : data.afterFileName);
+                afterFileLabel.Text = name ?? string.Empty;
             }
         }
 
@@ -316,7 +515,7 @@ namespace protectTreesV2.backstage.care
 
         protected void LinkButton_save_Click(object sender, EventArgs e)
         {
-            UpdatePhotoBlocksFromRepeater();
+            SavePendingUploadsFromRepeater();
 
             bool isFinal = CheckBox_isFinal.Checked;
 
@@ -411,6 +610,8 @@ namespace protectTreesV2.backstage.care
                 return;
             }
 
+            ClearPendingUploads();
+
             var tree = TreeService.GetTree(CurrentTreeID);
             string actionText = isNew ? "新增" : "編輯";
             string logMemo = isNew ? "新增養護" : "編輯養護";
@@ -430,6 +631,7 @@ namespace protectTreesV2.backstage.care
 
         protected void LinkButton_cancel_Click(object sender, EventArgs e)
         {
+            ClearPendingUploads();
             base.ReturnState();
         }
 
@@ -503,9 +705,7 @@ namespace protectTreesV2.backstage.care
 
         private bool HasAnyPhotoAfterChange()
         {
-            int existingCount = CurrentCareID > 0 ? system_care.GetCarePhotos(CurrentCareID).Count : 0;
-            int deletedCount = 0;
-            int newUploads = 0;
+            int totalPhotos = 0;
 
             foreach (RepeaterItem item in Repeater_carePhotos.Items)
             {
@@ -513,6 +713,12 @@ namespace protectTreesV2.backstage.care
                 var deleteCheck = (CheckBox)item.FindControl("CheckBox_deletePhoto");
                 var beforeUpload = (FileUpload)item.FindControl("FileUpload_beforePhoto");
                 var afterUpload = (FileUpload)item.FindControl("FileUpload_afterPhoto");
+                var beforeTempKey = (HiddenField)item.FindControl("HiddenField_beforeTempKey");
+                var afterTempKey = (HiddenField)item.FindControl("HiddenField_afterTempKey");
+                var beforeDeleteField = (HiddenField)item.FindControl("HiddenField_beforeDelete");
+                var afterDeleteField = (HiddenField)item.FindControl("HiddenField_afterDelete");
+                var beforeExistingPath = (HiddenField)item.FindControl("HiddenField_beforeExistingPath");
+                var afterExistingPath = (HiddenField)item.FindControl("HiddenField_afterExistingPath");
 
                 int photoId = 0;
                 if (idField != null)
@@ -522,18 +728,26 @@ namespace protectTreesV2.backstage.care
 
                 if (photoId > 0 && deleteCheck != null && deleteCheck.Checked)
                 {
-                    deletedCount++;
                     continue;
                 }
 
-                bool hasUpload = (beforeUpload != null && beforeUpload.HasFile) || (afterUpload != null && afterUpload.HasFile);
-                if (photoId == 0 && hasUpload)
-                {
-                    newUploads++;
-                }
+                bool beforeDelete = beforeDeleteField != null && beforeDeleteField.Value == "1";
+                bool afterDelete = afterDeleteField != null && afterDeleteField.Value == "1";
+                bool hasBeforeTemp = beforeTempKey != null && !string.IsNullOrWhiteSpace(beforeTempKey.Value);
+                bool hasAfterTemp = afterTempKey != null && !string.IsNullOrWhiteSpace(afterTempKey.Value);
+                bool hasBeforeUpload = beforeUpload != null && beforeUpload.HasFile;
+                bool hasAfterUpload = afterUpload != null && afterUpload.HasFile;
+                bool hasBeforeExisting = beforeExistingPath != null && !string.IsNullOrWhiteSpace(beforeExistingPath.Value);
+                bool hasAfterExisting = afterExistingPath != null && !string.IsNullOrWhiteSpace(afterExistingPath.Value);
+
+                bool beforeExists = !beforeDelete && (hasBeforeUpload || hasBeforeTemp || hasBeforeExisting);
+                bool afterExists = !afterDelete && (hasAfterUpload || hasAfterTemp || hasAfterExisting);
+
+                if (beforeExists) totalPhotos++;
+                if (afterExists) totalPhotos++;
             }
 
-            return (existingCount - deletedCount + newUploads) > 0;
+            return totalPhotos > 0;
         }
 
         private bool ProcessCarePhotos(int careId, int accountId, bool isFinal)
@@ -546,9 +760,11 @@ namespace protectTreesV2.backstage.care
             {
                 var idField = (HiddenField)item.FindControl("HiddenField_photoId");
                 var itemNameBox = (TextBox)item.FindControl("TextBox_itemName");
-                var beforeUpload = (FileUpload)item.FindControl("FileUpload_beforePhoto");
-                var afterUpload = (FileUpload)item.FindControl("FileUpload_afterPhoto");
                 var deleteCheck = (CheckBox)item.FindControl("CheckBox_deletePhoto");
+                var beforeTempKeyField = (HiddenField)item.FindControl("HiddenField_beforeTempKey");
+                var afterTempKeyField = (HiddenField)item.FindControl("HiddenField_afterTempKey");
+                var beforeDeleteField = (HiddenField)item.FindControl("HiddenField_beforeDelete");
+                var afterDeleteField = (HiddenField)item.FindControl("HiddenField_afterDelete");
 
                 int photoId = 0;
                 if (idField != null)
@@ -558,8 +774,15 @@ namespace protectTreesV2.backstage.care
 
                 string itemName = itemNameBox?.Text.Trim() ?? string.Empty;
                 bool isDelete = deleteCheck != null && deleteCheck.Checked;
-                bool hasBefore = beforeUpload != null && beforeUpload.HasFile;
-                bool hasAfter = afterUpload != null && afterUpload.HasFile;
+                bool beforeDelete = beforeDeleteField != null && beforeDeleteField.Value == "1";
+                bool afterDelete = afterDeleteField != null && afterDeleteField.Value == "1";
+
+                string beforeTempKey = beforeTempKeyField?.Value;
+                string afterTempKey = afterTempKeyField?.Value;
+                var beforeTemp = GetTempUpload(beforeTempKey);
+                var afterTemp = GetTempUpload(afterTempKey);
+                bool hasBeforeTemp = beforeTemp != null;
+                bool hasAfterTemp = afterTemp != null;
 
                 if (photoId > 0)
                 {
@@ -574,6 +797,8 @@ namespace protectTreesV2.backstage.care
                         system_care.SoftDeleteCarePhoto(photoId, accountId);
                         DeleteFileIfExists(origin.beforeFilePath);
                         DeleteFileIfExists(origin.afterFilePath);
+                        RemoveTempUpload(beforeTempKey);
+                        RemoveTempUpload(afterTempKey);
                         continue;
                     }
 
@@ -590,29 +815,45 @@ namespace protectTreesV2.backstage.care
                         afterFileSize = origin.afterFileSize
                     };
 
-                    if (hasBefore)
+                    if (hasBeforeTemp)
                     {
-                        var beforeInfo = SavePhotoFile(beforeUpload.PostedFile, uploadFolder, careId);
+                        var beforeInfo = SaveTempFile(beforeTemp, uploadFolder, careId);
                         DeleteFileIfExists(origin.beforeFilePath);
                         updated.beforeFileName = beforeInfo.fileName;
                         updated.beforeFilePath = beforeInfo.filePath;
                         updated.beforeFileSize = beforeInfo.fileSize;
+                        RemoveTempUpload(beforeTempKey);
+                    }
+                    else if (beforeDelete)
+                    {
+                        DeleteFileIfExists(origin.beforeFilePath);
+                        updated.beforeFileName = null;
+                        updated.beforeFilePath = null;
+                        updated.beforeFileSize = 0;
                     }
 
-                    if (hasAfter)
+                    if (hasAfterTemp)
                     {
-                        var afterInfo = SavePhotoFile(afterUpload.PostedFile, uploadFolder, careId);
+                        var afterInfo = SaveTempFile(afterTemp, uploadFolder, careId);
                         DeleteFileIfExists(origin.afterFilePath);
                         updated.afterFileName = afterInfo.fileName;
                         updated.afterFilePath = afterInfo.filePath;
                         updated.afterFileSize = afterInfo.fileSize;
+                        RemoveTempUpload(afterTempKey);
+                    }
+                    else if (afterDelete)
+                    {
+                        DeleteFileIfExists(origin.afterFilePath);
+                        updated.afterFileName = null;
+                        updated.afterFilePath = null;
+                        updated.afterFileSize = 0;
                     }
 
                     system_care.UpdateCarePhoto(updated);
                 }
                 else
                 {
-                    if (!hasBefore && !hasAfter)
+                    if (!hasBeforeTemp && !hasAfterTemp)
                     {
                         continue;
                     }
@@ -623,20 +864,22 @@ namespace protectTreesV2.backstage.care
                         itemName = NormalizeText(itemName)
                     };
 
-                    if (hasBefore)
+                    if (hasBeforeTemp)
                     {
-                        var beforeInfo = SavePhotoFile(beforeUpload.PostedFile, uploadFolder, careId);
+                        var beforeInfo = SaveTempFile(beforeTemp, uploadFolder, careId);
                         newPhoto.beforeFileName = beforeInfo.fileName;
                         newPhoto.beforeFilePath = beforeInfo.filePath;
                         newPhoto.beforeFileSize = beforeInfo.fileSize;
+                        RemoveTempUpload(beforeTempKey);
                     }
 
-                    if (hasAfter)
+                    if (hasAfterTemp)
                     {
-                        var afterInfo = SavePhotoFile(afterUpload.PostedFile, uploadFolder, careId);
+                        var afterInfo = SaveTempFile(afterTemp, uploadFolder, careId);
                         newPhoto.afterFileName = afterInfo.fileName;
                         newPhoto.afterFilePath = afterInfo.filePath;
                         newPhoto.afterFileSize = afterInfo.fileSize;
+                        RemoveTempUpload(afterTempKey);
                     }
 
                     system_care.InsertCarePhoto(newPhoto, accountId);
@@ -669,15 +912,31 @@ namespace protectTreesV2.backstage.care
             }
         }
 
-        private (string fileName, string filePath, int fileSize) SavePhotoFile(HttpPostedFile file, string uploadFolder, int careId)
+        private (string fileName, string filePath, int fileSize) SaveTempFile(TempUploadInfo temp, string uploadFolder, int careId)
         {
-            string originalName = Path.GetFileName(file.FileName);
+            string originalName = Path.GetFileName(temp.FileName);
             string savedName = string.Format(CultureInfo.InvariantCulture, "{0:yyyyMMddHHmmssfff}_{1}", DateTime.Now, originalName);
             string physicalPath = Path.Combine(uploadFolder, savedName);
-            file.SaveAs(physicalPath);
+
+            if (!string.IsNullOrWhiteSpace(temp.PhysicalPath) && File.Exists(temp.PhysicalPath))
+            {
+                File.Move(temp.PhysicalPath, physicalPath);
+            }
+            else
+            {
+                throw new FileNotFoundException("Temp file not found.", temp.PhysicalPath);
+            }
 
             string virtualPath = string.Format(CultureInfo.InvariantCulture, "/_file/care/img/{0}/{1}", careId, savedName);
-            return (originalName, virtualPath, file.ContentLength);
+            int fileSize = 0;
+            try
+            {
+                fileSize = (int)new FileInfo(physicalPath).Length;
+            }
+            catch
+            {
+            }
+            return (originalName, virtualPath, fileSize);
         }
 
         private List<CarePhotoViewModel> CollectPhotoBlocksFromRepeater()
@@ -693,6 +952,10 @@ namespace protectTreesV2.backstage.care
                 var item = Repeater_carePhotos.Items[i];
                 var itemNameBox = (TextBox)item.FindControl("TextBox_itemName");
                 var idField = (HiddenField)item.FindControl("HiddenField_photoId");
+                var beforeTempKey = (HiddenField)item.FindControl("HiddenField_beforeTempKey");
+                var afterTempKey = (HiddenField)item.FindControl("HiddenField_afterTempKey");
+                var beforeDeleteField = (HiddenField)item.FindControl("HiddenField_beforeDelete");
+                var afterDeleteField = (HiddenField)item.FindControl("HiddenField_afterDelete");
 
                 int photoId = 0;
                 if (idField != null)
@@ -709,14 +972,116 @@ namespace protectTreesV2.backstage.care
 
                 blocks[i].photoID = photoId;
                 blocks[i].itemName = itemName;
+                blocks[i].beforeTempKey = beforeTempKey?.Value;
+                blocks[i].afterTempKey = afterTempKey?.Value;
+                blocks[i].beforeDelete = beforeDeleteField != null && beforeDeleteField.Value == "1";
+                blocks[i].afterDelete = afterDeleteField != null && afterDeleteField.Value == "1";
             }
 
             return blocks;
         }
 
-        private void UpdatePhotoBlocksFromRepeater()
+        private void SavePendingUploadsFromRepeater()
         {
-            PhotoBlocks = CollectPhotoBlocksFromRepeater();
+            var blocks = CollectPhotoBlocksFromRepeater();
+
+            for (int i = 0; i < Repeater_carePhotos.Items.Count; i++)
+            {
+                var item = Repeater_carePhotos.Items[i];
+                var beforeUpload = (FileUpload)item.FindControl("FileUpload_beforePhoto");
+                var afterUpload = (FileUpload)item.FindControl("FileUpload_afterPhoto");
+                var beforeDeleteField = (HiddenField)item.FindControl("HiddenField_beforeDelete");
+                var afterDeleteField = (HiddenField)item.FindControl("HiddenField_afterDelete");
+
+                if (i >= blocks.Count)
+                {
+                    blocks.Add(new CarePhotoViewModel());
+                }
+
+                var block = blocks[i];
+                bool beforeDelete = beforeDeleteField != null && beforeDeleteField.Value == "1";
+                bool afterDelete = afterDeleteField != null && afterDeleteField.Value == "1";
+
+                if (beforeDelete)
+                {
+                    RemoveTempUpload(block.beforeTempKey);
+                    block.beforeTempKey = null;
+                    block.beforeTempFileName = null;
+                    block.beforeTempFilePath = null;
+                    block.beforeDelete = true;
+                }
+                else if (beforeUpload != null && beforeUpload.HasFile)
+                {
+                    block.beforeTempKey = SaveTempUpload(beforeUpload.PostedFile, block.beforeTempKey);
+                    block.beforeDelete = false;
+                    if (beforeDeleteField != null)
+                    {
+                        beforeDeleteField.Value = "0";
+                    }
+                }
+
+                if (afterDelete)
+                {
+                    RemoveTempUpload(block.afterTempKey);
+                    block.afterTempKey = null;
+                    block.afterTempFileName = null;
+                    block.afterTempFilePath = null;
+                    block.afterDelete = true;
+                }
+                else if (afterUpload != null && afterUpload.HasFile)
+                {
+                    block.afterTempKey = SaveTempUpload(afterUpload.PostedFile, block.afterTempKey);
+                    block.afterDelete = false;
+                    if (afterDeleteField != null)
+                    {
+                        afterDeleteField.Value = "0";
+                    }
+                }
+
+                AttachTempInfo(block);
+            }
+
+            PhotoBlocks = blocks;
+        }
+
+        private void AttachTempInfoToBlocks(List<CarePhotoViewModel> blocks)
+        {
+            if (blocks == null) return;
+            foreach (var block in blocks)
+            {
+                AttachTempInfo(block);
+            }
+        }
+
+        private void AttachTempInfo(CarePhotoViewModel block)
+        {
+            if (block == null) return;
+
+            var beforeTemp = GetTempUpload(block.beforeTempKey);
+            if (beforeTemp != null)
+            {
+                block.beforeTempFileName = beforeTemp.FileName;
+                block.beforeTempFilePath = beforeTemp.VirtualPath;
+            }
+            else
+            {
+                block.beforeTempFileName = null;
+                block.beforeTempFilePath = null;
+                block.beforeTempKey = string.IsNullOrWhiteSpace(block.beforeTempKey) ? null : block.beforeTempKey;
+            }
+
+            var afterTemp = GetTempUpload(block.afterTempKey);
+            if (afterTemp != null)
+            {
+                block.afterTempFileName = afterTemp.FileName;
+                block.afterTempFilePath = afterTemp.VirtualPath;
+            }
+            else
+            {
+                block.afterTempFileName = null;
+                block.afterTempFilePath = null;
+                block.afterTempKey = string.IsNullOrWhiteSpace(block.afterTempKey) ? null : block.afterTempKey;
+            }
         }
 
         private static int? ParseNullableInt(string value)
