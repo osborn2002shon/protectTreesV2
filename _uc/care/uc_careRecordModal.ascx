@@ -1,4 +1,4 @@
-<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="uc_careRecordModal.ascx.cs" Inherits="protectTreesV2._uc.care.uc_careRecordModal" %>
+﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="uc_careRecordModal.ascx.cs" Inherits="protectTreesV2._uc.care.uc_careRecordModal" %>
 <div class="modalForm">
     <asp:PlaceHolder ID="phEmpty" runat="server" Visible="true">
         <div class="text-center text-muted py-4">尚未載入養護紀錄。</div>
