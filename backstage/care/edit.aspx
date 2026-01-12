@@ -126,21 +126,21 @@
                         </asp:RadioButtonList>
                         <div id="crownOptions" class="option-group mt-2">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_crownSeasonal" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_crownSeasonal" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_crownSeasonal.ClientID %>">季節性休眠落葉</label>
                             </div>
                             <div class="form-check d-flex align-items-center">
-                                <asp:CheckBox ID="CheckBox_crownDeadBranch" runat="server" CssClass="form-check-input me-2" />
+                                <asp:CheckBox ID="CheckBox_crownDeadBranch" runat="server" CssClass="me-2" />
                                 <label class="form-check-label me-2" for="<%= CheckBox_crownDeadBranch.ClientID %>">有枯枝(現存枝葉量：</label>
                                 <asp:TextBox ID="TextBox_crownDeadBranchPercent" runat="server" CssClass="form-control form-control-sm w-auto" placeholder="0" />
                                 <span class="ms-2">%)</span>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_crownPest" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_crownPest" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_crownPest.ClientID %>">有明顯病蟲害(葉部有明顯蟲體或病徵)</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_crownForeign" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_crownForeign" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_crownForeign.ClientID %>">樹冠接觸電線或異物</label>
                             </div>
                             <div class="mt-2">
@@ -160,31 +160,31 @@
                         </asp:RadioButtonList>
                         <div id="trunkOptions" class="option-group mt-2">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkBark" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkBark" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkBark.ClientID %>">樹皮破損</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkDecay" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkDecay" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkDecay.ClientID %>">莖幹損傷(腐朽中空或膨大)</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkTermite" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkTermite" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkTermite.ClientID %>">有白蟻蟻道</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkLean" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkLean" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkLean.ClientID %>">主莖傾斜搖晃</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkFungus" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkFungus" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkFungus.ClientID %>">莖基部有真菌子實體(如靈芝)</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkGummosis" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkGummosis" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkGummosis.ClientID %>">有流膠或潰瘍</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_trunkVine" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_trunkVine" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_trunkVine.ClientID %>">有纏勒植物(如雀榕或小花蔓澤蘭)</label>
                             </div>
                             <div class="mt-2">
@@ -204,23 +204,23 @@
                         </asp:RadioButtonList>
                         <div id="rootOptions" class="option-group mt-2">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_rootDamage" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_rootDamage" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_rootDamage.ClientID %>">根部損傷</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_rootDecay" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_rootDecay" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_rootDecay.ClientID %>">根部有腐朽或可見子實體</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_rootExpose" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_rootExpose" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_rootExpose.ClientID %>">盤根或浮根</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_rootRot" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_rootRot" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_rootRot.ClientID %>">根部潰爛</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_rootSucker" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_rootSucker" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_rootSucker.ClientID %>">大量萌櫱(不定芽)</label>
                             </div>
                             <div class="mt-2">
@@ -240,31 +240,31 @@
                         </asp:RadioButtonList>
                         <div id="envOptions" class="option-group mt-2">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envPitSmall" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envPitSmall" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envPitSmall.ClientID %>">樹穴過小</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envPaved" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envPaved" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envPaved.ClientID %>">遭鋪面封固(如柏油、混凝土、磚瓦等)</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envDebris" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envDebris" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envDebris.ClientID %>">有石塊或廢棄物推積</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envSoilCover" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envSoilCover" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envSoilCover.ClientID %>">根領覆土過高</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envCompaction" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envCompaction" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envCompaction.ClientID %>">土壤壓實</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envWater" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envWater" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envWater.ClientID %>">環境積水</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_envFacility" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_envFacility" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_envFacility.ClientID %>">緊鄰設施或建物</label>
                             </div>
                             <div class="mt-2">
@@ -284,15 +284,15 @@
                         </asp:RadioButtonList>
                         <div id="adjacentOptions" class="option-group mt-2">
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_adjacentBuilding" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_adjacentBuilding" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_adjacentBuilding.ClientID %>">接觸建築物</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_adjacentWire" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_adjacentWire" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_adjacentWire.ClientID %>">接觸電線或管線</label>
                             </div>
                             <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_adjacentSignal" runat="server" CssClass="form-check-input" />
+                                <asp:CheckBox ID="CheckBox_adjacentSignal" runat="server"  />
                                 <label class="form-check-label" for="<%= CheckBox_adjacentSignal.ClientID %>">遮蔽路燈或號誌</label>
                             </div>
                             <div class="mt-2">
@@ -411,7 +411,7 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check">
-                                        <asp:CheckBox ID="CheckBox_deletePhoto" runat="server" CssClass="form-check-input" Text="刪除此筆照片" />
+                                        <asp:CheckBox ID="CheckBox_deletePhoto" runat="server"  Text="刪除此筆照片" />
                                     </div>
                                 </div>
                             </div>
