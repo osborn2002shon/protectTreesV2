@@ -338,13 +338,13 @@ namespace protectTreesV2.backstage.care
             if (beforeImage != null)
             {
                 beforeImage.ImageUrl = beforePreview ?? string.Empty;
-                beforeImage.Visible = !string.IsNullOrWhiteSpace(beforePreview);
+                beforeImage.Visible = true;
             }
 
             if (afterImage != null)
             {
                 afterImage.ImageUrl = afterPreview ?? string.Empty;
-                afterImage.Visible = !string.IsNullOrWhiteSpace(afterPreview);
+                afterImage.Visible = true;
             }
 
             if (beforeFileLabel != null)
@@ -1009,11 +1009,25 @@ namespace protectTreesV2.backstage.care
                     block.beforeTempFileName = null;
                     block.beforeTempFilePath = null;
                     block.beforeDelete = true;
+                    if (beforeDeleteField != null)
+                    {
+                        beforeDeleteField.Value = "1";
+                    }
+                    var beforeTempKeyField = (HiddenField)item.FindControl("HiddenField_beforeTempKey");
+                    if (beforeTempKeyField != null)
+                    {
+                        beforeTempKeyField.Value = string.Empty;
+                    }
                 }
                 else if (beforeUpload != null && beforeUpload.HasFile)
                 {
                     block.beforeTempKey = SaveTempUpload(beforeUpload.PostedFile, block.beforeTempKey);
                     block.beforeDelete = false;
+                    var beforeTempKeyField = (HiddenField)item.FindControl("HiddenField_beforeTempKey");
+                    if (beforeTempKeyField != null)
+                    {
+                        beforeTempKeyField.Value = block.beforeTempKey ?? string.Empty;
+                    }
                     if (beforeDeleteField != null)
                     {
                         beforeDeleteField.Value = "0";
@@ -1027,11 +1041,25 @@ namespace protectTreesV2.backstage.care
                     block.afterTempFileName = null;
                     block.afterTempFilePath = null;
                     block.afterDelete = true;
+                    if (afterDeleteField != null)
+                    {
+                        afterDeleteField.Value = "1";
+                    }
+                    var afterTempKeyField = (HiddenField)item.FindControl("HiddenField_afterTempKey");
+                    if (afterTempKeyField != null)
+                    {
+                        afterTempKeyField.Value = string.Empty;
+                    }
                 }
                 else if (afterUpload != null && afterUpload.HasFile)
                 {
                     block.afterTempKey = SaveTempUpload(afterUpload.PostedFile, block.afterTempKey);
                     block.afterDelete = false;
+                    var afterTempKeyField = (HiddenField)item.FindControl("HiddenField_afterTempKey");
+                    if (afterTempKeyField != null)
+                    {
+                        afterTempKeyField.Value = block.afterTempKey ?? string.Empty;
+                    }
                     if (afterDeleteField != null)
                     {
                         afterDeleteField.Value = "0";
