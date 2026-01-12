@@ -451,8 +451,8 @@
                                                 <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-clear-photo">刪除照片</button>
                                             </div>
                                         </div>
-                                        <asp:HiddenField ID="HiddenField_beforeTempKey" runat="server" CssClass="photo-temp-key" />
-                                        <asp:HiddenField ID="HiddenField_beforeDelete" runat="server" Value="0" CssClass="photo-delete-flag" />
+                                        <asp:HiddenField ID="HiddenField_beforeTempKey" runat="server"  />
+                                        <asp:HiddenField ID="HiddenField_beforeDelete" runat="server" Value="0"/>
                                         <asp:HiddenField ID="HiddenField_beforeExistingPath" runat="server" />
                                     </div>
                                     <asp:HyperLink ID="HyperLink_beforePhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
@@ -470,8 +470,8 @@
                                                 <button type="button" class="btn btn-link btn-sm text-danger p-0 btn-clear-photo">刪除照片</button>
                                             </div>
                                         </div>
-                                        <asp:HiddenField ID="HiddenField_afterTempKey" runat="server" CssClass="photo-temp-key" />
-                                        <asp:HiddenField ID="HiddenField_afterDelete" runat="server" Value="0" CssClass="photo-delete-flag" />
+                                        <asp:HiddenField ID="HiddenField_afterTempKey" runat="server" />
+                                        <asp:HiddenField ID="HiddenField_afterDelete" runat="server" Value="0"/>
                                         <asp:HiddenField ID="HiddenField_afterExistingPath" runat="server" />
                                     </div>
                                     <asp:HyperLink ID="HyperLink_afterPhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
