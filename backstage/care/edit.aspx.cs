@@ -651,7 +651,7 @@ namespace protectTreesV2.backstage.care
                     missing.Add("養護日期格式不正確");
                 }
             }
-            else
+            else if (isFinal)
             {
                 missing.Add("養護日期");
             }
@@ -673,9 +673,9 @@ namespace protectTreesV2.backstage.care
                 return false;
             }
 
-            if (isFinal && !HasAnyPhotoAfterChange())
+            if (isFinal && !HasAnyCompletePhotoSetAfterChange())
             {
-                ShowMessage("限制", "定稿至少需要一張養護照片", "warning");
+                ShowMessage("限制", "定稿至少需要一組施作的照片", "warning");
                 return false;
             }
 
@@ -703,9 +703,8 @@ namespace protectTreesV2.backstage.care
             return false;
         }
 
-        private bool HasAnyPhotoAfterChange()
+        private bool HasAnyCompletePhotoSetAfterChange()
         {
-            int totalPhotos = 0;
 
             foreach (RepeaterItem item in Repeater_carePhotos.Items)
             {
@@ -743,11 +742,13 @@ namespace protectTreesV2.backstage.care
                 bool beforeExists = !beforeDelete && (hasBeforeUpload || hasBeforeTemp || hasBeforeExisting);
                 bool afterExists = !afterDelete && (hasAfterUpload || hasAfterTemp || hasAfterExisting);
 
-                if (beforeExists) totalPhotos++;
-                if (afterExists) totalPhotos++;
+                if (beforeExists && afterExists)
+                {
+                    return true;
+                }
             }
 
-            return totalPhotos > 0;
+            return false;
         }
 
         private bool ProcessCarePhotos(int careId, int accountId, bool isFinal)
@@ -886,10 +887,15 @@ namespace protectTreesV2.backstage.care
                 }
             }
 
-            if (isFinal && system_care.GetCarePhotos(careId).Count == 0)
+            if (isFinal)
             {
-                ShowMessage("限制", "定稿至少需要一張養護照片", "warning");
-                return false;
+                bool hasCompleteSet = system_care.GetCarePhotos(careId)
+                    .Any(p => !string.IsNullOrWhiteSpace(p.beforeFilePath) && !string.IsNullOrWhiteSpace(p.afterFilePath));
+                if (!hasCompleteSet)
+                {
+                    ShowMessage("限制", "定稿至少需要一組施作的照片", "warning");
+                    return false;
+                }
             }
 
             return true;
