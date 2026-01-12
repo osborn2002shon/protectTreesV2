@@ -143,7 +143,7 @@
                         <asp:TextBox ID="TextBox_careDate" runat="server" CssClass="form-control" TextMode="Date" placeholder="請選擇養護日期" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">記錄人員</label>
+                        <label class="form-label">記錄人員　<span class="text-danger">*</span></label>
                         <asp:TextBox ID="TextBox_recorder" runat="server" CssClass="form-control" MaxLength="100" placeholder="請輸入記錄人員" />
                     </div>
                     <div class="col-md-4">
@@ -452,7 +452,7 @@
                                             </div>
                                         </div>
                                         <asp:HiddenField ID="HiddenField_beforeTempKey" runat="server" />
-                                        <asp:HiddenField ID="HiddenField_beforeDelete" runat="server" Value="0" CssClass="photo-delete-flag" />
+                                        <asp:HiddenField ID="HiddenField_beforeDelete" runat="server" Value="0" />
                                         <asp:HiddenField ID="HiddenField_beforeExistingPath" runat="server" />
                                     </div>
                                     <asp:HyperLink ID="HyperLink_beforePhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
@@ -471,7 +471,7 @@
                                             </div>
                                         </div>
                                         <asp:HiddenField ID="HiddenField_afterTempKey" runat="server" />
-                                        <asp:HiddenField ID="HiddenField_afterDelete" runat="server" Value="0" CssClass="photo-delete-flag" />
+                                        <asp:HiddenField ID="HiddenField_afterDelete" runat="server" Value="0" />
                                         <asp:HiddenField ID="HiddenField_afterExistingPath" runat="server" />
                                     </div>
                                     <asp:HyperLink ID="HyperLink_afterPhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
