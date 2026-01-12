@@ -11,6 +11,8 @@
     <nav class="nav nav-tabs mb-4">
         <a class="nav-link active" href="main.aspx">養護管理</a>
         <a class="nav-link text-dark" href="list.aspx">異動管理</a>
+        <a class="nav-link text-dark" href="upload.aspx">上傳多筆養護紀錄</a>
+        <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆養護照片</a>
     </nav>
 
     <div class="queryBox">
@@ -41,7 +43,7 @@
                     <asp:Label runat="server" AssociatedControlID="RadioButtonList_queryOption" Text="查詢選項" />
                     <div class="pt-1">
                         <asp:RadioButtonList ID="RadioButtonList_queryOption" runat="server" RepeatDirection="Horizontal" RepeatLayout="Flow" CssClass="d-flex gap-3">
-                            <asp:ListItem Text="近180天無紀錄" Value="NoRecord180" Selected="True"></asp:ListItem>
+                            <asp:ListItem Text="近365天無紀錄" Value="NoRecord365" Selected="True"></asp:ListItem>
                             <asp:ListItem Text="全部樹籍" Value="All"></asp:ListItem>
                             <asp:ListItem Text="從未有紀錄" Value="Never"></asp:ListItem>
                         </asp:RadioButtonList>
