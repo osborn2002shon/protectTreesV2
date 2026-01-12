@@ -789,3 +789,24 @@ REFERENCES [dbo].[Tree_CareRecord] ([careID])
 GO
 ALTER TABLE [dbo].[Tree_CarePhoto] CHECK CONSTRAINT [FK_Tree_CarePhoto_Tree_CareRecord]
 GO
+/****** Object:  Table [dbo].[Tree_CareBatchSetting]    Script Date: 2025/8/21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tree_CareBatchSetting](
+        [settingID] [int] IDENTITY(1,1) NOT NULL, -- 暫存設定主鍵
+        [accountID] [int] NOT NULL, -- 使用者帳號ID
+        [treeID] [int] NOT NULL, -- 樹木基本資料編號
+        [insertDateTime] [datetime] NOT NULL CONSTRAINT [DF_Tree_CareBatchSetting_insertDateTime] DEFAULT (GETDATE()), -- 建立時間
+ CONSTRAINT [PK_Tree_CareBatchSetting] PRIMARY KEY CLUSTERED
+(
+        [settingID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Tree_CareBatchSetting]  WITH CHECK ADD  CONSTRAINT [FK_Tree_CareBatchSetting_Tree_Record] FOREIGN KEY([treeID])
+REFERENCES [dbo].[Tree_Record] ([treeID])
+GO
+ALTER TABLE [dbo].[Tree_CareBatchSetting] CHECK CONSTRAINT [FK_Tree_CareBatchSetting_Tree_Record]
+GO

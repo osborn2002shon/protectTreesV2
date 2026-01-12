@@ -1,8 +1,11 @@
 ﻿using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using static protectTreesV2.Care.Care;
 
 namespace protectTreesV2.backstage.care
@@ -50,6 +53,7 @@ namespace protectTreesV2.backstage.care
                 }
 
                 BindResult();
+                BindSelectedList();
             }
         }
 
@@ -172,6 +176,25 @@ namespace protectTreesV2.backstage.care
         {
             string arg = e.CommandArgument?.ToString();
 
+            if (e.CommandName == "_AddToUpload")
+            {
+                int treeId = Convert.ToInt32(arg);
+                var user = UserService.GetCurrentUser();
+                int accountID = user?.userID ?? 0;
+
+                try
+                {
+                    system_care.AddToCareBatchSetting(accountID, treeId);
+                    BindSelectedList();
+                    BindResult();
+                    ShowMessage("提示", "加入成功");
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("錯誤", "加入失敗：" + ex.Message);
+                }
+            }
+
             if (e.CommandName == "_AddRecord")
             {
                 setTreeID = arg;
@@ -206,6 +229,141 @@ namespace protectTreesV2.backstage.care
                         e.Row.CssClass += " table-warning";
                     }
                 }
+            }
+        }
+
+        private void BindSelectedList()
+        {
+            var user = UserService.GetCurrentUser();
+            int accountID = user?.userID ?? 0;
+
+            try
+            {
+                List<CareBatchSettingResult> list = system_care.GetCareBatchSetting(accountID);
+                GridView_selectedList.DataSource = list;
+                GridView_selectedList.DataBind();
+            }
+            catch (Exception ex)
+            {
+                GridView_selectedList.DataSource = null;
+                GridView_selectedList.DataBind();
+                ShowMessage("錯誤", "讀取設定清單失敗：" + ex.Message);
+            }
+        }
+
+        private void CreateCell(IRow row, int cellIndex, string value)
+        {
+            ICell cell = row.GetCell(cellIndex) ?? row.CreateCell(cellIndex);
+            cell.SetCellValue(value ?? string.Empty);
+        }
+
+        protected void GridView_selectedList_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "_Remove")
+            {
+                int treeId = Convert.ToInt32(e.CommandArgument);
+                var user = UserService.GetCurrentUser();
+                int accountID = user?.userID ?? 0;
+
+                try
+                {
+                    system_care.RemoveFromCareBatchSetting(accountID, treeId);
+                    BindSelectedList();
+                    BindResult();
+                    ShowMessage("提示", "移除成功");
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("錯誤", "移除失敗：" + ex.Message);
+                }
+            }
+        }
+
+        protected void LinkButton_clearList_Click(object sender, EventArgs e)
+        {
+            var user = UserService.GetCurrentUser();
+            int accountID = user?.userID ?? 0;
+
+            try
+            {
+                system_care.RemoveFromCareBatchSetting(accountID, null);
+                BindSelectedList();
+                BindResult();
+                ShowMessage("提示", "已清空列表");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("錯誤", "清空失敗：" + ex.Message);
+            }
+        }
+
+        protected void LinkButton_generateExcel_Click(object sender, EventArgs e)
+        {
+            var user = UserService.GetCurrentUser();
+            int accountID = user?.userID ?? 0;
+
+            try
+            {
+                var list = system_care.GetCareBatchSetting(accountID);
+                if (list == null || list.Count == 0)
+                {
+                    ShowMessage("警告", "清單目前沒有任何資料，請先加入樹籍後再產製。");
+                    return;
+                }
+
+                string templatePath = Server.MapPath("~/_doc/受保護樹木養護資料蒐集用表格.xlsx");
+                if (!File.Exists(templatePath))
+                {
+                    ShowMessage("錯誤", "找不到 Excel 範本檔案。");
+                    return;
+                }
+
+                IWorkbook workbook;
+                using (FileStream fs = new FileStream(templatePath, FileMode.Open, FileAccess.Read))
+                {
+                    workbook = WorkbookFactory.Create(fs);
+                }
+
+                ISheet sheetBasic = workbook.GetSheet("基本資料");
+                if (sheetBasic != null)
+                {
+                    int startRowIndex = 2;
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        var item = list[i];
+                        int currentRowIdx = startRowIndex + i;
+                        IRow row = sheetBasic.GetRow(currentRowIdx) ?? sheetBasic.CreateRow(currentRowIdx);
+
+                        CreateCell(row, 0, (i + 1).ToString());
+                        CreateCell(row, 1, item.systemTreeNo);
+                        CreateCell(row, 2, item.agencyTreeNo);
+                        CreateCell(row, 3, item.cityName);
+                        CreateCell(row, 4, item.areaName);
+                        CreateCell(row, 5, item.speciesName);
+                    }
+                }
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    workbook.Write(ms);
+                    string fileName = $"養護資料蒐集表_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+
+                    Response.Clear();
+                    Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                    string encodedFileName = System.Web.HttpUtility.UrlEncode(fileName, System.Text.Encoding.UTF8);
+                    Response.AddHeader("Content-Disposition", $"attachment; filename*=UTF-8''{encodedFileName}");
+
+                    Response.BinaryWrite(ms.ToArray());
+                    Response.End();
+                }
+            }
+            catch (System.Threading.ThreadAbortException)
+            {
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("錯誤", "產製失敗：" + ex.Message);
             }
         }
     }
