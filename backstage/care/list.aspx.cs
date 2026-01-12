@@ -2,6 +2,7 @@
 using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using static protectTreesV2.Care.Care;
 
@@ -195,9 +196,13 @@ namespace protectTreesV2.backstage.care
             {
                 if (int.TryParse(arg, out int careId))
                 {
-                    setCareID = careId.ToString();
-                    setTreeID = null;
-                    base.RedirectState("edit.aspx", this.CurrentFilter);
+                    var record = system_care.GetCareRecord(careId);
+                    var tree = record != null ? TreeService.GetTree(record.treeID) : null;
+                    var photos = record != null ? system_care.GetCarePhotos(careId) : null;
+
+                    BindBasicInfo(tree);
+                    uc_careRecordModal.BindRecord(record, photos);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowCareModal", "showCareRecordModal();", true);
                 }
             }
             else if (e.CommandName == "_EditCare")
@@ -254,6 +259,37 @@ namespace protectTreesV2.backstage.care
         protected void DropDownList_city_SelectedIndexChanged(object sender, EventArgs e)
         {
             Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
+        }
+
+        private void BindBasicInfo(TreeRecord tree)
+        {
+            if (tree == null)
+            {
+                litSystemTreeNo.Text = string.Empty;
+                litAgencyTreeNo.Text = string.Empty;
+                litLocation.Text = string.Empty;
+                litSpecies.Text = string.Empty;
+                litManager.Text = string.Empty;
+                return;
+            }
+
+            litSystemTreeNo.Text = FormatText(tree.SystemTreeNo);
+            litAgencyTreeNo.Text = FormatText(tree.AgencyTreeNo);
+            litLocation.Text = FormatText(CombineLocation(tree.CityName, tree.AreaName));
+            litSpecies.Text = FormatText(tree.SpeciesDisplayName);
+            litManager.Text = FormatText(tree.Manager);
+        }
+
+        private static string FormatText(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "--" : value.Trim();
+        }
+
+        private static string CombineLocation(string city, string area)
+        {
+            if (string.IsNullOrWhiteSpace(city)) return string.IsNullOrWhiteSpace(area) ? string.Empty : area;
+            if (string.IsNullOrWhiteSpace(area)) return city;
+            return city + area;
         }
     }
 }

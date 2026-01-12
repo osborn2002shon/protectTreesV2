@@ -1,6 +1,15 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="list.aspx.cs" Inherits="protectTreesV2.backstage.care.list" MaintainScrollPositionOnPostback="true" %>
 
+<%@ Register Src="~/_uc/care/uc_careRecordModal.ascx" TagPrefix="uc1" TagName="uc_careRecordModal" %>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
+    <script>
+        function showCareRecordModal() {
+            var modalEl = document.getElementById('careRecordModal');
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
     養護資料管理 / 養護紀錄
@@ -143,5 +152,56 @@
                 </div>
             </EmptyDataTemplate>
         </asp:GridView>
+    </div>
+
+    <div class="modal fade" id="careRecordModal" tabindex="-1" aria-hidden="true" style="color:#000;">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    養護紀錄
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="formCard card mb-4">
+                        <div class="card-header">樹籍基本資料</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">系統樹籍編號</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litSystemTreeNo" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">機關樹木編號</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litAgencyTreeNo" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">所在地</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litLocation" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">樹種</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litSpecies" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-6">
+                                    <label class="form-label text-muted">管理人</label>
+                                    <div class="fw-bold">
+                                        <asp:Literal ID="litManager" runat="server" Mode="Encode" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <uc1:uc_careRecordModal runat="server" id="uc_careRecordModal" />
+                </div>
+            </div>
+        </div>
     </div>
 </asp:Content>
