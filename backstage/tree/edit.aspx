@@ -47,21 +47,18 @@
                                             <asp:Label runat="server" AssociatedControlID="txtAgencyTreeNo" Text="機關樹木編號" /><asp:TextBox ID="txtAgencyTreeNo" runat="server" CssClass="form-control" placeholder="T-2024-001" />
                                         </div>
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種及學名" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種及學名" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" />
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="數量" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="數量" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtTreeCount" runat="server" TextMode="Number" CssClass="form-control" placeholder="3" />
                                             <small class="form-text text-muted">若為群生竹木請填寫實際株(棵)數</small>
                                         </div>
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <div class="d-flex gap-2">
                                                 <asp:DropDownList ID="ddlCity" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCity_SelectedIndexChanged" />
                                                 <asp:DropDownList ID="ddlArea" runat="server" CssClass="form-select" />
@@ -71,20 +68,17 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtSite" Text="坐落地點" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtSite" Text="坐落地點" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtSite" runat="server" TextMode="MultiLine" CssClass="form-control" placeholder="台北市中正區中山南路1號" />
                                         </div>
                                     </div>
                                     <div class="row align-items-end">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" Step="0.000001" CssClass="form-control" placeholder="25.032969" />
                                         </div>
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number" Step="0.000001" CssClass="form-control" placeholder="121.565418" />
                                         </div>
                                         <div class="col">
@@ -109,8 +103,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtManager" Text="管理人" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtManager" Text="管理人" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtManager" runat="server" CssClass="form-control" placeholder="王小明" />
                                         </div>
                                         <div class="col">
@@ -124,13 +117,11 @@
                                     </div>
                                     <div class="row">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="ddlStatus" Text="樹籍狀態" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-select" />
                                         </div>
                                         <div class="col" id="announcementDateContainer">
-                                            <span class="text-danger required-marker required-final" data-requirement="announcement">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="txtAnnouncementDate" Text="公告日期" /><span class="text-danger required-marker required-final" data-requirement="announcement">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtAnnouncementDate" runat="server" TextMode="Date" CssClass="form-control" placeholder="2024-05-15" />
                                         </div>
                                     </div>
@@ -140,8 +131,7 @@
                                     
                                     <div class="row" id="recognitionContainer">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final" data-requirement="recognition">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" /><i class="fa-solid fa-eye"></i>
+                                            <asp:Label runat="server" AssociatedControlID="cblRecognition" Text="受保護認定理由" /><span class="text-danger required-marker required-final" data-requirement="recognition">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:CheckBoxList ID="cblRecognition" runat="server" RepeatDirection="Vertical" />
                                         </div>
                                     </div>
@@ -154,8 +144,7 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col">
-                                                    <span class="text-danger required-marker required-final">*</span>
-                                                    <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="文化歷史價值介紹" /><i class="fa-solid fa-eye"></i>
+                                                    <asp:Label runat="server" AssociatedControlID="txtCulturalHistory" Text="文化歷史價值介紹" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                                     <asp:TextBox ID="txtCulturalHistory" runat="server" TextMode="MultiLine" Height="150" CssClass="form-control" placeholder="日治時期種植，陪伴社區成長" />
                                                 </div>
                                             </div>
@@ -174,8 +163,7 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col">
-                                            <span class="text-danger required-marker required-final">*</span>
-                                            <asp:Label runat="server" AssociatedControlID="txtSurveyDate" Text="調查日期" />
+                                            <asp:Label runat="server" AssociatedControlID="txtSurveyDate" Text="調查日期" /><span class="text-danger required-marker required-final">*</span>
                                             <asp:TextBox ID="txtSurveyDate" runat="server" TextMode="Date" CssClass="form-control" placeholder="2024-05-01" />
                                         </div>
                                         <div class="col">
