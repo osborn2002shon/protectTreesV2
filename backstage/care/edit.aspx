@@ -35,6 +35,27 @@
         .photo-block .form-label {
             font-weight: 600;
         }
+
+        .photo-drop {
+            border: 2px dashed #6c757d;
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+            color: #6c757d;
+            cursor: pointer;
+            background-color: #fff;
+        }
+
+        .photo-drop.dragging {
+            background-color: #f1f5f9;
+        }
+
+        .photo-filename {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 6px;
+            word-break: break-all;
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
@@ -395,18 +416,28 @@
                         <div class="photo-block">
                             <asp:HiddenField ID="HiddenField_photoId" runat="server" Value='<%# Eval("photoID") %>' />
                             <div class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-12">
                                     <label class="form-label">施作項目名稱</label>
                                     <asp:TextBox ID="TextBox_itemName" runat="server" CssClass="form-control" placeholder="例如：枯枝清除" Text='<%# Eval("itemName") %>' />
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">施作前照片</label>
-                                    <asp:FileUpload ID="FileUpload_beforePhoto" runat="server" CssClass="form-control" accept="image/png, image/jpeg, image/jpg" />
+                                    <div class="photo-drop" title="拖曳照片到此處或點擊選擇">
+                                        <div class="mb-2"><i class="fa-solid fa-cloud-arrow-up fa-lg"></i></div>
+                                        <div>將照片拖曳到此處或點擊選擇</div>
+                                        <asp:FileUpload ID="FileUpload_beforePhoto" runat="server" CssClass="d-none" accept="image/png, image/jpeg, image/jpg" />
+                                        <div class="photo-filename"></div>
+                                    </div>
                                     <asp:HyperLink ID="HyperLink_beforePhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">施作後照片</label>
-                                    <asp:FileUpload ID="FileUpload_afterPhoto" runat="server" CssClass="form-control" accept="image/png, image/jpeg, image/jpg" />
+                                    <div class="photo-drop" title="拖曳照片到此處或點擊選擇">
+                                        <div class="mb-2"><i class="fa-solid fa-cloud-arrow-up fa-lg"></i></div>
+                                        <div>將照片拖曳到此處或點擊選擇</div>
+                                        <asp:FileUpload ID="FileUpload_afterPhoto" runat="server" CssClass="d-none" accept="image/png, image/jpeg, image/jpg" />
+                                        <div class="photo-filename"></div>
+                                    </div>
                                     <asp:HyperLink ID="HyperLink_afterPhoto" runat="server" CssClass="small text-decoration-none d-block mt-1" Target="_blank" />
                                 </div>
                                 <div class="col-12">
@@ -504,6 +535,44 @@
             toggleTask('<%= RadioButton_task3None.ClientID %>', '<%= RadioButton_task3Do.ClientID %>', '<%= TextBox_task3Note.ClientID %>');
             toggleTask('<%= RadioButton_task4None.ClientID %>', '<%= RadioButton_task4Do.ClientID %>', '<%= TextBox_task4Note.ClientID %>');
             toggleTask('<%= RadioButton_task5None.ClientID %>', '<%= RadioButton_task5Do.ClientID %>', '<%= TextBox_task5Note.ClientID %>');
+
+            function setupPhotoDrop($dropArea) {
+                var $fileInput = $dropArea.find('input[type="file"]');
+                var $fileName = $dropArea.find('.photo-filename');
+
+                $fileInput.on('click', function (e) { e.stopPropagation(); });
+                $fileInput.on('change', function () {
+                    var file = this.files && this.files[0];
+                    $fileName.text(file ? file.name : '');
+                });
+
+                $dropArea.on('click', function () { $fileInput.trigger('click'); });
+                $dropArea.on('dragover', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $dropArea.addClass('dragging');
+                });
+                $dropArea.on('dragleave', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $dropArea.removeClass('dragging');
+                });
+                $dropArea.on('drop', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $dropArea.removeClass('dragging');
+                    var files = e.originalEvent.dataTransfer.files;
+                    if (!files || !files.length) return;
+                    var dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    $fileInput[0].files = dt.files;
+                    $fileInput.trigger('change');
+                });
+            }
+
+            $('.photo-drop').each(function () {
+                setupPhotoDrop($(this));
+            });
         });
     </script>
 </asp:Content>

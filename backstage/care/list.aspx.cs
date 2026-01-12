@@ -195,7 +195,9 @@ namespace protectTreesV2.backstage.care
             {
                 if (int.TryParse(arg, out int careId))
                 {
-                    base.RedirectState($"edit.aspx?id={careId}", this.CurrentFilter);
+                    setCareID = careId.ToString();
+                    setTreeID = null;
+                    base.RedirectState("edit.aspx", this.CurrentFilter);
                 }
             }
             else if (e.CommandName == "_EditCare")
@@ -204,7 +206,7 @@ namespace protectTreesV2.backstage.care
                 {
                     setCareID = careId.ToString();
                     setTreeID = null;
-                    base.RedirectState($"edit.aspx?id={careId}", this.CurrentFilter);
+                    base.RedirectState("edit.aspx", this.CurrentFilter);
                 }
             }
             else if (e.CommandName == "_DeleteCare")

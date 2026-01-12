@@ -54,11 +54,6 @@ namespace protectTreesV2.backstage.care
             {
                 InitIdsFromSession();
 
-                if (CurrentCareID == 0 && int.TryParse(Request.QueryString["id"], out int careId))
-                {
-                    CurrentCareID = careId;
-                }
-
                 if (CurrentCareID == 0 && CurrentTreeID == 0)
                 {
                     ShowMessage("錯誤", "無效的參數，請由列表頁進入。");
