@@ -178,6 +178,7 @@
     <Content Include="_js\image-upload.js" />
     <Content Include="_js\jquery-3.7.1.js" />
     <Content Include="_js\mp_default.js" />
+    <Content Include="_uc\care\uc_careRecordModal.ascx" />
     <Content Include="_uc\health\uc_healthRecordModal.ascx" />
   </ItemGroup>
   <ItemGroup>
@@ -323,6 +324,13 @@
     </Compile>
     <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.designer.cs">
       <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\care\uc_careRecordModal.ascx.cs">
+      <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_uc\care\uc_careRecordModal.ascx.designer.cs">
+      <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
     </Compile>
     <Compile Include="_uc\TreePhotoAlbum.ascx.cs">
       <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>

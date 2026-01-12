@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <自動產生>
 //     這段程式碼是由工具產生的。
 //
@@ -7,155 +7,191 @@
 // </自動產生>
 //------------------------------------------------------------------------------
 
-namespace protectTreesV2.backstage.care
+namespace protectTreesV2._uc.care
 {
 
 
-    public partial class list
+    public partial class uc_careRecordModal
     {
 
         /// <summary>
-        /// RadioButtonList_scope 控制項。
+        /// phEmpty 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_scope;
+        protected global::System.Web.UI.WebControls.PlaceHolder phEmpty;
 
         /// <summary>
-        /// DropDownList_city 控制項。
+        /// phContent 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList DropDownList_city;
+        protected global::System.Web.UI.WebControls.PlaceHolder phContent;
 
         /// <summary>
-        /// DropDownList_area 控制項。
+        /// litCareId 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList DropDownList_area;
+        protected global::System.Web.UI.WebControls.Literal litCareId;
 
         /// <summary>
-        /// DropDownList_species 控制項。
+        /// litStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList DropDownList_species;
+        protected global::System.Web.UI.WebControls.Literal litStatus;
 
         /// <summary>
-        /// TextBox_dateStart 控制項。
+        /// litCareDate 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox_dateStart;
+        protected global::System.Web.UI.WebControls.Literal litCareDate;
 
         /// <summary>
-        /// TextBox_dateEnd 控制項。
+        /// litRecorder 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox_dateEnd;
+        protected global::System.Web.UI.WebControls.Literal litRecorder;
 
         /// <summary>
-        /// TextBox_keyword 控制項。
+        /// litReviewer 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox_keyword;
+        protected global::System.Web.UI.WebControls.Literal litReviewer;
 
         /// <summary>
-        /// LinkButton_search 控制項。
+        /// litLastUpdate 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton LinkButton_search;
+        protected global::System.Web.UI.WebControls.Literal litLastUpdate;
 
         /// <summary>
-        /// Label_recordCount 控制項。
+        /// litCrownSummary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_recordCount;
+        protected global::System.Web.UI.WebControls.Literal litCrownSummary;
 
         /// <summary>
-        /// GridView_careList 控制項。
+        /// litTrunkSummary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView GridView_careList;
+        protected global::System.Web.UI.WebControls.Literal litTrunkSummary;
 
         /// <summary>
-        /// litSystemTreeNo 控制項。
+        /// litRootSummary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litSystemTreeNo;
+        protected global::System.Web.UI.WebControls.Literal litRootSummary;
 
         /// <summary>
-        /// litAgencyTreeNo 控制項。
+        /// litEnvSummary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litAgencyTreeNo;
+        protected global::System.Web.UI.WebControls.Literal litEnvSummary;
 
         /// <summary>
-        /// litLocation 控制項。
+        /// litAdjacentSummary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litLocation;
+        protected global::System.Web.UI.WebControls.Literal litAdjacentSummary;
 
         /// <summary>
-        /// litSpecies 控制項。
+        /// litTask1Summary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litSpecies;
+        protected global::System.Web.UI.WebControls.Literal litTask1Summary;
 
         /// <summary>
-        /// litManager 控制項。
+        /// litTask2Summary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal litManager;
+        protected global::System.Web.UI.WebControls.Literal litTask2Summary;
 
         /// <summary>
-        /// uc_careRecordModal 控制項。
+        /// litTask3Summary 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::protectTreesV2._uc.care.uc_careRecordModal uc_careRecordModal;
+        protected global::System.Web.UI.WebControls.Literal litTask3Summary;
+
+        /// <summary>
+        /// litTask4Summary 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litTask4Summary;
+
+        /// <summary>
+        /// litTask5Summary 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litTask5Summary;
+
+        /// <summary>
+        /// phPhotoEmpty 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phPhotoEmpty;
+
+        /// <summary>
+        /// rptPhotos 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptPhotos;
     }
 }
