@@ -651,7 +651,7 @@ namespace protectTreesV2.backstage.care
                     missing.Add("養護日期格式不正確");
                 }
             }
-            else if (isFinal)
+            else
             {
                 missing.Add("養護日期");
             }
@@ -675,7 +675,7 @@ namespace protectTreesV2.backstage.care
 
             if (isFinal && !HasAnyCompletePhotoSetAfterChange())
             {
-                ShowMessage("限制", "定稿至少需要一組施作的照片", "warning");
+                ShowMessage("限制", "定稿至少需要一組施作項目名稱與施作前後照片", "warning");
                 return false;
             }
 
@@ -710,6 +710,7 @@ namespace protectTreesV2.backstage.care
             {
                 var idField = (HiddenField)item.FindControl("HiddenField_photoId");
                 var deleteCheck = (CheckBox)item.FindControl("CheckBox_deletePhoto");
+                var itemNameBox = (TextBox)item.FindControl("TextBox_itemName");
                 var beforeUpload = (FileUpload)item.FindControl("FileUpload_beforePhoto");
                 var afterUpload = (FileUpload)item.FindControl("FileUpload_afterPhoto");
                 var beforeTempKey = (HiddenField)item.FindControl("HiddenField_beforeTempKey");
@@ -738,11 +739,12 @@ namespace protectTreesV2.backstage.care
                 bool hasAfterUpload = afterUpload != null && afterUpload.HasFile;
                 bool hasBeforeExisting = beforeExistingPath != null && !string.IsNullOrWhiteSpace(beforeExistingPath.Value);
                 bool hasAfterExisting = afterExistingPath != null && !string.IsNullOrWhiteSpace(afterExistingPath.Value);
+                bool hasItemName = itemNameBox != null && !string.IsNullOrWhiteSpace(itemNameBox.Text);
 
                 bool beforeExists = !beforeDelete && (hasBeforeUpload || hasBeforeTemp || hasBeforeExisting);
                 bool afterExists = !afterDelete && (hasAfterUpload || hasAfterTemp || hasAfterExisting);
 
-                if (beforeExists && afterExists)
+                if (hasItemName && beforeExists && afterExists)
                 {
                     return true;
                 }
@@ -890,10 +892,12 @@ namespace protectTreesV2.backstage.care
             if (isFinal)
             {
                 bool hasCompleteSet = system_care.GetCarePhotos(careId)
-                    .Any(p => !string.IsNullOrWhiteSpace(p.beforeFilePath) && !string.IsNullOrWhiteSpace(p.afterFilePath));
+                    .Any(p => !string.IsNullOrWhiteSpace(p.itemName)
+                        && !string.IsNullOrWhiteSpace(p.beforeFilePath)
+                        && !string.IsNullOrWhiteSpace(p.afterFilePath));
                 if (!hasCompleteSet)
                 {
-                    ShowMessage("限制", "定稿至少需要一組施作的照片", "warning");
+                    ShowMessage("限制", "定稿至少需要一組施作項目名稱與施作前後照片", "warning");
                     return false;
                 }
             }
