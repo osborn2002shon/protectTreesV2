@@ -447,6 +447,15 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Repeater rptHealthRecords;
 
         /// <summary>
+        /// lnkBackToList 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink lnkBackToList;
+
+        /// <summary>
         /// lblModal_healthId 控制項。
         /// </summary>
         /// <remarks>
@@ -508,14 +517,5 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::protectTreesV2._uc.health.uc_healthRecordModal uc_healthRecordModal;
-
-        /// <summary>
-        /// lnkBackToList 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkBackToList;
     }
 }

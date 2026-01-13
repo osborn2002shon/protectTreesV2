@@ -11,7 +11,7 @@ namespace protectTreesV2.backstage.tree
 {
     public partial class detail : BasePage
     {
-        private readonly Health system_health = new Health();
+        private readonly Health.Health system_health = new Health.Health();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -112,7 +112,7 @@ namespace protectTreesV2.backstage.tree
 
         private void BindHealthRecords(int treeId)
         {
-            var records = system_health.GetHealthRecordsByTreeId(treeId) ?? new List<Health.TreeHealthRecord>();
+            var records = system_health.GetHealthRecordsByTreeId(treeId) ?? new List<Health.Health.TreeHealthRecord>();
             foreach (var record in records)
             {
                 record.attachments = system_health.GetHealthAttachments(record.healthID);
@@ -154,7 +154,7 @@ namespace protectTreesV2.backstage.tree
                 return;
             }
 
-            var photos = system_health.GetHealthPhotos(healthId.Value) ?? new List<Health.TreeHealthPhoto>();
+            var photos = system_health.GetHealthPhotos(healthId.Value) ?? new List<Health.Health.TreeHealthPhoto>();
             if (!photos.Any())
             {
                 pnlHealthPhotoGallery.Visible = false;
@@ -264,21 +264,21 @@ namespace protectTreesV2.backstage.tree
 
         protected string GetHealthRecordCardCss(object dataItem)
         {
-            var record = dataItem as Health.TreeHealthRecord;
+            var record = dataItem as Health.Health.TreeHealthRecord;
             var isActive = record != null && SelectedHealthId.HasValue && record.healthID == SelectedHealthId.Value;
             return isActive ? "card mb-3 health-record-card is-active" : "card mb-3 health-record-card";
         }
 
         protected string GetAttachmentUrl(object dataItem)
         {
-            var record = dataItem as Health.TreeHealthRecord;
+            var record = dataItem as Health.Health.TreeHealthRecord;
             var attachment = record?.attachments?.FirstOrDefault();
             return string.IsNullOrWhiteSpace(attachment?.filePath) ? "javascript:void(0);" : ResolveUrl(attachment.filePath);
         }
 
         protected string GetAttachmentButtonCss(object dataItem)
         {
-            var record = dataItem as Health.TreeHealthRecord;
+            var record = dataItem as Health.Health.TreeHealthRecord;
             var attachment = record?.attachments?.FirstOrDefault();
             return string.IsNullOrWhiteSpace(attachment?.filePath)
                 ? "btn btn-sm btn-outline-secondary disabled"
@@ -287,11 +287,11 @@ namespace protectTreesV2.backstage.tree
 
         protected string ResolveHealthPhotoUrl(object dataItem)
         {
-            var photo = dataItem as Health.TreeHealthPhoto;
+            var photo = dataItem as Health.Health.TreeHealthPhoto;
             return string.IsNullOrWhiteSpace(photo?.filePath) ? "#" : ResolveUrl(photo.filePath);
         }
 
-        protected string BuildHealthPhotoTitle(Health.TreeHealthPhoto photo)
+        protected string BuildHealthPhotoTitle(Health.Health.TreeHealthPhoto photo)
         {
             if (photo == null) return string.Empty;
             if (!string.IsNullOrWhiteSpace(photo.caption))
@@ -301,7 +301,7 @@ namespace protectTreesV2.backstage.tree
             return string.IsNullOrWhiteSpace(photo.fileName) ? "未命名照片" : photo.fileName;
         }
 
-        protected string BuildHealthPhotoDescriptionAttribute(Health.TreeHealthPhoto photo)
+        protected string BuildHealthPhotoDescriptionAttribute(Health.Health.TreeHealthPhoto photo)
         {
             if (photo == null) return string.Empty;
             var title = BuildHealthPhotoTitle(photo);
@@ -311,12 +311,12 @@ namespace protectTreesV2.backstage.tree
 
         protected string BuildHealthPhotoTitleFromData(object dataItem)
         {
-            return BuildHealthPhotoTitle(dataItem as Health.TreeHealthPhoto);
+            return BuildHealthPhotoTitle(dataItem as Health.Health.TreeHealthPhoto);
         }
 
         protected string BuildHealthPhotoDescriptionFromData(object dataItem)
         {
-            return BuildHealthPhotoDescriptionAttribute(dataItem as Health.TreeHealthPhoto);
+            return BuildHealthPhotoDescriptionAttribute(dataItem as Health.Health.TreeHealthPhoto);
         }
 
         private string DisplayOrDefault(string value)

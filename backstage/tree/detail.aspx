@@ -45,6 +45,7 @@
                     <button class="nav-link text-dark disabled" type="button" aria-disabled="true">養護紀錄</button>
                 </li>
             </ul>
+
             <div class="tab-content" id="treeDetailTabContent">
                 <div class="tab-pane fade show active" id="pane-tree" role="tabpanel" aria-labelledby="tree-detail-tab">
                     <div class="row g-4">
@@ -414,6 +415,7 @@
         </div>
     </ContentTemplate>
     </asp:UpdatePanel>
+
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script type="text/javascript">
         (function () {
