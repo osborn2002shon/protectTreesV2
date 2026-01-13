@@ -1,7 +1,45 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="detail.aspx.cs" Inherits="protectTreesV2.backstage.tree.detail" %>
 <%@ Register Src="~/_uc/TreePhotoAlbum.ascx" TagPrefix="uc" TagName="TreePhotoAlbum" %>
+<%@ Register Src="~/_uc/health/uc_healthRecordModal.ascx" TagPrefix="uc" TagName="HealthRecordModal" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+    <style>
+        .health-photo-album img {
+            object-fit: cover;
+        }
+
+        .health-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        @media (max-width: 767.98px) {
+            .health-photo-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .health-photo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .health-photo-thumb .ratio {
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+        }
+    </style>
+    <script>
+        function showHealthRecordModal() {
+            var modalEl = document.getElementById('healthRecordModal');
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
     樹籍管理 / 樹籍檢視
@@ -14,12 +52,13 @@
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
             <asp:HiddenField ID="hfTreeID" runat="server" />
+            <asp:HiddenField ID="hfSelectedHealthId" runat="server" />
             <ul class="nav nav-tabs mb-4" id="treeDetailTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link active" aria-current="page" href="#">樹籍資料</a>
+                    <a class="nav-link active" id="tree-detail-tab" data-bs-toggle="tab" href="#pane-tree" role="tab" aria-controls="pane-tree" aria-selected="true">樹籍資料</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">健檢紀錄</a>
+                    <a class="nav-link" id="tree-health-tab" data-bs-toggle="tab" href="#pane-health" role="tab" aria-controls="pane-health" aria-selected="false">健檢紀錄</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">巡查紀錄</a>
@@ -248,9 +287,170 @@
                             </div>
                         </div>
                     </div>
-                <div class="row mt-4">
-                    <div class="col">
-                        <asp:HyperLink ID="lnkBackToList" runat="server" Text="返回列表" NavigateUrl="query.aspx" CssClass="btn btn-outline-secondary" />
+                </div>
+
+                <div class="tab-pane fade" id="pane-health" role="tabpanel" aria-labelledby="tree-health-tab">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card h-100">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <span class="fw-semibold">健檢照片</span>
+                                    <span class="text-muted small">選擇右側紀錄以切換</span>
+                                </div>
+                                <div class="card-body">
+                                    <asp:Panel ID="pnlHealthPhotoGallery" runat="server" CssClass="health-photo-album">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <asp:Panel ID="pnlHealthCoverPhoto" runat="server" CssClass="health-photo-cover">
+                                                    <div class="ratio ratio-4x3 rounded overflow-hidden bg-light">
+                                                        <a id="lnkHealthCoverLightbox" runat="server" class="tree-lightbox d-block h-100 w-100">
+                                                            <asp:Image ID="imgHealthCover" runat="server" CssClass="w-100 h-100" />
+                                                        </a>
+                                                    </div>
+                                                </asp:Panel>
+                                            </div>
+                                            <div class="col-12">
+                                                <asp:Repeater ID="rptHealthGallery" runat="server">
+                                                    <HeaderTemplate>
+                                                        <div class="health-photo-grid">
+                                                    </HeaderTemplate>
+                                                    <ItemTemplate>
+                                                        <div class="health-photo-thumb">
+                                                            <a href='<%# ResolveUrl(Eval("filePath").ToString()) %>' class="tree-lightbox d-block" data-gallery="health-photos" data-title='<%# BuildHealthPhotoTitle(Container.DataItem) %>' data-description='<%# BuildHealthPhotoDescriptionAttribute(Container.DataItem) %>'>
+                                                                <div class="ratio ratio-4x3 overflow-hidden bg-light">
+                                                                    <img src='<%# ResolveUrl(Eval("filePath").ToString()) %>' loading="lazy" decoding="async" class="w-100 h-100" alt='<%# BuildHealthPhotoTitle(Container.DataItem) %>' />
+                                                                </div>
+                                                            </a>
+                                                        </div>
+                                                    </ItemTemplate>
+                                                    <FooterTemplate>
+                                                        </div>
+                                                    </FooterTemplate>
+                                                </asp:Repeater>
+                                            </div>
+                                        </div>
+                                    </asp:Panel>
+                                    <asp:Label ID="lblNoHealthPhotos" runat="server" Text="尚無健檢照片" CssClass="text-muted" Visible="false" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <asp:Panel ID="pnlHealthRecordEmpty" runat="server" Visible="false" CssClass="text-center text-muted py-5">
+                                查無健檢紀錄。
+                            </asp:Panel>
+                            <asp:Repeater ID="rptHealthRecords" runat="server" OnItemCommand="rptHealthRecords_ItemCommand" OnItemDataBound="rptHealthRecords_ItemDataBound">
+                                <ItemTemplate>
+                                    <asp:Panel ID="pnlHealthCard" runat="server" CssClass="card mb-3">
+                                        <div class="card-header d-flex align-items-center justify-content-between">
+                                            <asp:LinkButton ID="btnSelectHealth" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectHealth" CommandArgument='<%# Eval("HealthId") %>'>
+                                                <%# Eval("SurveyDateDisplay") %>
+                                            </asp:LinkButton>
+                                            <span class="text-muted small">點選切換照片</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <div class="text-muted small">管理情況</div>
+                                                    <div class="fw-semibold"><%# Eval("ManagementStatusDisplay") %></div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="text-muted small">建議處理優先順序</div>
+                                                    <div class="fw-semibold"><%# Eval("PriorityDisplay") %></div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="text-muted small">處理情形說明</div>
+                                                    <div class="fw-semibold"><%# Eval("TreatmentDescriptionDisplay") %></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                                <asp:LinkButton ID="btnViewReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("HealthId") %>' Text="檢視報告" />
+                                                <div class="dropdown">
+                                                    <button id="btnAttachmentToggle" runat="server" type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">附件下載</button>
+                                                    <ul class="dropdown-menu">
+                                                        <asp:Repeater ID="rptHealthAttachments" runat="server">
+                                                            <ItemTemplate>
+                                                                <li>
+                                                                    <a class="dropdown-item" href='<%# ResolveUrl(Eval("filePath").ToString()) %>' target="_blank" rel="noopener">
+                                                                        <%# Eval("fileName") %>
+                                                                    </a>
+                                                                </li>
+                                                            </ItemTemplate>
+                                                        </asp:Repeater>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer text-muted small text-end">
+                                            調查人：<%# Eval("SurveyorDisplay") %>
+                                        </div>
+                                    </asp:Panel>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col">
+                    <asp:HyperLink ID="lnkBackToList" runat="server" Text="返回列表" NavigateUrl="query.aspx" CssClass="btn btn-outline-secondary" />
+                </div>
+            </div>
+
+            <div class="modal fade" id="healthRecordModal" tabindex="-1" aria-hidden="true" style="color: #000;">
+                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            健檢紀錄
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="formCard card mb-4">
+                                <div class="card-header">基本資料</div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-4 col-sm-6">
+                                            <label class="form-label text-muted">系統紀錄編號</label>
+                                            <div class="fw-bold">
+                                                <asp:Label ID="lblModal_healthId" runat="server"></asp:Label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-sm-6">
+                                            <label class="form-label text-muted">系統樹籍編號</label>
+                                            <div class="fw-bold">
+                                                <asp:Label ID="lblModal_systemTreeNo" runat="server"></asp:Label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-sm-6">
+                                            <label class="form-label text-muted">資料狀態</label>
+                                            <div class="fw-bold">
+                                                <asp:Label ID="lblModal_status" runat="server"></asp:Label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-sm-6">
+                                            <label class="form-label text-muted">所在地</label>
+                                            <div class="fw-bold">
+                                                <asp:Label ID="lblModal_location" runat="server"></asp:Label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-sm-6">
+                                            <label class="form-label text-muted">樹種及學名</label>
+                                            <div class="fw-bold">
+                                                <asp:Label ID="lblModal_species" runat="server"></asp:Label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-sm-6">
+                                            <label class="form-label text-muted">最後更新</label>
+                                            <div class="fw-bold">
+                                                <asp:Label ID="lblModal_lastUpdate" runat="server"></asp:Label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <uc:HealthRecordModal runat="server" ID="uc_healthRecordModal" />
+                        </div>
                     </div>
                 </div>
             </div>
