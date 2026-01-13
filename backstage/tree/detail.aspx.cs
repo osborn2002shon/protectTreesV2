@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using protectTreesV2.Base;
 using protectTreesV2.Health;
 using protectTreesV2.TreeCatalog;
@@ -190,37 +189,35 @@ namespace protectTreesV2.backstage.tree
         private void BindHealthPhotos(int? healthId)
         {
             var photos = healthId.HasValue ? systemHealth.GetHealthPhotos(healthId.Value) : new List<Health.Health.TreeHealthPhoto>();
-            if (photos == null || photos.Count == 0)
+            healthPhotoAlbum.GalleryName = "health-photos";
+            healthPhotoAlbum.SetPhotos(MapHealthPhotosToTreePhotos(photos));
+        }
+
+        private IEnumerable<TreePhoto> MapHealthPhotosToTreePhotos(IEnumerable<Health.Health.TreeHealthPhoto> photos)
+        {
+            var photoList = photos?.ToList() ?? new List<Health.Health.TreeHealthPhoto>();
+            var mappedPhotos = new List<TreePhoto>();
+
+            for (int i = 0; i < photoList.Count; i++)
             {
-                pnlHealthPhotoGallery.Visible = false;
-                lblNoHealthPhotos.Visible = true;
-                return;
+                var photo = photoList[i];
+                if (photo == null)
+                {
+                    continue;
+                }
+
+                mappedPhotos.Add(new TreePhoto
+                {
+                    PhotoID = photo.photoID,
+                    FileName = photo.fileName,
+                    FilePath = ResolveUrl(photo.filePath),
+                    Caption = photo.caption,
+                    InsertDateTime = photo.insertDateTime,
+                    IsCover = i == 0
+                });
             }
 
-            var coverPhoto = photos.FirstOrDefault();
-            if (coverPhoto != null)
-            {
-                imgHealthCover.ImageUrl = ResolveUrl(coverPhoto.filePath);
-                imgHealthCover.AlternateText = BuildHealthPhotoTitle(coverPhoto);
-
-                lnkHealthCoverLightbox.HRef = ResolveUrl(coverPhoto.filePath);
-                lnkHealthCoverLightbox.Attributes["data-gallery"] = "health-photos";
-                lnkHealthCoverLightbox.Attributes["data-title"] = BuildHealthPhotoTitle(coverPhoto);
-                lnkHealthCoverLightbox.Attributes["data-description"] = BuildHealthPhotoDescriptionAttribute(coverPhoto);
-            }
-
-            pnlHealthCoverPhoto.Visible = coverPhoto != null;
-
-            var galleryPhotos = photos
-                .Where(p => coverPhoto == null || p.photoID != coverPhoto.photoID)
-                .ToList();
-
-            rptHealthGallery.DataSource = galleryPhotos;
-            rptHealthGallery.DataBind();
-            rptHealthGallery.Visible = galleryPhotos.Any();
-
-            pnlHealthPhotoGallery.Visible = true;
-            lblNoHealthPhotos.Visible = false;
+            return mappedPhotos;
         }
 
         protected void rptHealthRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
@@ -322,7 +319,7 @@ namespace protectTreesV2.backstage.tree
             }
 
             uc_healthRecordModal.BindRecord(record);
-            System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowHealthModal", "showHealthRecordModal();", true);
+            System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowRecordModal", "showRecordModal();", true);
         }
 
         private void ActivateHealthTab()
@@ -330,29 +327,5 @@ namespace protectTreesV2.backstage.tree
             System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowHealthTab", "showHealthTab();", true);
         }
 
-        protected string BuildHealthPhotoTitle(object dataItem)
-        {
-            return BuildHealthPhotoTitle(dataItem as Health.Health.TreeHealthPhoto);
-        }
-
-        protected string BuildHealthPhotoTitle(Health.Health.TreeHealthPhoto photo)
-        {
-            if (photo == null) return string.Empty;
-            if (!string.IsNullOrWhiteSpace(photo.caption)) return photo.caption.Trim();
-            return string.IsNullOrWhiteSpace(photo.fileName) ? "健檢照片" : photo.fileName.Trim();
-        }
-
-        protected string BuildHealthPhotoDescriptionAttribute(object dataItem)
-        {
-            return BuildHealthPhotoDescriptionAttribute(dataItem as Health.Health.TreeHealthPhoto);
-        }
-
-        protected string BuildHealthPhotoDescriptionAttribute(Health.Health.TreeHealthPhoto photo)
-        {
-            if (photo == null) return string.Empty;
-            var caption = BuildHealthPhotoTitle(photo);
-            var uploadTime = photo.insertDateTime == default ? "未知時間" : photo.insertDateTime.ToString("yyyy/MM/dd HH:mm");
-            return HttpUtility.HtmlAttributeEncode($"{caption}｜上傳：{uploadTime}");
-        }
     }
 }

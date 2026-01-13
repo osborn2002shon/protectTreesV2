@@ -4,35 +4,6 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
-        .health-photo-album img {
-            object-fit: cover;
-        }
-
-        .health-photo-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.75rem;
-            padding: 0;
-            margin: 0;
-        }
-
-        @media (max-width: 767.98px) {
-            .health-photo-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            .health-photo-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .health-photo-thumb .ratio {
-            border: 1px solid #e9ecef;
-            border-radius: 0.5rem;
-        }
-
         .health-record-card {
             cursor: pointer;
             transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
@@ -45,8 +16,8 @@
         }
     </style>
     <script>
-        function showHealthRecordModal() {
-            var modalEl = document.getElementById('healthRecordModal');
+        function showRecordModal() {
+            var modalEl = document.getElementById('recordModal');
             var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
         }
@@ -315,39 +286,7 @@
                                     <span class="text-muted small">選擇右側紀錄以切換</span>
                                 </div>
                                 <div class="card-body">
-                                    <asp:Panel ID="pnlHealthPhotoGallery" runat="server" CssClass="health-photo-album">
-                                        <div class="row g-3">
-                                            <div class="col-12">
-                                                <asp:Panel ID="pnlHealthCoverPhoto" runat="server" CssClass="health-photo-cover">
-                                                    <div class="ratio ratio-4x3 rounded overflow-hidden bg-light">
-                                                        <a id="lnkHealthCoverLightbox" runat="server" class="tree-lightbox d-block h-100 w-100">
-                                                            <asp:Image ID="imgHealthCover" runat="server" CssClass="w-100 h-100" />
-                                                        </a>
-                                                    </div>
-                                                </asp:Panel>
-                                            </div>
-                                            <div class="col-12">
-                                                <asp:Repeater ID="rptHealthGallery" runat="server">
-                                                    <HeaderTemplate>
-                                                        <div class="health-photo-grid">
-                                                    </HeaderTemplate>
-                                                    <ItemTemplate>
-                                                        <div class="health-photo-thumb">
-                                                            <a href='<%# ResolveUrl(Eval("filePath").ToString()) %>' class="tree-lightbox d-block" data-gallery="health-photos" data-title='<%# BuildHealthPhotoTitle(Container.DataItem) %>' data-description='<%# BuildHealthPhotoDescriptionAttribute(Container.DataItem) %>'>
-                                                                <div class="ratio ratio-4x3 overflow-hidden bg-light">
-                                                                    <img src='<%# ResolveUrl(Eval("filePath").ToString()) %>' loading="lazy" decoding="async" class="w-100 h-100" alt='<%# BuildHealthPhotoTitle(Container.DataItem) %>' />
-                                                                </div>
-                                                            </a>
-                                                        </div>
-                                                    </ItemTemplate>
-                                                    <FooterTemplate>
-                                                        </div>
-                                                    </FooterTemplate>
-                                                </asp:Repeater>
-                                            </div>
-                                        </div>
-                                    </asp:Panel>
-                                    <asp:Label ID="lblNoHealthPhotos" runat="server" Text="尚無健檢照片" CssClass="text-muted" Visible="false" />
+                                    <uc:TreePhotoAlbum ID="healthPhotoAlbum" runat="server" />
                                 </div>
                             </div>
                         </div>
@@ -422,7 +361,7 @@
                 </div>
             </div>
 
-            <div class="modal fade" id="healthRecordModal" tabindex="-1" aria-hidden="true" style="color: #000;">
+            <div class="modal fade" id="recordModal" tabindex="-1" aria-hidden="true" style="color: #000;">
                 <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">

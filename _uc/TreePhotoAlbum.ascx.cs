@@ -12,6 +12,8 @@ namespace protectTreesV2._uc
     {
         private const string TransparentPixel = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
         public IEnumerable<TreePhoto> Photos { get; private set; } = Enumerable.Empty<TreePhoto>();
+        public string GalleryName { get; set; } = "tree-photos";
+        protected string GalleryNameValue => string.IsNullOrWhiteSpace(GalleryName) ? "tree-photos" : GalleryName;
 
         public void SetPhotos(IEnumerable<TreePhoto> photos)
         {
@@ -40,7 +42,7 @@ namespace protectTreesV2._uc
                 imgCover.Attributes["data-src"] = coverPhoto.FilePath;
 
                 lnkCoverLightbox.HRef = coverPhoto.FilePath;
-                lnkCoverLightbox.Attributes["data-gallery"] = "tree-photos";
+                lnkCoverLightbox.Attributes["data-gallery"] = GalleryNameValue;
                 lnkCoverLightbox.Attributes["data-title"] = BuildLightboxTitle(coverPhoto);
                 lnkCoverLightbox.Attributes["data-description"] = BuildLightboxDescriptionAttribute(coverPhoto);
             }

@@ -366,58 +366,13 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Label lblMemo;
 
         /// <summary>
-        /// pnlHealthPhotoGallery 控制項。
+        /// healthPhotoAlbum 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlHealthPhotoGallery;
-
-        /// <summary>
-        /// pnlHealthCoverPhoto 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlHealthCoverPhoto;
-
-        /// <summary>
-        /// lnkHealthCoverLightbox 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlAnchor lnkHealthCoverLightbox;
-
-        /// <summary>
-        /// imgHealthCover 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Image imgHealthCover;
-
-        /// <summary>
-        /// rptHealthGallery 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptHealthGallery;
-
-        /// <summary>
-        /// lblNoHealthPhotos 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblNoHealthPhotos;
+        protected global::protectTreesV2._uc.TreePhotoAlbum healthPhotoAlbum;
 
         /// <summary>
         /// pnlHealthRecordEmpty 控制項。
