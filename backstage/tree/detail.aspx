@@ -283,7 +283,7 @@
                             <div class="card h-100">
                                 <div class="card-header d-flex align-items-center justify-content-between">
                                     <span class="fw-semibold">健檢照片</span>
-                                    <span class="text-muted small">選擇右側紀錄以切換</span>
+                                    <span class="text-muted small">選擇右側紀錄以切換，點擊照片以燈箱檢視</span>
                                 </div>
                                 <div class="card-body">
                                     <uc:TreePhotoAlbum ID="healthPhotoAlbum" runat="server" />
