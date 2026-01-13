@@ -63,6 +63,8 @@ namespace protectTreesV2.TreeCatalog
         public string FileName { get; set; }
         public string FilePath { get; set; }
         public string Caption { get; set; }
+        public string LightboxTitle { get; set; }
+        public string LightboxSubtitle { get; set; }
         public bool IsCover { get; set; }
         public DateTime InsertDateTime { get; set; }
         public int InsertAccountID { get; set; }

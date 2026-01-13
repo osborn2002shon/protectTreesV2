@@ -363,7 +363,7 @@
                                                 </div>
                                             </div>
                                             <div class="card-footer text-muted small text-end">
-                                                調查人：<%# Eval("SurveyorDisplay") %>
+                                                調查人：<%# Eval("SurveyorDisplay") %>｜最後更新：<%# Eval("LastUpdateDisplay") %>
                                             </div>
                                         </asp:Panel>
                                     </div>
@@ -425,7 +425,7 @@
                                                 </div>
                                             </div>
                                             <div class="card-footer text-muted small text-end">
-                                                巡查人：<%# Eval("PatrollerDisplay") %>
+                                                巡查人：<%# Eval("PatrollerDisplay") %>｜最後更新：<%# Eval("LastUpdateDisplay") %>
                                             </div>
                                         </asp:Panel>
                                     </div>
@@ -487,7 +487,7 @@
                                                 </div>
                                             </div>
                                             <div class="card-footer text-muted small text-end">
-                                                最後更新：<%# Eval("LastUpdateDisplay") %>
+                                                調查人：<%# Eval("SurveyorDisplay") %>｜最後更新：<%# Eval("LastUpdateDisplay") %>
                                             </div>
                                         </asp:Panel>
                                     </div>
