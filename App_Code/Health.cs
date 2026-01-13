@@ -874,6 +874,46 @@ namespace protectTreesV2.Health
             return result;
         }
 
+        public List<TreeHealthRecord> GetHealthRecordsByTreeId(int treeId)
+        {
+            string sql = @"
+                SELECT 
+                    healthID,
+                    treeID,
+                    surveyDate,
+                    surveyor,
+                    managementStatus,
+                    priority,
+                    treatmentDescription
+                FROM Tree_HealthRecord
+                WHERE treeID = @treeID
+                  AND removeDateTime IS NULL
+                ORDER BY surveyDate DESC, healthID DESC";
+
+            var result = new List<TreeHealthRecord>();
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@treeID", treeId));
+                foreach (DataRow row in dt.Rows)
+                {
+                    var record = new TreeHealthRecord
+                    {
+                        healthID = GetNullableInt(row, "healthID") ?? 0,
+                        treeID = GetNullableInt(row, "treeID") ?? treeId,
+                        surveyDate = GetNullableDateTime(row, "surveyDate"),
+                        surveyor = GetString(row, "surveyor"),
+                        managementStatus = GetString(row, "managementStatus"),
+                        priority = GetString(row, "priority"),
+                        treatmentDescription = GetString(row, "treatmentDescription")
+                    };
+
+                    result.Add(record);
+                }
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// 取得健檢紀錄
         /// </summary>
