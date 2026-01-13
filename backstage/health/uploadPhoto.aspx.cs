@@ -41,7 +41,7 @@ namespace protectTreesV2.backstage.health
                 var latest = historyList[0];
                 Label_LastStatus.Text = $"最新上傳：{latest.insertDateTime?.ToString("yyyy/MM/dd HH:mm")} (成功 {latest.successCount} / 失敗 {latest.failCount})";
 
-                var details = system_batch.GetLatestBatchTaskLogs(userId);
+                var details = system_batch.GetLatestBatchTaskLogs(latest.taskID);
                 GridView_Detail.DataSource = details;
                 GridView_Detail.DataBind();
             }

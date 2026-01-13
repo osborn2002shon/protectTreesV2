@@ -67,13 +67,38 @@
                 </div>
                 <div class="card-body pt-0">
                     <p class="card-text">
-                        請使用系統的命名規則來命名檔案並且上傳，系統將自動解析檔名以關聯至正確的調查資料。
+                        請依照系統命名規則重新命名照片檔案後上傳，系統將自動解析檔名並關聯至對應的調查資料。
                     </p>
-                
+
+                    <p class="fw-bold mb-1">命名規則與範例：</p>
                     <ul>
-                        <li>命名規則：系統樹籍編號_調查日期_xxxx.jpg</li>
-                        <li>檔案限制：僅接受 *.jpg、*.jpeg、*.png 格式，單一檔案大小限制 10MB，每筆健檢紀錄最多上傳 5 張。</li>
-                        <li>範例說明：若需要上傳系統樹籍編號為 A0001、調查日期為 2025-01-01 的照片，請將該照片命名為 A0001_20250101_001.jpg 即可。</li>
+                        <li>
+                            <strong>命名規則：</strong>系統樹籍編號_調查日期_xxxx.jpg
+                            <br /><span class="text-muted small">（xxxx 可為任意流水號或自訂註記）</span>
+                        </li>
+                        <li>
+                            <strong>範例說明：</strong>
+                            若要上傳「系統樹籍編號 A0001」於「2025年1月1日」的照片，請將照片命名為 <code>A0001_20250101_001.jpg</code>。
+                        </li>
+                    </ul>
+
+                    <p class="fw-bold mb-1">勾選狀態說明：</p>
+                    <ul>
+                        <li>
+                            <strong>勾選「指定日期若無紀錄則自動新增一筆（草稿）」：</strong>
+                            若系統中查無該「樹籍編號」與「調查日期」的對應紀錄，系統將自動建立一筆新的草稿資料以利歸檔照片。
+                        </li>
+                    </ul>
+
+                    <p class="fw-bold mb-1">檔案格式限制：</p>
+                    <ul>
+                        <li>格式限制：僅接受 .jpg, .jpeg, .png 格式。</li>
+                        <li>大小限制：單一檔案大小限制 10MB。</li>
+                        <li>
+                            <strong>數量限制：</strong>每筆健檢紀錄最多容納 5 張照片。
+                            <br />
+                            <span class="text-muted small">（系統將檢查該筆紀錄原有的照片數量，合併計算後總數不可超過 5 張）</span>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -177,8 +202,8 @@
 
     <div class="row">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-light py-3 border-0">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
                     <h5 class="m-0 fw-bold text-dark">
                         <i class="fa-solid fa-clock-rotate-left me-2"></i>歷史上傳紀錄（近五筆）
                     </h5>
