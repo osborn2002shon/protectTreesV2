@@ -118,7 +118,7 @@
                 </HeaderTemplate>
                 <ItemTemplate>
                     <div class="tree-gallery-thumb">
-                        <a href='<%# Eval("FilePath") %>' class="tree-lightbox d-block"  data-gallery="tree-photos" data-title='<%# BuildLightboxTitleFromData(Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttributeFromData(Container.DataItem) %>'>
+                        <a href='<%# Eval("FilePath") %>' class="tree-lightbox d-block" data-gallery='<%# GalleryNameValue %>' data-title='<%# BuildLightboxTitleFromData(Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttributeFromData(Container.DataItem) %>'>
                             <div class="ratio ratio-4x3 overflow-hidden bg-light image-wrapper is-loading" style="min-height:100px;">
                                 <div class="loading-indicator" >
                                     <div class="spinner-border spinner-border-sm text-success" role="status">
