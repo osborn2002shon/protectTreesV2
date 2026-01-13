@@ -10,7 +10,7 @@ namespace protectTreesV2.backstage.tree
 {
     public partial class detail : BasePage
     {
-        private readonly Health systemHealth = new Health();
+        private readonly Health.Health systemHealth = new Health.Health();
 
         private class HealthRecordCardViewModel
         {
@@ -21,7 +21,7 @@ namespace protectTreesV2.backstage.tree
             public string PriorityDisplay { get; set; }
             public string TreatmentDescriptionDisplay { get; set; }
             public bool IsSelected { get; set; }
-            public IList<Health.TreeHealthAttachment> Attachments { get; set; }
+            public IList<Health.Health.TreeHealthAttachment> Attachments { get; set; }
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -138,7 +138,7 @@ namespace protectTreesV2.backstage.tree
 
         private void BindHealthRecords(int treeId)
         {
-            var records = systemHealth.GetHealthRecordsByTree(treeId) ?? new List<Health.TreeHealthRecord>();
+            var records = systemHealth.GetHealthRecordsByTree(treeId) ?? new List<Health.Health.TreeHealthRecord>();
 
             if (!records.Any())
             {
@@ -164,7 +164,7 @@ namespace protectTreesV2.backstage.tree
                 PriorityDisplay = DisplayOrDefault(record.priority),
                 TreatmentDescriptionDisplay = DisplayOrDefault(record.treatmentDescription),
                 IsSelected = selectedHealthId.HasValue && record.healthID == selectedHealthId.Value,
-                Attachments = record.attachments ?? new List<Health.TreeHealthAttachment>()
+                Attachments = record.attachments ?? new List<Health.Health.TreeHealthAttachment>()
             }).ToList();
 
             rptHealthRecords.DataSource = viewModels;
@@ -175,7 +175,7 @@ namespace protectTreesV2.backstage.tree
             BindHealthPhotos(selectedHealthId);
         }
 
-        private int? GetSelectedHealthId(IEnumerable<Health.TreeHealthRecord> records)
+        private int? GetSelectedHealthId(IEnumerable<Health.Health.TreeHealthRecord> records)
         {
             if (int.TryParse(hfSelectedHealthId.Value, out int selectedId) && records.Any(r => r.healthID == selectedId))
             {
@@ -189,7 +189,7 @@ namespace protectTreesV2.backstage.tree
 
         private void BindHealthPhotos(int? healthId)
         {
-            var photos = healthId.HasValue ? systemHealth.GetHealthPhotos(healthId.Value) : new List<Health.TreeHealthPhoto>();
+            var photos = healthId.HasValue ? systemHealth.GetHealthPhotos(healthId.Value) : new List<Health.Health.TreeHealthPhoto>();
             if (photos == null || photos.Count == 0)
             {
                 pnlHealthPhotoGallery.Visible = false;
@@ -267,7 +267,7 @@ namespace protectTreesV2.backstage.tree
 
             var attachmentToggle = e.Item.FindControl("btnAttachmentToggle") as System.Web.UI.HtmlControls.HtmlButton;
             var attachmentRepeater = e.Item.FindControl("rptHealthAttachments") as System.Web.UI.WebControls.Repeater;
-            var attachments = viewModel.Attachments ?? new List<Health.TreeHealthAttachment>();
+            var attachments = viewModel.Attachments ?? new List<Health.Health.TreeHealthAttachment>();
 
             if (attachmentRepeater != null)
             {
@@ -313,10 +313,10 @@ namespace protectTreesV2.backstage.tree
 
         protected string BuildHealthPhotoTitle(object dataItem)
         {
-            return BuildHealthPhotoTitle(dataItem as Health.TreeHealthPhoto);
+            return BuildHealthPhotoTitle(dataItem as Health.Health.TreeHealthPhoto);
         }
 
-        protected string BuildHealthPhotoTitle(Health.TreeHealthPhoto photo)
+        protected string BuildHealthPhotoTitle(Health.Health.TreeHealthPhoto photo)
         {
             if (photo == null) return string.Empty;
             if (!string.IsNullOrWhiteSpace(photo.caption)) return photo.caption.Trim();
@@ -325,10 +325,10 @@ namespace protectTreesV2.backstage.tree
 
         protected string BuildHealthPhotoDescriptionAttribute(object dataItem)
         {
-            return BuildHealthPhotoDescriptionAttribute(dataItem as Health.TreeHealthPhoto);
+            return BuildHealthPhotoDescriptionAttribute(dataItem as Health.Health.TreeHealthPhoto);
         }
 
-        protected string BuildHealthPhotoDescriptionAttribute(Health.TreeHealthPhoto photo)
+        protected string BuildHealthPhotoDescriptionAttribute(Health.Health.TreeHealthPhoto photo)
         {
             if (photo == null) return string.Empty;
             var caption = BuildHealthPhotoTitle(photo);

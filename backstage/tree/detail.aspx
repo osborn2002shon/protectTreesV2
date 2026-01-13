@@ -49,16 +49,15 @@
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
 
-    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-        <ContentTemplate>
+
             <asp:HiddenField ID="hfTreeID" runat="server" />
             <asp:HiddenField ID="hfSelectedHealthId" runat="server" />
             <ul class="nav nav-tabs mb-4" id="treeDetailTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link active" id="tree-detail-tab" data-bs-toggle="tab" href="#pane-tree" role="tab" aria-controls="pane-tree" aria-selected="true">樹籍資料</a>
+                    <a class="nav-link text-dark active" id="tree-detail-tab" data-bs-toggle="tab" href="#pane-tree" role="tab" aria-controls="pane-tree" aria-selected="true">樹籍資料</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link" id="tree-health-tab" data-bs-toggle="tab" href="#pane-health" role="tab" aria-controls="pane-health" aria-selected="false">健檢紀錄</a>
+                    <a class="nav-link text-dark" id="tree-health-tab" data-bs-toggle="tab" href="#pane-health" role="tab" aria-controls="pane-health" aria-selected="false">健檢紀錄</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">巡查紀錄</a>
@@ -454,9 +453,8 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </ContentTemplate>
-    </asp:UpdatePanel>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script type="text/javascript">
