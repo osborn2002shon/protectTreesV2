@@ -1,15 +1,18 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="detail.aspx.cs" Inherits="protectTreesV2.backstage.tree.detail" %>
 <%@ Register Src="~/_uc/TreePhotoAlbum.ascx" TagPrefix="uc" TagName="TreePhotoAlbum" %>
 <%@ Register Src="~/_uc/health/uc_healthRecordModal.ascx" TagPrefix="uc" TagName="HealthRecordModal" %>
+<%@ Register Src="~/_uc/patrol/uc_patrolRecordModal.ascx" TagPrefix="uc" TagName="PatrolRecordModal" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
-        .health-record-card {
+        .health-record-card,
+        .patrol-record-card {
             cursor: pointer;
             transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
         }
 
-        .health-record-card.is-selected {
+        .health-record-card.is-selected,
+        .patrol-record-card.is-selected {
             border: 2px solid #198754;
             box-shadow: 0 0.75rem 1.5rem rgba(25, 135, 84, 0.2);
             background-color: #f0fbf4;
@@ -28,6 +31,13 @@
             var tab = bootstrap.Tab.getOrCreateInstance(tabEl);
             tab.show();
         }
+
+        function showPatrolTab() {
+            var tabEl = document.getElementById('tree-patrol-tab');
+            if (!tabEl) return;
+            var tab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            tab.show();
+        }
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
@@ -41,6 +51,7 @@
 
             <asp:HiddenField ID="hfTreeID" runat="server" />
             <asp:HiddenField ID="hfSelectedHealthId" runat="server" />
+            <asp:HiddenField ID="hfSelectedPatrolId" runat="server" />
             <ul class="nav nav-tabs mb-4" id="treeDetailTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <a class="nav-link text-dark active" id="tree-detail-tab" data-bs-toggle="tab" href="#pane-tree" role="tab" aria-controls="pane-tree" aria-selected="true">樹籍資料</a>
@@ -49,7 +60,7 @@
                     <a class="nav-link text-dark" id="tree-health-tab" data-bs-toggle="tab" href="#pane-health" role="tab" aria-controls="pane-health" aria-selected="false">健檢紀錄</a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">巡查紀錄</a>
+                    <a class="nav-link text-dark" id="tree-patrol-tab" data-bs-toggle="tab" href="#pane-patrol" role="tab" aria-controls="pane-patrol" aria-selected="false">巡查紀錄</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link text-dark disabled" href="#" tabindex="-1" aria-disabled="true">養護紀錄</a>
@@ -353,6 +364,68 @@
                         </div>
                     </div>
                 </div>
+                <div class="tab-pane" id="pane-patrol" role="tabpanel" aria-labelledby="tree-patrol-tab">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card h-100">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <span class="fw-semibold">巡查照片</span>
+                                    <span class="text-muted small">選擇右側紀錄以切換，點擊照片以燈箱檢視</span>
+                                </div>
+                                <div class="card-body">
+                                    <uc:TreePhotoAlbum ID="patrolPhotoAlbum" runat="server" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <asp:Panel ID="pnlPatrolRecordEmpty" runat="server" Visible="false" CssClass="text-center text-muted py-5">
+                                查無巡查紀錄。
+                            </asp:Panel>
+                            <asp:Repeater ID="rptPatrolRecords" runat="server" OnItemCommand="rptPatrolRecords_ItemCommand" OnItemDataBound="rptPatrolRecords_ItemDataBound">
+                                <HeaderTemplate>
+                                    <div class="row g-3">
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <div class="col-12 col-lg-6">
+                                        <asp:Panel ID="pnlPatrolCard" runat="server" CssClass="card patrol-record-card h-100">
+                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                                <asp:LinkButton ID="btnSelectPatrol" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectPatrol" CommandArgument='<%# Eval("PatrolId") %>'>
+                                                    <%# Eval("PatrolDateDisplay") %>
+                                                </asp:LinkButton>
+                                                <asp:Label ID="lblPatrolSelectionHint" runat="server" CssClass="text-muted small" Text="點選切換照片" />
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <div class="text-muted small">公共安全風險</div>
+                                                        <div class="fw-semibold"><%# Eval("RiskDisplay") %></div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="text-muted small">巡查備註</div>
+                                                        <div class="fw-semibold"><%# Eval("MemoDisplay") %></div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="text-muted small">資料狀態</div>
+                                                        <div class="fw-semibold"><%# Eval("StatusDisplay") %></div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                                    <asp:LinkButton ID="btnViewPatrolReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("PatrolId") %>' Text="檢視報告" />
+                                                </div>
+                                            </div>
+                                            <div class="card-footer text-muted small text-end">
+                                                巡查人：<%# Eval("PatrollerDisplay") %>
+                                            </div>
+                                        </asp:Panel>
+                                    </div>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </div>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="row mt-4">
@@ -365,7 +438,7 @@
                 <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header">
-                            健檢紀錄
+                            <asp:Literal ID="ltlRecordModalTitle" runat="server" Text="健檢紀錄" />
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -413,7 +486,12 @@
                                 </div>
                             </div>
 
-                            <uc:HealthRecordModal runat="server" ID="uc_healthRecordModal" />
+                            <asp:PlaceHolder ID="phHealthRecordModal" runat="server">
+                                <uc:HealthRecordModal runat="server" ID="uc_healthRecordModal" />
+                            </asp:PlaceHolder>
+                            <asp:PlaceHolder ID="phPatrolRecordModal" runat="server" Visible="false">
+                                <uc:PatrolRecordModal runat="server" ID="uc_patrolRecordModal" />
+                            </asp:PlaceHolder>
                         </div>
                     </div>
                 </div>
@@ -458,9 +536,32 @@
                 });
             }
 
+            function initPatrolRecordCards() {
+                document.querySelectorAll('.patrol-record-card').forEach(function (card) {
+                    if (card.dataset.patrolCardBound) {
+                        return;
+                    }
+                    card.dataset.patrolCardBound = 'true';
+                    card.addEventListener('click', function (event) {
+                        if (event.target.closest('a, button, .dropdown-menu, input, label')) {
+                            return;
+                        }
+                        var targetId = card.getAttribute('data-select-target');
+                        if (!targetId) {
+                            return;
+                        }
+                        var targetLink = document.getElementById(targetId);
+                        if (targetLink) {
+                            targetLink.click();
+                        }
+                    });
+                });
+            }
+
             function initPageComponents() {
                 initLightbox();
                 initHealthRecordCards();
+                initPatrolRecordCards();
             }
 
             document.addEventListener('DOMContentLoaded', initPageComponents);
