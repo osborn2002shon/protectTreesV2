@@ -197,7 +197,7 @@ namespace protectTreesV2.backstage.tree
                 HealthId = record.healthID,
                 SurveyDateDisplay = DisplayOrDefault(record.surveyDateDisplay),
                 SurveyorDisplay = DisplayOrDefault(record.surveyor),
-                LastUpdateDisplay = DisplayOrDefault(record.lastUpdateDisplay),
+                LastUpdateDisplay = DisplayOrDefault(record.updateDateTime ?? record.insertDateTime),
                 ManagementStatusDisplay = DisplayOrDefault(record.managementStatus),
                 PriorityDisplay = DisplayOrDefault(record.priority),
                 TreatmentDescriptionDisplay = DisplayOrDefault(record.treatmentDescription),
@@ -361,7 +361,7 @@ namespace protectTreesV2.backstage.tree
                     FilePath = ResolveUrl(photo.filePath),
                     Caption = photo.caption,
                     LightboxTitle = photo.fileName,
-                    LightboxSubtitle = photo.caption,
+                    LightboxSubtitle = photo.caption ?? string.Empty,
                     InsertDateTime = photo.insertDateTime,
                     IsCover = i == 0
                 });
@@ -390,7 +390,7 @@ namespace protectTreesV2.backstage.tree
                     FilePath = ResolveUrl(photo.FilePath),
                     Caption = photo.Caption,
                     LightboxTitle = photo.FileName,
-                    LightboxSubtitle = photo.Caption,
+                    LightboxSubtitle = photo.Caption ?? string.Empty,
                     InsertDateTime = DateTime.MinValue,
                     IsCover = i == 0
                 });
@@ -431,7 +431,6 @@ namespace protectTreesV2.backstage.tree
             }
 
             var captionSuffix = string.IsNullOrWhiteSpace(photo.itemName) ? suffix : $"{photo.itemName} - {suffix}";
-            var fileNamePair = BuildCareFileNamePair(photo);
             mappedPhotos.Add(new TreePhoto
             {
                 PhotoID = (photo.photoID * 10) + mappedPhotos.Count + 1,
@@ -439,27 +438,10 @@ namespace protectTreesV2.backstage.tree
                 FilePath = ResolveUrl(filePath),
                 Caption = captionSuffix,
                 LightboxTitle = captionSuffix,
-                LightboxSubtitle = fileNamePair,
+                LightboxSubtitle = fileName ?? string.Empty,
                 InsertDateTime = photo.insertDateTime ?? DateTime.MinValue,
                 IsCover = false
             });
-        }
-
-        private string BuildCareFileNamePair(Care.Care.CarePhotoRecord photo)
-        {
-            if (photo == null)
-            {
-                return string.Empty;
-            }
-
-            var parts = new List<string>
-            {
-                photo.beforeFileName,
-                photo.afterFileName
-            };
-
-            var display = string.Join(" / ", parts.Where(name => !string.IsNullOrWhiteSpace(name)));
-            return string.IsNullOrWhiteSpace(display) ? "未命名照片" : display;
         }
 
         protected void rptHealthRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)

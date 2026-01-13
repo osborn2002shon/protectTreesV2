@@ -86,7 +86,7 @@ namespace protectTreesV2._uc
         protected string BuildLightboxDescriptionAttribute(TreePhoto photo)
         {
             if (photo == null) return string.Empty;
-            var caption = string.IsNullOrWhiteSpace(photo.LightboxSubtitle) ? BuildPhotoCaption(photo) : photo.LightboxSubtitle;
+            var caption = photo.LightboxSubtitle ?? BuildPhotoCaption(photo);
             var uploadTime = BuildUploadTimeDisplay(photo);
             var description = $"{HttpUtility.HtmlEncode(caption)}<br />上傳：{HttpUtility.HtmlEncode(uploadTime)}";
             return description;
