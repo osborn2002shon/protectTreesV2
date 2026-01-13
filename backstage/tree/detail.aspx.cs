@@ -209,7 +209,7 @@ namespace protectTreesV2.backstage.tree
                 PatrollerDisplay = DisplayOrDefault(record.patroller),
                 RiskDisplay = record.hasPublicSafetyRisk ? "有" : "無",
                 MemoDisplay = DisplayOrDefault(record.memo),
-                StatusDisplay = record.dataStatus == (int)Patrol.PatrolRecordStatus.定稿 ? "定稿" : "草稿",
+                StatusDisplay = record.dataStatus == (int)Patrol.Patrol.PatrolRecordStatus.定稿 ? "定稿" : "草稿",
                 IsSelected = selectedPatrolId.HasValue && record.patrolID == selectedPatrolId.Value
             }).ToList();
 
@@ -481,7 +481,7 @@ namespace protectTreesV2.backstage.tree
                 var tree = TreeService.GetTree(record.treeID);
                 lblModal_healthId.Text = record.patrolID.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 lblModal_systemTreeNo.Text = string.IsNullOrWhiteSpace(tree?.SystemTreeNo) ? "--" : tree.SystemTreeNo.Trim();
-                lblModal_status.Text = record.dataStatus == (int)Patrol.PatrolRecordStatus.定稿 ? "定稿" : "草稿";
+                lblModal_status.Text = record.dataStatus == (int)Patrol.Patrol.PatrolRecordStatus.定稿 ? "定稿" : "草稿";
 
                 string location = (tree?.CityName ?? "") + (tree?.AreaName ?? "");
                 lblModal_location.Text = string.IsNullOrWhiteSpace(location) ? "--" : location.Trim();
