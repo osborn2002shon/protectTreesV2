@@ -236,12 +236,14 @@ namespace protectTreesV2.backstage.tree
             {
                 hfSelectedHealthId.Value = healthId.ToString();
                 BindHealthRecords(treeId);
+                ActivateHealthTab();
                 return;
             }
 
             if (e.CommandName == "ViewReport")
             {
                 ShowHealthRecordModal(healthId);
+                ActivateHealthTab();
             }
         }
 
@@ -260,9 +262,20 @@ namespace protectTreesV2.backstage.tree
             }
 
             var card = e.Item.FindControl("pnlHealthCard") as System.Web.UI.WebControls.Panel;
-            if (card != null && viewModel.IsSelected)
+            if (card != null)
             {
-                card.CssClass = $"{card.CssClass} border-success shadow-sm";
+                card.Attributes["data-select-target"] = (e.Item.FindControl("btnSelectHealth") as System.Web.UI.WebControls.LinkButton)?.ClientID ?? string.Empty;
+                if (viewModel.IsSelected)
+                {
+                    card.CssClass = $"{card.CssClass} is-selected";
+                }
+            }
+
+            var selectionHint = e.Item.FindControl("lblHealthSelectionHint") as System.Web.UI.WebControls.Label;
+            if (selectionHint != null && viewModel.IsSelected)
+            {
+                selectionHint.Text = "顯示照片中";
+                selectionHint.CssClass = "text-success fw-semibold small";
             }
 
             var attachmentToggle = e.Item.FindControl("btnAttachmentToggle") as System.Web.UI.HtmlControls.HtmlButton;
@@ -279,6 +292,7 @@ namespace protectTreesV2.backstage.tree
             {
                 attachmentToggle.Attributes["disabled"] = "disabled";
                 attachmentToggle.Attributes["aria-disabled"] = "true";
+                attachmentToggle.InnerText = "無附件";
             }
         }
 
@@ -309,6 +323,11 @@ namespace protectTreesV2.backstage.tree
 
             uc_healthRecordModal.BindRecord(record);
             System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowHealthModal", "showHealthRecordModal();", true);
+        }
+
+        private void ActivateHealthTab()
+        {
+            System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowHealthTab", "showHealthTab();", true);
         }
 
         protected string BuildHealthPhotoTitle(object dataItem)

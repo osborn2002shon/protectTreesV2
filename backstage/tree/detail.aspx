@@ -32,12 +32,30 @@
             border: 1px solid #e9ecef;
             border-radius: 0.5rem;
         }
+
+        .health-record-card {
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .health-record-card.is-selected {
+            border: 2px solid #198754;
+            box-shadow: 0 0.75rem 1.5rem rgba(25, 135, 84, 0.2);
+            background-color: #f0fbf4;
+        }
     </style>
     <script>
         function showHealthRecordModal() {
             var modalEl = document.getElementById('healthRecordModal');
             var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
+        }
+
+        function showHealthTab() {
+            var tabEl = document.getElementById('tree-health-tab');
+            if (!tabEl) return;
+            var tab = bootstrap.Tab.getOrCreateInstance(tabEl);
+            tab.show();
         }
     </script>
 </asp:Content>
@@ -338,52 +356,60 @@
                                 查無健檢紀錄。
                             </asp:Panel>
                             <asp:Repeater ID="rptHealthRecords" runat="server" OnItemCommand="rptHealthRecords_ItemCommand" OnItemDataBound="rptHealthRecords_ItemDataBound">
+                                <HeaderTemplate>
+                                    <div class="row g-3">
+                                </HeaderTemplate>
                                 <ItemTemplate>
-                                    <asp:Panel ID="pnlHealthCard" runat="server" CssClass="card mb-3">
-                                        <div class="card-header d-flex align-items-center justify-content-between">
-                                            <asp:LinkButton ID="btnSelectHealth" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectHealth" CommandArgument='<%# Eval("HealthId") %>'>
-                                                <%# Eval("SurveyDateDisplay") %>
-                                            </asp:LinkButton>
-                                            <span class="text-muted small">點選切換照片</span>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row g-3">
-                                                <div class="col-12">
-                                                    <div class="text-muted small">管理情況</div>
-                                                    <div class="fw-semibold"><%# Eval("ManagementStatusDisplay") %></div>
+                                    <div class="col-12 col-lg-6">
+                                        <asp:Panel ID="pnlHealthCard" runat="server" CssClass="card health-record-card h-100">
+                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                                <asp:LinkButton ID="btnSelectHealth" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectHealth" CommandArgument='<%# Eval("HealthId") %>'>
+                                                    <%# Eval("SurveyDateDisplay") %>
+                                                </asp:LinkButton>
+                                                <asp:Label ID="lblHealthSelectionHint" runat="server" CssClass="text-muted small" Text="點選切換照片" />
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <div class="text-muted small">管理情況</div>
+                                                        <div class="fw-semibold"><%# Eval("ManagementStatusDisplay") %></div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="text-muted small">建議處理優先順序</div>
+                                                        <div class="fw-semibold"><%# Eval("PriorityDisplay") %></div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="text-muted small">處理情形說明</div>
+                                                        <div class="fw-semibold"><%# Eval("TreatmentDescriptionDisplay") %></div>
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="text-muted small">建議處理優先順序</div>
-                                                    <div class="fw-semibold"><%# Eval("PriorityDisplay") %></div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="text-muted small">處理情形說明</div>
-                                                    <div class="fw-semibold"><%# Eval("TreatmentDescriptionDisplay") %></div>
+                                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                                    <asp:LinkButton ID="btnViewReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("HealthId") %>' Text="檢視報告" />
+                                                    <div class="dropdown">
+                                                        <button id="btnAttachmentToggle" runat="server" type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">附件下載</button>
+                                                        <ul class="dropdown-menu">
+                                                            <asp:Repeater ID="rptHealthAttachments" runat="server">
+                                                                <ItemTemplate>
+                                                                    <li>
+                                                                        <a class="dropdown-item" href='<%# ResolveUrl(Eval("filePath").ToString()) %>' target="_blank" rel="noopener">
+                                                                            <%# Eval("fileName") %>
+                                                                        </a>
+                                                                    </li>
+                                                                </ItemTemplate>
+                                                            </asp:Repeater>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="d-flex flex-wrap gap-2 mt-3">
-                                                <asp:LinkButton ID="btnViewReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("HealthId") %>' Text="檢視報告" />
-                                                <div class="dropdown">
-                                                    <button id="btnAttachmentToggle" runat="server" type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">附件下載</button>
-                                                    <ul class="dropdown-menu">
-                                                        <asp:Repeater ID="rptHealthAttachments" runat="server">
-                                                            <ItemTemplate>
-                                                                <li>
-                                                                    <a class="dropdown-item" href='<%# ResolveUrl(Eval("filePath").ToString()) %>' target="_blank" rel="noopener">
-                                                                        <%# Eval("fileName") %>
-                                                                    </a>
-                                                                </li>
-                                                            </ItemTemplate>
-                                                        </asp:Repeater>
-                                                    </ul>
-                                                </div>
+                                            <div class="card-footer text-muted small text-end">
+                                                調查人：<%# Eval("SurveyorDisplay") %>
                                             </div>
-                                        </div>
-                                        <div class="card-footer text-muted small text-end">
-                                            調查人：<%# Eval("SurveyorDisplay") %>
-                                        </div>
-                                    </asp:Panel>
+                                        </asp:Panel>
+                                    </div>
                                 </ItemTemplate>
+                                <FooterTemplate>
+                                    </div>
+                                </FooterTemplate>
                             </asp:Repeater>
                         </div>
                     </div>
@@ -471,8 +497,31 @@
                 });
             }
 
+            function initHealthRecordCards() {
+                document.querySelectorAll('.health-record-card').forEach(function (card) {
+                    if (card.dataset.healthCardBound) {
+                        return;
+                    }
+                    card.dataset.healthCardBound = 'true';
+                    card.addEventListener('click', function (event) {
+                        if (event.target.closest('a, button, .dropdown-menu, input, label')) {
+                            return;
+                        }
+                        var targetId = card.getAttribute('data-select-target');
+                        if (!targetId) {
+                            return;
+                        }
+                        var targetLink = document.getElementById(targetId);
+                        if (targetLink) {
+                            targetLink.click();
+                        }
+                    });
+                });
+            }
+
             function initPageComponents() {
                 initLightbox();
+                initHealthRecordCards();
             }
 
             document.addEventListener('DOMContentLoaded', initPageComponents);
