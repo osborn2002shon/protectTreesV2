@@ -178,6 +178,7 @@ namespace protectTreesV2.Care
             public string afterFileName { get; set; }
             public string afterFilePath { get; set; }
             public int? afterFileSize { get; set; }
+            public DateTime? insertDateTime { get; set; }
         }
 
         public List<CareMainQueryResult> GetCareMainList(CareMainQueryFilter filter, int currentUserId)
@@ -921,7 +922,8 @@ WHERE careID=@careID AND removeDateTime IS NULL;";
                         beforeFileSize = GetNullableInt(row, "beforeFileSize"),
                         afterFileName = GetString(row, "afterFileName"),
                         afterFilePath = GetString(row, "afterFilePath"),
-                        afterFileSize = GetNullableInt(row, "afterFileSize")
+                        afterFileSize = GetNullableInt(row, "afterFileSize"),
+                        insertDateTime = GetNullableDateTime(row, "insertDateTime")
                     });
                 }
             }

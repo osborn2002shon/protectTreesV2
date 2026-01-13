@@ -13,6 +13,7 @@ namespace protectTreesV2._uc
         private const string TransparentPixel = "data:image/gif;base64,R0lGODlhAQABAAAAACw=";
         public IEnumerable<TreePhoto> Photos { get; private set; } = Enumerable.Empty<TreePhoto>();
         public string GalleryName { get; set; } = "tree-photos";
+        public bool ShowCoverLabel { get; set; } = true;
         protected string GalleryNameValue => string.IsNullOrWhiteSpace(GalleryName) ? "tree-photos" : GalleryName;
 
         public void SetPhotos(IEnumerable<TreePhoto> photos)
@@ -78,17 +79,17 @@ namespace protectTreesV2._uc
         protected string BuildLightboxTitle(TreePhoto photo)
         {
             if (photo == null) return string.Empty;
-            var caption = BuildPhotoCaption(photo);
-            return photo.IsCover ? $"{caption}（封面）" : caption;
+            var title = string.IsNullOrWhiteSpace(photo.LightboxTitle) ? BuildPhotoCaption(photo) : photo.LightboxTitle;
+            return photo.IsCover && ShowCoverLabel ? $"{title}（封面）" : title;
         }
 
         protected string BuildLightboxDescriptionAttribute(TreePhoto photo)
         {
             if (photo == null) return string.Empty;
-            var caption = BuildPhotoCaption(photo);
+            var caption = string.IsNullOrWhiteSpace(photo.LightboxSubtitle) ? BuildPhotoCaption(photo) : photo.LightboxSubtitle;
             var uploadTime = BuildUploadTimeDisplay(photo);
-            var description = $"{caption}｜上傳：{uploadTime}";
-            return HttpUtility.HtmlAttributeEncode(description);
+            var description = $"{HttpUtility.HtmlEncode(caption)}<br />上傳：{HttpUtility.HtmlEncode(uploadTime)}";
+            return description;
         }
 
         protected string BuildLightboxTitleFromData(object dataItem)

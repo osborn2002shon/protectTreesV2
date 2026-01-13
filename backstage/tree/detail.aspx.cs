@@ -20,6 +20,7 @@ namespace protectTreesV2.backstage.tree
             public int HealthId { get; set; }
             public string SurveyDateDisplay { get; set; }
             public string SurveyorDisplay { get; set; }
+            public string LastUpdateDisplay { get; set; }
             public string ManagementStatusDisplay { get; set; }
             public string PriorityDisplay { get; set; }
             public string TreatmentDescriptionDisplay { get; set; }
@@ -32,6 +33,7 @@ namespace protectTreesV2.backstage.tree
             public int PatrolId { get; set; }
             public string PatrolDateDisplay { get; set; }
             public string PatrollerDisplay { get; set; }
+            public string LastUpdateDisplay { get; set; }
             public string RiskDisplay { get; set; }
             public string MemoDisplay { get; set; }
             public string StatusDisplay { get; set; }
@@ -46,6 +48,7 @@ namespace protectTreesV2.backstage.tree
             public string ReviewerDisplay { get; set; }
             public string StatusDisplay { get; set; }
             public string LastUpdateDisplay { get; set; }
+            public string SurveyorDisplay { get; set; }
             public bool IsSelected { get; set; }
         }
 
@@ -194,6 +197,7 @@ namespace protectTreesV2.backstage.tree
                 HealthId = record.healthID,
                 SurveyDateDisplay = DisplayOrDefault(record.surveyDateDisplay),
                 SurveyorDisplay = DisplayOrDefault(record.surveyor),
+                LastUpdateDisplay = DisplayOrDefault(record.lastUpdateDisplay),
                 ManagementStatusDisplay = DisplayOrDefault(record.managementStatus),
                 PriorityDisplay = DisplayOrDefault(record.priority),
                 TreatmentDescriptionDisplay = DisplayOrDefault(record.treatmentDescription),
@@ -228,6 +232,7 @@ namespace protectTreesV2.backstage.tree
                 PatrolId = record.patrolID,
                 PatrolDateDisplay = DisplayOrDefault(record.patrolDate),
                 PatrollerDisplay = DisplayOrDefault(record.patroller),
+                LastUpdateDisplay = DisplayOrDefault(record.updateDateTime ?? record.insertDateTime),
                 RiskDisplay = record.hasPublicSafetyRisk ? "有" : "無",
                 MemoDisplay = DisplayOrDefault(record.memo),
                 StatusDisplay = record.dataStatus == (int)Patrol.Patrol.PatrolRecordStatus.定稿 ? "定稿" : "草稿",
@@ -264,6 +269,7 @@ namespace protectTreesV2.backstage.tree
                 ReviewerDisplay = DisplayOrDefault(record.reviewer),
                 StatusDisplay = DisplayOrDefault(record.dataStatusText),
                 LastUpdateDisplay = DisplayOrDefault(record.lastUpdate),
+                SurveyorDisplay = DisplayOrDefault(record.recorder),
                 IsSelected = selectedCareId.HasValue && record.careID == selectedCareId.Value
             }).ToList();
 
@@ -315,6 +321,7 @@ namespace protectTreesV2.backstage.tree
         {
             var photos = healthId.HasValue ? systemHealth.GetHealthPhotos(healthId.Value) : new List<Health.Health.TreeHealthPhoto>();
             healthPhotoAlbum.GalleryName = "health-photos";
+            healthPhotoAlbum.ShowCoverLabel = false;
             healthPhotoAlbum.SetPhotos(MapHealthPhotosToTreePhotos(photos));
         }
 
@@ -322,6 +329,7 @@ namespace protectTreesV2.backstage.tree
         {
             var photos = patrolId.HasValue ? systemPatrol.GetPatrolPhotos(patrolId.Value) : new List<Patrol.Patrol.PatrolPhoto>();
             patrolPhotoAlbum.GalleryName = "patrol-photos";
+            patrolPhotoAlbum.ShowCoverLabel = false;
             patrolPhotoAlbum.SetPhotos(MapPatrolPhotosToTreePhotos(photos));
         }
 
@@ -329,6 +337,7 @@ namespace protectTreesV2.backstage.tree
         {
             var photos = careId.HasValue ? systemCare.GetCarePhotos(careId.Value) : new List<Care.Care.CarePhotoRecord>();
             carePhotoAlbum.GalleryName = "care-photos";
+            carePhotoAlbum.ShowCoverLabel = false;
             carePhotoAlbum.SetPhotos(MapCarePhotosToTreePhotos(photos));
         }
 
@@ -351,6 +360,8 @@ namespace protectTreesV2.backstage.tree
                     FileName = photo.fileName,
                     FilePath = ResolveUrl(photo.filePath),
                     Caption = photo.caption,
+                    LightboxTitle = photo.fileName,
+                    LightboxSubtitle = photo.caption,
                     InsertDateTime = photo.insertDateTime,
                     IsCover = i == 0
                 });
@@ -378,6 +389,8 @@ namespace protectTreesV2.backstage.tree
                     FileName = photo.FileName,
                     FilePath = ResolveUrl(photo.FilePath),
                     Caption = photo.Caption,
+                    LightboxTitle = photo.FileName,
+                    LightboxSubtitle = photo.Caption,
                     InsertDateTime = DateTime.MinValue,
                     IsCover = i == 0
                 });
@@ -418,15 +431,35 @@ namespace protectTreesV2.backstage.tree
             }
 
             var captionSuffix = string.IsNullOrWhiteSpace(photo.itemName) ? suffix : $"{photo.itemName} - {suffix}";
+            var fileNamePair = BuildCareFileNamePair(photo);
             mappedPhotos.Add(new TreePhoto
             {
                 PhotoID = (photo.photoID * 10) + mappedPhotos.Count + 1,
                 FileName = fileName,
                 FilePath = ResolveUrl(filePath),
                 Caption = captionSuffix,
-                InsertDateTime = DateTime.MinValue,
+                LightboxTitle = captionSuffix,
+                LightboxSubtitle = fileNamePair,
+                InsertDateTime = photo.insertDateTime ?? DateTime.MinValue,
                 IsCover = false
             });
+        }
+
+        private string BuildCareFileNamePair(Care.Care.CarePhotoRecord photo)
+        {
+            if (photo == null)
+            {
+                return string.Empty;
+            }
+
+            var parts = new List<string>
+            {
+                photo.beforeFileName,
+                photo.afterFileName
+            };
+
+            var display = string.Join(" / ", parts.Where(name => !string.IsNullOrWhiteSpace(name)));
+            return string.IsNullOrWhiteSpace(display) ? "未命名照片" : display;
         }
 
         protected void rptHealthRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
