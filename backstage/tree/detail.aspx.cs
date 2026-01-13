@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using protectTreesV2.Base;
+using protectTreesV2.Care;
 using protectTreesV2.Health;
 using protectTreesV2.Patrol;
 using protectTreesV2.TreeCatalog;
@@ -12,6 +13,7 @@ namespace protectTreesV2.backstage.tree
     {
         private readonly Health.Health systemHealth = new Health.Health();
         private readonly Patrol.Patrol systemPatrol = new Patrol.Patrol();
+        private readonly Care.Care systemCare = new Care.Care();
 
         private class HealthRecordCardViewModel
         {
@@ -34,6 +36,24 @@ namespace protectTreesV2.backstage.tree
             public string MemoDisplay { get; set; }
             public string StatusDisplay { get; set; }
             public bool IsSelected { get; set; }
+        }
+
+        private class CareRecordCardViewModel
+        {
+            public int CareId { get; set; }
+            public string CareDateDisplay { get; set; }
+            public string RecorderDisplay { get; set; }
+            public string ReviewerDisplay { get; set; }
+            public string StatusDisplay { get; set; }
+            public string LastUpdateDisplay { get; set; }
+            public bool IsSelected { get; set; }
+        }
+
+        private enum RecordModalType
+        {
+            Health,
+            Patrol,
+            Care
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -127,6 +147,7 @@ namespace protectTreesV2.backstage.tree
 
             BindHealthRecords(treeId);
             BindPatrolRecords(treeId);
+            BindCareRecords(treeId);
         }
 
         private string DisplayOrDefault(string value)
@@ -221,6 +242,39 @@ namespace protectTreesV2.backstage.tree
             BindPatrolPhotos(selectedPatrolId);
         }
 
+        private void BindCareRecords(int treeId)
+        {
+            var records = systemCare.GetCareRecordsByTree(treeId) ?? new List<Care.Care.CareRecordListResult>();
+
+            if (!records.Any())
+            {
+                pnlCareRecordEmpty.Visible = true;
+                rptCareRecords.Visible = false;
+                BindCarePhotos(null);
+                return;
+            }
+
+            int? selectedCareId = GetSelectedCareId(records);
+
+            var viewModels = records.Select(record => new CareRecordCardViewModel
+            {
+                CareId = record.careID,
+                CareDateDisplay = DisplayOrDefault(record.careDate),
+                RecorderDisplay = DisplayOrDefault(record.recorder),
+                ReviewerDisplay = DisplayOrDefault(record.reviewer),
+                StatusDisplay = DisplayOrDefault(record.dataStatusText),
+                LastUpdateDisplay = DisplayOrDefault(record.lastUpdate),
+                IsSelected = selectedCareId.HasValue && record.careID == selectedCareId.Value
+            }).ToList();
+
+            rptCareRecords.DataSource = viewModels;
+            rptCareRecords.DataBind();
+            rptCareRecords.Visible = true;
+            pnlCareRecordEmpty.Visible = false;
+
+            BindCarePhotos(selectedCareId);
+        }
+
         private int? GetSelectedHealthId(IEnumerable<Health.Health.TreeHealthRecord> records)
         {
             if (int.TryParse(hfSelectedHealthId.Value, out int selectedId) && records.Any(r => r.healthID == selectedId))
@@ -245,6 +299,18 @@ namespace protectTreesV2.backstage.tree
             return fallbackId;
         }
 
+        private int? GetSelectedCareId(IEnumerable<Care.Care.CareRecordListResult> records)
+        {
+            if (int.TryParse(hfSelectedCareId.Value, out int selectedId) && records.Any(r => r.careID == selectedId))
+            {
+                return selectedId;
+            }
+
+            int? fallbackId = records.FirstOrDefault()?.careID;
+            hfSelectedCareId.Value = fallbackId?.ToString() ?? string.Empty;
+            return fallbackId;
+        }
+
         private void BindHealthPhotos(int? healthId)
         {
             var photos = healthId.HasValue ? systemHealth.GetHealthPhotos(healthId.Value) : new List<Health.Health.TreeHealthPhoto>();
@@ -257,6 +323,13 @@ namespace protectTreesV2.backstage.tree
             var photos = patrolId.HasValue ? systemPatrol.GetPatrolPhotos(patrolId.Value) : new List<Patrol.Patrol.PatrolPhoto>();
             patrolPhotoAlbum.GalleryName = "patrol-photos";
             patrolPhotoAlbum.SetPhotos(MapPatrolPhotosToTreePhotos(photos));
+        }
+
+        private void BindCarePhotos(int? careId)
+        {
+            var photos = careId.HasValue ? systemCare.GetCarePhotos(careId.Value) : new List<Care.Care.CarePhotoRecord>();
+            carePhotoAlbum.GalleryName = "care-photos";
+            carePhotoAlbum.SetPhotos(MapCarePhotosToTreePhotos(photos));
         }
 
         private IEnumerable<TreePhoto> MapHealthPhotosToTreePhotos(IEnumerable<Health.Health.TreeHealthPhoto> photos)
@@ -313,6 +386,49 @@ namespace protectTreesV2.backstage.tree
             return mappedPhotos;
         }
 
+        private IEnumerable<TreePhoto> MapCarePhotosToTreePhotos(IEnumerable<Care.Care.CarePhotoRecord> photos)
+        {
+            var photoList = photos?.ToList() ?? new List<Care.Care.CarePhotoRecord>();
+            var mappedPhotos = new List<TreePhoto>();
+
+            foreach (var photo in photoList)
+            {
+                if (photo == null)
+                {
+                    continue;
+                }
+
+                AppendCarePhoto(mappedPhotos, photo, photo.beforeFilePath, photo.beforeFileName, "施作前");
+                AppendCarePhoto(mappedPhotos, photo, photo.afterFilePath, photo.afterFileName, "施作後");
+            }
+
+            if (mappedPhotos.Any())
+            {
+                mappedPhotos[0].IsCover = true;
+            }
+
+            return mappedPhotos;
+        }
+
+        private void AppendCarePhoto(List<TreePhoto> mappedPhotos, Care.Care.CarePhotoRecord photo, string filePath, string fileName, string suffix)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var captionSuffix = string.IsNullOrWhiteSpace(photo.itemName) ? suffix : $"{photo.itemName} - {suffix}";
+            mappedPhotos.Add(new TreePhoto
+            {
+                PhotoID = (photo.photoID * 10) + mappedPhotos.Count + 1,
+                FileName = fileName,
+                FilePath = ResolveUrl(filePath),
+                Caption = captionSuffix,
+                InsertDateTime = DateTime.MinValue,
+                IsCover = false
+            });
+        }
+
         protected void rptHealthRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
         {
             if (!int.TryParse(e.CommandArgument?.ToString(), out int healthId))
@@ -358,6 +474,30 @@ namespace protectTreesV2.backstage.tree
             {
                 ShowPatrolRecordModal(patrolId);
                 ActivatePatrolTab();
+            }
+        }
+
+        protected void rptCareRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
+        {
+            if (!int.TryParse(e.CommandArgument?.ToString(), out int careId))
+            {
+                return;
+            }
+
+            int treeId = int.Parse(hfTreeID.Value);
+
+            if (e.CommandName == "SelectCare")
+            {
+                hfSelectedCareId.Value = careId.ToString();
+                BindCareRecords(treeId);
+                ActivateCareTab();
+                return;
+            }
+
+            if (e.CommandName == "ViewReport")
+            {
+                ShowCareRecordModal(careId);
+                ActivateCareTab();
             }
         }
 
@@ -442,6 +582,38 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
+        protected void rptCareRecords_ItemDataBound(object sender, System.Web.UI.WebControls.RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType != System.Web.UI.WebControls.ListItemType.Item &&
+                e.Item.ItemType != System.Web.UI.WebControls.ListItemType.AlternatingItem)
+            {
+                return;
+            }
+
+            var viewModel = e.Item.DataItem as CareRecordCardViewModel;
+            if (viewModel == null)
+            {
+                return;
+            }
+
+            var card = e.Item.FindControl("pnlCareCard") as System.Web.UI.WebControls.Panel;
+            if (card != null)
+            {
+                card.Attributes["data-select-target"] = (e.Item.FindControl("btnSelectCare") as System.Web.UI.WebControls.LinkButton)?.ClientID ?? string.Empty;
+                if (viewModel.IsSelected)
+                {
+                    card.CssClass = $"{card.CssClass} is-selected";
+                }
+            }
+
+            var selectionHint = e.Item.FindControl("lblCareSelectionHint") as System.Web.UI.WebControls.Label;
+            if (selectionHint != null && viewModel.IsSelected)
+            {
+                selectionHint.Text = "顯示照片中";
+                selectionHint.CssClass = "text-success fw-semibold small";
+            }
+        }
+
         private void ShowHealthRecordModal(int healthId)
         {
             var record = systemHealth.GetHealthRecord(healthId);
@@ -467,7 +639,7 @@ namespace protectTreesV2.backstage.tree
                 lblModal_lastUpdate.Text = string.Empty;
             }
 
-            SetRecordModalMode(isHealth: true);
+            SetRecordModalMode(RecordModalType.Health);
             uc_healthRecordModal.BindRecord(record);
             System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowRecordModal", "showRecordModal();", true);
         }
@@ -501,16 +673,63 @@ namespace protectTreesV2.backstage.tree
             }
 
             var photos = record != null ? systemPatrol.GetPatrolPhotos(patrolId) : new List<Patrol.Patrol.PatrolPhoto>();
-            SetRecordModalMode(isHealth: false);
+            SetRecordModalMode(RecordModalType.Patrol);
             uc_patrolRecordModal.BindRecord(record, photos);
             System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowRecordModal", "showRecordModal();", true);
         }
 
-        private void SetRecordModalMode(bool isHealth)
+        private void ShowCareRecordModal(int careId)
         {
-            phHealthRecordModal.Visible = isHealth;
-            phPatrolRecordModal.Visible = !isHealth;
-            ltlRecordModalTitle.Text = isHealth ? "健檢紀錄" : "巡查紀錄";
+            var record = systemCare.GetCareRecord(careId);
+            var tree = record != null ? TreeService.GetTree(record.treeID) : null;
+
+            if (record != null)
+            {
+                lblModal_healthId.Text = record.careID.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                lblModal_systemTreeNo.Text = string.IsNullOrWhiteSpace(tree?.SystemTreeNo) ? "--" : tree.SystemTreeNo.Trim();
+                lblModal_status.Text = record.dataStatus == (int)Care.Care.CareRecordStatus.定稿 ? "定稿" : "草稿";
+
+                string location = (tree?.CityName ?? "") + (tree?.AreaName ?? "");
+                lblModal_location.Text = string.IsNullOrWhiteSpace(location) ? "--" : location.Trim();
+                lblModal_species.Text = string.IsNullOrWhiteSpace(tree?.SpeciesDisplayName) ? "--" : tree.SpeciesDisplayName.Trim();
+
+                DateTime? lastUpdate = record.updateDateTime ?? record.insertDateTime;
+                lblModal_lastUpdate.Text = DisplayOrDefault(lastUpdate);
+            }
+            else
+            {
+                lblModal_healthId.Text = string.Empty;
+                lblModal_systemTreeNo.Text = string.Empty;
+                lblModal_status.Text = string.Empty;
+                lblModal_location.Text = string.Empty;
+                lblModal_species.Text = string.Empty;
+                lblModal_lastUpdate.Text = string.Empty;
+            }
+
+            var photos = record != null ? systemCare.GetCarePhotos(careId) : new List<Care.Care.CarePhotoRecord>();
+            SetRecordModalMode(RecordModalType.Care);
+            uc_careRecordModal.BindRecord(record, photos);
+            System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowRecordModal", "showRecordModal();", true);
+        }
+
+        private void SetRecordModalMode(RecordModalType mode)
+        {
+            phHealthRecordModal.Visible = mode == RecordModalType.Health;
+            phPatrolRecordModal.Visible = mode == RecordModalType.Patrol;
+            phCareRecordModal.Visible = mode == RecordModalType.Care;
+
+            switch (mode)
+            {
+                case RecordModalType.Health:
+                    ltlRecordModalTitle.Text = "健檢紀錄";
+                    break;
+                case RecordModalType.Patrol:
+                    ltlRecordModalTitle.Text = "巡查紀錄";
+                    break;
+                case RecordModalType.Care:
+                    ltlRecordModalTitle.Text = "養護紀錄";
+                    break;
+            }
         }
 
         private void ActivateHealthTab()
@@ -521,6 +740,11 @@ namespace protectTreesV2.backstage.tree
         private void ActivatePatrolTab()
         {
             System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowPatrolTab", "showPatrolTab();", true);
+        }
+
+        private void ActivateCareTab()
+        {
+            System.Web.UI.ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowCareTab", "showCareTab();", true);
         }
 
     }

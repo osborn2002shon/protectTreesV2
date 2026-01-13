@@ -42,6 +42,15 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.HiddenField hfSelectedPatrolId;
 
         /// <summary>
+        /// hfSelectedCareId 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfSelectedCareId;
+
+        /// <summary>
         /// treePhotoAlbum 控制項。
         /// </summary>
         /// <remarks>
@@ -411,6 +420,15 @@ namespace protectTreesV2.backstage.tree
         protected global::protectTreesV2._uc.TreePhotoAlbum patrolPhotoAlbum;
 
         /// <summary>
+        /// carePhotoAlbum 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::protectTreesV2._uc.TreePhotoAlbum carePhotoAlbum;
+
+        /// <summary>
         /// pnlPatrolRecordEmpty 控制項。
         /// </summary>
         /// <remarks>
@@ -427,6 +445,24 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptPatrolRecords;
+
+        /// <summary>
+        /// pnlCareRecordEmpty 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlCareRecordEmpty;
+
+        /// <summary>
+        /// rptCareRecords 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptCareRecords;
 
         /// <summary>
         /// lnkBackToList 控制項。
@@ -535,5 +571,23 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::protectTreesV2._uc.patrol.uc_patrolRecordModal uc_patrolRecordModal;
+
+        /// <summary>
+        /// phCareRecordModal 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phCareRecordModal;
+
+        /// <summary>
+        /// uc_careRecordModal 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::protectTreesV2._uc.care.uc_careRecordModal uc_careRecordModal;
     }
 }

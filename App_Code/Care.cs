@@ -589,6 +589,43 @@ namespace protectTreesV2.Care
             return result;
         }
 
+        public List<CareRecordListResult> GetCareRecordsByTree(int treeId)
+        {
+            const string sql = @"
+                SELECT
+                    careID,
+                    careDate,
+                    recorder,
+                    reviewer,
+                    dataStatus,
+                    COALESCE(updateDateTime, insertDateTime) AS lastUpdate
+                FROM Tree_CareRecord
+                WHERE treeID = @treeID AND removeDateTime IS NULL
+                ORDER BY careDate DESC, careID DESC";
+
+            var result = new List<CareRecordListResult>();
+            using (var da = new DataAccess.MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sql, new SqlParameter("@treeID", treeId));
+                foreach (DataRow row in dt.Rows)
+                {
+                    var item = new CareRecordListResult
+                    {
+                        careID = GetNullableInt(row, "careID") ?? 0,
+                        careDate = GetNullableDateTime(row, "careDate"),
+                        recorder = GetString(row, "recorder"),
+                        reviewer = GetString(row, "reviewer"),
+                        dataStatus = GetNullableInt(row, "dataStatus"),
+                        lastUpdate = GetNullableDateTime(row, "lastUpdate")
+                    };
+
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
         public CareRecord GetCareRecord(int careId)
         {
             const string sql = @"SELECT TOP 1 * FROM Tree_CareRecord WHERE careID=@id AND removeDateTime IS NULL";
