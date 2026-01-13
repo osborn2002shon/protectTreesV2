@@ -566,6 +566,38 @@ namespace protectTreesV2.Patrol
             }
         }
 
+        public List<PatrolRecord> GetPatrolRecordsByTree(int treeId)
+        {
+            const string sql = @"SELECT * FROM Tree_PatrolRecord WHERE treeID=@treeId AND removeDateTime IS NULL ORDER BY patrolDate DESC, patrolID DESC";
+            var result = new List<PatrolRecord>();
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var dt = da.GetDataTable(sql, new SqlParameter("@treeId", treeId));
+                foreach (DataRow row in dt.Rows)
+                {
+                    result.Add(new PatrolRecord
+                    {
+                        patrolID = GetNullableInt(row, "patrolID") ?? 0,
+                        treeID = GetNullableInt(row, "treeID") ?? 0,
+                        patrolDate = GetNullableDateTime(row, "patrolDate"),
+                        patroller = GetString(row, "patroller"),
+                        dataStatus = GetNullableInt(row, "dataStatus") ?? 0,
+                        memo = GetString(row, "memo"),
+                        hasPublicSafetyRisk = GetBoolean(row, "hasPublicSafetyRisk"),
+                        sourceUnit = GetString(row, "sourceUnit"),
+                        sourceUnitID = GetNullableInt(row, "sourceUnitID"),
+                        insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
+                        insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
+                        updateAccountID = GetNullableInt(row, "updateAccountID"),
+                        updateDateTime = GetNullableDateTime(row, "updateDateTime")
+                    });
+                }
+            }
+
+            return result;
+        }
+
         public List<PatrolPhoto> GetPatrolPhotos(int patrolId)
         {
             const string sql = @"SELECT * FROM Tree_PatrolPhoto WHERE patrolID=@id AND removeDateTime IS NULL ORDER BY insertDateTime";
