@@ -86,7 +86,7 @@
             </ul>
 
             <div class="tab-content" id="treeDetailTabContent">
-                <div class="tab-pane fade show active" id="pane-tree" role="tabpanel" aria-labelledby="tree-detail-tab">
+                <div class="tab-pane show active" id="pane-tree" role="tabpanel" aria-labelledby="tree-detail-tab">
                     <div class="row g-4">
                         <div class="col-lg-5">
                             <div class="card h-100">
@@ -306,7 +306,7 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="pane-health" role="tabpanel" aria-labelledby="tree-health-tab">
+                <div class="tab-pane" id="pane-health" role="tabpanel" aria-labelledby="tree-health-tab">
                     <div class="row g-4">
                         <div class="col-lg-5">
                             <div class="card h-100">
