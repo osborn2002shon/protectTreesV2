@@ -886,6 +886,7 @@ namespace protectTreesV2.Health
                     h.managementStatus,
                     h.priority,
                     h.treatmentDescription,
+                    h.dataStatus,
                     h.insertDateTime,
                     h.updateDateTime
                 FROM Tree_HealthRecord h
