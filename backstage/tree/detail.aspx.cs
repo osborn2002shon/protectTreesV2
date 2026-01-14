@@ -169,9 +169,53 @@ namespace protectTreesV2.backstage.tree
             return value.HasValue ? value.Value.ToString() : "無資料";
         }
 
+        protected string GetHealthAttachmentTooltip(object dataItem)
+        {
+            var attachment = dataItem as Health.Health.TreeHealthAttachment;
+            if (attachment == null)
+            {
+                return string.Empty;
+            }
+
+            string sizeDisplay = FormatFileSize(attachment.fileSize);
+            return string.IsNullOrWhiteSpace(sizeDisplay) ? string.Empty : $"檔案大小：{sizeDisplay}";
+        }
+
+        private static string FormatFileSize(int? fileSize)
+        {
+            if (!fileSize.HasValue || fileSize.Value <= 0)
+            {
+                return "未知";
+            }
+
+            double size = fileSize.Value;
+            string unit = "B";
+
+            if (size >= 1024)
+            {
+                size /= 1024;
+                unit = "KB";
+            }
+
+            if (size >= 1024 && unit == "KB")
+            {
+                size /= 1024;
+                unit = "MB";
+            }
+
+            if (size >= 1024 && unit == "MB")
+            {
+                size /= 1024;
+                unit = "GB";
+            }
+
+            return $"{size:0.##} {unit}";
+        }
+
         private void BindHealthRecords(int treeId)
         {
             var records = systemHealth.GetHealthRecordsByTree(treeId) ?? new List<Health.Health.TreeHealthRecord>();
+            records = records.Where(record => record.dataStatus == 1).ToList();
 
             if (!records.Any())
             {
@@ -212,8 +256,8 @@ namespace protectTreesV2.backstage.tree
         private void BindPatrolRecords(int treeId)
         {
             var records = systemPatrol.GetPatrolRecordsByTree(treeId) ?? new List<Patrol.Patrol.PatrolRecord>();
-
-            BindPatrolFilterOptions(records);
+            records = records.Where(record => record.dataStatus == (int)Patrol.Patrol.PatrolRecordStatus.定稿).ToList();
+            pnlPatrolFilters.Visible = records.Any();
 
             if (!records.Any())
             {
@@ -224,6 +268,7 @@ namespace protectTreesV2.backstage.tree
                 return;
             }
 
+            BindPatrolFilterOptions(records);
             int? selectedPatrolId = GetSelectedPatrolId(records);
             var filteredRecords = ApplyPatrolFilters(records);
 
@@ -335,8 +380,8 @@ namespace protectTreesV2.backstage.tree
         private void BindCareRecords(int treeId)
         {
             var records = systemCare.GetCareRecordsByTree(treeId) ?? new List<Care.Care.CareRecordListResult>();
-
-            BindCareFilterOptions(records);
+            records = records.Where(record => record.dataStatus == (int)Care.Care.CareRecordStatus.定稿).ToList();
+            pnlCareFilters.Visible = records.Any();
 
             if (!records.Any())
             {
@@ -347,6 +392,7 @@ namespace protectTreesV2.backstage.tree
                 return;
             }
 
+            BindCareFilterOptions(records);
             int? selectedCareId = GetSelectedCareId(records);
             var filteredRecords = ApplyCareFilters(records);
 

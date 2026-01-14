@@ -358,7 +358,7 @@
                                                             <asp:Repeater ID="rptHealthAttachments" runat="server">
                                                                 <ItemTemplate>
                                                                     <li>
-                                                                        <a class="dropdown-item" href='<%# ResolveUrl(Eval("filePath").ToString()) %>' target="_blank" rel="noopener">
+                                                                        <a class="dropdown-item" href='<%# ResolveUrl(Eval("filePath").ToString()) %>' target="_blank" rel="noopener" title='<%# GetHealthAttachmentTooltip(Container.DataItem) %>'>
                                                                             <%# Eval("fileName") %>
                                                                         </a>
                                                                     </li>
@@ -398,7 +398,7 @@
                             <asp:Panel ID="pnlPatrolRecordEmpty" runat="server" Visible="false" CssClass="text-center text-muted py-5">
                                 查無巡查紀錄。
                             </asp:Panel>
-                            <div class="card mb-3">
+                            <asp:Panel ID="pnlPatrolFilters" runat="server" CssClass="card mb-3">
                                 <div class="card-body">
                                     <div class="row g-3 align-items-end">
                                         <div class="col-md-3">
@@ -419,7 +419,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </asp:Panel>
                             <asp:GridView ID="gvPatrolRecords" runat="server" CssClass="table table-bordered align-middle" AutoGenerateColumns="false" OnRowCommand="gvPatrolRecords_RowCommand" OnRowDataBound="gvPatrolRecords_RowDataBound">
                                 <Columns>
                                     <asp:TemplateField HeaderText="巡查日期">
@@ -469,7 +469,7 @@
                             <asp:Panel ID="pnlCareRecordEmpty" runat="server" Visible="false" CssClass="text-center text-muted py-5">
                                 查無養護紀錄。
                             </asp:Panel>
-                            <div class="card mb-3">
+                            <asp:Panel ID="pnlCareFilters" runat="server" CssClass="card mb-3">
                                 <div class="card-body">
                                     <div class="row g-3 align-items-end">
                                         <div class="col-md-3">
@@ -490,7 +490,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </asp:Panel>
                             <asp:GridView ID="gvCareRecords" runat="server" CssClass="table table-bordered align-middle" AutoGenerateColumns="false" OnRowCommand="gvCareRecords_RowCommand" OnRowDataBound="gvCareRecords_RowDataBound">
                                 <Columns>
                                     <asp:TemplateField HeaderText="養護日期">
