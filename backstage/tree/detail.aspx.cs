@@ -38,15 +38,13 @@ namespace protectTreesV2.backstage.tree
             public bool IsSelected { get; set; }
         }
 
-        private class CareRecordCardViewModel
+        private class CareRecordGridViewModel
         {
             public int CareId { get; set; }
             public string CareDateDisplay { get; set; }
+            public string CareItemDisplay { get; set; }
             public string RecorderDisplay { get; set; }
             public string ReviewerDisplay { get; set; }
-            public string StatusDisplay { get; set; }
-            public string LastUpdateDisplay { get; set; }
-            public string SurveyorDisplay { get; set; }
             public bool IsSelected { get; set; }
         }
 
@@ -328,34 +326,141 @@ namespace protectTreesV2.backstage.tree
         {
             var records = systemCare.GetCareRecordsByTree(treeId) ?? new List<Care.Care.CareRecordListResult>();
 
+            BindCareFilterOptions(records);
+
             if (!records.Any())
             {
                 pnlCareRecordEmpty.Visible = true;
-                rptCareRecords.Visible = false;
+                gvCareRecords.Visible = false;
+                lblCareRecordTotal.Text = "0";
                 BindCarePhotos(null);
                 return;
             }
 
             int? selectedCareId = GetSelectedCareId(records);
+            var filteredRecords = ApplyCareFilters(records);
 
-            var viewModels = records.Select(record => new CareRecordCardViewModel
+            if (!filteredRecords.Any())
+            {
+                pnlCareRecordEmpty.Visible = true;
+                gvCareRecords.Visible = false;
+                lblCareRecordTotal.Text = "0";
+                BindCarePhotos(null);
+                return;
+            }
+
+            if (selectedCareId.HasValue && !filteredRecords.Any(record => record.careID == selectedCareId.Value))
+            {
+                selectedCareId = filteredRecords.FirstOrDefault()?.careID;
+                hfSelectedCareId.Value = selectedCareId?.ToString() ?? string.Empty;
+            }
+
+            var viewModels = filteredRecords.Select(record => new CareRecordGridViewModel
             {
                 CareId = record.careID,
                 CareDateDisplay = DisplayOrDefault(record.careDate),
+                CareItemDisplay = BuildCareItemDisplay(record.careID),
                 RecorderDisplay = DisplayOrDefault(record.recorder),
                 ReviewerDisplay = DisplayOrDefault(record.reviewer),
-                StatusDisplay = DisplayOrDefault(record.dataStatusText),
-                LastUpdateDisplay = DisplayOrDefault(record.lastUpdate),
-                SurveyorDisplay = DisplayOrDefault(record.recorder),
                 IsSelected = selectedCareId.HasValue && record.careID == selectedCareId.Value
             }).ToList();
 
-            rptCareRecords.DataSource = viewModels;
-            rptCareRecords.DataBind();
-            rptCareRecords.Visible = true;
+            gvCareRecords.DataSource = viewModels;
+            gvCareRecords.DataBind();
+            gvCareRecords.Visible = true;
             pnlCareRecordEmpty.Visible = false;
+            lblCareRecordTotal.Text = filteredRecords.Count.ToString();
 
             BindCarePhotos(selectedCareId);
+        }
+
+        private void BindCareFilterOptions(IEnumerable<Care.Care.CareRecordListResult> records)
+        {
+            string selectedYear = ddlCareYear.SelectedValue;
+            string selectedMonth = ddlCareMonth.SelectedValue;
+
+            var years = records
+                .Where(record => record.careDate.HasValue)
+                .Select(record => record.careDate.Value.Year)
+                .Distinct()
+                .OrderByDescending(year => year)
+                .ToList();
+
+            ddlCareYear.Items.Clear();
+            ddlCareYear.Items.Add(new System.Web.UI.WebControls.ListItem("不拘", string.Empty));
+            foreach (var year in years)
+            {
+                ddlCareYear.Items.Add(new System.Web.UI.WebControls.ListItem($"{year}年", year.ToString()));
+            }
+
+            if (!string.IsNullOrEmpty(selectedYear) && ddlCareYear.Items.FindByValue(selectedYear) != null)
+            {
+                ddlCareYear.SelectedValue = selectedYear;
+            }
+
+            var months = records
+                .Where(record => record.careDate.HasValue)
+                .Select(record => record.careDate.Value.Month)
+                .Distinct()
+                .OrderBy(month => month)
+                .ToList();
+
+            ddlCareMonth.Items.Clear();
+            ddlCareMonth.Items.Add(new System.Web.UI.WebControls.ListItem("不拘", string.Empty));
+            foreach (var month in months)
+            {
+                ddlCareMonth.Items.Add(new System.Web.UI.WebControls.ListItem($"{month}月", month.ToString()));
+            }
+
+            if (!string.IsNullOrEmpty(selectedMonth) && ddlCareMonth.Items.FindByValue(selectedMonth) != null)
+            {
+                ddlCareMonth.SelectedValue = selectedMonth;
+            }
+        }
+
+        private List<Care.Care.CareRecordListResult> ApplyCareFilters(IEnumerable<Care.Care.CareRecordListResult> records)
+        {
+            var filtered = records;
+
+            if (int.TryParse(ddlCareYear.SelectedValue, out int selectedYear))
+            {
+                filtered = filtered.Where(record => record.careDate.HasValue && record.careDate.Value.Year == selectedYear);
+            }
+
+            if (int.TryParse(ddlCareMonth.SelectedValue, out int selectedMonth))
+            {
+                filtered = filtered.Where(record => record.careDate.HasValue && record.careDate.Value.Month == selectedMonth);
+            }
+
+            return filtered.ToList();
+        }
+
+        private string BuildCareItemDisplay(int careId)
+        {
+            var photos = systemCare.GetCarePhotos(careId) ?? new List<Care.Care.CarePhotoRecord>();
+            var itemNames = photos
+                .Select(photo => photo?.itemName)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name.Trim())
+                .Distinct()
+                .ToList();
+
+            if (!itemNames.Any())
+            {
+                return "無資料";
+            }
+
+            var encodedItems = itemNames
+                .Select(System.Web.HttpUtility.HtmlEncode)
+                .ToList();
+
+            var lines = new List<string>();
+            for (int i = 0; i < encodedItems.Count; i += 5)
+            {
+                lines.Add(string.Join("、", encodedItems.Skip(i).Take(5)));
+            }
+
+            return string.Join("<br />", lines);
         }
 
         private int? GetSelectedHealthId(IEnumerable<Health.Health.TreeHealthRecord> records)
@@ -583,7 +688,7 @@ namespace protectTreesV2.backstage.tree
             ActivatePatrolTab();
         }
 
-        protected void rptCareRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
+        protected void gvCareRecords_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
         {
             if (!int.TryParse(e.CommandArgument?.ToString(), out int careId))
             {
@@ -605,6 +710,20 @@ namespace protectTreesV2.backstage.tree
                 ShowCareRecordModal(careId);
                 ActivateCareTab();
             }
+        }
+
+        protected void ddlCareYear_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int treeId = int.Parse(hfTreeID.Value);
+            BindCareRecords(treeId);
+            ActivateCareTab();
+        }
+
+        protected void ddlCareMonth_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int treeId = int.Parse(hfTreeID.Value);
+            BindCareRecords(treeId);
+            ActivateCareTab();
         }
 
         protected void rptHealthRecords_ItemDataBound(object sender, System.Web.UI.WebControls.RepeaterItemEventArgs e)
@@ -686,35 +805,33 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
-        protected void rptCareRecords_ItemDataBound(object sender, System.Web.UI.WebControls.RepeaterItemEventArgs e)
+        protected void gvCareRecords_RowDataBound(object sender, System.Web.UI.WebControls.GridViewRowEventArgs e)
         {
-            if (e.Item.ItemType != System.Web.UI.WebControls.ListItemType.Item &&
-                e.Item.ItemType != System.Web.UI.WebControls.ListItemType.AlternatingItem)
+            if (e.Row.RowType != System.Web.UI.WebControls.DataControlRowType.DataRow)
             {
                 return;
             }
 
-            var viewModel = e.Item.DataItem as CareRecordCardViewModel;
+            var viewModel = e.Row.DataItem as CareRecordGridViewModel;
             if (viewModel == null)
             {
                 return;
             }
 
-            var card = e.Item.FindControl("pnlCareCard") as System.Web.UI.WebControls.Panel;
-            if (card != null)
+            var photoButton = e.Row.FindControl("btnSelectCare") as System.Web.UI.WebControls.LinkButton;
+            if (photoButton != null)
             {
-                card.Attributes["data-select-target"] = (e.Item.FindControl("btnSelectCare") as System.Web.UI.WebControls.LinkButton)?.ClientID ?? string.Empty;
                 if (viewModel.IsSelected)
                 {
-                    card.CssClass = $"{card.CssClass} is-selected";
+                    photoButton.Text = "顯示照片中";
+                    photoButton.CssClass = "btn btn-sm btn-success";
+                    e.Row.CssClass = $"{e.Row.CssClass} care-record-row is-selected";
                 }
-            }
-
-            var selectionHint = e.Item.FindControl("lblCareSelectionHint") as System.Web.UI.WebControls.Label;
-            if (selectionHint != null && viewModel.IsSelected)
-            {
-                selectionHint.Text = "顯示照片中";
-                selectionHint.CssClass = "text-success fw-semibold small";
+                else
+                {
+                    photoButton.Text = "照片";
+                    photoButton.CssClass = "btn btn-sm btn-outline-primary";
+                }
             }
         }
 

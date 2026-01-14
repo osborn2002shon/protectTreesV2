@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         .health-record-card,
-        .patrol-record-card,
-        .care-record-card {
+        .patrol-record-card {
             cursor: pointer;
             transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
         }
@@ -18,10 +17,13 @@
         }
 
         .health-record-card.is-selected,
-        .patrol-record-card.is-selected,
-        .care-record-card.is-selected {
+        .patrol-record-card.is-selected {
             border: 2px solid #198754;
             box-shadow: 0 0.75rem 1.5rem rgba(25, 135, 84, 0.2);
+            background-color: #f0fbf4;
+        }
+
+        .care-record-row.is-selected {
             background-color: #f0fbf4;
         }
     </style>
@@ -463,48 +465,60 @@
                             <asp:Panel ID="pnlCareRecordEmpty" runat="server" Visible="false" CssClass="text-center text-muted py-5">
                                 查無養護紀錄。
                             </asp:Panel>
-                            <asp:Repeater ID="rptCareRecords" runat="server" OnItemCommand="rptCareRecords_ItemCommand" OnItemDataBound="rptCareRecords_ItemDataBound">
-                                <HeaderTemplate>
-                                    <div class="row g-3">
-                                </HeaderTemplate>
-                                <ItemTemplate>
-                                    <div class="col-12 col-lg-6">
-                                        <asp:Panel ID="pnlCareCard" runat="server" CssClass="card care-record-card h-100">
-                                            <div class="card-header d-flex align-items-center justify-content-between">
-                                                <asp:LinkButton ID="btnSelectCare" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectCare" CommandArgument='<%# Eval("CareId") %>'>
-                                                    <%# Eval("CareDateDisplay") %>
-                                                </asp:LinkButton>
-                                                <asp:Label ID="lblCareSelectionHint" runat="server" CssClass="text-muted small" Text="點選切換照片" />
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-3">
-                                                    <div class="col-12">
-                                                        <div class="text-muted small">資料狀態</div>
-                                                        <div class="fw-semibold"><%# Eval("StatusDisplay") %></div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="text-muted small">記錄人員</div>
-                                                        <div class="fw-semibold"><%# Eval("RecorderDisplay") %></div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="text-muted small">覆核人員</div>
-                                                        <div class="fw-semibold"><%# Eval("ReviewerDisplay") %></div>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex flex-wrap gap-2 mt-3">
-                                                    <asp:LinkButton ID="btnViewCareReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("CareId") %>' Text="檢視報告" />
-                                                </div>
-                                            </div>
-                                            <div class="card-footer text-muted small text-end">
-                                                調查人：<%# Eval("SurveyorDisplay") %>｜最後更新：<%# Eval("LastUpdateDisplay") %>
-                                            </div>
-                                        </asp:Panel>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-4">
+                                            <label class="form-label">年度篩選</label>
+                                            <asp:DropDownList ID="ddlCareYear" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCareYear_SelectedIndexChanged" />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">月份篩選</label>
+                                            <asp:DropDownList ID="ddlCareMonth" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCareMonth_SelectedIndexChanged" />
+                                        </div>
+                                        <div class="col-md-4 text-md-end">
+                                            <span class="text-muted">資料總筆數：</span>
+                                            <asp:Label ID="lblCareRecordTotal" runat="server" CssClass="fw-semibold" />
+                                        </div>
                                     </div>
-                                </ItemTemplate>
-                                <FooterTemplate>
-                                    </div>
-                                </FooterTemplate>
-                            </asp:Repeater>
+                                </div>
+                            </div>
+                            <asp:GridView ID="gvCareRecords" runat="server" CssClass="table table-bordered align-middle" AutoGenerateColumns="false" OnRowCommand="gvCareRecords_RowCommand" OnRowDataBound="gvCareRecords_RowDataBound">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="養護日期">
+                                        <ItemTemplate>
+                                            <%# Eval("CareDateDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="施作項目">
+                                        <ItemTemplate>
+                                            <div class="text-wrap">
+                                                <asp:Literal ID="ltlCareItems" runat="server" Mode="PassThrough" Text='<%# Eval("CareItemDisplay") %>' />
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="記錄人員">
+                                        <ItemTemplate>
+                                            <%# Eval("RecorderDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="覆核人員">
+                                        <ItemTemplate>
+                                            <%# Eval("ReviewerDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="照片">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnSelectCare" runat="server" CssClass="btn btn-sm btn-outline-primary" CommandName="SelectCare" CommandArgument='<%# Eval("CareId") %>' Text="照片" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="檢視">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnViewCareReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("CareId") %>' Text="檢視" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
                         </div>
                     </div>
                 </div>
@@ -643,33 +657,10 @@
                 });
             }
 
-            function initCareRecordCards() {
-                document.querySelectorAll('.care-record-card').forEach(function (card) {
-                    if (card.dataset.careCardBound) {
-                        return;
-                    }
-                    card.dataset.careCardBound = 'true';
-                    card.addEventListener('click', function (event) {
-                        if (event.target.closest('a, button, .dropdown-menu, input, label')) {
-                            return;
-                        }
-                        var targetId = card.getAttribute('data-select-target');
-                        if (!targetId) {
-                            return;
-                        }
-                        var targetLink = document.getElementById(targetId);
-                        if (targetLink) {
-                            targetLink.click();
-                        }
-                    });
-                });
-            }
-
             function initPageComponents() {
                 initLightbox();
                 initHealthRecordCards();
                 initPatrolRecordCards();
-                initCareRecordCards();
             }
 
             document.addEventListener('DOMContentLoaded', initPageComponents);
