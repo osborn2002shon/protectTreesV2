@@ -810,7 +810,7 @@ namespace protectTreesV2.backstage.tree
             var selectionHint = e.Item.FindControl("lblHealthSelectionHint") as System.Web.UI.WebControls.Label;
             if (selectionHint != null && viewModel.IsSelected)
             {
-                selectionHint.Text = "顯示照片中";
+                selectionHint.Text = "檢視";
                 selectionHint.CssClass = "text-success fw-semibold small";
             }
 
@@ -850,13 +850,13 @@ namespace protectTreesV2.backstage.tree
             {
                 if (viewModel.IsSelected)
                 {
-                    photoButton.Text = "顯示照片中";
+                    photoButton.Text = "檢視";
                     photoButton.CssClass = "btn btn-sm btn-success";
                     e.Row.CssClass = $"{e.Row.CssClass} patrol-record-row is-selected";
                 }
                 else
                 {
-                    photoButton.Text = "照片";
+                    photoButton.Text = "檢視";
                     photoButton.CssClass = "btn btn-sm btn-outline-primary";
                 }
             }
@@ -880,13 +880,13 @@ namespace protectTreesV2.backstage.tree
             {
                 if (viewModel.IsSelected)
                 {
-                    photoButton.Text = "顯示照片中";
+                    photoButton.Text = "檢視";
                     photoButton.CssClass = "btn btn-sm btn-success";
                     e.Row.CssClass = $"{e.Row.CssClass} care-record-row is-selected";
                 }
                 else
                 {
-                    photoButton.Text = "照片";
+                    photoButton.Text = "檢視";
                     photoButton.CssClass = "btn btn-sm btn-outline-primary";
                 }
             }

@@ -444,7 +444,7 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="照片">
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="btnSelectPatrol" runat="server" CssClass="btn btn-sm btn-outline-primary" CommandName="SelectPatrol" CommandArgument='<%# Eval("PatrolId") %>' Text="照片" />
+                                            <asp:LinkButton ID="btnSelectPatrol" runat="server" CssClass="btn btn-sm btn-outline-primary" CommandName="SelectPatrol" CommandArgument='<%# Eval("PatrolId") %>' Text="檢視" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
                                 </Columns>
@@ -517,10 +517,10 @@
                                     </asp:TemplateField>
                                     <asp:TemplateField HeaderText="照片">
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="btnSelectCare" runat="server" CssClass="btn btn-sm btn-outline-primary" CommandName="SelectCare" CommandArgument='<%# Eval("CareId") %>' Text="照片" />
+                                            <asp:LinkButton ID="btnSelectCare" runat="server" CssClass="btn btn-sm btn-outline-primary" CommandName="SelectCare" CommandArgument='<%# Eval("CareId") %>' Text="檢視" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
-                                    <asp:TemplateField HeaderText="檢視">
+                                    <asp:TemplateField HeaderText="內容">
                                         <ItemTemplate>
                                             <asp:LinkButton ID="btnViewCareReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("CareId") %>' Text="檢視" />
                                         </ItemTemplate>
