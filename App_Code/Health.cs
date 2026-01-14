@@ -884,7 +884,9 @@ namespace protectTreesV2.Health
                     h.surveyor,
                     h.managementStatus,
                     h.priority,
-                    h.treatmentDescription
+                    h.treatmentDescription,
+                    h.insertDateTime,
+                    h.updateDateTime
                 FROM Tree_HealthRecord h
                 WHERE h.treeID = @treeID
                   AND h.removeDateTime IS NULL
