@@ -33,10 +33,8 @@ namespace protectTreesV2.backstage.tree
             public int PatrolId { get; set; }
             public string PatrolDateDisplay { get; set; }
             public string PatrollerDisplay { get; set; }
-            public string LastUpdateDisplay { get; set; }
             public string RiskDisplay { get; set; }
             public string MemoDisplay { get; set; }
-            public string StatusDisplay { get; set; }
             public bool IsSelected { get; set; }
         }
 
@@ -217,34 +215,113 @@ namespace protectTreesV2.backstage.tree
         {
             var records = systemPatrol.GetPatrolRecordsByTree(treeId) ?? new List<Patrol.Patrol.PatrolRecord>();
 
+            BindPatrolFilterOptions(records);
+
             if (!records.Any())
             {
                 pnlPatrolRecordEmpty.Visible = true;
-                rptPatrolRecords.Visible = false;
+                gvPatrolRecords.Visible = false;
+                lblPatrolRecordTotal.Text = "0";
                 BindPatrolPhotos(null);
                 return;
             }
 
             int? selectedPatrolId = GetSelectedPatrolId(records);
+            var filteredRecords = ApplyPatrolFilters(records);
 
-            var viewModels = records.Select(record => new PatrolRecordCardViewModel
+            if (!filteredRecords.Any())
+            {
+                pnlPatrolRecordEmpty.Visible = true;
+                gvPatrolRecords.Visible = false;
+                lblPatrolRecordTotal.Text = "0";
+                BindPatrolPhotos(null);
+                return;
+            }
+
+            if (selectedPatrolId.HasValue && !filteredRecords.Any(record => record.patrolID == selectedPatrolId.Value))
+            {
+                selectedPatrolId = filteredRecords.FirstOrDefault()?.patrolID;
+                hfSelectedPatrolId.Value = selectedPatrolId?.ToString() ?? string.Empty;
+            }
+
+            var viewModels = filteredRecords.Select(record => new PatrolRecordCardViewModel
             {
                 PatrolId = record.patrolID,
                 PatrolDateDisplay = DisplayOrDefault(record.patrolDate),
                 PatrollerDisplay = DisplayOrDefault(record.patroller),
-                LastUpdateDisplay = DisplayOrDefault(record.updateDateTime ?? record.insertDateTime),
                 RiskDisplay = record.hasPublicSafetyRisk ? "有" : "無",
                 MemoDisplay = DisplayOrDefault(record.memo),
-                StatusDisplay = record.dataStatus == (int)Patrol.Patrol.PatrolRecordStatus.定稿 ? "定稿" : "草稿",
                 IsSelected = selectedPatrolId.HasValue && record.patrolID == selectedPatrolId.Value
             }).ToList();
 
-            rptPatrolRecords.DataSource = viewModels;
-            rptPatrolRecords.DataBind();
-            rptPatrolRecords.Visible = true;
+            gvPatrolRecords.DataSource = viewModels;
+            gvPatrolRecords.DataBind();
+            gvPatrolRecords.Visible = true;
             pnlPatrolRecordEmpty.Visible = false;
+            lblPatrolRecordTotal.Text = filteredRecords.Count.ToString();
 
             BindPatrolPhotos(selectedPatrolId);
+        }
+
+        private void BindPatrolFilterOptions(IEnumerable<Patrol.Patrol.PatrolRecord> records)
+        {
+            string selectedYear = ddlPatrolYear.SelectedValue;
+            string selectedMonth = ddlPatrolMonth.SelectedValue;
+
+            var years = records
+                .Where(record => record.patrolDate.HasValue)
+                .Select(record => record.patrolDate.Value.Year)
+                .Distinct()
+                .OrderByDescending(year => year)
+                .ToList();
+
+            ddlPatrolYear.Items.Clear();
+            ddlPatrolYear.Items.Add(new System.Web.UI.WebControls.ListItem("不拘", string.Empty));
+            foreach (var year in years)
+            {
+                ddlPatrolYear.Items.Add(new System.Web.UI.WebControls.ListItem($"{year}年", year.ToString()));
+            }
+
+            if (!string.IsNullOrEmpty(selectedYear) && ddlPatrolYear.Items.FindByValue(selectedYear) != null)
+            {
+                ddlPatrolYear.SelectedValue = selectedYear;
+            }
+
+            var months = records
+                .Where(record => record.patrolDate.HasValue)
+                .Select(record => record.patrolDate.Value.Month)
+                .Distinct()
+                .OrderBy(month => month)
+                .ToList();
+
+            ddlPatrolMonth.Items.Clear();
+            ddlPatrolMonth.Items.Add(new System.Web.UI.WebControls.ListItem("不拘", string.Empty));
+            foreach (var month in months)
+            {
+                ddlPatrolMonth.Items.Add(new System.Web.UI.WebControls.ListItem($"{month}月", month.ToString()));
+            }
+
+            if (!string.IsNullOrEmpty(selectedMonth) && ddlPatrolMonth.Items.FindByValue(selectedMonth) != null)
+            {
+                ddlPatrolMonth.SelectedValue = selectedMonth;
+            }
+        }
+
+        private List<Patrol.Patrol.PatrolRecord> ApplyPatrolFilters(IEnumerable<Patrol.Patrol.PatrolRecord> records)
+        {
+            var filtered = records;
+
+            if (int.TryParse(ddlPatrolYear.SelectedValue, out int selectedYear))
+            {
+                filtered = filtered.Where(record => record.patrolDate.HasValue && record.patrolDate.Value.Year == selectedYear);
+            }
+
+            if (int.TryParse(ddlPatrolMonth.SelectedValue, out int selectedMonth))
+            {
+                filtered = filtered.Where(record => record.patrolDate.HasValue && record.patrolDate.Value.Month == selectedMonth);
+            }
+
+            return filtered.ToList();
         }
 
         private void BindCareRecords(int treeId)
@@ -468,7 +545,7 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
-        protected void rptPatrolRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
+        protected void gvPatrolRecords_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
         {
             if (!int.TryParse(e.CommandArgument?.ToString(), out int patrolId))
             {
@@ -490,6 +567,20 @@ namespace protectTreesV2.backstage.tree
                 ShowPatrolRecordModal(patrolId);
                 ActivatePatrolTab();
             }
+        }
+
+        protected void ddlPatrolYear_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int treeId = int.Parse(hfTreeID.Value);
+            BindPatrolRecords(treeId);
+            ActivatePatrolTab();
+        }
+
+        protected void ddlPatrolMonth_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int treeId = int.Parse(hfTreeID.Value);
+            BindPatrolRecords(treeId);
+            ActivatePatrolTab();
         }
 
         protected void rptCareRecords_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
@@ -565,35 +656,33 @@ namespace protectTreesV2.backstage.tree
             }
         }
 
-        protected void rptPatrolRecords_ItemDataBound(object sender, System.Web.UI.WebControls.RepeaterItemEventArgs e)
+        protected void gvPatrolRecords_RowDataBound(object sender, System.Web.UI.WebControls.GridViewRowEventArgs e)
         {
-            if (e.Item.ItemType != System.Web.UI.WebControls.ListItemType.Item &&
-                e.Item.ItemType != System.Web.UI.WebControls.ListItemType.AlternatingItem)
+            if (e.Row.RowType != System.Web.UI.WebControls.DataControlRowType.DataRow)
             {
                 return;
             }
 
-            var viewModel = e.Item.DataItem as PatrolRecordCardViewModel;
+            var viewModel = e.Row.DataItem as PatrolRecordCardViewModel;
             if (viewModel == null)
             {
                 return;
             }
 
-            var card = e.Item.FindControl("pnlPatrolCard") as System.Web.UI.WebControls.Panel;
-            if (card != null)
+            var photoButton = e.Row.FindControl("btnSelectPatrol") as System.Web.UI.WebControls.LinkButton;
+            if (photoButton != null)
             {
-                card.Attributes["data-select-target"] = (e.Item.FindControl("btnSelectPatrol") as System.Web.UI.WebControls.LinkButton)?.ClientID ?? string.Empty;
                 if (viewModel.IsSelected)
                 {
-                    card.CssClass = $"{card.CssClass} is-selected";
+                    photoButton.Text = "顯示照片中";
+                    photoButton.CssClass = "btn btn-sm btn-success";
+                    e.Row.CssClass = $"{e.Row.CssClass} patrol-record-row is-selected";
                 }
-            }
-
-            var selectionHint = e.Item.FindControl("lblPatrolSelectionHint") as System.Web.UI.WebControls.Label;
-            if (selectionHint != null && viewModel.IsSelected)
-            {
-                selectionHint.Text = "顯示照片中";
-                selectionHint.CssClass = "text-success fw-semibold small";
+                else
+                {
+                    photoButton.Text = "照片";
+                    photoButton.CssClass = "btn btn-sm btn-outline-primary";
+                }
             }
         }
 

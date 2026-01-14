@@ -438,13 +438,40 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.Panel pnlPatrolRecordEmpty;
 
         /// <summary>
-        /// rptPatrolRecords 控制項。
+        /// ddlPatrolYear 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptPatrolRecords;
+        protected global::System.Web.UI.WebControls.DropDownList ddlPatrolYear;
+
+        /// <summary>
+        /// ddlPatrolMonth 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlPatrolMonth;
+
+        /// <summary>
+        /// lblPatrolRecordTotal 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPatrolRecordTotal;
+
+        /// <summary>
+        /// gvPatrolRecords 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvPatrolRecords;
 
         /// <summary>
         /// pnlCareRecordEmpty 控制項。

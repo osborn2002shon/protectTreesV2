@@ -13,6 +13,10 @@
             transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
         }
 
+        .patrol-record-row.is-selected {
+            background-color: #f0fbf4;
+        }
+
         .health-record-card.is-selected,
         .patrol-record-card.is-selected,
         .care-record-card.is-selected {
@@ -392,48 +396,53 @@
                             <asp:Panel ID="pnlPatrolRecordEmpty" runat="server" Visible="false" CssClass="text-center text-muted py-5">
                                 查無巡查紀錄。
                             </asp:Panel>
-                            <asp:Repeater ID="rptPatrolRecords" runat="server" OnItemCommand="rptPatrolRecords_ItemCommand" OnItemDataBound="rptPatrolRecords_ItemDataBound">
-                                <HeaderTemplate>
-                                    <div class="row g-3">
-                                </HeaderTemplate>
-                                <ItemTemplate>
-                                    <div class="col-12 col-lg-6">
-                                        <asp:Panel ID="pnlPatrolCard" runat="server" CssClass="card patrol-record-card h-100">
-                                            <div class="card-header d-flex align-items-center justify-content-between">
-                                                <asp:LinkButton ID="btnSelectPatrol" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectPatrol" CommandArgument='<%# Eval("PatrolId") %>'>
-                                                    <%# Eval("PatrolDateDisplay") %>
-                                                </asp:LinkButton>
-                                                <asp:Label ID="lblPatrolSelectionHint" runat="server" CssClass="text-muted small" Text="點選切換照片" />
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row g-3">
-                                                    <div class="col-12">
-                                                        <div class="text-muted small">公共安全風險</div>
-                                                        <div class="fw-semibold"><%# Eval("RiskDisplay") %></div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="text-muted small">巡查備註</div>
-                                                        <div class="fw-semibold"><%# Eval("MemoDisplay") %></div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="text-muted small">資料狀態</div>
-                                                        <div class="fw-semibold"><%# Eval("StatusDisplay") %></div>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex flex-wrap gap-2 mt-3">
-                                                    <asp:LinkButton ID="btnViewPatrolReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("PatrolId") %>' Text="檢視報告" />
-                                                </div>
-                                            </div>
-                                            <div class="card-footer text-muted small text-end">
-                                                巡查人：<%# Eval("PatrollerDisplay") %>｜最後更新：<%# Eval("LastUpdateDisplay") %>
-                                            </div>
-                                        </asp:Panel>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-4">
+                                            <label class="form-label">年度篩選</label>
+                                            <asp:DropDownList ID="ddlPatrolYear" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlPatrolYear_SelectedIndexChanged" />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">月份篩選</label>
+                                            <asp:DropDownList ID="ddlPatrolMonth" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlPatrolMonth_SelectedIndexChanged" />
+                                        </div>
+                                        <div class="col-md-4 text-md-end">
+                                            <span class="text-muted">資料總筆數：</span>
+                                            <asp:Label ID="lblPatrolRecordTotal" runat="server" CssClass="fw-semibold" />
+                                        </div>
                                     </div>
-                                </ItemTemplate>
-                                <FooterTemplate>
-                                    </div>
-                                </FooterTemplate>
-                            </asp:Repeater>
+                                </div>
+                            </div>
+                            <asp:GridView ID="gvPatrolRecords" runat="server" CssClass="table table-bordered align-middle" AutoGenerateColumns="false" OnRowCommand="gvPatrolRecords_RowCommand" OnRowDataBound="gvPatrolRecords_RowDataBound">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="巡查日期">
+                                        <ItemTemplate>
+                                            <%# Eval("PatrolDateDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="調查人">
+                                        <ItemTemplate>
+                                            <%# Eval("PatrollerDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="巡查備註">
+                                        <ItemTemplate>
+                                            <%# Eval("MemoDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="風險狀況">
+                                        <ItemTemplate>
+                                            <%# Eval("RiskDisplay") %>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="照片">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnSelectPatrol" runat="server" CssClass="btn btn-sm btn-outline-primary" CommandName="SelectPatrol" CommandArgument='<%# Eval("PatrolId") %>' Text="照片" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
                         </div>
                     </div>
                 </div>
