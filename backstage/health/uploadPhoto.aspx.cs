@@ -71,7 +71,7 @@ namespace protectTreesV2.backstage.health
             List<TreePhotoInfo> processQueue = new List<TreePhotoInfo>();
 
             // =========================================================
-            // 階段一：解析與格式驗證 (Parse & Validation Phase)
+            // 解析與格式驗證
             // =========================================================
             for (int i = 0; i < files.Count; i++)
             {
@@ -155,7 +155,7 @@ namespace protectTreesV2.backstage.health
             }
 
             // =========================================================
-            // 階段二：資料庫批次驗證 (DB Validation Phase)
+            // 資料庫批次驗證
             // =========================================================
 
             // 檢查樹籍編號
@@ -260,7 +260,7 @@ namespace protectTreesV2.backstage.health
                 }
             }
             // =========================================================
-            // 階段三：實體儲存與批次寫入控管 (Storage Phase)
+            // 實體儲存與批次寫入控管 
             // =========================================================
 
             // 1. 先分組
@@ -341,7 +341,7 @@ namespace protectTreesV2.backstage.health
                         info.log.isSuccess = false;
                         info.log.resultMsg = "失敗：超過 5 張限制";
                     }
-                } // End Foreach (Group loop)
+                } 
 
                 // 批次寫入資料庫 & 錯誤回滾 (Transaction) ---
                 if (batchInsertList.Count > 0)
@@ -380,34 +380,63 @@ namespace protectTreesV2.backstage.health
             }
 
             // =========================================================
-            // 階段四：資料庫結算 (Final DB Commit) - 使用您的專屬 FN
+            // 寫入紀錄
             // =========================================================
             int successCount = allLogList.Count(x => x.isSuccess);
             int failCount = allLogList.Count(x => !x.isSuccess);
             int totalCount = allLogList.Count;
 
-            // 取得Task ID
-            int newBatchTaskID = system_batch.CreateBatchTask(
-                enum_treeBatchType.Health_Photo,
-                "批次照片上傳",
-                accountID,
-                totalCount,
-                successCount,
-                failCount
-            );
+            bool isLogSavedToDB = false;
+            string dbErrorMsg = "";
 
-            //回填 TaskID 到每一筆明細
-            foreach (var log in allLogList)
+            try
             {
-                log.taskID = newBatchTaskID;
+                // 取得 Task ID
+                int newBatchTaskID = system_batch.CreateBatchTask(
+                    enum_treeBatchType.Health_Photo,
+                    "批次照片上傳",
+                    accountID,
+                    totalCount,
+                    successCount,
+                    failCount
+                );
+
+                // 回填 TaskID
+                foreach (var log in allLogList)
+                {
+                    log.taskID = newBatchTaskID;
+                }
+
+                // 批次寫入 TaskLog
+                system_batch.BulkInsertTaskLogs(allLogList);
+
+                // 標記寫入成功
+                isLogSavedToDB = true;
+            }
+            catch (Exception ex)
+            {
+                isLogSavedToDB = false;
+                dbErrorMsg = ex.Message;
             }
 
-            // 批次寫入明細
-            system_batch.BulkInsertTaskLogs(allLogList);
+            // =========================================================
+            // 結果顯示
+            // =========================================================
 
-            // 顯示結果
-            ShowMessage("處理完成", $"成功：{successCount}，失敗：{failCount}");
-            BindData();
+            if (isLogSavedToDB)
+            {
+                //成功上傳
+                ShowMessage("處理完成", $"成功：{successCount}，失敗：{failCount}");
+                BindData(); // 這會去撈 DB，因為我們剛剛存進去了，所以撈得到
+            }
+            else
+            {
+                
+                //db紀錄寫入失敗
+                ShowMessage("警告", $"照片上傳作業已執行，但「操作紀錄」寫入資料庫失敗。\n(原因：{dbErrorMsg})\n\n請參考下方列表確認結果。");
+                GridView_Detail.DataSource = allLogList; 
+                GridView_Detail.DataBind();
+            }
         }
        
     }

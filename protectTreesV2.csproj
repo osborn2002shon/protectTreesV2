@@ -139,10 +139,10 @@
     <Content Include="backstage\care\edit.aspx" />
     <Content Include="backstage\care\list.aspx" />
     <Content Include="backstage\care\main.aspx" />
+    <Content Include="backstage\care\upload.aspx" />
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
-    <Content Include="backstage\Manage\TreeManage_Care.aspx" />
     <Content Include="backstage\patrol\edit.aspx" />
     <Content Include="backstage\patrol\list.aspx" />
     <Content Include="backstage\patrol\main.aspx" />
@@ -212,9 +212,12 @@
     <Compile Include="backstage\care\main.aspx.designer.cs">
       <DependentUpon>main.aspx</DependentUpon>
     </Compile>
-    <Compile Include="backstage\Manage\TreeManage_Care.aspx.cs">
-      <DependentUpon>TreeManage_Care.aspx</DependentUpon>
+    <Compile Include="backstage\care\upload.aspx.cs">
+      <DependentUpon>upload.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\care\upload.aspx.designer.cs">
+      <DependentUpon>upload.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\patrol\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>

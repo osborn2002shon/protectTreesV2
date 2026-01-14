@@ -165,7 +165,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive gv-tb">
                         <asp:GridView ID="GridView_Detail" runat="server" 
-                            CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" UseAccessibleHeader="true">
+                            CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" UseAccessibleHeader="true" OnRowCommand="GridView_Detail_RowCommand">
                             <Columns>
                                 <asp:TemplateField HeaderText="狀態" ItemStyle-Width="80px">
                                     <ItemTemplate>
@@ -174,8 +174,45 @@
                                           : "<i class='fa-solid fa-circle-xmark text-danger fs-5'></i>" %>
                                     </ItemTemplate>
                                 </asp:TemplateField>
-                                <asp:BoundField DataField="refKey" HeaderText="樹籍編號" ItemStyle-Width="120px" />
-                                <asp:BoundField DataField="refDate" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" ItemStyle-Width="120px" />
+                               <%-- 樹籍編號 (成功顯示連結，失敗顯示純文字) --%>
+                                <asp:TemplateField HeaderText="樹籍編號" ItemStyle-Width="120px">
+                                    <ItemTemplate>
+                                        <%-- 成功 -> 顯示 LinkButton --%>
+                                        <asp:LinkButton ID="btnTreeNo" runat="server" 
+                                            Text='<%# Eval("refKey") %>'
+                                            CommandName="ViewTree" 
+                                            CommandArgument='<%# Eval("refKey") %>'
+                                            CssClass="text-decoration-underline text-primary"
+                                            Visible='<%# (bool)Eval("isSuccess") %>'>
+                                        </asp:LinkButton>
+
+                                        <%-- 失敗 -> 顯示 Label (純文字) --%>
+                                        <asp:Label ID="lblTreeNo" runat="server" 
+                                            Text='<%# Eval("refKey") %>'
+                                            Visible='<%# !(bool)Eval("isSuccess") %>'>
+                                        </asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <%-- 調查日期  --%>
+                                <asp:TemplateField HeaderText="調查日期" ItemStyle-Width="120px">
+                                    <ItemTemplate>
+                                        <%--  成功 -> 顯示 LinkButton --%>
+                                        <asp:LinkButton ID="btnSurveyDate" runat="server" 
+                                            Text='<%# Eval("refDate", "{0:yyyy/MM/dd}") %>'
+                                            CommandName="ViewHealth" 
+                                            CommandArgument='<%# Eval("refKey") + "," + Eval("refDate", "{0:yyyy/MM/dd}") %>'
+                                            CssClass="text-decoration-underline text-primary"
+                                            Visible='<%# (bool)Eval("isSuccess") %>'>
+                                        </asp:LinkButton>
+
+                                        <%--  失敗 -> 顯示 Label (純文字) --%>
+                                        <asp:Label ID="lblSurveyDate" runat="server" 
+                                            Text='<%# Eval("refDate", "{0:yyyy/MM/dd}") %>'
+                                            Visible='<%# !(bool)Eval("isSuccess") %>'>
+                                        </asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
                                 <asp:BoundField DataField="sourceItem" HeaderText="檔案名稱" />
                                 <asp:TemplateField HeaderText="處理結果">
                                     <ItemTemplate>

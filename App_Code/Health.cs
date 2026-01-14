@@ -36,6 +36,7 @@ namespace protectTreesV2.Health
         /// </summary>
         public enum enum_pruningDamageType
         {
+            無,
             截幹,
             截頂,
             不當縮剪

@@ -1014,10 +1014,10 @@ namespace protectTreesV2.Batch
                                 ) 
                                 VALUES 
                                 (
-                                    @tid, @sDate, 0,  -- 0:草稿
+                                    @tid, @sDate, 0,  /* 0:草稿 */
                                     @accID, GETDATE()
                                 );
-                                SELECT SCOPE_IDENTITY(); -- 取回新 ID
+                                SELECT SCOPE_IDENTITY(); /* 取回新 ID */
                             ";
 
                             using (SqlCommand cmd = new SqlCommand(sql, conn, trans))

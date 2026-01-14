@@ -77,20 +77,108 @@ namespace protectTreesV2.backstage.health
                 GridView_Detail.DataBind();
             }
         }
+
+        protected void GridView_Detail_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            // 檢視樹籍資料 (ViewTree)
+            if (e.CommandName == "ViewTree")
+            {
+                string treeNo = e.CommandArgument.ToString();
+
+                List<string> searchList = new List<string> { treeNo };
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList);
+
+                if (treeIdMap.ContainsKey(treeNo))
+                {
+                    int treeID = treeIdMap[treeNo];
+
+                    // 設定 Session 
+                    setTreeID = treeID.ToString();
+
+                    // 開啟新視窗
+                    string targetUrl = ResolveUrl("~/Backstage/tree/detail.aspx");
+                    string script = $"window.open('{targetUrl}', '_blank');";
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenTreeWindow", script, true);
+                }
+                else
+                {
+                    ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，可能尚未建立或已被刪除。");
+                }
+            }
+            // 檢視健檢紀錄 (ViewHealth)
+            else if (e.CommandName == "ViewHealth")
+            {
+                // 解析參數：樹號,日期
+                string[] args = e.CommandArgument.ToString().Split(',');
+                if (args.Length < 2) return;
+
+                string treeNo = args[0];
+                string dateStr = args[1];
+
+                if (!DateTime.TryParse(dateStr, out DateTime checkDate))
+                {
+                    ShowMessage("提示", "日期格式錯誤");
+                    return;
+                }
+
+                // 先查 TreeID
+                List<string> searchTreeList = new List<string> { treeNo };
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList);
+
+                if (treeIdMap.ContainsKey(treeNo))
+                {
+                    int treeID = treeIdMap[treeNo];
+
+                    // 2組裝查詢 Key (TreeID + Date)
+                    var queryKeys = new List<TreeQueryKey>
+                    {
+                        new TreeQueryKey { treeID = treeID, checkDate = checkDate }
+                    };
+
+                    // 反查 HealthID
+                    Dictionary<string, int> healthMap = system_batch.GetHealthIDMap(queryKeys);
+
+                    // Key 的格式通常是 $"{treeID}_{yyyyMMdd}"
+                    string mapKey = $"{treeID}_{checkDate:yyyyMMdd}";
+
+                    if (healthMap.ContainsKey(mapKey))
+                    {
+                        int healthID = healthMap[mapKey];
+
+                        // 設定 Session 並跳轉
+                        setHealthID = healthID.ToString(); // 設定健檢 ID
+                        setTreeID = null;                  // 清空樹木 ID 
+
+                        // 開啟新視窗到編輯頁
+                        string targetUrl = ResolveUrl("edit.aspx");
+                        string script = $"window.open('{targetUrl}', '_blank');";
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenHealthWindow", script, true);
+                    }
+                    else
+                    {
+                        ShowMessage("提示", $"查無此日期的健檢紀錄 ({dateStr})。");
+                    }
+                }
+                else
+                {
+                    ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，無法查詢健檢紀錄。");
+                }
+            }
+        }
         protected void Button_StartUpload_Click(object sender, EventArgs e)
         {
-
+            // ==========================================
+            // 1. 基礎檢查 (檔案存在、格式、大小)
+            // ==========================================
             var user = UserService.GetCurrentUser();
             int accountID = user?.userID ?? 0;
 
-            // 1. 基礎檢查：是否有選取檔案
             if (!FileUpload_Batch.HasFile)
             {
-                ShowMessage("提示","請先選取檔案！");
+                ShowMessage("提示", "請先選取檔案！");
                 return;
             }
 
-            // 2. 檢查副檔名 (Excel 格式)
             string fileName = FileUpload_Batch.FileName;
             string fileExt = Path.GetExtension(fileName).ToLower();
 
@@ -100,8 +188,7 @@ namespace protectTreesV2.backstage.health
                 return;
             }
 
-            // 3. 檢查檔案大小 (30MB)
-            // 30MB = 30 * 1024 * 1024 bytes
+            // 30MB 限制
             int maxFileSize = 30 * 1024 * 1024;
             if (FileUpload_Batch.PostedFile.ContentLength > maxFileSize)
             {
@@ -109,30 +196,27 @@ namespace protectTreesV2.backstage.health
                 return;
             }
 
+            // ==========================================
+            // 2. 檔案儲存 (保留檔案，不刪除)
+            // ==========================================
+            string saveFullPath = "";
             try
             {
-               
                 string yyyyMM = DateTime.Now.ToString("yyyyMM");
-
-                // 實體路徑: ...\_file\health\upload\5\202601\
                 string relativeFolder = $"~/_file/health/upload/{accountID}/{yyyyMM}/";
                 string physicalFolder = Server.MapPath(relativeFolder);
 
-                // 如果資料夾不存在則建立
                 if (!Directory.Exists(physicalFolder))
                 {
                     Directory.CreateDirectory(physicalFolder);
                 }
 
-
-                //取得檔名
                 string fileNameNoExt = Path.GetFileNameWithoutExtension(fileName);
                 string timeStamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                 string baseFileName = $"{timeStamp}_{fileNameNoExt}";
                 string finalFileName = baseFileName + fileExt;
 
-                // 組合完整實體路徑
-                string saveFullPath = Path.Combine(physicalFolder, finalFileName);
+                saveFullPath = Path.Combine(physicalFolder, finalFileName);
                 int counter = 1;
                 while (File.Exists(saveFullPath))
                 {
@@ -142,244 +226,170 @@ namespace protectTreesV2.backstage.health
                 }
 
                 FileUpload_Batch.SaveAs(saveFullPath);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("提示", $"檔案上傳失敗：{ex.Message}");
+                return;
+            }
 
-                // Key: 頁籤名稱
-                // Value: (TargetRow: 檢查哪一列, Cols: 欄位順序陣列)
-                var sheetRules = new Dictionary<string, (int TargetRow, string[] Cols)>
-                {
-                    // 1. 基本資料 (TargetRow = 0)
-                    { "基本資料", (0, new[] {
-                        "調查記數", "樹籍編號", "機關樹木編號", "座落地點縣市", "座落地點鄉鎮",
-                        "樹種", "調查日期", "調查人", "樹牌", "樹高(m)",
-                        "樹冠投影面積(m2)", "N(緯度)", "E(經度)", "米圍(1.0m處)", "米徑(1.0m處)",
-                        "胸圍(1.3m處)", "胸徑(1.3m處)", "備註(上移或下移實際量測高度)"
-                    })},
+            // ==========================================
+            // 3. 定義檢查規則
+            // ==========================================
+            var sheetRules = new Dictionary<string, (int TargetRow, string[] Cols)>
+    {
+        { "基本資料", (0, new[] {
+            "調查記數", "樹籍編號", "機關樹木編號", "座落地點縣市", "座落地點鄉鎮",
+            "樹種", "調查日期", "調查人", "樹牌", "樹高(m)",
+            "樹冠投影面積(m2)", "N(緯度)", "E(經度)", "米圍(1.0m處)", "米徑(1.0m處)",
+            "胸圍(1.3m處)", "胸徑(1.3m處)", "備註(上移或下移實際量測高度)"
+        })},
+        { "病蟲害調查", (1, new[] {
+            "調查記數", "樹籍編號", "樹種",
+            "重大病害樹木褐根病 / 靈芝 / 木材腐朽菌 / 潰瘍 / 其他(____)",
+            "根系", "樹基部", "主幹", "枝幹", "樹冠", "其他",
+            "根系", "樹基部", "主幹", "枝幹", "樹冠", "其他",
+            "根系", "樹基部", "主幹", "枝幹", "樹冠", "其他",
+            "其他病蟲害問題詳加備註"
+        })},
+        { "樹木生長外觀情況", (1, new[] {
+            "調查記數", "樹籍編號", "樹種",
+            "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "打草傷", "根傷", "盤根", "其他",
+            "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "打草傷", "其他",
+            "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "內生夾皮", "其他",
+            "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "內生夾皮", "下垂枝", "其他",
+            "樹葉生長覆蓋度百分比%", "一般枯枝%", "懸掛枝", "其他",
+            "其他問題詳加備註"
+        })},
+        { "樹木修剪與支撐情況", (1, new[] {
+            "調查記數", "樹籍編號", "樹種",
+            "錯誤修剪傷害", "修剪傷口是否有癒合", "附生植物", "寄生植物", "纏勒性植物", "其他修剪問題詳加備註",
+            "有設立支架（單位為支，請輸入數字）", "支架已嵌入樹皮", "其他支撐問題詳加備註"
+        })},
+        { "生育地環境與土讓檢測情況", (1, new[] {
+            "調查記數", "樹籍編號", "樹種",
+            "水泥鋪面%", "柏油鋪面%", "花台", "休憩設施(桌椅)", "雜物堆置",
+            "受限建物之間", "土壤受踩踏夯實", "覆土過深", "其他生育地問題詳加備註",
+            "土壤酸鹼度(pH值)", "有機質含量", "電導度(EC值)"
+        })},
+        { "健康檢查結果及風險評估", (0, new[] {
+            "調查記數", "樹籍編號", "樹種", "管理情況", "建議處理優先順序", "處理情形說明"
+        })}
+    };
 
-                    // 2. 病蟲害調查 (TargetRow = 1，因為 Row 0 是大標題)
-                    { "病蟲害調查", (1, new[] {
-                        "調查記數", "樹籍編號", "樹種", 
-                         // 重大病害
-                        "重大病害樹木褐根病 / 靈芝 / 木材腐朽菌 / 潰瘍 / 其他(____)", 
-                          // 重大蟲害
-                        "根系", "樹基部", "主幹", "枝幹", "樹冠", "其他",
-                        // 一般蟲害
-                        "根系", "樹基部", "主幹", "枝幹", "樹冠", "其他",
-                        // 一般病害
-                        "根系", "樹基部", "主幹", "枝幹", "樹冠", "其他",
-                       "其他病蟲害問題詳加備註",
+            // ==========================================
+            // 4. 開始解析與處理
+            // ==========================================
+            // 所有的 Log 
+            List<TreeBatchTaskLog> allLogList = new List<TreeBatchTaskLog>();
+            List<ImportTreeDataModel> validDataList = new List<ImportTreeDataModel>();
 
+            // 業務邏輯旗標
+            bool isSetFinal = CheckBox_SetFinal.Checked;   // 定稿
+            bool isOverwrite = CheckBox_Overwrite.Checked; // 覆蓋
+            bool isStrictMode = isSetFinal || isOverwrite; // 必填檢查
 
-                    })},
+            // 重複檢查 (同檔內)
+            HashSet<string> internalDuplicateCheck = new HashSet<string>();
 
-                    // 3. 樹木生長外觀情況 (TargetRow = 1)
-                    // 注意：這裡欄位名稱重複很多次(腐朽百分比)，程式會依順序檢查，順序不能錯
-                    { "樹木生長外觀情況", (1, new[] {
-                        "調查記數", "樹籍編號", "樹種",
-                         // 根系
-                        "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "打草傷", "根傷", "盤根", "其他",
-                        // 樹基部
-                        "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "打草傷", "其他",
-                          // 主幹
-                        "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "內生夾皮", "其他",
-                        // 枝幹
-                        "腐朽百分比%", "樹洞最大直徑(m)", "傷口最大直徑(m)", "機具損傷", "內生夾皮", "下垂枝", "其他",
-                        // 樹冠
-                        "樹葉生長覆蓋度百分比%", "一般枯枝%", "懸掛枝", "其他",
-                        // 最後
-                        "其他問題詳加備註"
-                    })},
-
-                    // 4. 樹木修剪與支撐情況 (TargetRow = 1)
-                    { "樹木修剪與支撐情況", (1, new[] {
-                        "調查記數", "樹籍編號", "樹種",
-                        // 樹木(近期)修剪情況
-                        "錯誤修剪傷害", "修剪傷口是否有癒合", "附生植物", "寄生植物", "纏勒性植物", "其他修剪問題詳加備註",
-                        // 樹木支撐情況 (注意：括號與換行會在檢查時被 Replace 掉，所以這裡字串要寫對)
-                        "有設立支架（單位為支，請輸入數字）", "支架已嵌入樹皮", "其他支撐問題詳加備註"
-                    })},
-
-                    // 5. 生育地環境與土讓檢測情況 (TargetRow = 1)
-                    { "生育地環境與土讓檢測情況", (1, new[] {
-                        "調查記數", "樹籍編號", "樹種",
-                          // 生育地環境
-                        "水泥鋪面%", "柏油鋪面%", "花台", "休憩設施(桌椅)", "雜物堆置",
-                        "受限建物之間", "土壤受踩踏夯實", "覆土過深", "其他生育地問題詳加備註",
-                        // 土壤檢測
-                        "土壤酸鹼度(pH值)", "有機質含量", "電導度(EC值)",
-                      
-                        
-                    })},
-
-                    // 6. 健康檢查結果及風險評估 (TargetRow = 0，只有一行)
-                    { "健康檢查結果及風險評估", (0, new[] {
-                        "調查記數", "樹籍編號", "樹種", "管理情況", "建議處理優先順序", "處理情形說明"
-                    })}
-                };
-
-                // ==========================================
-                // NPOI 格式檢查邏輯 (通用)
-                // ==========================================
+            try
+            {
                 IWorkbook workbook = null;
-                bool isFormatValid = true;
-
                 using (FileStream fs = new FileStream(saveFullPath, FileMode.Open, FileAccess.Read))
                 {
                     workbook = WorkbookFactory.Create(fs);
 
+                    // ---------------------------------------------------------
+                    // 4.1 格式檢查 (Format Validation)
+                    // ---------------------------------------------------------
+                    bool isFormatValid = true;
                     foreach (var rule in sheetRules)
                     {
                         string sheetName = rule.Key;
                         int targetRowIdx = rule.Value.TargetRow;
                         string[] expectedCols = rule.Value.Cols;
 
-                        // A. 檢查頁籤
                         ISheet sheet = workbook.GetSheet(sheetName);
-                        if (sheet == null)
-                        {
-                            isFormatValid = false;
-                            // System.Diagnostics.Debug.WriteLine($"缺少頁籤: {sheetName}");
-                            break;
-                        }
+                        if (sheet == null) { isFormatValid = false; break; }
 
-                        // B. 檢查標題列
                         IRow targetRow = sheet.GetRow(targetRowIdx);
-                        if (targetRow == null)
-                        {
-                            isFormatValid = false;
-                            break;
-                        }
+                        if (targetRow == null) { isFormatValid = false; break; }
 
-                        int descRowIndex = targetRowIdx + 1;
-                        IRow descRow = sheet.GetRow(descRowIndex);
-
-                        if (descRow == null)
-                        {
-                            // 如果連下一列都沒有，代表使用者把說明列刪了，或檔案不完整
-                            isFormatValid = false;
-                            // Debug: System.Diagnostics.Debug.WriteLine($"頁籤[{sheetName}] 缺少說明列");
-                            break;
-                        }
+                        // 檢查說明列 (簡單檢查是否為正確的範本)
+                        IRow descRow = sheet.GetRow(targetRowIdx + 1);
+                        if (descRow == null) { isFormatValid = false; break; }
                         ICell descCell = descRow.GetCell(0);
                         string descText = (descCell == null) ? "" : descCell.ToString();
-                        if (!descText.Contains("填寫說明") && !descText.Contains("調查記數"))
-                        {
-                            isFormatValid = false;
-                            // Debug: System.Diagnostics.Debug.WriteLine($"頁籤[{sheetName}] 說明列驗證失敗，內容為: {descText}");
-                            break;
+                        if (!descText.Contains("填寫說明") ) 
+                        { 
+                            isFormatValid = false; break; 
                         }
 
-                        // C. 檢查欄位 (包含往上查找邏輯)
+                        // 檢查欄位名稱
                         for (int i = 0; i < expectedCols.Length; i++)
                         {
                             string actualValue = "";
-
-                            // 往上查找 Loop (從 TargetRow 往上找到 Row 0)
+                            // 往上查找 Loop (處理合併儲存格)
                             for (int r = targetRowIdx; r >= 0; r--)
                             {
                                 IRow currentRow = sheet.GetRow(r);
                                 if (currentRow != null)
                                 {
                                     ICell cell = currentRow.GetCell(i);
-                                    // 讀取值並去除空白、換行
                                     string val = (cell == null) ? "" : cell.ToString().Trim().Replace("\n", "").Replace("\r", "").Replace(" ", "");
                                     if (!string.IsNullOrEmpty(val))
                                     {
                                         actualValue = val;
-                                        break; // 找到有字的就停止
+                                        break;
                                     }
                                 }
                             }
-
-                            // 為了比對方便，預期字串也做同樣的正規化處理
                             string expectedRaw = expectedCols[i].Trim().Replace("\n", "").Replace("\r", "").Replace(" ", "");
-
                             if (!actualValue.Equals(expectedRaw, StringComparison.OrdinalIgnoreCase))
                             {
                                 isFormatValid = false;
-                                // Debug 用：印出哪一欄錯了
-                                // System.Diagnostics.Debug.WriteLine($"頁籤[{sheetName}] 第{i+1}欄錯誤: 預期[{expectedRaw}] 實際[{actualValue}]");
                                 break;
                             }
                         }
-
                         if (!isFormatValid) break;
                     }
-                }
 
-                // ==========================================
-                // 檢查欄位結果處理
-                // ==========================================
-                if (!isFormatValid)
-                {
-                    // --- 修改建議：不要刪除檔案，改為註解掉 ---
-                    /* try
+                    if (!isFormatValid)
                     {
-                        if (workbook != null) workbook.Close();
-                        File.Delete(saveFullPath); // 建議保留，方便日後查修
+                        // 格式錯誤：不刪檔，直接回傳
+                        ShowMessage("提示", "EXCEL欄位格式錯誤，請檢查EXCEL欄位是否與範本相符");
+                        return;
                     }
-                    catch { }
-                    */
 
-                    if (workbook != null) workbook.Close();
-                    ShowMessage("提示", "EXCEL欄位格式錯誤，請檢查EXCEL欄位");
-                    return;
-                }
-
-                //準備匯入資料
-
-                // 所有的 Log 
-                List<TreeBatchTaskLog> allLogList = new List<TreeBatchTaskLog>();
-
-                List<ImportTreeDataModel> validDataList = new List<ImportTreeDataModel>();
-
-                // 業務邏輯旗標
-                bool isSetFinal = CheckBox_SetFinal.Checked;   // 定稿
-                bool isOverwrite = CheckBox_Overwrite.Checked; // 覆蓋
-                bool isStrictMode = isSetFinal || isOverwrite; // 必填檢查
-
-                // 用來確保同一份檔案中，不會出現兩筆「同樹號 + 同日期」
-                HashSet<string> internalDuplicateCheck = new HashSet<string>();
-
-                using (FileStream fs = new FileStream(saveFullPath, FileMode.Open, FileAccess.Read))
-                {
-                    workbook = WorkbookFactory.Create(fs);
-
-                    //檢查其他頁籤的資料
+                    // ---------------------------------------------------------
+                    // 4.2 讀取資料 (Data Parsing)
+                    // ---------------------------------------------------------
                     var pestMap = ScanSideSheet(workbook, "病蟲害調查", 3, 0, allLogList);
                     var appearanceMap = ScanSideSheet(workbook, "樹木生長外觀情況", 3, 0, allLogList);
                     var pruningMap = ScanSideSheet(workbook, "樹木修剪與支撐情況", 3, 0, allLogList);
                     var soilMap = ScanSideSheet(workbook, "生育地環境與土讓檢測情況", 3, 0, allLogList);
                     var riskMap = ScanSideSheet(workbook, "健康檢查結果及風險評估", 2, 0, allLogList);
 
-                    // =========================================================================
-                    // 讀取 [基本資料]
-                    // =========================================================================
                     ISheet mainSheet = workbook.GetSheet("基本資料");
 
-                    // 資料從 Row 2 開始 (Row 0=標題, Row 1=說明)
                     for (int r = 2; r <= mainSheet.LastRowNum; r++)
                     {
                         IRow row = mainSheet.GetRow(r);
                         if (row == null) continue;
 
-                        // 取得 Key 
-                        string linkKey = GetCellValue(row, 0); // 調查記數 (Col 0)
-                        string treeNo = GetCellValue(row, 1);  // 樹籍編號 (Col 1)
+                        string linkKey = GetCellValue(row, 0);
+                        string treeNo = GetCellValue(row, 1);
+                        string valDateStr = GetCellValue(row, 6); 
 
-                        // 全欄位掃描 (判斷這行是不是真的有資料)
+                        // 空行判斷
                         bool hasData = false;
                         for (int c = 0; c < row.LastCellNum; c++)
                         {
-                            if (!string.IsNullOrEmpty(GetCellValue(row, c)))
-                            {
-                                hasData = true;
-                                break;
-                            }
+                            if (!string.IsNullOrEmpty(GetCellValue(row, c))) { hasData = true; break; }
                         }
-                        // 空行與漏填 Key 判斷
-                        if (string.IsNullOrEmpty(linkKey))
+
+                        if (string.IsNullOrEmpty(linkKey) || string.IsNullOrEmpty(treeNo) || string.IsNullOrEmpty(valDateStr))
                         {
-                            // 如果沒記數，但這行有其他資料 
                             if (hasData)
                             {
                                 allLogList.Add(new TreeBatchTaskLog
@@ -388,99 +398,93 @@ namespace protectTreesV2.backstage.health
                                     sourceItem = $"基本資料-第{r + 1}列",
                                     refKey = treeNo,
                                     isSuccess = false,
-                                    resultMsg = "失敗：資料提供不全 (調查記數為必填)"
+                                    resultMsg = "失敗：必要欄位未填寫"
                                 });
                             }
-                            continue; // 跳過無法處理的行
+                            continue;
+                        }
+
+                        DateTime validSurveyDate;
+                        if (!DateTime.TryParse(valDateStr, out validSurveyDate))
+                        {
+                            allLogList.Add(new TreeBatchTaskLog
+                            {
+                                taskID = 0,
+                                sourceItem = $"基本資料-第{r + 1}列",
+                                refKey = treeNo,
+                                isSuccess = false,
+                                resultMsg = $"失敗：調查日期格式錯誤"
+                            });
+                            continue; 
+                        }
+
+                        // 民國年自動校正 (ROC Logic)
+                        if (validSurveyDate.Year < 1911)
+                        {
+                            validSurveyDate = validSurveyDate.AddYears(1911);
                         }
 
                         TreeBatchTaskLog myLog = new TreeBatchTaskLog
                         {
                             taskID = 0,
-                            sourceItem = $"基本資料-第{r + 1}列", 
+                            sourceItem = $"基本資料-第{r + 1}列",
                             refKey = treeNo,
                             isSuccess = false,
                             resultMsg = ""
                         };
                         allLogList.Add(myLog);
 
-                        // =================================================================
-                        // 欄位驗證
-                        // =================================================================
                         List<string> rowErrors = new List<string>();
+                        BasicInfoParseResult basicResult = ValidateBasicInfo(row, isStrictMode, validSurveyDate);
 
-                        BasicInfoParseResult basicResult = ValidateBasicInfo(row, isStrictMode);
-
-                        // 收集基本資料錯誤
-                        if (basicResult.errors.Count > 0)
-                        {
-                            rowErrors.AddRange(basicResult.errors);
-                        }
-
-                        // 設定 Log 日期 (如果有解出來的話)
-                        if (basicResult.surveyDate.HasValue)
-                        {
-                            myLog.refDate = basicResult.surveyDate.Value;
-                        }
+                        if (basicResult.errors.Count > 0) rowErrors.AddRange(basicResult.errors);
+                        if (basicResult.surveyDate.HasValue) myLog.refDate = basicResult.surveyDate.Value;
 
                         TreeHealthRecord draftRecord = basicResult.parsedData;
 
+                        // 領取附屬資料
                         IRow pestRow = GetAndRemove(pestMap, linkKey);
                         IRow appRow = GetAndRemove(appearanceMap, linkKey);
                         IRow prunRow = GetAndRemove(pruningMap, linkKey);
                         IRow soilRow = GetAndRemove(soilMap, linkKey);
                         IRow riskRow = GetAndRemove(riskMap, linkKey);
+
+                        // --- 附屬頁籤檢查 ---
                         if (pestRow != null)
                         {
-                            //  一致性檢查 (確認樹號沒貼錯)
                             CheckTreeNoConsistency(treeNo, pestRow, "病蟲害調查", rowErrors);
-
-                            // 解析 + 驗證 + 填入
-                            List<string> pestErrors = ParseAndValidatePestInfo(pestRow, draftRecord, isStrictMode);
-
-                            if (pestErrors.Count > 0) rowErrors.AddRange(pestErrors);
+                            var errs = ParseAndValidatePestInfo(pestRow, draftRecord, isStrictMode);
+                            if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-
-                        // --- 外觀 ---
                         if (appRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, appRow, "樹木生長外觀情況", rowErrors);
-                            List<string> appErrors = ParseAndValidateAppearance(appRow, draftRecord, isStrictMode);
-                            if (appErrors.Count > 0) rowErrors.AddRange(appErrors);
+                            var errs = ParseAndValidateAppearance(appRow, draftRecord, isStrictMode);
+                            if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-
-                        // --- 修剪 ---
                         if (prunRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, prunRow, "樹木修剪與支撐情況", rowErrors);
-                            List<string> prunErrors = ParseAndValidatePruning(prunRow, draftRecord, isStrictMode);
-                            if (prunErrors.Count > 0) rowErrors.AddRange(prunErrors);
+                            var errs = ParseAndValidatePruning(prunRow, draftRecord, isStrictMode);
+                            if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-
-                        // --- 生育地 ---
                         if (soilRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, soilRow, "生育地環境與土讓檢測情況", rowErrors);
-                            List<string> soilErrors = ParseAndValidateSoil(soilRow, draftRecord, isStrictMode);
-                            if (soilErrors.Count > 0) rowErrors.AddRange(soilErrors);
+                            var errs = ParseAndValidateSoil(soilRow, draftRecord, isStrictMode);
+                            if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-
-                        // --- 風險 ---
                         if (riskRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, riskRow, "健康檢查結果及風險評估", rowErrors);
-
-                            List<string> riskErrors = ParseAndValidateRisk(riskRow, draftRecord, isStrictMode);
-                            if (riskErrors.Count > 0) rowErrors.AddRange(riskErrors);
+                            var errs = ParseAndValidateRisk(riskRow, draftRecord, isStrictMode);
+                            if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
 
-                        
+                        // --- 重複資料檢查 (同檔案內) ---
                         if (rowErrors.Count == 0)
                         {
-                            //重複資料檢查
-                            // 組合唯一鍵值：樹號 + 日期
                             string uniqueKey = $"{treeNo}_{myLog.refDate:yyyyMMdd}";
-
                             if (internalDuplicateCheck.Contains(uniqueKey))
                             {
                                 rowErrors.Add("Excel內包含重複的[樹號+日期]資料");
@@ -491,56 +495,53 @@ namespace protectTreesV2.backstage.health
                             }
                         }
 
+                        // --- 總結單列結果 ---
                         if (rowErrors.Count > 0)
                         {
-                            // 失敗：串接所有錯誤訊息
-                            myLog.resultMsg = "失敗：資料提供不全 (" + string.Join("、", rowErrors) + ")";
+                            //myLog.resultMsg = "失敗：資料提供不全 (" + string.Join("、", rowErrors) + ")";
+                            myLog.resultMsg = "失敗：資料提供不全 ";
                             myLog.isSuccess = false;
                         }
                         else
                         {
-                            // 成功：標記 Log 為成功
                             myLog.isSuccess = true;
                             myLog.resultMsg = "";
-
-                            // 成功後，將 draftRecord 的狀態設好
-                            // (注意：draftRecord 裡面的資料在前面各步驟都已經填好了)
                             draftRecord.dataStatus = isSetFinal ? 1 : 0;
 
-                            // 加入「待匯入清單」
                             validDataList.Add(new ImportTreeDataModel
                             {
                                 log = myLog,
                                 record = draftRecord
-                            });
+                            }); ;
                         }
+                    } // End Loop
 
-                    }
-
-                    //其他頁籤沒有對應到的資料檢查
+                    // 處理孤兒資料
                     ProcessOrphans(pestMap, "病蟲害調查", allLogList);
                     ProcessOrphans(appearanceMap, "樹木生長外觀情況", allLogList);
                     ProcessOrphans(pruningMap, "樹木修剪與支撐情況", allLogList);
                     ProcessOrphans(soilMap, "生育地環境與土讓檢測情況", allLogList);
                     ProcessOrphans(riskMap, "健康檢查結果及風險評估", allLogList);
-                }
 
+                } // End Using FileStream
+
+                // ==========================================
+                // 資料庫比對與寫入
+                // ==========================================
+
+                // excel沒有資料
                 if (allLogList.Count == 0)
                 {
                     ShowMessage("提示", "檔案中沒有讀取到任何資料列。");
+                    return; 
                 }
 
+                // 資料庫比對 
                 if (validDataList.Count > 0)
                 {
-
-                    List<string> distinctTreeNos = validDataList
-                        .Select(x => x.record.systemTreeNo)
-                        .Distinct()
-                        .ToList();
-
+                    List<string> distinctTreeNos = validDataList.Select(x => x.record.systemTreeNo).Distinct().ToList();
                     Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos);
 
-                    // 倒序迴圈
                     for (int i = validDataList.Count - 1; i >= 0; i--)
                     {
                         var item = validDataList[i];
@@ -548,120 +549,174 @@ namespace protectTreesV2.backstage.health
 
                         if (treeIdMap.ContainsKey(tNo))
                         {
-                            // 查到了，填入 TreeID
                             item.record.treeID = treeIdMap[tNo];
                         }
                         else
                         {
-                            // 查無此樹
                             item.log.isSuccess = false;
                             item.log.resultMsg = $"失敗：查無系統樹籍編號 ({tNo})";
-
-                            // 從待存檔清單中移除
                             validDataList.RemoveAt(i);
                         }
                     }
 
                     if (validDataList.Count > 0)
                     {
-                        // 檢查有無健檢資料
-                        var queryKeys = validDataList
-                            .Select(x => new TreeQueryKey
-                            {
-                                treeID = x.record.treeID,
-                                checkDate = x.record.surveyDate.Value
-                            })
-                            .Distinct() 
-                            .ToList();
+                        var queryKeys = validDataList.Select(x => new TreeQueryKey
+                        {
+                            treeID = x.record.treeID,
+                            checkDate = x.record.surveyDate.Value
+                        }).Distinct().ToList();
 
-                        // 2. 呼叫 Service 取得 Map (Key format: $"{TreeID}_{yyyyMMdd}")
                         Dictionary<string, int> healthMap = system_batch.GetHealthIDMap(queryKeys);
 
-                        // 3. 再次倒序迴圈檢查重複與覆蓋邏輯
                         for (int i = validDataList.Count - 1; i >= 0; i--)
                         {
                             var item = validDataList[i];
-
-                            // 組合 Key 來比對 (與 Service 回傳的 Key 格式要一致)
                             string key = $"{item.record.treeID}_{item.record.surveyDate:yyyyMMdd}";
 
                             if (healthMap.ContainsKey(key))
                             {
                                 int oldHealthID = healthMap[key];
-
                                 if (isOverwrite)
                                 {
-                                    // 情況 1: 勾選覆蓋 -> 標記為 Update (填入舊 ID)
                                     item.record.healthID = oldHealthID;
-
-                                    // 提示訊息
                                     item.log.resultMsg += "提醒：已覆蓋同日調查資料";
                                 }
                                 else
                                 {
-                                    // 情況 2: 未勾選覆蓋 -> 視為失敗
                                     item.log.isSuccess = false;
                                     item.log.resultMsg = "失敗：同日已有紀錄但未覆蓋";
-
-                                    // 踢除，不存檔
                                     validDataList.RemoveAt(i);
                                 }
                             }
-                            
-                        }
-                    }
-
-                    if (validDataList.Count > 0)
-                    {
-                        // 分流 Insert 和 Update
-                        var updateList = validDataList.Where(x => x.record.healthID > 0).Select(x => x.record).ToList();
-                        var insertList = validDataList.Where(x => x.record.healthID == 0).Select(x => x.record).ToList();
-
-                        // 執行更新 (Update)
-                        if (updateList.Count > 0)
-                        {
-                            foreach (var rec in updateList)
-                            {
-                                rec.updateAccountID = accountID;
-                                rec.updateDateTime = DateTime.Now;
-                                // 如果有勾定稿，物件狀態設為 1；沒勾則保持 0 
-                                if (isSetFinal) rec.dataStatus = 1;
-                            }
-
-                            // 如果 isSetFinal 為 false，Update 時就會自動忽略 dataStatus 欄位
-                            system_batch.BulkUpdateHealthRecords(updateList, updateStatus: isSetFinal);
-                        }
-
-                        // 執行新增
-                        if (insertList.Count > 0)
-                        {
-                            foreach (var rec in insertList)
-                            {
-                                rec.insertAccountID = accountID;
-                                rec.insertDateTime = DateTime.Now;
-                            }
-                            system_batch.BulkInsertHealthRecords(insertList);
                         }
                     }
                 }
 
-                int successCount = allLogList.Count(x => x.isSuccess);
-                int failCount = allLogList.Count(x => !x.isSuccess);
-                int totalCount = allLogList.Count;
+                var updateModels = validDataList.Where(x => x.record.healthID > 0).ToList();
+                var insertModels = validDataList.Where(x => x.record.healthID == 0).ToList();
 
-                int newBatchTaskID = system_batch.CreateBatchTask(enum_treeBatchType.Health_Record,fileName, accountID, totalCount,successCount,failCount);
-
-                // 回填 TaskID 到每一筆 Log 明細，並寫入 DB
-                foreach (var log in allLogList)
+                // -----------------------------------------------------
+                // 執行更新 
+                // -----------------------------------------------------
+                if (updateModels.Count > 0)
                 {
-                    log.taskID = newBatchTaskID;
+                    try
+                    {
+                        // 1. 準備純資料 List 給 Service 用
+                        var recordsToUpdate = updateModels.Select(x => x.record).ToList();
+
+                        // 2. 設定欄位
+                        foreach (var rec in recordsToUpdate)
+                        {
+                            rec.updateAccountID = accountID;
+                            rec.updateDateTime = DateTime.Now;
+                            if (isSetFinal) rec.dataStatus = 1;
+                        }
+
+                        // 3. 執行 SQL
+                        system_batch.BulkUpdateHealthRecords(recordsToUpdate, updateStatus: isSetFinal);
+
+                        // 成功：保持原本 Log 的 isSuccess = true
+                    }
+                    catch (Exception ex)
+                    {
+                        // 失敗：把這批「原本以為會成功」的 Log 全部改成失敗
+                        foreach (var item in updateModels)
+                        {
+                            item.log.isSuccess = false;
+                            item.log.resultMsg = $"失敗：資料庫寫入錯誤";
+                        }
+                    }
                 }
 
-                system_batch.BulkInsertTaskLogs(allLogList);
+                // -----------------------------------------------------
+                //  執行新增 
+                // -----------------------------------------------------
+                if (insertModels.Count > 0)
+                {
+                    try
+                    {
+                        // 1. 準備純資料 List
+                        var recordsToInsert = insertModels.Select(x => x.record).ToList();
 
-                // 顯示結果
-                ShowMessage("處理完成", $"成功：{successCount}，失敗：{failCount}");
-                BindData();
+                        // 2. 設定欄位
+                        foreach (var rec in recordsToInsert)
+                        {
+                            rec.insertAccountID = accountID;
+                            rec.insertDateTime = DateTime.Now;
+                        }
+
+                        // 3. 執行 SQL
+                        system_batch.BulkInsertHealthRecords(recordsToInsert);
+
+                        // 成功：保持原本 Log 的 isSuccess = true
+                    }
+                    catch (Exception ex)
+                    {
+                        // 失敗：把這批 Log 全部改成失敗
+                        foreach (var item in insertModels)
+                        {
+                            item.log.isSuccess = false;
+                            item.log.resultMsg = $"失敗：資料庫寫入錯誤";
+                        }
+                    }
+                }
+
+               
+                int finalSuccess = allLogList.Count(x => x.isSuccess);
+                int finalFail = allLogList.Count(x => !x.isSuccess);
+                int finalTotal = allLogList.Count;
+
+                bool logSaved = false;
+                string logError = "";
+
+                try
+                {
+                    // 建立 Task
+                    int newBatchTaskID = system_batch.CreateBatchTask(
+                        enum_treeBatchType.Health_Record,
+                        fileName,
+                        accountID,
+                        finalTotal,
+                        finalSuccess,
+                        finalFail
+                    );
+
+                    // 回填 TaskID
+                    foreach (var log in allLogList)
+                    {
+                        log.taskID = newBatchTaskID;
+                    }
+
+                    // 寫入 DB
+                    system_batch.BulkInsertTaskLogs(allLogList);
+                    logSaved = true;
+                }
+                catch (Exception ex)
+                {
+                    logSaved = false;
+                    logError = ex.Message;
+                }
+
+                // =====================================================
+                // Step E: 顯示結果
+                // =====================================================
+
+                if (logSaved)
+                {
+                    ShowMessage("處理完成", $"成功：{finalSuccess}，失敗：{finalFail}");
+                    // 如果 Log 存成功，可以直接 Bind DB
+                    BindData();
+                }
+                else
+                {
+                    // 如果 Log 存失敗 ，顯示記憶體中的結果
+                    ShowMessage("警告", $"資料處理結束，但紀錄寫入失敗 ({logError})。\n請參考下方列表。");
+                    GridView_Detail.DataSource = allLogList;
+                    GridView_Detail.DataBind();
+                }
+
             }
             catch (Exception ex)
             {
@@ -756,7 +811,7 @@ namespace protectTreesV2.backstage.health
         /// <summary>
         /// 驗證基本資料並回傳解析後的物件
         /// </summary>
-        private BasicInfoParseResult ValidateBasicInfo(IRow row, bool isSetFinal)
+        private BasicInfoParseResult ValidateBasicInfo(IRow row, bool isSetFinal, DateTime confirmedDate)
         {
             var result = new BasicInfoParseResult();
             var errors = result.errors;
@@ -766,44 +821,13 @@ namespace protectTreesV2.backstage.health
             // 樹籍編號 (Col 1)
             // ---------------------------------------------------------
             string valTreeNo = GetCellValue(row, 1);
-            if (string.IsNullOrEmpty(valTreeNo))
-            {
-                errors.Add("樹籍編號 (未填)");
-            }
-            else
-            {
-                data.systemTreeNo = valTreeNo;
-            }
+            data.systemTreeNo = valTreeNo;
 
             // ---------------------------------------------------------
             // 調查日期 (Col 6)
             // ---------------------------------------------------------
-            string valDate = GetCellValue(row, 6);
-
-            if (string.IsNullOrEmpty(valDate))
-            {
-                errors.Add("調查日期 (未填)");
-            }
-            else
-            {
-                // 嘗試解析日期
-                if (DateTime.TryParse(valDate, out DateTime d))
-                {
-                    // 自動校正民國年 
-                    if (d.Year < 1911)
-                    {
-                        d = d.AddYears(1911);
-                    }
-
-
-                    data.surveyDate = d;
-                    result.surveyDate = d; 
-                }
-                else
-                {
-                    errors.Add($"調查日期 (格式錯誤: {valDate})");
-                }
-            }
+            data.surveyDate = confirmedDate;
+            result.surveyDate = confirmedDate;
 
             // ---------------------------------------------------------
             // 調查人 (Col 7)
@@ -1076,10 +1100,10 @@ namespace protectTreesV2.backstage.health
             record.rootWoundMaxDiameter = ParseDecimalColumn(row, 5, "根系-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
             // 單選狀態 (只允許 有/無)
-            record.rootMechanicalDamage = ParseBoolColumn(row, 6, "根系-機具損傷", errors);
-            record.rootMowingInjury = ParseBoolColumn(row, 7, "根系-打草傷", errors);
-            record.rootInjury = ParseBoolColumn(row, 8, "根系-根傷", errors);
-            record.rootGirdling = ParseBoolColumn(row, 9, "根系-盤根", errors); // 對應到 rootGirdling
+            record.rootMechanicalDamage = ParseBoolColumn(row, 6, "根系-機具損傷", errors, isStrictMode);
+            record.rootMowingInjury = ParseBoolColumn(row, 7, "根系-打草傷", errors, isStrictMode);
+            record.rootInjury = ParseBoolColumn(row, 8, "根系-根傷", errors, isStrictMode);
+            record.rootGirdling = ParseBoolColumn(row, 9, "根系-盤根", errors, isStrictMode); 
 
             // 備註
             record.rootOtherNote = GetCellValue(row, 10);
@@ -1092,8 +1116,8 @@ namespace protectTreesV2.backstage.health
             record.baseCavityMaxDiameter = ParseDecimalColumn(row, 12, "樹基部-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.baseWoundMaxDiameter = ParseDecimalColumn(row, 13, "樹基部-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
-            record.baseMechanicalDamage = ParseBoolColumn(row, 14, "樹基部-機具損傷", errors);
-            record.baseMowingInjury = ParseBoolColumn(row, 15, "樹基部-打草傷", errors);
+            record.baseMechanicalDamage = ParseBoolColumn(row, 14, "樹基部-機具損傷", errors, isStrictMode);
+            record.baseMowingInjury = ParseBoolColumn(row, 15, "樹基部-打草傷", errors, isStrictMode);
 
             record.baseOtherNote = GetCellValue(row, 16);
 
@@ -1105,8 +1129,8 @@ namespace protectTreesV2.backstage.health
             record.trunkCavityMaxDiameter = ParseDecimalColumn(row, 18, "主幹-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.trunkWoundMaxDiameter = ParseDecimalColumn(row, 19, "主幹-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
-            record.trunkMechanicalDamage = ParseBoolColumn(row, 20, "主幹-機具損傷", errors);
-            record.trunkIncludedBark = ParseBoolColumn(row, 21, "主幹-內生夾皮", errors);
+            record.trunkMechanicalDamage = ParseBoolColumn(row, 20, "主幹-機具損傷", errors, isStrictMode);
+            record.trunkIncludedBark = ParseBoolColumn(row, 21, "主幹-內生夾皮", errors, isStrictMode);
 
             record.trunkOtherNote = GetCellValue(row, 22);
 
@@ -1118,9 +1142,9 @@ namespace protectTreesV2.backstage.health
             record.branchCavityMaxDiameter = ParseDecimalColumn(row, 24, "枝幹-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.branchWoundMaxDiameter = ParseDecimalColumn(row, 25, "枝幹-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
-            record.branchMechanicalDamage = ParseBoolColumn(row, 26, "枝幹-機具損傷", errors);
-            record.branchIncludedBark = ParseBoolColumn(row, 27, "枝幹-內生夾皮", errors);
-            record.branchDrooping = ParseBoolColumn(row, 28, "枝幹-下垂枝", errors);
+            record.branchMechanicalDamage = ParseBoolColumn(row, 26, "枝幹-機具損傷", errors, isStrictMode);
+            record.branchIncludedBark = ParseBoolColumn(row, 27, "枝幹-內生夾皮", errors, isStrictMode);
+            record.branchDrooping = ParseBoolColumn(row, 28, "枝幹-下垂枝", errors, isStrictMode);
 
             record.branchOtherNote = GetCellValue(row, 29);
 
@@ -1131,7 +1155,7 @@ namespace protectTreesV2.backstage.health
             record.crownLeafCoveragePercent = ParseDecimalColumn(row, 30, "樹冠-樹葉生長覆蓋度百分比%", isStrictMode, 0, 100, errors);
             record.crownDeadBranchPercent = ParseDecimalColumn(row, 31, "樹冠-一般枯枝%", isStrictMode, 0, 100, errors);
 
-            record.crownHangingBranch = ParseBoolColumn(row, 32, "樹冠-懸掛枝", errors);
+            record.crownHangingBranch = ParseBoolColumn(row, 32, "樹冠-懸掛枝", errors, isStrictMode);
 
             record.crownOtherNote = GetCellValue(row, 33);
 
@@ -1169,22 +1193,22 @@ namespace protectTreesV2.backstage.health
                 }
                 else
                 {
-                    errors.Add($"錯誤修剪傷害 (內容不合法: {valDamage})，請填寫：截幹、截頂、不當縮剪");
+                    errors.Add($"錯誤修剪傷害 (選項錯誤: {valDamage})");
                 }
             }
             // 若為 null 或空字串，視為無錯誤修剪，不報錯 (除非這是必填，看您需求)
 
             // B. 修剪傷口癒合 (Bool) - Index 4
-            record.pruningWoundHealing = ParseBoolColumn(row, 4, "修剪傷口是否有癒合", errors);
+            record.pruningWoundHealing = ParseBoolColumn(row, 4, "修剪傷口是否有癒合", errors, isStrictMode);
 
             // C. 附生植物 (Bool) - Index 5
-            record.pruningEpiphyte = ParseBoolColumn(row, 5, "樹幹附生植物", errors);
+            record.pruningEpiphyte = ParseBoolColumn(row, 5, "樹幹附生植物", errors, isStrictMode);
 
             // D. 寄生植物 (Bool) - Index 6
-            record.pruningParasite = ParseBoolColumn(row, 6, "寄生植物情形", errors);
+            record.pruningParasite = ParseBoolColumn(row, 6, "寄生植物情形", errors, isStrictMode);
 
             // E. 纏勒性植物 (Bool) - Index 7
-            record.pruningVine = ParseBoolColumn(row, 7, "蔓藤纏繞情形", errors);
+            record.pruningVine = ParseBoolColumn(row, 7, "蔓藤纏繞情形", errors, isStrictMode);
 
             // F. 修剪其他說明 (String) - Index 8
             record.pruningOtherNote = GetCellValue(row, 8);
@@ -1198,7 +1222,7 @@ namespace protectTreesV2.backstage.health
             record.supportCount = ParseIntColumn(row, 9, "支撐設施數量", false, 0, int.MaxValue, errors);
 
             // H. 支架嵌入 (Bool) - Index 10
-            record.supportEmbedded = ParseBoolColumn(row, 10, "支撐設施嵌入樹幹", errors);
+            record.supportEmbedded = ParseBoolColumn(row, 10, "支撐設施嵌入樹幹", errors, isStrictMode);
 
             // I. 支撐其他說明 (String) - Index 11
             record.supportOtherNote = GetCellValue(row, 11);
@@ -1227,12 +1251,12 @@ namespace protectTreesV2.backstage.health
             // 標頭: 花台, 休憩設施(桌椅), 雜物堆置, 受限建物之間, 土壤受踩踏夯實, 覆土過深
             // 規則: 嚴格限制填寫 "有" 或 "無"
             // =========================================================================
-            record.sitePlanter = ParseBoolColumn(row, 5, "花台", errors);
-            record.siteRecreationFacility = ParseBoolColumn(row, 6, "休憩設施(桌椅)", errors);
-            record.siteDebrisStack = ParseBoolColumn(row, 7, "雜物堆置", errors);
-            record.siteBetweenBuildings = ParseBoolColumn(row, 8, "受限建物之間", errors);
-            record.siteSoilCompaction = ParseBoolColumn(row, 9, "土壤受踩踏夯實", errors);
-            record.siteOverburiedSoil = ParseBoolColumn(row, 10, "覆土過深", errors);
+            record.sitePlanter = ParseBoolColumn(row, 5, "花台", errors, isStrictMode);
+            record.siteRecreationFacility = ParseBoolColumn(row, 6, "休憩設施(桌椅)", errors, isStrictMode);
+            record.siteDebrisStack = ParseBoolColumn(row, 7, "雜物堆置", errors, isStrictMode);
+            record.siteBetweenBuildings = ParseBoolColumn(row, 8, "受限建物之間", errors, isStrictMode);
+            record.siteSoilCompaction = ParseBoolColumn(row, 9, "土壤受踩踏夯實", errors, isStrictMode);
+            record.siteOverburiedSoil = ParseBoolColumn(row, 10, "覆土過深", errors, isStrictMode);
 
             // =========================================================================
             // 3. 其他備註 (Index 11)
@@ -1288,7 +1312,7 @@ namespace protectTreesV2.backstage.health
                 }
                 else
                 {
-                    errors.Add($"建議處理優先順序 (內容不合法: {valPriority})，請填寫：緊急處理、優先處理、例行養護");
+                    errors.Add($"建議處理優先順序 (選項錯誤: {valPriority})");
                 }
             }
 
@@ -1419,13 +1443,22 @@ namespace protectTreesV2.backstage.health
         /// <summary>
         /// 驗證並解析布林欄位 (有/無)
         /// </summary>
-        private bool? ParseBoolColumn(IRow row, int col, string fieldName, List<string> errors)
+        /// <param name="isStrictMode">是否為嚴格模式 (定稿或覆蓋時為 true)</param>
+        private bool? ParseBoolColumn(IRow row, int col, string fieldName, List<string> errors, bool isStrictMode)
         {
             string val = GetCellValue(row, col);
 
+            // 空值檢查
             if (string.IsNullOrEmpty(val))
             {
-                return null; // 沒填視為 Null
+                // 只有在嚴格模式下，未填寫才算錯誤
+                if (isStrictMode)
+                {
+                    errors.Add($"{fieldName} (必填)");
+                }
+
+                // 不論是否嚴格，空值都回傳 null
+                return null;
             }
 
             val = val.Trim(); // 去除空白
@@ -1433,8 +1466,8 @@ namespace protectTreesV2.backstage.health
             if (val == "有") return true;
             if (val == "無") return false;
 
-            // 嚴格限制只能填這兩個字
-            errors.Add($"{fieldName} (內容不合法: {val})，請填寫：有/無");
+            // 2. 內容錯誤 (不管是不是嚴格模式，填錯字就是錯)
+            errors.Add($"{fieldName} (選項錯誤: {val})");
             return null;
         }
 
@@ -1451,12 +1484,14 @@ namespace protectTreesV2.backstage.health
                 logs.Add(new TreeBatchTaskLog
                 {
                     taskID = 0, 
-                    sourceItem = $"{sheetName}-第{info.rowIndex + 1}列 (記數:{info.linkKey})",
+                    sourceItem = $"{sheetName}-第{info.rowIndex + 1}列",
                     refKey = orphanTreeNo,
                     isSuccess = false,
                     resultMsg = "失敗：無對應資料 (在基本資料頁籤中找不到對應的調查記數)"
                 });
             }
         }
+
+        
     }
 }
