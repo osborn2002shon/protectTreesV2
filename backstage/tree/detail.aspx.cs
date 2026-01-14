@@ -851,13 +851,13 @@ namespace protectTreesV2.backstage.tree
                 if (viewModel.IsSelected)
                 {
                     photoButton.Text = "檢視";
-                    photoButton.CssClass = "btn btn-sm btn-success";
+                    photoButton.CssClass = "btn btn-sm btn-danger";
                     e.Row.CssClass = $"{e.Row.CssClass} patrol-record-row is-selected";
                 }
                 else
                 {
                     photoButton.Text = "檢視";
-                    photoButton.CssClass = "btn btn-sm btn-outline-primary";
+                    photoButton.CssClass = "btn btn-sm btn-primary";
                 }
             }
         }
@@ -881,13 +881,13 @@ namespace protectTreesV2.backstage.tree
                 if (viewModel.IsSelected)
                 {
                     photoButton.Text = "檢視";
-                    photoButton.CssClass = "btn btn-sm btn-success";
+                    photoButton.CssClass = "btn btn-sm btn-danger";
                     e.Row.CssClass = $"{e.Row.CssClass} care-record-row is-selected";
                 }
                 else
                 {
                     photoButton.Text = "檢視";
-                    photoButton.CssClass = "btn btn-sm btn-outline-primary";
+                    photoButton.CssClass = "btn btn-sm btn-primary";
                 }
             }
         }
