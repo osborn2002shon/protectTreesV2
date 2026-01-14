@@ -319,6 +319,16 @@ namespace protectTreesV2.backstage.tree
                 filtered = filtered.Where(record => record.patrolDate.HasValue && record.patrolDate.Value.Month == selectedMonth);
             }
 
+            string keyword = txtPatrolKeyword.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                filtered = filtered.Where(record =>
+                    ContainsKeyword(DisplayOrDefault(record.patrolDate), keyword) ||
+                    ContainsKeyword(record.patroller, keyword) ||
+                    ContainsKeyword(record.memo, keyword) ||
+                    ContainsKeyword(record.hasPublicSafetyRisk ? "有" : "無", keyword));
+            }
+
             return filtered.ToList();
         }
 
@@ -432,7 +442,40 @@ namespace protectTreesV2.backstage.tree
                 filtered = filtered.Where(record => record.careDate.HasValue && record.careDate.Value.Month == selectedMonth);
             }
 
+            string keyword = txtCareKeyword.Text?.Trim();
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                filtered = filtered.Where(record =>
+                    ContainsKeyword(DisplayOrDefault(record.careDate), keyword) ||
+                    ContainsKeyword(record.recorder, keyword) ||
+                    ContainsKeyword(record.reviewer, keyword) ||
+                    ContainsKeyword(BuildCareItemKeyword(record.careID), keyword));
+            }
+
             return filtered.ToList();
+        }
+
+        private string BuildCareItemKeyword(int careId)
+        {
+            var photos = systemCare.GetCarePhotos(careId) ?? new List<Care.Care.CarePhotoRecord>();
+            var itemNames = photos
+                .Select(photo => photo?.itemName)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name.Trim())
+                .Distinct()
+                .ToList();
+
+            return itemNames.Any() ? string.Join(" ", itemNames) : string.Empty;
+        }
+
+        private static bool ContainsKeyword(string source, string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(keyword))
+            {
+                return false;
+            }
+
+            return source.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private string BuildCareItemDisplay(int careId)
@@ -688,6 +731,13 @@ namespace protectTreesV2.backstage.tree
             ActivatePatrolTab();
         }
 
+        protected void txtPatrolKeyword_TextChanged(object sender, EventArgs e)
+        {
+            int treeId = int.Parse(hfTreeID.Value);
+            BindPatrolRecords(treeId);
+            ActivatePatrolTab();
+        }
+
         protected void gvCareRecords_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
         {
             if (!int.TryParse(e.CommandArgument?.ToString(), out int careId))
@@ -720,6 +770,13 @@ namespace protectTreesV2.backstage.tree
         }
 
         protected void ddlCareMonth_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int treeId = int.Parse(hfTreeID.Value);
+            BindCareRecords(treeId);
+            ActivateCareTab();
+        }
+
+        protected void txtCareKeyword_TextChanged(object sender, EventArgs e)
         {
             int treeId = int.Parse(hfTreeID.Value);
             BindCareRecords(treeId);
