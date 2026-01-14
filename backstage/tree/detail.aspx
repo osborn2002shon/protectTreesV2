@@ -401,15 +401,19 @@
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="row g-3 align-items-end">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="form-label">年度篩選</label>
                                             <asp:DropDownList ID="ddlPatrolYear" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlPatrolYear_SelectedIndexChanged" />
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="form-label">月份篩選</label>
                                             <asp:DropDownList ID="ddlPatrolMonth" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlPatrolMonth_SelectedIndexChanged" />
                                         </div>
-                                        <div class="col-md-4 text-md-end">
+                                        <div class="col-md-3">
+                                            <label class="form-label">關鍵字篩選</label>
+                                            <asp:TextBox ID="txtPatrolKeyword" runat="server" CssClass="form-control" AutoPostBack="true" OnTextChanged="txtPatrolKeyword_TextChanged" />
+                                        </div>
+                                        <div class="col-md-3 text-md-end">
                                             <span class="text-muted">資料總筆數：</span>
                                             <asp:Label ID="lblPatrolRecordTotal" runat="server" CssClass="fw-semibold" />
                                         </div>
@@ -468,15 +472,19 @@
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <div class="row g-3 align-items-end">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="form-label">年度篩選</label>
                                             <asp:DropDownList ID="ddlCareYear" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCareYear_SelectedIndexChanged" />
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label class="form-label">月份篩選</label>
                                             <asp:DropDownList ID="ddlCareMonth" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlCareMonth_SelectedIndexChanged" />
                                         </div>
-                                        <div class="col-md-4 text-md-end">
+                                        <div class="col-md-3">
+                                            <label class="form-label">關鍵字篩選</label>
+                                            <asp:TextBox ID="txtCareKeyword" runat="server" CssClass="form-control" AutoPostBack="true" OnTextChanged="txtCareKeyword_TextChanged" />
+                                        </div>
+                                        <div class="col-md-3 text-md-end">
                                             <span class="text-muted">資料總筆數：</span>
                                             <asp:Label ID="lblCareRecordTotal" runat="server" CssClass="fw-semibold" />
                                         </div>
