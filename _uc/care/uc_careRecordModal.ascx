@@ -17,14 +17,10 @@
 
     .care-compare__image {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        max-width: none;
-        max-height: none;
-        width: auto;
-        height: auto;
-        transform: translate(-50%, -50%);
-        object-fit: none;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         object-position: center;
     }
 
