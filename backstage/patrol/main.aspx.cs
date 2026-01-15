@@ -1,5 +1,4 @@
-﻿using protectTreesV2.User;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Web.UI;
@@ -127,8 +126,8 @@ namespace protectTreesV2.backstage.patrol
             filter.sortExpression = SortExpression;
             filter.sortDirection = SortDirection;
 
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             List<PatrolMainQueryResult> data = system_patrol.GetPatrolMainList(filter, accountID);
 
@@ -179,8 +178,8 @@ namespace protectTreesV2.backstage.patrol
             if (e.CommandName == "_AddToUpload")
             {
                 int treeId = Convert.ToInt32(arg);
-                var user = UserService.GetCurrentUser();
-                int accountID = user?.userID ?? 0;
+                var user = UserInfo.GetCurrentUser;
+                int accountID = user?.accountID ?? 0;
 
                 try
                 {
@@ -234,8 +233,8 @@ namespace protectTreesV2.backstage.patrol
 
         private void BindSelectedList()
         {
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             try
             {
@@ -262,8 +261,8 @@ namespace protectTreesV2.backstage.patrol
             if (e.CommandName == "_Remove")
             {
                 int treeId = Convert.ToInt32(e.CommandArgument);
-                var user = UserService.GetCurrentUser();
-                int accountID = user?.userID ?? 0;
+                var user = UserInfo.GetCurrentUser;
+                int accountID = user?.accountID ?? 0;
 
                 try
                 {
@@ -281,8 +280,8 @@ namespace protectTreesV2.backstage.patrol
 
         protected void LinkButton_clearList_Click(object sender, EventArgs e)
         {
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             try
             {
@@ -299,8 +298,8 @@ namespace protectTreesV2.backstage.patrol
 
         protected void LinkButton_generateExcel_Click(object sender, EventArgs e)
         {
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             try
             {

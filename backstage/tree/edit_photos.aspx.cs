@@ -71,8 +71,8 @@ namespace protectTreesV2.backstage.tree
             }
 
             const int maxSize = 5 * 1024 * 1024;
-            var user = protectTreesV2.User.UserService.GetCurrentUser();
-            int accountId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
             bool hasCover = existing.Any(p => p.IsCover);
             string uploadFolder = Server.MapPath($"~/upload/tree/{treeId}/");
             Directory.CreateDirectory(uploadFolder);
@@ -115,8 +115,8 @@ namespace protectTreesV2.backstage.tree
         protected void rptPhotos_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             int treeId = int.Parse(hfTreeID.Value);
-            var user = protectTreesV2.User.UserService.GetCurrentUser();
-            int accountId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
             int photoId = Convert.ToInt32(e.CommandArgument);
 
             if (e.CommandName == "cover")

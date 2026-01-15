@@ -1,22 +1,20 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="mp_login.master.cs" Inherits="protectTreesV2._mp.mp_login" %>
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>受保護樹木管理系統</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Noto+Serif+TC:wght@200..900&display=swap" rel="stylesheet">
     <script src="_js/bootstrap.bundle.js"></script>
     <script src="_js/jquery-3.7.1.js"></script>
     <link href="_css/bootstrap.css" rel="stylesheet" />
     <link href="_css/fontawesome-all.css" rel="stylesheet" />
-    <link href="_css/mp_login.css" rel="stylesheet" />
+    <link href="_css/mp_public.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
-    <div class="login-container">
+    <form class="login-container" runat="server">
         <div class="login-card">
             <div class="login-header">
                 <div class="logo-icon">
@@ -24,21 +22,46 @@
                 </div>
                 <h1 class="system-title">受保護樹木管理系統</h1>
                 <p class="system-subtitle">Protected Trees Management System</p>
-            </div>            
+            </div>
             <div class="login-body">
                 <div class="pageTitle">
                     <asp:ContentPlaceHolder ID="ContentPlaceHolder_title" runat="server"></asp:ContentPlaceHolder>
                 </div>
-                <form id="loginForm" runat="server">
+                <div id="loginForm">
                     <asp:ContentPlaceHolder ID="ContentPlaceHolder_body" runat="server"></asp:ContentPlaceHolder>
-                </form>
-                <div style="font-size:0.85rem;text-align:center;margin-top:10px">
+                </div>
+                <div style="font-size: 0.85rem; text-align: center; margin-top: 10px">
                     Copyright © 2025 Forestry and Nature Conservation Agency<br />
                     (02)2351-5441
                 </div>
             </div>
         </div>
-    </div>
-    <asp:ContentPlaceHolder ID="ContentPlaceHolder_jsBottom" runat="server"></asp:ContentPlaceHolder>
+        <div class="modal fade" id="divMSG" tabindex="-1" aria-labelledby="publicModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="publicModalLabel">
+                            <asp:ContentPlaceHolder ID="ContentPlaceHolder_modal_title" runat="server"></asp:ContentPlaceHolder>
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder_modal_body" runat="server"></asp:ContentPlaceHolder>
+                    </div>
+                    <div class="modal-footer">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder_modal_footer" runat="server"></asp:ContentPlaceHolder>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <asp:ContentPlaceHolder ID="ContentPlaceHolder_jsBottom" runat="server"></asp:ContentPlaceHolder>
+        <script type="text/javascript">
+            function showModal() {
+                var md = new bootstrap.Modal(document.getElementById('divMSG'));
+                md.show();
+            }
+        </script>
+    </form>
 </body>
 </html>

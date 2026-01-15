@@ -1,7 +1,6 @@
 ﻿using protectTreesV2.Base;
 using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
-using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -406,8 +405,8 @@ namespace protectTreesV2.backstage.patrol
                 record.sourceUnitID = tree.SourceUnitID;
             }
 
-            var user = UserService.GetCurrentUser();
-            int accountId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
 
             if (record.patrolID > 0)
             {
@@ -431,18 +430,18 @@ namespace protectTreesV2.backstage.patrol
                 TrySendRiskNotification(record, tree);
             }
 
-            string actionText = isNew ? "新增" : "編輯";
+            UserLog.enum_UserLogType actionText = isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改;
             string logMemo = isNew ? "新增巡查" : "編輯巡查";
-            OperationLogger.InsertLog("巡查管理", actionText, logMemo);
+            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.巡查紀錄管理, actionText, logMemo);
             FunctionLogService.InsertLog(LogFunctionTypes.Patrol,
                 record.patrolID,
                 logMemo,
                 $"系統樹籍編號：{tree?.SystemTreeNo ?? "無"}，巡查日期：{record.patrolDate:yyyy-MM-dd}，狀態：{(record.dataStatus == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿")}",
                 Request?.UserHostAddress,
-                user?.userID,
+                user?.accountID,
                 user?.account,
                 user?.name,
-                user?.unit);
+                user?.unitName);
 
             ClearPendingUploads();
             base.ReturnState();
@@ -702,6 +701,7 @@ namespace protectTreesV2.backstage.patrol
 
             try
             {
+                //TODO: Mail對象要檢查 + Mail要List
                 var emails = system_patrol.GetRiskNotificationEmails(tree.CityID ?? -1);
                 if (emails == null || emails.Count == 0) return;
 
@@ -716,7 +716,7 @@ namespace protectTreesV2.backstage.patrol
 
                 foreach (var mail in emails.Where(m => !string.IsNullOrWhiteSpace(m)))
                 {
-                    EmailService.SendMail(mail, subject, body);
+                    //Mail.SendMail(mail, subject, body);
                 }
             }
             catch

@@ -143,19 +143,19 @@
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
-    <Content Include="backstage\patrol\edit.aspx" />
-    <Content Include="backstage\patrol\list.aspx" />
-    <Content Include="backstage\patrol\main.aspx" />
     <Content Include="backstage\health\upload.aspx" />
     <Content Include="backstage\health\uploadFile.aspx" />
     <Content Include="backstage\health\uploadPhoto.aspx" />
-    <Content Include="backstage\Manage\Tree.aspx" />
+    <Content Include="backstage\patrol\edit.aspx" />
+    <Content Include="backstage\patrol\list.aspx" />
+    <Content Include="backstage\patrol\main.aspx" />
     <Content Include="backstage\tree\detail.aspx" />
     <Content Include="backstage\tree\edit.aspx" />
     <Content Include="backstage\tree\edit_photos.aspx" />
     <Content Include="backstage\tree\query.aspx" />
-    <Content Include="Login.aspx" />
-    <Content Include="SQL\Schema.sql" />
+    <Content Include="login.aspx" />
+    <Content Include="reg.aspx" />
+    <Content Include="regVerify.aspx" />
     <Content Include="Web.config" />
     <Content Include="_css\bootstrap-icons.css" />
     <Content Include="_css\bootstrap-table.css" />
@@ -163,7 +163,7 @@
     <Content Include="_css\control.css" />
     <Content Include="_css\fontawesome-all.css" />
     <Content Include="_css\mp_default.css" />
-    <Content Include="_css\mp_login.css" />
+    <Content Include="_css\mp_public.css" />
     <Content Include="_img\logo.png" />
     <Content Include="_img\logo_mini.png" />
     <Content Include="_js\bootstrap-table-zh-TW.js" />
@@ -177,20 +177,28 @@
     <Content Include="_js\highcharts_exporting.js" />
     <Content Include="_js\image-upload.js" />
     <Content Include="_js\jquery-3.7.1.js" />
+    <Content Include="_js\jquery.mask.js" />
     <Content Include="_js\mp_default.js" />
     <Content Include="_uc\care\uc_careRecordModal.ascx" />
     <Content Include="_uc\health\uc_healthRecordModal.ascx" />
+    <Content Include="_uc\patrol\uc_patrolRecordModal.ascx" />
+    <Content Include="_uc\TreePhotoAlbum.ascx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\Base.cs">
+    <Compile Include="App_Code\Base\Base.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="App_Code\Base\DataAccess_MS_SQL.cs" />
+    <Compile Include="App_Code\Base\Log.cs" />
+    <Compile Include="App_Code\Base\_Log.cs" />
+    <Compile Include="App_Code\Base\Mail.cs" />
+    <Compile Include="App_Code\Base\User.cs" />
     <Compile Include="App_Code\Batch.cs" />
     <Compile Include="App_Code\Care.cs" />
-    <Compile Include="App_Code\DataAccess_MS_SQL.cs" />
-    <Compile Include="App_Code\EmailService.cs" />
     <Compile Include="App_Code\Health.cs" />
+    <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\Patrol.cs" />
+    <Compile Include="App_Code\TreeCatalog.cs" />
     <Compile Include="backstage\care\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -219,31 +227,6 @@
     <Compile Include="backstage\care\upload.aspx.designer.cs">
       <DependentUpon>upload.aspx</DependentUpon>
     </Compile>
-    <Compile Include="backstage\patrol\edit.aspx.cs">
-      <DependentUpon>edit.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\patrol\edit.aspx.designer.cs">
-      <DependentUpon>edit.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\patrol\main.aspx.cs">
-      <DependentUpon>main.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\patrol\list.aspx.cs">
-      <DependentUpon>list.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="backstage\patrol\main.aspx.designer.cs">
-      <DependentUpon>main.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="backstage\patrol\list.aspx.designer.cs">
-      <DependentUpon>list.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="App_Code\Log.cs" />
-    <Compile Include="App_Code\OrgUnit.cs" />
-    <Compile Include="App_Code\TreeCatalog.cs" />
-    <Compile Include="App_Code\User.cs" />
     <Compile Include="backstage\health\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -286,12 +269,26 @@
     <Compile Include="backstage\health\uploadPhoto.aspx.designer.cs">
       <DependentUpon>uploadPhoto.aspx</DependentUpon>
     </Compile>
-    <Compile Include="backstage\Manage\Tree.aspx.cs">
-      <DependentUpon>Tree.aspx</DependentUpon>
+    <Compile Include="backstage\patrol\edit.aspx.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="backstage\Manage\Tree.aspx.designer.cs">
-      <DependentUpon>Tree.aspx</DependentUpon>
+    <Compile Include="backstage\patrol\edit.aspx.designer.cs">
+      <DependentUpon>edit.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\patrol\list.aspx.cs">
+      <DependentUpon>list.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\patrol\list.aspx.designer.cs">
+      <DependentUpon>list.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\patrol\main.aspx.cs">
+      <DependentUpon>main.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\patrol\main.aspx.designer.cs">
+      <DependentUpon>main.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\tree\detail.aspx.cs">
       <DependentUpon>detail.aspx</DependentUpon>
@@ -321,33 +318,26 @@
     <Compile Include="backstage\tree\query.aspx.designer.cs">
       <DependentUpon>query.aspx</DependentUpon>
     </Compile>
-    <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.cs">
-      <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+    <Compile Include="reg.aspx.cs">
+      <DependentUpon>reg.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.designer.cs">
-      <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+    <Compile Include="reg.aspx.designer.cs">
+      <DependentUpon>reg.aspx</DependentUpon>
     </Compile>
-    <Compile Include="_uc\care\uc_careRecordModal.ascx.cs">
-      <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
+    <Compile Include="regVerify.aspx.cs">
+      <DependentUpon>regVerify.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="_uc\care\uc_careRecordModal.ascx.designer.cs">
-      <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
+    <Compile Include="regVerify.aspx.designer.cs">
+      <DependentUpon>regVerify.aspx</DependentUpon>
     </Compile>
-    <Compile Include="_uc\TreePhotoAlbum.ascx.cs">
-      <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
+    <Compile Include="login.aspx.cs">
+      <DependentUpon>login.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="_uc\TreePhotoAlbum.ascx.designer.cs">
-      <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Login.aspx.cs">
-      <DependentUpon>Login.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Login.aspx.designer.cs">
-      <DependentUpon>Login.aspx</DependentUpon>
+    <Compile Include="login.aspx.designer.cs">
+      <DependentUpon>login.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="_mp\mp_backstage.Master.cs">
@@ -364,12 +354,33 @@
     <Compile Include="_mp\mp_login.Master.designer.cs">
       <DependentUpon>mp_login.Master</DependentUpon>
     </Compile>
+    <Compile Include="_uc\care\uc_careRecordModal.ascx.cs">
+      <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_uc\care\uc_careRecordModal.ascx.designer.cs">
+      <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
+    </Compile>
     <Compile Include="_uc\health\uc_healthRecordModal.ascx.cs">
       <DependentUpon>uc_healthRecordModal.ascx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="_uc\health\uc_healthRecordModal.ascx.designer.cs">
       <DependentUpon>uc_healthRecordModal.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.cs">
+      <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_uc\patrol\uc_patrolRecordModal.ascx.designer.cs">
+      <DependentUpon>uc_patrolRecordModal.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\TreePhotoAlbum.ascx.cs">
+      <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_uc\TreePhotoAlbum.ascx.designer.cs">
+      <DependentUpon>TreePhotoAlbum.ascx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -383,8 +394,6 @@
     <Content Include="_fonts\bootstrap-icons.woff" />
     <Content Include="_fonts\bootstrap-icons.woff2" />
     <Content Include="_uc\captcha.ashx" />
-    <Content Include="_uc\patrol\uc_patrolRecordModal.ascx" />
-    <Content Include="_uc\TreePhotoAlbum.ascx" />
     <Content Include="_fonts\fa-brands-400.woff2" />
     <Content Include="_fonts\fa-regular-400.woff2" />
     <Content Include="_fonts\fa-solid-900.woff2" />

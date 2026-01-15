@@ -24,6 +24,15 @@ namespace protectTreesV2
         protected global::System.Web.UI.WebControls.TextBox TextBox_ac;
 
         /// <summary>
+        /// Label_ac 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_ac;
+
+        /// <summary>
         /// TextBox_pw 控制項。
         /// </summary>
         /// <remarks>
@@ -31,6 +40,15 @@ namespace protectTreesV2
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox TextBox_pw;
+
+        /// <summary>
+        /// Label_pw 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_pw;
 
         /// <summary>
         /// TextBox_Captcha 控制項。
@@ -42,6 +60,15 @@ namespace protectTreesV2
         protected global::System.Web.UI.WebControls.TextBox TextBox_Captcha;
 
         /// <summary>
+        /// Label_Captcha 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label_Captcha;
+
+        /// <summary>
         /// Image_Captcha 控制項。
         /// </summary>
         /// <remarks>
@@ -49,15 +76,6 @@ namespace protectTreesV2
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Image Image_Captcha;
-
-        /// <summary>
-        /// Label_msg 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_msg;
 
         /// <summary>
         /// Button_login 控制項。
@@ -69,30 +87,12 @@ namespace protectTreesV2
         protected global::System.Web.UI.WebControls.Button Button_login;
 
         /// <summary>
-        /// LinkButton_regist 控制項。
+        /// Label_msg 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton LinkButton_regist;
-
-        /// <summary>
-        /// LinkButton_fpw 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton LinkButton_fpw;
-
-        /// <summary>
-        /// LinkButton_fac 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton LinkButton_fac;
+        protected global::System.Web.UI.WebControls.Label Label_msg;
     }
 }

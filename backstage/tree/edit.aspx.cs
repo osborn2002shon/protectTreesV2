@@ -11,7 +11,6 @@ using System.Web.UI.WebControls;
 using protectTreesV2.Base;
 using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
-using protectTreesV2.User;
 
 namespace protectTreesV2.backstage.tree
 {
@@ -377,8 +376,8 @@ namespace protectTreesV2.backstage.tree
                 record.SystemTreeNo = TreeService.GenerateSystemTreeNo(record.CityID, record.AreaID, record.AnnouncementDate ?? record.SurveyDate ?? DateTime.Today);
             }
             
-            var user = UserService.GetCurrentUser();
-            int accountId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
 
             if (record.TreeID > 0)
             {
@@ -398,16 +397,16 @@ namespace protectTreesV2.backstage.tree
             }
 
             string logMemo = isNew ? "新增樹籍" : "編輯樹籍";
-            OperationLogger.InsertLog("樹籍管理", isNew ? "新增" : "編輯", logMemo);
+            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.樹籍基本資料管理, isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改, logMemo);
             FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog,
                 record.TreeID,
                 logMemo,
                 $"系統樹籍編號：{record.SystemTreeNo ?? "無"}，狀態：{TreeService.GetStatusText(record.Status)}，編輯狀態：{record.EditStatus}",
                 Request?.UserHostAddress,
-                user?.userID,
+                user?.accountID,
                 user?.account,
                 user?.name,
-                user?.unit);
+                user?.unitName);
 
             return true;
         }

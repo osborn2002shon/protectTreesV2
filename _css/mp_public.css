@@ -3,9 +3,8 @@
 }
 
 body {
-    background: linear-gradient(135deg, #0f2350 0%, #1a3b6b 50%, #2c5282 100%);
+    background: linear-gradient(180deg, #006948 0%, #54917f 50%, #79c06e 100%);
     min-height: 100vh;
-    /*font-family: 'Microsoft JhengHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;*/
 }
 
 .login-container {
@@ -18,7 +17,7 @@ body {
 
 .login-card {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
+    border-radius: 10px;
     box-shadow: 0 20px 40px rgba(15, 35, 80, 0.2);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -28,7 +27,7 @@ body {
 }
 
 .login-header {
-    background: linear-gradient(135deg, #0f2350, #1a3b6b);
+    background: linear-gradient(135deg, #006948, #54917f);
     color: white;
     padding: 15px;
     text-align: center;
@@ -49,9 +48,11 @@ body {
         font-size: 3.5rem;
         color: #ffffff;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        margin-bottom:15px;
     }
+
         .login-header .logo-icon img {
-            max-width: 100%;
+            max-width: 80%;
         }
 
     .login-header .system-title {
@@ -77,37 +78,64 @@ body {
         font-size: 1.5rem;
         font-weight: 500;
         text-align: center;
-        color: #0f2350;
+        color: #006948;
     }
 
-    .form-floating {
-        margin-bottom: 20px;
-    }
+.form-floating {
+    margin-bottom: 20px;
+}
 
-.form-control {
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
+.form-control, .form-select {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
     padding: 15px 20px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: rgba(248, 249, 250, 0.8);
+    /*background: rgba(248, 249, 250, 0.8);*/
 }
 
+    .form-control::placeholder {
+        /*改動會影響Login的效果*/
+        /*color:#c0c0c0 !important*/
+    }
+
     .form-control:focus {
-        border-color: #0f2350;
+        border-color: #006948;
         box-shadow: 0 0 0 0.2rem rgba(15, 35, 80, 0.15);
         background: white;
     }
 
-.form-floating label {
+.form-floating label, .contItem {
     color: #6c757d;
     font-weight: 500;
 }
 
+
+.form-floating.position-relative .form-control {
+    padding-right: 130px; /* 增加右側padding給驗證碼圖片留空間 */
+}
+
+.form-floating.position-relative .captcha-image {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-floating > .form-select {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    margin-bottom:2px;
+}
+
 .btn-login {
-    border: 2px solid #0f2350;
-    background: linear-gradient(135deg, #0f2350, #1a3b6b);
-    border-radius: 12px;
+    background: #54917F;
+    background: linear-gradient(135deg, #006948 0%, #54917f 100%);
+    border: none;
+    border-radius: 10px;
     padding: 12px;
     font-size: 1rem;
     font-weight: 500;
@@ -119,9 +147,9 @@ body {
 
     .btn-login:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(15, 35, 80, 0.4);
-        background: linear-gradient(135deg, #1a3b6b, #2c5282);
-        color: #fef263
+        background: #54917F;
+        background: linear-gradient(135deg, rgba(84, 145, 127, 1) 0%, rgba(121, 192, 110, 1) 100%);
+        /*color: #fef263*/
     }
 
     .btn-login:active {
@@ -129,82 +157,44 @@ body {
         transform: translateY(0);
     }
 
-.btn-back {
-    border: 2px solid #0f2350;
-    color: #0f2350;
-    background: transparent;
-    border-radius: 12px;
+.btn-cancel {
+    background: #b0b0b0;
+    background: linear-gradient(135deg,rgba(176, 176, 176, 1) 0%, rgba(207, 204, 204, 1) 100%);
+    border: none;
+    border-radius: 10px;
     padding: 12px;
     font-size: 1rem;
     font-weight: 500;
+    color: white;
     width: 100%;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(15, 35, 80, 0.3);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
 }
 
-    .btn-back:hover {
+    .btn-cancel:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(15, 35, 80, 0.4);
-        background: linear-gradient(135deg, #1a3b6b, #2c5282);
-        color: #fef263
+        background: #B0B0B0;
+        background: linear-gradient(135deg, rgba(207, 204, 204, 1) 0%, rgba(176, 176, 176, 1) 100%);
     }
 
-.forgot-password {
-    color: #0f2350;
+    .btn-cancel:active {
+        color: #999999;
+        transform: translateY(0);
+    }
+
+.link {
+    color: #006948;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
-    .forgot-password:hover {
-        color: #1a3b6b;
+    .link:hover {
+        color: #54917f;
         text-decoration: underline;
-    }
-
-.divider {
-    margin: 30px 0;
-    text-align: center;
-    position: relative;
-}
-
-.divider {
-    margin: 30px 0;
-    text-align: center;
-    position: relative;
-}
-
-    .divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #dee2e6;
-    }
-
-    .divider span {
-        background: white;
-        padding: 0 20px;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-.register-btn {
-    border: 2px solid #0f2350;
-    color: #0f2350;
-    background: transparent;
-    border-radius: 12px;
-    padding: 15px;
-    font-size: 1rem;
-    font-weight: 600;
-    width: 100%;
-    transition: all 0.3s ease;
-}
-
-    .register-btn:hover {
-        background: #0f2350;
-        color: white;
-        transform: translateY(-1px);
     }
 
 .password-toggle {
@@ -223,62 +213,27 @@ body {
 }
 
     .password-toggle:hover {
-        color: #0f2350;
+        color: #006948;
     }
 
     .password-toggle:focus {
         outline: none;
-        color: #0f2350;
+        color: #006948;
     }
 
-.form-floating.position-relative .form-control {
-    padding-right: 130px; /* 增加右側padding給驗證碼圖片留空間 */
+.start {
+    color: tomato;
 }
 
-.form-floating.position-relative .captcha-image {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    cursor: pointer;
+.ul li {
+    margin: 5px 0px
 }
 
-border: 2px solid #0f2350;
-color: #0f2350;
-background: transparent;
-border-radius: 12px;
-padding: 15px;
-font-size: 1rem;
-font-weight: 600;
-width: 100%;
-transition: all 0.3s ease;
-}
-
-.register-btn:hover {
-    background: #0f2350;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.remember-check {
-    margin-bottom: 25px;
-}
-
-.form-check-input:checked {
-    background-color: #0f2350;
-    border-color: #0f2350;
-}
-
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(15, 35, 80, 0.15);
-}
 
 @media (max-width: 576px) {
     .login-card {
         margin: 10px;
-        border-radius: 15px;
+        border-radius: 10px;
     }
 
     .login-header {
@@ -292,16 +247,4 @@ transition: all 0.3s ease;
     .system-title {
         font-size: 1.5rem;
     }
-}
-
-.loading-spinner {
-    display: none;
-}
-
-.btn-login.loading .loading-spinner {
-    display: inline-block;
-}
-
-.btn-login.loading .btn-text {
-    display: none;
 }

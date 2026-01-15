@@ -3,14 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using Newtonsoft.Json;
 using static protectTreesV2.Health.Health;
 using System.IO;
 using protectTreesV2.Log;
-using protectTreesV2.User;
-using protectTreesV2.backstage.Manage;
 
 namespace protectTreesV2.backstage.health
 {
@@ -716,8 +713,8 @@ namespace protectTreesV2.backstage.health
                 TreeHealthRecord record = GetFormData();
 
                 // 儲存主檔 (Service 會自動判斷 healthID <= 0 做 Insert)
-                var user = UserService.GetCurrentUser();
-                int accountID = user?.userID ?? 0;
+                var user = UserInfo.GetCurrentUser;
+                int accountID = user?.accountID ?? 0;
                 int savedHealthID = system_health.SaveHealthRecord(record, accountID);
 
                 // 更新 CurrentHealthID，確保後續照片存檔有 ID
@@ -950,7 +947,7 @@ namespace protectTreesV2.backstage.health
                 // 因為 enum_treeSignStatus 的 Value 是數字 (1, 2, 3)
                 if (!int.TryParse(treeSignVal, out int tsId) || !Enum.IsDefined(typeof(enum_treeSignStatus), tsId))
                 {
-                    errors.Add("樹牌狀態 (選項數值不合法)");
+                    errors.Add("樹牌狀態 (選項數值錯誤)");
                 }
             }
 
@@ -1063,7 +1060,7 @@ namespace protectTreesV2.backstage.health
                 // 因為 enum_pruningDamageType 的 Value 是文字 ("截幹"...)
                 if (!Enum.IsDefined(typeof(enum_pruningDamageType), pruningVal))
                 {
-                    errors.Add("錯誤修剪傷害 (選項數值不合法)");
+                    errors.Add("錯誤修剪傷害 (選項數值錯誤)");
                 }
             }
 
@@ -1099,7 +1096,7 @@ namespace protectTreesV2.backstage.health
                 // 因為 enum_treatmentPriority 的 Value 是文字 ("緊急處理"...)
                 if (!Enum.IsDefined(typeof(enum_treatmentPriority), priorityVal))
                 {
-                    errors.Add("建議處理優先順序 (選項數值不合法)");
+                    errors.Add("建議處理優先順序 (選項數值錯誤)");
                 }
             }
 

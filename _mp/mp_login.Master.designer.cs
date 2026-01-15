@@ -33,15 +33,6 @@ namespace protectTreesV2._mp
         protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_title;
 
         /// <summary>
-        /// loginForm 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlForm loginForm;
-
-        /// <summary>
         /// ContentPlaceHolder_body 控制項。
         /// </summary>
         /// <remarks>
@@ -49,6 +40,33 @@ namespace protectTreesV2._mp
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_body;
+
+        /// <summary>
+        /// ContentPlaceHolder_modal_title 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_modal_title;
+
+        /// <summary>
+        /// ContentPlaceHolder_modal_body 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_modal_body;
+
+        /// <summary>
+        /// ContentPlaceHolder_modal_footer 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_modal_footer;
 
         /// <summary>
         /// ContentPlaceHolder_jsBottom 控制項。

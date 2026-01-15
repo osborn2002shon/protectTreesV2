@@ -1,5 +1,4 @@
-﻿using protectTreesV2.User;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -193,8 +192,8 @@ namespace protectTreesV2.backstage.health
             filter.sortDirection = SortDirection;
 
             // 2. 取得當前使用者 ID
-            var user = UserService.GetCurrentUser();
-            int userId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int userId = user?.accountID ?? 0;
 
             // 3. 呼叫 Service 
             List<HealthMainQueryResult> data = system_health.GetHealthRecordList(filter, userId);
@@ -295,8 +294,8 @@ namespace protectTreesV2.backstage.health
                 if (int.TryParse(healthStr, out int targetID))
                 {
                     // 取得當前操作者 ID
-                    var user = UserService.GetCurrentUser();
-                    int userID = user?.userID ?? 0;
+                    var user = UserInfo.GetCurrentUser;
+                    int userID = user?.accountID ?? 0;
 
                     // 執行刪除
                     bool isDeleted = system_health.DeleteHealthRecord(targetID, userID);

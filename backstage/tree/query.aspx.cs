@@ -8,7 +8,6 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
 using protectTreesV2.Log;
-using protectTreesV2.User;
 using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.tree
@@ -312,7 +311,9 @@ namespace protectTreesV2.backstage.tree
                 return;
             }
 
-            OperationLogger.InsertLog("樹籍列表", "匯出", "下載樹籍基本資料");
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
+            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.樹籍基本資料管理, UserLog.enum_UserLogType.下載, "下載樹籍基本資料");
 
             var sb = new StringBuilder();
             sb.Append("<table border='1'>");
@@ -376,11 +377,12 @@ namespace protectTreesV2.backstage.tree
                 announcement = dt;
             }
 
-            var user = UserService.GetCurrentUser();
-            int accountId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
 
             TreeService.BulkUpdateStatus(selected, status, announcement, accountId);
-            OperationLogger.InsertLog("樹籍管理", "批次設定", $"更新{selected.Count}筆狀態為{TreeService.GetStatusText(status)}");
+            //OperationLogger.InsertLog("樹籍管理", "批次設定", $"更新{selected.Count}筆狀態為{TreeService.GetStatusText(status)}");
+            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.樹籍基本資料管理, UserLog.enum_UserLogType.修改, $"更新{selected.Count}筆狀態為{TreeService.GetStatusText(status)}");
             foreach (var treeId in selected)
             {
                 FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog,
@@ -388,10 +390,10 @@ namespace protectTreesV2.backstage.tree
                     "批次設定樹籍狀態",
                     $"狀態更新為{TreeService.GetStatusText(status)}",
                     Request?.UserHostAddress,
-                    user?.userID,
+                    user?.accountID,
                     user?.account,
                     user?.name,
-                    user?.unit);
+                    user?.unitName);
             }
             BindTrees();
         }

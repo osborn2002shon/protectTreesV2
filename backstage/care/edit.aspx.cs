@@ -6,10 +6,8 @@ using System.Linq;
 using System.Web;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
-using protectTreesV2.Care;
 using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
-using protectTreesV2.User;
 
 namespace protectTreesV2.backstage.care
 {
@@ -589,8 +587,8 @@ namespace protectTreesV2.backstage.care
             record.task4Note = NormalizeText(TextBox_task4Note.Text);
             record.task5Note = NormalizeText(TextBox_task5Note.Text);
 
-            var user = UserService.GetCurrentUser();
-            int accountId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
 
             if (record.careID > 0)
             {
@@ -613,18 +611,18 @@ namespace protectTreesV2.backstage.care
             ClearPendingUploads();
 
             var tree = TreeService.GetTree(CurrentTreeID);
-            string actionText = isNew ? "新增" : "編輯";
+            UserLog.enum_UserLogType actionText = isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改;
             string logMemo = isNew ? "新增養護" : "編輯養護";
-            OperationLogger.InsertLog("養護管理", actionText, logMemo);
+            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.養護紀錄管理, actionText, logMemo);
             FunctionLogService.InsertLog(LogFunctionTypes.Care,
                 record.careID,
                 logMemo,
                 $"系統樹籍編號：{tree?.SystemTreeNo ?? "無"}，養護日期：{record.careDate:yyyy-MM-dd}，狀態：{(record.dataStatus == (int)Care.Care.CareRecordStatus.定稿 ? "定稿" : "草稿")}",
                 Request?.UserHostAddress,
-                user?.userID,
+                user?.accountID,
                 user?.account,
                 user?.name,
-                user?.unit);
+                user?.unitName);
 
             base.ReturnState();
         }

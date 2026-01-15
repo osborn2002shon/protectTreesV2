@@ -1,5 +1,4 @@
 ﻿using protectTreesV2.TreeCatalog;
-using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
 using System.Web.UI;
@@ -165,8 +164,8 @@ namespace protectTreesV2.backstage.patrol
             filter.sortExpression = SortExpression;
             filter.sortDirection = SortDirection;
 
-            var user = UserService.GetCurrentUser();
-            int userId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int userId = user?.accountID ?? 0;
 
             List<PatrolRecordListResult> data = system_patrol.GetPatrolRecordList(filter, userId);
 
@@ -234,8 +233,8 @@ namespace protectTreesV2.backstage.patrol
                         return;
                     }
 
-                    var user = UserService.GetCurrentUser();
-                    int accountId = user?.userID ?? 0;
+                    var user = UserInfo.GetCurrentUser;
+                    int accountId = user?.accountID ?? 0;
                     system_patrol.DeletePatrolRecord(patrolId, accountId);
 
                     ShowMessage("完成", "已刪除草稿巡查紀錄。", "success");

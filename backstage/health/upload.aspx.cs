@@ -1,5 +1,4 @@
 ﻿using NPOI.SS.UserModel;
-using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -52,8 +51,8 @@ namespace protectTreesV2.backstage.health
         private void BindData()
         {
             // 取得當前使用者 ID
-            var user = UserService.GetCurrentUser();
-            int userId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int userId = user?.accountID ?? 0;
 
             // 綁定歷史紀錄
             var historyList = system_batch.GetBatchTaskList(enum_treeBatchType.Health_Record, userId);
@@ -170,8 +169,8 @@ namespace protectTreesV2.backstage.health
             // ==========================================
             // 1. 基礎檢查 (檔案存在、格式、大小)
             // ==========================================
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             if (!FileUpload_Batch.HasFile)
             {

@@ -8,7 +8,6 @@ using System.Text;
 using DataAccess;
 using protectTreesV2.Base;
 using protectTreesV2.TreeCatalog;
-using protectTreesV2.User;
 using static protectTreesV2.Base.DataRowHelper;
 
 namespace protectTreesV2.Health

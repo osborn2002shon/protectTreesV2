@@ -738,13 +738,13 @@ SELECT SCOPE_IDENTITY();";
         public List<string> GetRiskNotificationEmails(int cityId)
         {
             const string sql = @"
-SELECT DISTINCT ua.email
-FROM User_Account ua
-JOIN User_Area_Mapping map ON ua.accountID = map.accountID
-WHERE (ua.auTypeID = 4 or ua.auTypeID = 1)
-  AND ua.isActive = 1
-  AND ua.removeDateTime IS NULL
-  AND (map.city = @cityId OR map.city = '-1')";
+        SELECT DISTINCT ua.email
+        FROM User_Account ua
+        JOIN User_Area_Mapping map ON ua.accountID = map.accountID
+        WHERE (ua.auTypeID = 4 or ua.auTypeID = 1)
+          AND ua.isActive = 1
+          AND ua.removeDateTime IS NULL
+          AND (map.city = @cityId OR map.city = '-1')";
 
             var emails = new List<string>();
             using (var da = new DataAccess.MS_SQL())

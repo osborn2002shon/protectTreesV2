@@ -1,5 +1,4 @@
-﻿using protectTreesV2.User;
-using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Web.UI;
@@ -142,8 +141,8 @@ namespace protectTreesV2.backstage.health
             filter.sortDirection = SortDirection;
 
             // 取得資料
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
             List<HealthMainQueryResult> data = system_health.GetHealthMainList(filter, accountID);
 
             // 更新筆數顯示
@@ -204,8 +203,8 @@ namespace protectTreesV2.backstage.health
             {
                 int treeId = Convert.ToInt32(arg);
 
-                var user = UserService.GetCurrentUser();
-                int accountID = user?.userID ?? 0;
+                var user = UserInfo.GetCurrentUser;
+                int accountID = user?.accountID ?? 0;
 
                 try
                 {
@@ -281,8 +280,8 @@ namespace protectTreesV2.backstage.health
         private void BindSelectedList()
         {
             // 1. 取得目前使用者 ID
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             try
             {
@@ -319,8 +318,8 @@ namespace protectTreesV2.backstage.health
                 int treeId = Convert.ToInt32(e.CommandArgument);
 
                 // 2. 取得目前使用者 ID
-                var user = UserService.GetCurrentUser();
-                int accountID = user?.userID ?? 0;
+                var user = UserInfo.GetCurrentUser;
+                int accountID = user?.accountID ?? 0;
 
                 try
                 {
@@ -344,8 +343,8 @@ namespace protectTreesV2.backstage.health
         protected void LinkButton_clearList_Click(object sender, EventArgs e)
         {
             // 1. 取得目前使用者 ID
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             try
             {
@@ -368,8 +367,8 @@ namespace protectTreesV2.backstage.health
         protected void LinkButton_generateExcel_Click(object sender, EventArgs e)
         {
             // 取得使用者與資料
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             try
             {

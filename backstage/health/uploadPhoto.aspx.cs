@@ -1,5 +1,4 @@
 ﻿using protectTreesV2.Base;
-using protectTreesV2.User;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,8 +26,8 @@ namespace protectTreesV2.backstage.health
         private void BindData()
         {
             // 取得當前使用者 ID
-            var user = UserService.GetCurrentUser();
-            int userId = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int userId = user?.accountID ?? 0;
 
             // 綁定歷史紀錄
             var historyList = system_batch.GetBatchTaskList( enum_treeBatchType.Health_Photo, userId);
@@ -59,8 +58,8 @@ namespace protectTreesV2.backstage.health
                 ShowMessage("提示", "請先選擇要上傳的檔案！");
                 return;
             }
-            var user = UserService.GetCurrentUser();
-            int accountID = user?.userID ?? 0;
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
 
             HttpFileCollection files = Request.Files;
 
