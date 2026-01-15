@@ -1,4 +1,67 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="uc_careRecordModal.ascx.cs" Inherits="protectTreesV2._uc.care.uc_careRecordModal" %>
+<style>
+    .care-compare {
+        --compare-position: 50%;
+    }
+
+    .care-compare__frame {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background: #000;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .care-compare__image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+    }
+
+    .care-compare__before {
+        position: absolute;
+        inset: 0;
+        width: var(--compare-position);
+        overflow: hidden;
+        z-index: 2;
+    }
+
+    .care-compare__divider {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--compare-position);
+        width: 3px;
+        background: #ffffff;
+        z-index: 3;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+        transform: translateX(-1.5px);
+    }
+
+    .care-compare__divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid #0d6efd;
+        transform: translate(-50%, -50%);
+    }
+
+    .care-compare__range {
+        width: 100%;
+        margin-top: 0.75rem;
+    }
+</style>
 <div class="modalForm">
     <asp:PlaceHolder ID="phEmpty" runat="server" Visible="true">
         <div class="text-center text-muted py-4">尚未載入養護紀錄。</div>
@@ -142,19 +205,36 @@
                                         <label class="form-label text-muted">施作項目名稱</label>
                                         <div class="fw-bold"><%# FormatText(Eval("itemName") as string) %></div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">施作前照片</label>
-                                        <a href='<%# ResolvePhotoUrl(Eval("beforeFilePath")) %>' target="_blank" rel="noopener">
-                                            <img src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' class="img-fluid rounded border shadow-sm" />
-                                        </a>
-                                        <div class="small text-muted mt-2 text-truncate" title='<%# FormatText(Eval("beforeFileName") as string) %>'><%# FormatText(Eval("beforeFileName") as string) %></div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">施作後照片</label>
-                                        <a href='<%# ResolvePhotoUrl(Eval("afterFilePath")) %>' target="_blank" rel="noopener">
-                                            <img src='<%# ResolvePhotoPreview(Eval("afterFilePath")) %>' alt='<%# FormatText(Eval("afterFileName") as string) %>' class="img-fluid rounded border shadow-sm" />
-                                        </a>
-                                        <div class="small text-muted mt-2 text-truncate" title='<%# FormatText(Eval("afterFileName") as string) %>'><%# FormatText(Eval("afterFileName") as string) %></div>
+                                    <div class="col-12">
+                                        <label class="form-label text-muted">施作前後照片對照</label>
+                                        <div class="care-compare" data-compare>
+                                            <div class="care-compare__frame">
+                                                <img src='<%# ResolvePhotoPreview(Eval("afterFilePath")) %>' alt='<%# FormatText(Eval("afterFileName") as string) %>' class="care-compare__image" />
+                                                <div class="care-compare__before">
+                                                    <img src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' class="care-compare__image" />
+                                                </div>
+                                                <div class="care-compare__divider" aria-hidden="true"></div>
+                                            </div>
+                                            <input type="range" class="care-compare__range" min="0" max="100" value="50" aria-label="施作前後照片比較滑桿" />
+                                        </div>
+                                        <div class="row g-2 mt-2">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted mb-1">施作前照片</label>
+                                                <div class="small text-truncate">
+                                                    <a href='<%# ResolvePhotoUrl(Eval("beforeFilePath")) %>' target="_blank" rel="noopener" title='<%# FormatText(Eval("beforeFileName") as string) %>'>
+                                                        <%# FormatText(Eval("beforeFileName") as string) %>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted mb-1">施作後照片</label>
+                                                <div class="small text-truncate">
+                                                    <a href='<%# ResolvePhotoUrl(Eval("afterFilePath")) %>' target="_blank" rel="noopener" title='<%# FormatText(Eval("afterFileName") as string) %>'>
+                                                        <%# FormatText(Eval("afterFileName") as string) %>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -168,3 +248,35 @@
         </div>
     </asp:PlaceHolder>
 </div>
+<script>
+    (function () {
+        var initCompare = function (root) {
+            var range = root.querySelector(".care-compare__range");
+            var frame = root.querySelector(".care-compare__frame");
+            if (!range || !frame) {
+                return;
+            }
+
+            var setPosition = function (value) {
+                var bounded = Math.max(0, Math.min(100, value));
+                frame.style.setProperty("--compare-position", bounded + "%");
+            };
+
+            setPosition(range.value || 50);
+            range.addEventListener("input", function (event) {
+                setPosition(event.target.value);
+            });
+        };
+
+        var initAll = function () {
+            var compares = document.querySelectorAll("[data-compare]");
+            compares.forEach(initCompare);
+        };
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initAll);
+        } else {
+            initAll();
+        }
+    })();
+</script>
