@@ -9,14 +9,16 @@
         overflow: hidden;
         border: 1px solid #dee2e6;
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        display: block;
     }
 
-    .care-compare img {
+    .care-compare img[slot] {
         width: 100%;
         height: 100%;
         object-fit: contain;
         object-position: center;
         background: #000;
+        display: block;
     }
 </style>
 <div class="modalForm">
