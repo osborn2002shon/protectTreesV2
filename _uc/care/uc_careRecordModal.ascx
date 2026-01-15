@@ -1,11 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="uc_careRecordModal.ascx.cs" Inherits="protectTreesV2._uc.care.uc_careRecordModal" %>
+<link rel="stylesheet" href="https://unpkg.com/img-comparison-slider@8/dist/styles.css" />
 <style>
     .care-compare {
-        --compare-position: 50%;
-    }
-
-    .care-compare__frame {
-        position: relative;
         width: 100%;
         aspect-ratio: 4 / 3;
         background: #000;
@@ -15,58 +11,11 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
 
-    .care-compare__image {
-        position: absolute;
-        inset: 0;
+    .care-compare img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         object-position: center;
-    }
-
-    .care-compare__before {
-        position: absolute;
-        inset: 0;
-        width: var(--compare-position);
-        overflow: hidden;
-        z-index: 2;
-        background: #000;
-    }
-
-    .care-compare__divider {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: var(--compare-position);
-        width: 3px;
-        background: #ffffff;
-        z-index: 3;
-        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
-        transform: translateX(-1.5px);
-    }
-
-    .care-compare__divider::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 2px solid #0d6efd;
-        transform: translate(-50%, -50%);
-    }
-
-    .care-compare__range {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        opacity: 0;
-        cursor: ew-resize;
-        z-index: 4;
     }
 </style>
 <div class="modalForm">
@@ -214,16 +163,10 @@
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label text-muted">施作前後照片對照</label>
-                                        <div class="care-compare" data-compare>
-                                            <div class="care-compare__frame">
-                                                <img src='<%# ResolvePhotoPreview(Eval("afterFilePath")) %>' alt='<%# FormatText(Eval("afterFileName") as string) %>' class="care-compare__image" />
-                                                <div class="care-compare__before">
-                                                    <img src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' class="care-compare__image" />
-                                                </div>
-                                                <div class="care-compare__divider" aria-hidden="true"></div>
-                                                <input type="range" class="care-compare__range" min="0" max="100" value="50" aria-label="施作前後照片比較滑桿" />
-                                            </div>
-                                        </div>
+                                        <img-comparison-slider class="care-compare">
+                                            <img slot="first" src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' />
+                                            <img slot="second" src='<%# ResolvePhotoPreview(Eval("afterFilePath")) %>' alt='<%# FormatText(Eval("afterFileName") as string) %>' />
+                                        </img-comparison-slider>
                                         <div class="row g-2 mt-2">
                                             <div class="col-md-6">
                                                 <label class="form-label text-muted mb-1">施作前照片</label>
@@ -255,35 +198,4 @@
         </div>
     </asp:PlaceHolder>
 </div>
-<script>
-    (function () {
-        var initCompare = function (root) {
-            var range = root.querySelector(".care-compare__range");
-            var frame = root.querySelector(".care-compare__frame");
-            if (!range || !frame) {
-                return;
-            }
-
-            var setPosition = function (value) {
-                var bounded = Math.max(0, Math.min(100, value));
-                frame.style.setProperty("--compare-position", bounded + "%");
-            };
-
-            setPosition(range.value || 50);
-            range.addEventListener("input", function (event) {
-                setPosition(event.target.value);
-            });
-        };
-
-        var initAll = function () {
-            var compares = document.querySelectorAll("[data-compare]");
-            compares.forEach(initCompare);
-        };
-
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", initAll);
-        } else {
-            initAll();
-        }
-    })();
-</script>
+<script defer src="https://unpkg.com/img-comparison-slider@8/dist/index.js"></script>
