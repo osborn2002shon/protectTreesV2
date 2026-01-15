@@ -17,10 +17,14 @@
 
     .care-compare__image {
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
+        top: 50%;
+        left: 50%;
+        max-width: none;
+        max-height: none;
+        width: auto;
+        height: auto;
+        transform: translate(-50%, -50%);
+        object-fit: none;
         object-position: center;
     }
 
@@ -30,6 +34,7 @@
         width: var(--compare-position);
         overflow: hidden;
         z-index: 2;
+        background: #000;
     }
 
     .care-compare__divider {
@@ -58,8 +63,14 @@
     }
 
     .care-compare__range {
+        position: absolute;
+        inset: 0;
         width: 100%;
-        margin-top: 0.75rem;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: ew-resize;
+        z-index: 4;
     }
 </style>
 <div class="modalForm">
@@ -214,8 +225,8 @@
                                                     <img src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' class="care-compare__image" />
                                                 </div>
                                                 <div class="care-compare__divider" aria-hidden="true"></div>
+                                                <input type="range" class="care-compare__range" min="0" max="100" value="50" aria-label="施作前後照片比較滑桿" />
                                             </div>
-                                            <input type="range" class="care-compare__range" min="0" max="100" value="50" aria-label="施作前後照片比較滑桿" />
                                         </div>
                                         <div class="row g-2 mt-2">
                                             <div class="col-md-6">
