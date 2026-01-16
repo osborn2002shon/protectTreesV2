@@ -55,7 +55,7 @@
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="txtTreeCount" Text="數量" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
                                             <asp:TextBox ID="txtTreeCount" runat="server" TextMode="Number" CssClass="form-control" placeholder="3" />
-                                            <small class="form-text text-muted">若為群生竹木請填寫實際株(棵)數</small>
+                                            <small class="form-text text-muted">當他為群生竹木請填寫實際株(棵)數</small>
                                         </div>
                                         <div class="col">
                                             <asp:Label runat="server" AssociatedControlID="ddlCity" Text="縣市鄉鎮" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
@@ -283,7 +283,8 @@
                             <div class="d-flex flex-wrap align-items-center gap-3">
                                 <div class="form-check">
                                     <asp:CheckBox ID="chkFinalConfirm" runat="server" />
-                                    <asp:Label runat="server" AssociatedControlID="chkFinalConfirm" CssClass="form-check-label" Text="確認為定稿（定稿後無法回復為草稿）" />
+                                    <asp:Label runat="server" AssociatedControlID="chkFinalConfirm" CssClass="form-check-label" Text="確認為定稿" /><br />
+                                    定稿後無法回復為草稿，定稿後會開放全部使用者可檢視
                                 </div>
                                 <asp:Button ID="btnSave" runat="server" Text="儲存" OnClick="btnSave_Click" OnClientClick="return confirmSave();" CssClass="btn btn-primary" />
                                 <asp:Button ID="btnCancel" runat="server" Text="取消" CausesValidation="false" OnClick="btnCancel_Click" OnClientClick="return confirmNavigate();" CssClass="btn btn-outline-secondary" />

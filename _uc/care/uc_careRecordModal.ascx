@@ -1,6 +1,7 @@
 ﻿<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="uc_careRecordModal.ascx.cs" Inherits="protectTreesV2._uc.care.uc_careRecordModal" %>
 <link rel="stylesheet" href="https://unpkg.com/img-comparison-slider@8/dist/styles.css" />
 <style>
+    /*
     .care-compare {
         width: 100%;
         aspect-ratio: 4 / 3;
@@ -11,7 +12,7 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         display: block;
     }
-
+    
     .care-compare img[slot] {
         width: 100%;
         height: 100%;
@@ -20,6 +21,7 @@
         background: #000;
         display: block;
     }
+        */
 </style>
 <div class="modalForm">
     <asp:PlaceHolder ID="phEmpty" runat="server" Visible="true">
@@ -165,11 +167,14 @@
                                         <div class="fw-bold"><%# FormatText(Eval("itemName") as string) %></div>
                                     </div>
                                     <div class="col-12">
-                                        <label class="form-label text-muted">施作前後照片對照</label>
-                                        <img-comparison-slider class="care-compare">
-                                            <img slot="first" src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' />
-                                            <img slot="second" src='<%# ResolvePhotoPreview(Eval("afterFilePath")) %>' alt='<%# FormatText(Eval("afterFileName") as string) %>' />
-                                        </img-comparison-slider>
+                                        <label class="form-label text-muted">施作前後照片對照</label><br />
+                                        <div class=" d-flex flex-column align-items-center">
+                                            <img-comparison-slider class="care-compare">
+                                                <img slot="first" src='<%# ResolvePhotoPreview(Eval("beforeFilePath")) %>' alt='<%# FormatText(Eval("beforeFileName") as string) %>' />
+                                                <img slot="second" src='<%# ResolvePhotoPreview(Eval("afterFilePath")) %>' alt='<%# FormatText(Eval("afterFileName") as string) %>' />
+                                            </img-comparison-slider>
+                                        </div>
+                                        
                                         <div class="row g-2 mt-2">
                                             <div class="col-md-6">
                                                 <label class="form-label text-muted mb-1">施作前照片</label>

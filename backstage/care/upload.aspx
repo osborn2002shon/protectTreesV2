@@ -72,15 +72,12 @@
                     <ul>
                         <li>
                             <strong>未勾選任何選項（草稿模式）：</strong>
-                            Excel 內僅需填寫「系統樹籍編號」與「調查日期」，其餘欄位可留空（視為尚未調查完畢）。
+                            Excel 內僅需填寫「系統樹籍編號」與「養護日期」，其餘欄位可留空。
                         </li>
-                        <li>
-                            <strong>勾選「上傳紀錄設定為定稿」：</strong>
-                            表示調查已完成，Excel 內所有欄位皆為必填，若有空值將無法上傳。
-                        </li>
+                        
                         <li>
                             <strong>勾選「若有同日資料直接覆蓋」：</strong>
-                            視同定稿標準，所有欄位皆為必填。若該日期已有資料，系統將直接覆蓋舊有紀錄。
+                            視同正式紀錄（必填欄位不可漏填），若該日期已有資料，系統將直接覆蓋舊有紀錄。
                         </li>
                     </ul>
 
@@ -94,7 +91,7 @@
 
                     <div class="text-muted small">
                         <strong>資料覆蓋原則：</strong>
-                        一個「系統樹籍編號」在同一「調查日期」下，僅會存在一筆健檢紀錄。
+                        一個「系統樹籍編號」在同一「養護日期」下，僅會存在一筆養護紀錄。
                         系統將以本次 Excel 內容為主，一旦上傳成功，新資料將直接覆蓋系統內原有的欄位數值。
                     </div>
 
@@ -132,9 +129,6 @@
                  <div class="d-flex justify-content-center gap-3 mb-3">
                      <asp:CheckBox ID="CheckBox_Overwrite" runat="server" Text="若有同日資料直接覆蓋" 
                          CssClass="fw-bold text-dark" Style="cursor: pointer;" />
-             
-                     <asp:CheckBox ID="CheckBox_SetFinal" runat="server" Text="上傳紀錄設定為定稿" 
-                         CssClass="fw-bold text-dark" Style="cursor: pointer;" />
                  </div>
 
                  <div>
@@ -164,7 +158,7 @@
                  <div class="card-body p-0">
                      <div class="table-responsive gv-tb">
                          <asp:GridView ID="GridView_Detail" runat="server" 
-                             CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" UseAccessibleHeader="true">
+                             CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" UseAccessibleHeader="true" OnRowCommand="GridView_Detail_RowCommand">
                              <Columns>
                                  <asp:TemplateField HeaderText="狀態" ItemStyle-Width="80px">
                                      <ItemTemplate>
@@ -173,9 +167,46 @@
                                            : "<i class='fa-solid fa-circle-xmark text-danger fs-5'></i>" %>
                                      </ItemTemplate>
                                  </asp:TemplateField>
-                                 <asp:BoundField DataField="refKey" HeaderText="樹籍編號" ItemStyle-Width="120px" />
-                                 <asp:BoundField DataField="refDate" HeaderText="調查日期" DataFormatString="{0:yyyy/MM/dd}" ItemStyle-Width="120px" />
-                                 <asp:BoundField DataField="sourceItem" HeaderText="檔案名稱" />
+                                <%-- 樹籍編號 (成功顯示連結，失敗顯示純文字) --%>
+                                 <asp:TemplateField HeaderText="樹籍編號" ItemStyle-Width="120px">
+                                     <ItemTemplate>
+                                         <%-- 成功 -> 顯示 LinkButton --%>
+                                         <asp:LinkButton ID="btnTreeNo" runat="server" 
+                                             Text='<%# Eval("refKey") %>'
+                                             CommandName="ViewTree" 
+                                             CommandArgument='<%# Eval("refKey") %>'
+                                             CssClass="text-decoration-underline text-primary"
+                                             Visible='<%# (bool)Eval("isSuccess") %>'>
+                                         </asp:LinkButton>
+
+                                         <%-- 失敗 -> 顯示 Label (純文字) --%>
+                                         <asp:Label ID="lblTreeNo" runat="server" 
+                                             Text='<%# Eval("refKey") %>'
+                                             Visible='<%# !(bool)Eval("isSuccess") %>'>
+                                         </asp:Label>
+                                     </ItemTemplate>
+                                 </asp:TemplateField>
+
+                                 <%-- 調查日期  --%>
+                                 <asp:TemplateField HeaderText="養護日期" ItemStyle-Width="120px">
+                                     <ItemTemplate>
+                                         <%--  成功 -> 顯示 LinkButton --%>
+                                         <asp:LinkButton ID="btnSurveyDate" runat="server" 
+                                             Text='<%# Eval("refDate", "{0:yyyy/MM/dd}") %>'
+                                             CommandName="ViewHealth" 
+                                             CommandArgument='<%# Eval("refKey") + "," + Eval("refDate", "{0:yyyy/MM/dd}") %>'
+                                             CssClass="text-decoration-underline text-primary"
+                                             Visible='<%# (bool)Eval("isSuccess") %>'>
+                                         </asp:LinkButton>
+
+                                         <%--  失敗 -> 顯示 Label (純文字) --%>
+                                         <asp:Label ID="lblSurveyDate" runat="server" 
+                                             Text='<%# Eval("refDate", "{0:yyyy/MM/dd}") %>'
+                                             Visible='<%# !(bool)Eval("isSuccess") %>'>
+                                         </asp:Label>
+                                     </ItemTemplate>
+                                 </asp:TemplateField>
+                                 <asp:BoundField DataField="sourceItem" HeaderText="所在行數" />
                                  <asp:TemplateField HeaderText="處理結果">
                                      <ItemTemplate>
                                          <span class='<%# (bool)Eval("isSuccess") ? "text-success" : "text-danger fw-bold" %>'>

@@ -33,8 +33,8 @@
     <asp:Button ID="Button_login" runat="server" CssClass="btn-login mb-3" Text="登入" OnClick="Button_login_Click" />
     <div class="text-center">
         <a href="reg.aspx" class="link me-3"><i class="fa-solid fa-registered me-1"></i>帳號申請</a>
-        <a href="fpw.aspx" class="link me-3"><i class="fa-solid fa-key me-1"></i>忘記密碼</a>
-        <a href="fac.aspx" class="link"><i class="fa-solid fa-question me-1"></i>忘記帳號</a>        
+        <a href="fpw.aspx" class="link me-3"><i class="fa-solid fa-key me-1"></i>忘記密碼*</a>
+        <a href="fac.aspx" class="link"><i class="fa-solid fa-question me-1"></i>忘記帳號*</a>        
     </div>
 </asp:Content>
 

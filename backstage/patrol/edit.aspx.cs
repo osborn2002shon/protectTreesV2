@@ -1,11 +1,11 @@
 ﻿using protectTreesV2.Base;
-using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.UI;
@@ -432,8 +432,8 @@ namespace protectTreesV2.backstage.patrol
 
             UserLog.enum_UserLogType actionText = isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改;
             string logMemo = isNew ? "新增巡查" : "編輯巡查";
-            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.巡查紀錄管理, actionText, logMemo);
-            FunctionLogService.InsertLog(LogFunctionTypes.Patrol,
+            UserLog.Insert_UserLog(accountId, UserLog.enum_UserLogItem.巡查紀錄管理, actionText, logMemo);
+            TreeLog.InsertLog(TreeLog.LogFunctionTypes.Patrol,
                 record.patrolID,
                 logMemo,
                 $"系統樹籍編號：{tree?.SystemTreeNo ?? "無"}，巡查日期：{record.patrolDate:yyyy-MM-dd}，狀態：{(record.dataStatus == (int)PatrolRecordStatus.定稿 ? "定稿" : "草稿")}",
@@ -660,7 +660,7 @@ namespace protectTreesV2.backstage.patrol
 
         private void BindLogs(int patrolId)
         {
-            var logs = FunctionLogService.GetLogs(LogFunctionTypes.Patrol, patrolId) ?? new List<FunctionLogEntry>();
+            var logs = TreeLog.GetLogs(TreeLog.LogFunctionTypes.Patrol, patrolId) ?? new List<TreeLog.FunctionLogEntry>();
             pnlLogs.Visible = true;
             lblLogEmpty.Visible = logs.Count == 0;
             gvLogs.Visible = logs.Count > 0;
@@ -702,11 +702,11 @@ namespace protectTreesV2.backstage.patrol
             try
             {
                 //TODO: Mail對象要檢查 + Mail要List
-                var emails = system_patrol.GetRiskNotificationEmails(tree.CityID ?? -1);
+                var emails = system_patrol.GetRiskNotificationEmails(tree.AreaID ?? -1);
                 if (emails == null || emails.Count == 0) return;
 
                 string actionText = this.Action == "add" ? "新增" : "編輯";
-                string subject = $"巡查公共安全風險通知 - {tree.SystemTreeNo ?? "樹籍"}";
+                string subject = $"[受保護樹木管理系統] 巡查公共安全風險通知 - {tree.SystemTreeNo ?? "樹籍"}";
                 string body = $"樹籍：{tree.SystemTreeNo ?? "未提供"} ({tree.Site})\n" +
                               $"此次巡查被標記為有公共安全風險，來源：{actionText}。\n" +
                               $"巡查日期：{record.patrolDate:yyyy/MM/dd}\n" +
@@ -714,14 +714,18 @@ namespace protectTreesV2.backstage.patrol
                               $"送出時間：{DateTime.Now:yyyy/MM/dd HH:mm}\n" +
                               $"備註：{record.memo}";
 
+                List<MailAddress> mails = new List<MailAddress>();
                 foreach (var mail in emails.Where(m => !string.IsNullOrWhiteSpace(m)))
                 {
-                    //Mail.SendMail(mail, subject, body);
+                    mails.Add(new MailAddress(mail));
                 }
+
+                Mail.SendMail(mails, subject, body);
             }
             catch
             {
                 // 若寄信失敗不阻斷流程
+                throw;
             }
         }
     }

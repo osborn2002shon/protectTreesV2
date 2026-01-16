@@ -140,6 +140,10 @@
     <Content Include="backstage\care\list.aspx" />
     <Content Include="backstage\care\main.aspx" />
     <Content Include="backstage\care\upload.aspx" />
+    <Content Include="backstage\dashboard\hm.aspx" />
+    <Content Include="backstage\dashboard\rm.aspx" />
+    <Content Include="backstage\dashboard\sm.aspx" />
+    <Content Include="backstage\dashboard\tm.aspx" />
     <Content Include="backstage\health\edit.aspx" />
     <Content Include="backstage\health\list.aspx" />
     <Content Include="backstage\health\main.aspx" />
@@ -149,6 +153,12 @@
     <Content Include="backstage\patrol\edit.aspx" />
     <Content Include="backstage\patrol\list.aspx" />
     <Content Include="backstage\patrol\main.aspx" />
+    <Content Include="backstage\statistics\treeHealth.aspx" />
+    <Content Include="backstage\statistics\treeSum.aspx" />
+    <Content Include="backstage\system\accountManage.aspx" />
+    <Content Include="backstage\system\profile.aspx" />
+    <Content Include="backstage\system\treeList.aspx" />
+    <Content Include="backstage\system\userLog.aspx" />
     <Content Include="backstage\tree\detail.aspx" />
     <Content Include="backstage\tree\edit.aspx" />
     <Content Include="backstage\tree\edit_photos.aspx" />
@@ -190,7 +200,6 @@
     </Compile>
     <Compile Include="App_Code\Base\DataAccess_MS_SQL.cs" />
     <Compile Include="App_Code\Base\Log.cs" />
-    <Compile Include="App_Code\Base\_Log.cs" />
     <Compile Include="App_Code\Base\Mail.cs" />
     <Compile Include="App_Code\Base\User.cs" />
     <Compile Include="App_Code\Batch.cs" />
@@ -226,6 +235,34 @@
     </Compile>
     <Compile Include="backstage\care\upload.aspx.designer.cs">
       <DependentUpon>upload.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\dashboard\hm.aspx.cs">
+      <DependentUpon>hm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\dashboard\hm.aspx.designer.cs">
+      <DependentUpon>hm.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\dashboard\rm.aspx.cs">
+      <DependentUpon>rm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\dashboard\rm.aspx.designer.cs">
+      <DependentUpon>rm.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\dashboard\sm.aspx.cs">
+      <DependentUpon>sm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\dashboard\sm.aspx.designer.cs">
+      <DependentUpon>sm.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\dashboard\tm.aspx.cs">
+      <DependentUpon>tm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\dashboard\tm.aspx.designer.cs">
+      <DependentUpon>tm.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\health\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>
@@ -289,6 +326,48 @@
     </Compile>
     <Compile Include="backstage\patrol\main.aspx.designer.cs">
       <DependentUpon>main.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\statistics\treeHealth.aspx.cs">
+      <DependentUpon>treeHealth.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\statistics\treeHealth.aspx.designer.cs">
+      <DependentUpon>treeHealth.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\statistics\treeSum.aspx.cs">
+      <DependentUpon>treeSum.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\statistics\treeSum.aspx.designer.cs">
+      <DependentUpon>treeSum.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\system\accountManage.aspx.cs">
+      <DependentUpon>accountManage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\system\accountManage.aspx.designer.cs">
+      <DependentUpon>accountManage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\system\profile.aspx.cs">
+      <DependentUpon>profile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\system\profile.aspx.designer.cs">
+      <DependentUpon>profile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\system\treeList.aspx.cs">
+      <DependentUpon>treeList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\system\treeList.aspx.designer.cs">
+      <DependentUpon>treeList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\system\userLog.aspx.cs">
+      <DependentUpon>userLog.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\system\userLog.aspx.designer.cs">
+      <DependentUpon>userLog.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\tree\detail.aspx.cs">
       <DependentUpon>detail.aspx</DependentUpon>
@@ -400,12 +479,11 @@
     <Content Include="_fonts\fa-v4compatibility.woff2" />
     <Content Include="_mp\mp_backstage.Master" />
     <Content Include="_mp\mp_login.Master" />
-    <Content Include="_doc\~%24受保護樹木健檢資料蒐集用表格.xlsx" />
     <Content Include="_doc\受保護樹木健檢資料蒐集用表格.xlsx" />
     <Content Include="_doc\受保護樹木巡查資料蒐集用表格.xlsx" />
+    <Content Include="_doc\受保護樹木養護資料蒐集用表格.xlsx" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="backstage\system\" />
     <Folder Include="pages\" />
     <Folder Include="_file\health\" />
     <Folder Include="_file\tree\" />

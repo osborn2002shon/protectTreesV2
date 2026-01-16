@@ -409,6 +409,9 @@ namespace protectTreesV2.backstage.health
                 // 批次寫入 TaskLog
                 system_batch.BulkInsertTaskLogs(allLogList);
 
+                //寫入操作紀錄
+                UserLog.Insert_UserLog(accountID, UserLog.enum_UserLogItem.健檢紀錄管理, UserLog.enum_UserLogType.上傳, "批次上傳照片");
+
                 // 標記寫入成功
                 isLogSavedToDB = true;
             }

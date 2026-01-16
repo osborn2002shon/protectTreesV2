@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Web;
-using static protectTreesV2.Batch.Batch;
+using static protectTreesV2.Care.Care;
 using static protectTreesV2.Health.Health;
 
 namespace protectTreesV2.Batch
@@ -22,6 +22,34 @@ namespace protectTreesV2.Batch
             Patrol_Photo,  // 巡查照片
             Care_Record,   // 養護紀錄
             Care_Photo     // 養護照片
+        }
+
+        /// <summary>
+        /// 錯誤類型列舉 
+        /// </summary>
+        public enum enum_uploadErrorCategory
+        {
+            必填未填,  
+            格式錯誤,   
+            長度過長,  
+            邏輯矛盾,    
+            整列缺漏       
+        }
+        public class ValidationError
+        {
+     
+            public enum_uploadErrorCategory category { get; set; } // 錯誤分類
+            public string source { get; set; }          // 來源 
+            public string message { get; set; }         // 錯誤訊息內容
+
+            public ValidationError(enum_uploadErrorCategory category, string source, string message)
+            {
+                this.category = category;
+                this.source = source;
+                this.message = message;
+            }
+
+            public string displayMessage => $"[{source}] {message}";
         }
         /// <summary>
         /// DB 查詢用的複合鍵
@@ -89,6 +117,25 @@ namespace protectTreesV2.Batch
             public string sourceItem { get; set; }
             public bool isSuccess { get; set; }
             public string resultMsg { get; set; }
+        }
+
+        /// <summary>
+        /// 操作紀錄 Model
+        /// </summary>
+        public class TreeLog
+        {
+            public int logID { get; set; }
+            public string functionType { get; set; }
+
+            public int dataID { get; set; }
+            public string actionType { get; set; }
+            public string memo { get; set; }
+            public string ipAddress { get; set; }
+            public int? accountID { get; set; }
+            public string account { get; set; }
+            public string accountName { get; set; }
+            public string accountUnit { get; set; }
+            public DateTime logDateTime { get; set; } = DateTime.Now;
         }
 
         /// <summary>
@@ -263,6 +310,51 @@ namespace protectTreesV2.Batch
                 }
             }
             return logs;
+        }
+
+        /// <summary>
+        /// 批次新增操作紀錄 (Tree_Log)
+        /// </summary>
+        /// <param name="logList">紀錄列表</param>
+        public void BulkInsertTreeLogs(List<TreeLog> logList)
+        {
+            if (logList == null || logList.Count == 0) return;
+
+            DataTable dt = new DataTable();
+            dt.Columns.Add("functionType", typeof(string));
+            dt.Columns.Add("dataID", typeof(int));
+            dt.Columns.Add("actionType", typeof(string));
+            dt.Columns.Add("memo", typeof(string));
+            dt.Columns.Add("ipAddress", typeof(string));
+            dt.Columns.Add("accountID", typeof(int)); 
+            dt.Columns.Add("account", typeof(string));
+            dt.Columns.Add("accountName", typeof(string));
+            dt.Columns.Add("accountUnit", typeof(string));
+            dt.Columns.Add("logDateTime", typeof(DateTime));
+
+            // 將 List 資料填入 DataTable
+            foreach (var item in logList)
+            {
+                DataRow row = dt.NewRow();
+                row["functionType"] = item.functionType;
+                row["dataID"] = item.dataID;
+                row["actionType"] = item.actionType;
+                row["memo"] = item.memo ?? (object)DBNull.Value;
+                row["ipAddress"] = item.ipAddress ?? (object)DBNull.Value;
+                row["accountID"] = item.accountID.HasValue ? (object)item.accountID.Value : DBNull.Value;
+                row["account"] = item.account ?? (object)DBNull.Value;
+                row["accountName"] = item.accountName ?? (object)DBNull.Value;
+                row["accountUnit"] = item.accountUnit ?? (object)DBNull.Value;
+                row["logDateTime"] = item.logDateTime;
+
+                dt.Rows.Add(row);
+            }
+
+            using (var da = new MS_SQL())
+            {
+                // 對應資料庫表名稱 Tree_Log
+                da.BulkCopy("Tree_Log", dt);
+            }
         }
 
         /// <summary>
@@ -1148,6 +1240,433 @@ namespace protectTreesV2.Batch
             using (var da = new MS_SQL())
             {
                 da.BulkCopy("Tree_HealthPhoto", dt);
+            }
+        }
+
+
+        /// <summary>
+        /// 批次取得養護記錄流水號
+        /// </summary>
+        /// <param name="keys">查詢條件 (TreeID + CheckDate)</param>
+        public Dictionary<string, int> GetCareIDMap(List<TreeQueryKey> keys)
+        {
+            Dictionary<string, int> map = new Dictionary<string, int>();
+            if (keys == null || keys.Count == 0) return map;
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(@"
+                SELECT treeID, careDate, careID 
+                FROM Tree_CareRecord
+                WHERE removeDateTime IS NULL 
+                  AND (
+            ");
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<string> conditions = new List<string>();
+
+            for (int i = 0; i < keys.Count; i++)
+            {
+                string pTreeID = $"@t{i}";
+                string pDate = $"@d{i}";
+
+                // 條件直接對應 treeID
+                conditions.Add($" (treeID = {pTreeID} AND careDate = {pDate}) ");
+
+                parameters.Add(new SqlParameter(pTreeID, keys[i].treeID));
+                parameters.Add(new SqlParameter(pDate, keys[i].checkDate));
+            }
+
+            sb.Append(string.Join(" OR ", conditions));
+            sb.Append(" )");
+
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sb.ToString(), parameters.ToArray());
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    int dbTreeID = Convert.ToInt32(row["treeID"]);
+                    DateTime dbDate = Convert.ToDateTime(row["careDate"]);
+                    int dbCarethID = Convert.ToInt32(row["careID"]);
+
+                    string key = $"{dbTreeID}_{dbDate:yyyyMMdd}";
+
+                    if (!map.ContainsKey(key))
+                    {
+                        map.Add(key, dbCarethID);
+                    }
+                }
+            }
+
+            return map;
+        }
+        /// <summary>
+        /// 將 CareRecord 轉為 DataTable
+        /// </summary>
+        private System.Data.DataTable CreateCareRecordDataTable(List<CareRecord> list, bool forUpdate)
+        {
+            System.Data.DataTable dt = new System.Data.DataTable();
+
+            // ==========================================
+            // A. 定義欄位 (對應 Tree_CareRecord)
+            // ==========================================
+
+            // 如果是更新模式，必須包含 PK
+            if (forUpdate) dt.Columns.Add("careID", typeof(int));
+
+            // 基本資料
+            dt.Columns.Add("treeID", typeof(int));
+            dt.Columns.Add("careDate", typeof(DateTime));
+            dt.Columns.Add("recorder", typeof(string));
+            dt.Columns.Add("reviewer", typeof(string));
+            dt.Columns.Add("dataStatus", typeof(byte)); // tinyint 對應 byte
+
+            // 樹冠枝葉 (Crown)
+            dt.Columns.Add("crownStatus", typeof(byte));
+            dt.Columns.Add("crownSeasonalDormant", typeof(bool));
+            dt.Columns.Add("crownDeadBranch", typeof(bool));
+            dt.Columns.Add("crownDeadBranchPercent", typeof(decimal));
+            dt.Columns.Add("crownPest", typeof(bool));
+            dt.Columns.Add("crownForeignObject", typeof(bool));
+            dt.Columns.Add("crownOtherNote", typeof(string));
+
+            // 主莖幹 (Trunk)
+            dt.Columns.Add("trunkStatus", typeof(byte));
+            dt.Columns.Add("trunkBarkDamage", typeof(bool));
+            dt.Columns.Add("trunkDecay", typeof(bool));
+            dt.Columns.Add("trunkTermiteTrail", typeof(bool));
+            dt.Columns.Add("trunkLean", typeof(bool));
+            dt.Columns.Add("trunkFungus", typeof(bool));
+            dt.Columns.Add("trunkGummosis", typeof(bool));
+            dt.Columns.Add("trunkVine", typeof(bool));
+            dt.Columns.Add("trunkOtherNote", typeof(string));
+
+            // 根部 (Root)
+            dt.Columns.Add("rootStatus", typeof(byte));
+            dt.Columns.Add("rootDamage", typeof(bool));
+            dt.Columns.Add("rootDecay", typeof(bool));
+            dt.Columns.Add("rootExpose", typeof(bool));
+            dt.Columns.Add("rootRot", typeof(bool));
+            dt.Columns.Add("rootSucker", typeof(bool));
+            dt.Columns.Add("rootOtherNote", typeof(string));
+
+            // 生育地環境 (Env)
+            dt.Columns.Add("envStatus", typeof(byte));
+            dt.Columns.Add("envPitSmall", typeof(bool));
+            dt.Columns.Add("envPaved", typeof(bool));
+            dt.Columns.Add("envDebris", typeof(bool));
+            dt.Columns.Add("envSoilCover", typeof(bool));
+            dt.Columns.Add("envCompaction", typeof(bool));
+            dt.Columns.Add("envWaterlog", typeof(bool));
+            dt.Columns.Add("envNearFacility", typeof(bool));
+            dt.Columns.Add("envOtherNote", typeof(string));
+
+            // 鄰接物 (Adjacent)
+            dt.Columns.Add("adjacentStatus", typeof(byte));
+            dt.Columns.Add("adjacentBuilding", typeof(bool));
+            dt.Columns.Add("adjacentWire", typeof(bool));
+            dt.Columns.Add("adjacentSignal", typeof(bool));
+            dt.Columns.Add("adjacentOtherNote", typeof(string));
+
+            // 養護作業項目 (Tasks)
+            dt.Columns.Add("task1Status", typeof(byte));
+            dt.Columns.Add("task1Note", typeof(string));
+            dt.Columns.Add("task2Status", typeof(byte));
+            dt.Columns.Add("task2Note", typeof(string));
+            dt.Columns.Add("task3Status", typeof(byte));
+            dt.Columns.Add("task3Note", typeof(string));
+            dt.Columns.Add("task4Status", typeof(byte));
+            dt.Columns.Add("task4Note", typeof(string));
+            dt.Columns.Add("task5Status", typeof(byte));
+            dt.Columns.Add("task5Note", typeof(string));
+
+            // 系統資訊
+            if (forUpdate)
+            {
+                dt.Columns.Add("updateAccountID", typeof(int));
+                dt.Columns.Add("updateDateTime", typeof(DateTime));
+            }
+            else
+            {
+                dt.Columns.Add("insertAccountID", typeof(int));
+                dt.Columns.Add("insertDateTime", typeof(DateTime));
+            }
+
+            // ==========================================
+            // B. 填入資料
+            // ==========================================
+            foreach (var item in list)
+            {
+                System.Data.DataRow row = dt.NewRow();
+
+                if (forUpdate) row["careID"] = item.careID;
+
+                row["treeID"] = item.treeID;
+                // Date 欄位要注意 Nullable 轉換
+                row["careDate"] = item.careDate ?? (object)DBNull.Value;
+                row["recorder"] = item.recorder ?? (object)DBNull.Value;
+                row["reviewer"] = item.reviewer ?? (object)DBNull.Value;
+                row["dataStatus"] = item.dataStatus; // int 轉 byte, 假設範圍正確
+
+                // Crown
+                row["crownStatus"] = item.crownStatus ?? (object)DBNull.Value;
+                row["crownSeasonalDormant"] = item.crownSeasonalDormant ?? (object)DBNull.Value;
+                row["crownDeadBranch"] = item.crownDeadBranch ?? (object)DBNull.Value;
+                row["crownDeadBranchPercent"] = item.crownDeadBranchPercent ?? (object)DBNull.Value;
+                row["crownPest"] = item.crownPest ?? (object)DBNull.Value;
+                row["crownForeignObject"] = item.crownForeignObject ?? (object)DBNull.Value;
+                row["crownOtherNote"] = item.crownOtherNote ?? (object)DBNull.Value;
+
+                // Trunk
+                row["trunkStatus"] = item.trunkStatus ?? (object)DBNull.Value;
+                row["trunkBarkDamage"] = item.trunkBarkDamage ?? (object)DBNull.Value;
+                row["trunkDecay"] = item.trunkDecay ?? (object)DBNull.Value;
+                row["trunkTermiteTrail"] = item.trunkTermiteTrail ?? (object)DBNull.Value;
+                row["trunkLean"] = item.trunkLean ?? (object)DBNull.Value;
+                row["trunkFungus"] = item.trunkFungus ?? (object)DBNull.Value;
+                row["trunkGummosis"] = item.trunkGummosis ?? (object)DBNull.Value;
+                row["trunkVine"] = item.trunkVine ?? (object)DBNull.Value;
+                row["trunkOtherNote"] = item.trunkOtherNote ?? (object)DBNull.Value;
+
+                // Root
+                row["rootStatus"] = item.rootStatus ?? (object)DBNull.Value;
+                row["rootDamage"] = item.rootDamage ?? (object)DBNull.Value;
+                row["rootDecay"] = item.rootDecay ?? (object)DBNull.Value;
+                row["rootExpose"] = item.rootExpose ?? (object)DBNull.Value;
+                row["rootRot"] = item.rootRot ?? (object)DBNull.Value;
+                row["rootSucker"] = item.rootSucker ?? (object)DBNull.Value;
+                row["rootOtherNote"] = item.rootOtherNote ?? (object)DBNull.Value;
+
+                // Env
+                row["envStatus"] = item.envStatus ?? (object)DBNull.Value;
+                row["envPitSmall"] = item.envPitSmall ?? (object)DBNull.Value;
+                row["envPaved"] = item.envPaved ?? (object)DBNull.Value;
+                row["envDebris"] = item.envDebris ?? (object)DBNull.Value;
+                row["envSoilCover"] = item.envSoilCover ?? (object)DBNull.Value;
+                row["envCompaction"] = item.envCompaction ?? (object)DBNull.Value;
+                row["envWaterlog"] = item.envWaterlog ?? (object)DBNull.Value;
+                row["envNearFacility"] = item.envNearFacility ?? (object)DBNull.Value;
+                row["envOtherNote"] = item.envOtherNote ?? (object)DBNull.Value;
+
+                // Adjacent
+                row["adjacentStatus"] = item.adjacentStatus ?? (object)DBNull.Value;
+                row["adjacentBuilding"] = item.adjacentBuilding ?? (object)DBNull.Value;
+                row["adjacentWire"] = item.adjacentWire ?? (object)DBNull.Value;
+                row["adjacentSignal"] = item.adjacentSignal ?? (object)DBNull.Value;
+                row["adjacentOtherNote"] = item.adjacentOtherNote ?? (object)DBNull.Value;
+
+                // Tasks
+                row["task1Status"] = item.task1Status ?? (object)DBNull.Value;
+                row["task1Note"] = item.task1Note ?? (object)DBNull.Value;
+                row["task2Status"] = item.task2Status ?? (object)DBNull.Value;
+                row["task2Note"] = item.task2Note ?? (object)DBNull.Value;
+                row["task3Status"] = item.task3Status ?? (object)DBNull.Value;
+                row["task3Note"] = item.task3Note ?? (object)DBNull.Value;
+                row["task4Status"] = item.task4Status ?? (object)DBNull.Value;
+                row["task4Note"] = item.task4Note ?? (object)DBNull.Value;
+                row["task5Status"] = item.task5Status ?? (object)DBNull.Value;
+                row["task5Note"] = item.task5Note ?? (object)DBNull.Value;
+
+                // System
+                if (forUpdate)
+                {
+                    row["updateAccountID"] = item.updateAccountID ?? (object)DBNull.Value;
+                    row["updateDateTime"] = DateTime.Now;
+                }
+                else
+                {
+                    row["insertAccountID"] = item.insertAccountID;
+                    row["insertDateTime"] = DateTime.Now;
+                }
+
+                dt.Rows.Add(row);
+            }
+
+            return dt;
+        }
+        /// <summary>
+        /// 批次新增養護紀錄
+        /// </summary>
+        /// <param name="list">要新增的資料清單</param>
+        public void BulkInsertCareRecords(List<CareRecord> list)
+        {
+            if (list == null || list.Count == 0) return;
+
+            // 1. 產生 DataTable (Insert 模式)
+            System.Data.DataTable dt = CreateCareRecordDataTable(list, forUpdate: false);
+
+            using (var da = new MS_SQL())
+            {
+                da.BulkCopy("Tree_CareRecord", dt);
+            }
+        }
+
+        /// <summary>
+        /// 批次更新養護紀錄
+        /// </summary>
+        public void BulkUpdateCareRecords(List<CareRecord> list)
+        {
+            if (list == null || list.Count == 0) return;
+
+            // 1. 產生 DataTable
+            System.Data.DataTable dt = CreateCareRecordDataTable(list, forUpdate: true);
+
+            // 2. 使用您的 MS_SQL 類別
+            using (var da = new MS_SQL())
+            {
+                // ===============================================
+                // Step A: 建立暫存表 (包含所有欄位)
+                // ===============================================
+                string createTempSql = @"
+            IF OBJECT_ID('tempdb..#TempCareUpdate') IS NOT NULL DROP TABLE #TempCareUpdate;
+
+            CREATE TABLE #TempCareUpdate (
+                [careID] [int] NOT NULL,
+                [treeID] [int] NULL,
+                [careDate] [date] NULL,
+                [recorder] [nvarchar](100) NULL,
+                [reviewer] [nvarchar](100) NULL,
+                [dataStatus] [tinyint] NULL,
+
+                [crownStatus] [tinyint] NULL,
+                [crownSeasonalDormant] [bit] NULL,
+                [crownDeadBranch] [bit] NULL,
+                [crownDeadBranchPercent] [decimal](5, 2) NULL,
+                [crownPest] [bit] NULL,
+                [crownForeignObject] [bit] NULL,
+                [crownOtherNote] [nvarchar](200) NULL,
+
+                [trunkStatus] [tinyint] NULL,
+                [trunkBarkDamage] [bit] NULL,
+                [trunkDecay] [bit] NULL,
+                [trunkTermiteTrail] [bit] NULL,
+                [trunkLean] [bit] NULL,
+                [trunkFungus] [bit] NULL,
+                [trunkGummosis] [bit] NULL,
+                [trunkVine] [bit] NULL,
+                [trunkOtherNote] [nvarchar](200) NULL,
+
+                [rootStatus] [tinyint] NULL,
+                [rootDamage] [bit] NULL,
+                [rootDecay] [bit] NULL,
+                [rootExpose] [bit] NULL,
+                [rootRot] [bit] NULL,
+                [rootSucker] [bit] NULL,
+                [rootOtherNote] [nvarchar](200) NULL,
+
+                [envStatus] [tinyint] NULL,
+                [envPitSmall] [bit] NULL,
+                [envPaved] [bit] NULL,
+                [envDebris] [bit] NULL,
+                [envSoilCover] [bit] NULL,
+                [envCompaction] [bit] NULL,
+                [envWaterlog] [bit] NULL,
+                [envNearFacility] [bit] NULL,
+                [envOtherNote] [nvarchar](200) NULL,
+
+                [adjacentStatus] [tinyint] NULL,
+                [adjacentBuilding] [bit] NULL,
+                [adjacentWire] [bit] NULL,
+                [adjacentSignal] [bit] NULL,
+                [adjacentOtherNote] [nvarchar](200) NULL,
+
+                [task1Status] [tinyint] NULL,
+                [task1Note] [nvarchar](500) NULL,
+                [task2Status] [tinyint] NULL,
+                [task2Note] [nvarchar](500) NULL,
+                [task3Status] [tinyint] NULL,
+                [task3Note] [nvarchar](500) NULL,
+                [task4Status] [tinyint] NULL,
+                [task4Note] [nvarchar](500) NULL,
+                [task5Status] [tinyint] NULL,
+                [task5Note] [nvarchar](500) NULL,
+
+                [updateAccountID] [int] NULL,
+                [updateDateTime] [datetime] NULL
+            );
+        ";
+                da.ExecNonQuery(createTempSql);
+
+                // ===============================================
+                // Step B: 批次寫入暫存表
+                // ===============================================
+                da.BulkCopy("#TempCareUpdate", dt);
+
+                // ===============================================
+                // Step C: 從暫存表更新主表 (列出所有欄位)
+                // ===============================================
+                string updateSql = @"
+            UPDATE T
+            SET 
+                T.treeID = S.treeID,
+                T.careDate = S.careDate,
+                T.recorder = S.recorder,
+                T.reviewer = S.reviewer,
+                /*T.dataStatus = CASE WHEN @UpdateStatus = 1 THEN S.dataStatus ELSE T.dataStatus END,*/
+
+                T.crownStatus = S.crownStatus,
+                T.crownSeasonalDormant = S.crownSeasonalDormant,
+                T.crownDeadBranch = S.crownDeadBranch,
+                T.crownDeadBranchPercent = S.crownDeadBranchPercent,
+                T.crownPest = S.crownPest,
+                T.crownForeignObject = S.crownForeignObject,
+                T.crownOtherNote = S.crownOtherNote,
+
+                T.trunkStatus = S.trunkStatus,
+                T.trunkBarkDamage = S.trunkBarkDamage,
+                T.trunkDecay = S.trunkDecay,
+                T.trunkTermiteTrail = S.trunkTermiteTrail,
+                T.trunkLean = S.trunkLean,
+                T.trunkFungus = S.trunkFungus,
+                T.trunkGummosis = S.trunkGummosis,
+                T.trunkVine = S.trunkVine,
+                T.trunkOtherNote = S.trunkOtherNote,
+
+                T.rootStatus = S.rootStatus,
+                T.rootDamage = S.rootDamage,
+                T.rootDecay = S.rootDecay,
+                T.rootExpose = S.rootExpose,
+                T.rootRot = S.rootRot,
+                T.rootSucker = S.rootSucker,
+                T.rootOtherNote = S.rootOtherNote,
+
+                T.envStatus = S.envStatus,
+                T.envPitSmall = S.envPitSmall,
+                T.envPaved = S.envPaved,
+                T.envDebris = S.envDebris,
+                T.envSoilCover = S.envSoilCover,
+                T.envCompaction = S.envCompaction,
+                T.envWaterlog = S.envWaterlog,
+                T.envNearFacility = S.envNearFacility,
+                T.envOtherNote = S.envOtherNote,
+
+                T.adjacentStatus = S.adjacentStatus,
+                T.adjacentBuilding = S.adjacentBuilding,
+                T.adjacentWire = S.adjacentWire,
+                T.adjacentSignal = S.adjacentSignal,
+                T.adjacentOtherNote = S.adjacentOtherNote,
+
+                T.task1Status = S.task1Status,
+                T.task1Note = S.task1Note,
+                T.task2Status = S.task2Status,
+                T.task2Note = S.task2Note,
+                T.task3Status = S.task3Status,
+                T.task3Note = S.task3Note,
+                T.task4Status = S.task4Status,
+                T.task4Note = S.task4Note,
+                T.task5Status = S.task5Status,
+                T.task5Note = S.task5Note,
+
+                T.updateAccountID = S.updateAccountID,
+                T.updateDateTime = GETDATE()
+            FROM Tree_CareRecord T
+            INNER JOIN #TempCareUpdate S ON T.careID = S.careID;
+
+            DROP TABLE #TempCareUpdate;
+        ";
+
+                // Step D: 執行 Update
+                da.ExecNonQuery(updateSql);
             }
         }
 

@@ -324,10 +324,10 @@ VALUES
         {
             const string sql = @"
 SELECT TOP 1 r.treeID, r.systemTreeNo, r.agencyTreeNo, r.agencyJurisdictionCode,
-       r.cityID, COALESCE(area.city, city.city, r.cityName) AS cityName,
-       r.areaID, COALESCE(area.area, r.areaName) AS areaName,
-       r.speciesID, COALESCE(species.commonName, r.speciesCommonName) AS speciesCommonName,
-       COALESCE(species.scientificName, r.speciesScientificName) AS speciesScientificName,
+       r.cityID, COALESCE(area.city, city.city) AS cityName,
+       r.areaID, area.area AS areaName,
+       r.speciesID, species.commonName AS speciesCommonName,
+       species.scientificName AS speciesScientificName,
        r.manager, r.managerContact, r.surveyDate, r.surveyor,
        r.announcementDate, r.isAnnounced, r.treeStatus, r.editStatus,
        r.treeCount, r.site, r.latitude, r.longitude,
@@ -400,10 +400,10 @@ WHERE r.systemTreeNo=@systemTreeNo AND r.removeDateTime IS NULL";
             var records = new List<TreeRecord>();
             var sql = new StringBuilder();
             sql.Append(@"SELECT r.treeID, r.systemTreeNo, r.agencyTreeNo, r.agencyJurisdictionCode,
-                                r.cityID, COALESCE(area.city, city.city, r.cityName) AS cityName,
-                                r.areaID, COALESCE(area.area, r.areaName) AS areaName,
-                                r.speciesID, COALESCE(species.commonName, r.speciesCommonName) AS speciesCommonName,
-                                COALESCE(species.scientificName, r.speciesScientificName) AS speciesScientificName,
+                                r.cityID, COALESCE(area.city, city.city) AS cityName,
+                                r.areaID, area.area AS areaName,
+                                r.speciesID, species.commonName AS speciesCommonName,
+                                species.scientificName AS speciesScientificName,
                                 r.manager, r.managerContact, r.surveyDate, r.announcementDate, r.isAnnounced,
                                 r.treeStatus, r.editStatus, r.updateDateTime,
                                 r.sourceUnit

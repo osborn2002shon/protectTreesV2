@@ -1258,8 +1258,19 @@
             $fileDropArea.on('dragleave', function (e) { e.preventDefault(); e.stopPropagation(); $(this).removeClass('dragging'); });
             $fileDropArea.on('drop', function (e) {
                 e.preventDefault(); e.stopPropagation(); $(this).removeClass('dragging');
-                const files = e.originalEvent.dataTransfer.files;
-                if (files.length > 0) handleAttachment(files[0]);
+
+                // 取得 DataTransfer 物件 (這是為了最後要塞回 input 用的)
+                const dt = e.originalEvent.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    const droppedFile = files[0];
+                    handleAttachment(droppedFile);
+                    if (newAttachment === droppedFile) {
+                        // 驗證成功
+                        $attachInput[0].files = files;
+                    }
+                }
             });
 
             // 刪除按鈕

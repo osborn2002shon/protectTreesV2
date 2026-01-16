@@ -426,11 +426,11 @@ namespace protectTreesV2.Health
                     record.manager, record.treeStatus,
             
                     /* 縣市鄉鎮名稱 */
-                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+                    COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                    areaInfo.area AS areaName,
             
                     /* 樹種名稱 */
-                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    species.commonName AS speciesName,
             
                     /* 最新健檢紀錄欄位 (可能為 NULL) */
                     latest_health.healthID, 
@@ -474,6 +474,15 @@ namespace protectTreesV2.Health
             // ==========================================
             whereClauses.Add("record.removeDateTime IS NULL");
             whereClauses.Add("record.editStatus = 1");
+            string unitLimitSql = @"
+                record.areaID IN (
+                    SELECT map.twID 
+                    FROM System_UnitCityMapping map
+                    INNER JOIN System_UserAccount u ON u.unitID = map.unitID
+                    WHERE u.accountID = @currentUserID
+                )
+            ";
+            whereClauses.Add(unitLimitSql);
 
             // 篩選：僅撈取無健檢紀錄樹籍
             // 因為用了 OUTER APPLY，無紀錄的 latest_health.healthID 會是 NULL
@@ -604,10 +613,10 @@ namespace protectTreesV2.Health
                        record.agencyTreeNo, 
                        record.agencyJurisdictionCode,
 
-                       COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                       COALESCE(areaInfo.area, record.areaName) AS areaName,
+                       COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                       areaInfo.area AS areaName,
                        /* 樹種 */
-                       COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                       species.commonName AS speciesName,
                
                        record.manager
                
@@ -726,11 +735,11 @@ namespace protectTreesV2.Health
                     record.agencyTreeNo,
             
                     /* 名稱轉換 (優先權：System_Taiwan > Tree_Record 原欄位) */
-                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+                    COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                    areaInfo.area AS areaName,
             
                     /* 樹種名稱 */
-                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    species.commonName AS speciesName,
             
                     record.manager
 
@@ -743,6 +752,8 @@ namespace protectTreesV2.Health
                 LEFT JOIN Tree_Species species ON species.speciesID = record.speciesID
             ";
 
+            parameters.Add(new SqlParameter("@currentUserID", currentUserID));
+
             // ==========================================
             // 2. 篩選條件
             // ==========================================
@@ -752,13 +763,25 @@ namespace protectTreesV2.Health
             // 必須是 editStatus = 1 (已完稿/有樹號) 才能有健檢紀錄
             whereClauses.Add("record.editStatus = 1");
 
+            //過濾單位
+            string unitLimitSql = @"
+                record.areaID IN (
+                    SELECT map.twID 
+                    FROM System_UnitCityMapping map
+                    INNER JOIN System_UserAccount u ON u.unitID = map.unitID
+                    WHERE u.accountID = @currentUserID
+                )
+            ";
+            whereClauses.Add(unitLimitSql);
+
             // Scope: 我的紀錄 vs 單位全部
             if (filter.scope == "My")
             {
-                whereClauses.Add("health.insertAccountID = @userID");
-                parameters.Add(new SqlParameter("@userID", currentUserID));
+                // 我的紀錄
+                // 只撈取 insertAccountID 等於自己的紀錄
+                whereClauses.Add("health.insertAccountID = @currentUserID");
             }
-            // 若是 Unit (單位全部)，不加額外過濾，顯示所有
+            
 
             // 日期區間 (針對 surveyDate)
             if (filter.dateStart.HasValue)
@@ -920,9 +943,9 @@ namespace protectTreesV2.Health
                 t.systemTreeNo, 
                 t.agencyTreeNo, 
                 t.manager,
-                COALESCE(areaInfo.city, cityInfo.city, t.cityName) AS cityName,
-                COALESCE(areaInfo.area, t.areaName) AS areaName,
-                COALESCE(species.commonName, t.speciesCommonName) AS speciesCommonName
+                COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                areaInfo.area AS areaName,
+                species.commonName AS speciesCommonName
             FROM Tree_HealthRecord h
             INNER JOIN Tree_Record t ON h.treeID = t.treeID
             OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = t.cityID) cityInfo

@@ -213,7 +213,7 @@
                                         </asp:Label>
                                     </ItemTemplate>
                                 </asp:TemplateField>
-                                <asp:BoundField DataField="sourceItem" HeaderText="檔案名稱" />
+                                <asp:BoundField DataField="sourceItem" HeaderText="所在行數" />
                                 <asp:TemplateField HeaderText="處理結果">
                                     <ItemTemplate>
                                         <span class='<%# (bool)Eval("isSuccess") ? "text-success" : "text-danger fw-bold" %>'>

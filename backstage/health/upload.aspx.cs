@@ -448,36 +448,59 @@ namespace protectTreesV2.backstage.health
                         IRow soilRow = GetAndRemove(soilMap, linkKey);
                         IRow riskRow = GetAndRemove(riskMap, linkKey);
 
-                        // --- 附屬頁籤檢查 ---
                         if (pestRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, pestRow, "病蟲害調查", rowErrors);
                             var errs = ParseAndValidatePestInfo(pestRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
+                        else if (isStrictMode)
+                        {
+                            rowErrors.Add("缺漏資料：[病蟲害調查] 頁籤中找不到此調查記數的資料。");
+                        }
+
                         if (appRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, appRow, "樹木生長外觀情況", rowErrors);
                             var errs = ParseAndValidateAppearance(appRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
+                        else if (isStrictMode)
+                        {
+                            rowErrors.Add("缺漏資料：[樹木生長外觀情況] 頁籤中找不到此調查記數的資料。");
+                        }
+
                         if (prunRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, prunRow, "樹木修剪與支撐情況", rowErrors);
                             var errs = ParseAndValidatePruning(prunRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
+                        else if (isStrictMode)
+                        {
+                            rowErrors.Add("缺漏資料：[樹木修剪與支撐情況] 頁籤中找不到此調查記數的資料。");
+                        }
+
                         if (soilRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, soilRow, "生育地環境與土讓檢測情況", rowErrors);
                             var errs = ParseAndValidateSoil(soilRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
+                        else if (isStrictMode)
+                        {
+                            rowErrors.Add("缺漏資料：[生育地環境與土讓檢測情況] 頁籤中找不到此調查記數的資料。");
+                        }
+
                         if (riskRow != null)
                         {
                             CheckTreeNoConsistency(treeNo, riskRow, "健康檢查結果及風險評估", rowErrors);
                             var errs = ParseAndValidateRisk(riskRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
+                        }
+                        else if (isStrictMode)
+                        {
+                            rowErrors.Add("缺漏資料：[健康檢查結果及風險評估] 頁籤中找不到此調查記數的資料。");
                         }
 
                         // --- 重複資料檢查 (同檔案內) ---
@@ -522,7 +545,7 @@ namespace protectTreesV2.backstage.health
                     ProcessOrphans(soilMap, "生育地環境與土讓檢測情況", allLogList);
                     ProcessOrphans(riskMap, "健康檢查結果及風險評估", allLogList);
 
-                } // End Using FileStream
+                } 
 
                 // ==========================================
                 // 資料庫比對與寫入
@@ -690,6 +713,10 @@ namespace protectTreesV2.backstage.health
 
                     // 寫入 DB
                     system_batch.BulkInsertTaskLogs(allLogList);
+
+                    //寫入操作紀錄
+                    UserLog.Insert_UserLog(accountID, UserLog.enum_UserLogItem.健檢紀錄管理, UserLog.enum_UserLogType.上傳, "批次上傳健檢紀錄");
+
                     logSaved = true;
                 }
                 catch (Exception ex)
@@ -699,7 +726,7 @@ namespace protectTreesV2.backstage.health
                 }
 
                 // =====================================================
-                // Step E: 顯示結果
+                // 顯示結果
                 // =====================================================
 
                 if (logSaved)

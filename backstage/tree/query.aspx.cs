@@ -7,7 +7,6 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
-using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.tree
@@ -313,7 +312,7 @@ namespace protectTreesV2.backstage.tree
 
             var user = UserInfo.GetCurrentUser;
             int accountId = user?.accountID ?? 0;
-            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.樹籍基本資料管理, UserLog.enum_UserLogType.下載, "下載樹籍基本資料");
+            UserLog.Insert_UserLog(accountId, UserLog.enum_UserLogItem.樹籍基本資料管理, UserLog.enum_UserLogType.下載, "下載樹籍基本資料");
 
             var sb = new StringBuilder();
             sb.Append("<table border='1'>");
@@ -385,7 +384,7 @@ namespace protectTreesV2.backstage.tree
             UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.樹籍基本資料管理, UserLog.enum_UserLogType.修改, $"更新{selected.Count}筆狀態為{TreeService.GetStatusText(status)}");
             foreach (var treeId in selected)
             {
-                FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog,
+                TreeLog.InsertLog(TreeLog.LogFunctionTypes.TreeCatalog,
                     treeId,
                     "批次設定樹籍狀態",
                     $"狀態更新為{TreeService.GetStatusText(status)}",

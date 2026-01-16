@@ -92,10 +92,10 @@ namespace protectTreesV2._mp
                 }
             }
 
-            // 移除固定層 /pages/
-            if (path.StartsWith("/Pages/", StringComparison.OrdinalIgnoreCase))
+            // 移除固定層 /backstage/
+            if (path.StartsWith("/backstage/", StringComparison.OrdinalIgnoreCase))
             {
-                path = path.Substring("/Pages".Length);
+                path = path.Substring("/backstage".Length);
             }
 
             // 確保開頭為 "/"
@@ -217,6 +217,15 @@ namespace protectTreesV2._mp
             return menuList;
         }
 
+        protected override void OnInit(EventArgs e)
+        {
+            // 若檢查沒有正確的 Session，直接返回登入畫面
+            var ui = UserInfo.GetCurrentUser;
+            if (ui == null || !ui.isExist)
+            {
+                Response.Redirect("~/Login.aspx");
+            }
+        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -252,6 +261,12 @@ namespace protectTreesV2._mp
                     Panel_closeModal_img.Visible = true;
                 }
             }
+        }
+
+        protected void LinkButton_logout_Click(object sender, EventArgs e)
+        {
+            UserInfo.SignOut();
+            Response.Redirect("~/Login.aspx");
         }
     }
 }

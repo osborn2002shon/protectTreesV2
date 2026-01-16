@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 using Newtonsoft.Json;
 using static protectTreesV2.Health.Health;
 using System.IO;
-using protectTreesV2.Log;
+using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.health
 {
@@ -67,6 +67,7 @@ namespace protectTreesV2.backstage.health
             get { return (int)(ViewState["CurrentTreeID"] ?? 0); }
             set { ViewState["CurrentTreeID"] = value; }
         }
+
 
         /// <summary>
         /// 動作判斷
@@ -299,7 +300,7 @@ namespace protectTreesV2.backstage.health
 
         private void BindLogs()
         {
-            var logs = FunctionLogService.GetLogs(LogFunctionTypes.Health,this.CurrentHealthID ) ?? new List<FunctionLogEntry>();
+            var logs = TreeLog.GetLogs(TreeLog.LogFunctionTypes.Health,this.CurrentHealthID ) ?? new List<TreeLog.FunctionLogEntry>();
             Panel_logs.Visible = true;
             GridView_logs.DataSource = logs;
             GridView_logs.DataBind();
@@ -689,9 +690,11 @@ namespace protectTreesV2.backstage.health
                     return;
                 }
 
-                // 如果是編輯模式 (ID > 0)
+                // 編輯模式 (ID > 0)
+                bool isNew = true;
                 if (this.CurrentHealthID > 0)
                 {
+                    isNew = false;
                     // 重新從資料庫讀取目前的狀態
                     var currentRecord = system_health.GetHealthRecord(this.CurrentHealthID);
 
@@ -725,6 +728,21 @@ namespace protectTreesV2.backstage.health
 
                 // 處理附件
                 ProcessAttachment(savedHealthID, accountID);
+
+                //寫入紀錄
+                var tree = TreeService.GetTree(CurrentTreeID);
+                UserLog.enum_UserLogType actionText = isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改;
+                string logMemo = isNew ? "新增健檢" : "編輯健檢";
+                UserLog.Insert_UserLog(accountID, UserLog.enum_UserLogItem.健檢紀錄管理, actionText, logMemo);
+                TreeLog.InsertLog(TreeLog.LogFunctionTypes.Health,
+                    record.healthID,
+                    logMemo,
+                    $"系統樹籍編號：{tree.SystemTreeNo ?? "無"}，調查日期：{record.surveyDate:yyyy-MM-dd}，狀態：{(record.dataStatus == (int)protectTreesV2.Health.Health.enum_healthRecordStatus.定稿 ? "定稿" : "草稿")}",
+                    Request?.UserHostAddress,
+                    user?.accountID,
+                    user?.account,
+                    user?.name,
+                    user?.unitName);
 
                 ShowMessage("系統提示", "資料儲存成功！");
 
@@ -1526,7 +1544,7 @@ namespace protectTreesV2.backstage.health
             // ----------------------------------------------------------------------
             if (hasNewFile)
             {
-                // 刪除舊 DB 紀錄（你是刪全部，OK）
+                // 刪除舊 DB 紀錄
                 var oldAttachments = system_health.GetHealthAttachments(healthId);
                 foreach (var oldAtt in oldAttachments)
                     system_health.DeleteHealthAttachment(healthId, oldAtt.attachmentID, accountId);
@@ -1588,7 +1606,7 @@ namespace protectTreesV2.backstage.health
 
         protected void LinkButton_cancel_Click(object sender, EventArgs e)
         {
-            base.ReturnState();
+            base.ReturnState("list.aspx");
         }
     }
 }

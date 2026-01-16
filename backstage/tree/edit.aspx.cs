@@ -9,7 +9,6 @@ using System.Web.Script.Serialization;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
-using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.tree
@@ -57,11 +56,8 @@ namespace protectTreesV2.backstage.tree
         private void BindDropdowns()
         {
             ddlCity.Items.Clear();
-            ddlCity.Items.Add(new ListItem("請選擇", string.Empty));
-            foreach (var city in GetCities())
-            {
-                ddlCity.Items.Add(city);
-            }
+            Base.DropdownBinder.Bind_DropDownList_City(ref ddlCity, false);
+            ddlCity.Items.Insert(0, new ListItem("請選擇", string.Empty));
 
             ddlArea.Items.Clear();
             ddlArea.Items.Add(new ListItem("請選擇", string.Empty));
@@ -209,18 +205,11 @@ namespace protectTreesV2.backstage.tree
         private void BindAreas()
         {
             ddlArea.Items.Clear();
-            ddlArea.Items.Add(new ListItem("請選擇", string.Empty));
-            if (string.IsNullOrWhiteSpace(ddlCity.SelectedValue)) return;
 
-            using (var da = new DataAccess.MS_SQL())
-            {
-                const string sql = "SELECT twID, area FROM System_Taiwan WHERE cityID=@city ORDER BY area";
-                var dt = da.GetDataTable(sql, new System.Data.SqlClient.SqlParameter("@city", ddlCity.SelectedValue));
-                foreach (DataRow row in dt.Rows)
-                {
-                    ddlArea.Items.Add(new ListItem(row["area"].ToString(), row["twID"].ToString()));
-                }
+            if (!string.IsNullOrWhiteSpace(ddlCity.SelectedValue)) { 
+                Base.DropdownBinder.Bind_DropDownList_Area(ref ddlArea, ddlCity.SelectedValue, false);
             }
+            ddlArea.Items.Insert(0, new ListItem("請選擇", string.Empty));
         }
 
         protected void btnSave_Click(object sender, EventArgs e)
@@ -397,8 +386,8 @@ namespace protectTreesV2.backstage.tree
             }
 
             string logMemo = isNew ? "新增樹籍" : "編輯樹籍";
-            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.樹籍基本資料管理, isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改, logMemo);
-            FunctionLogService.InsertLog(LogFunctionTypes.TreeCatalog,
+            UserLog.Insert_UserLog(accountId, UserLog.enum_UserLogItem.樹籍基本資料管理, isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改, logMemo);
+            TreeLog.InsertLog(TreeLog.LogFunctionTypes.TreeCatalog,
                 record.TreeID,
                 logMemo,
                 $"系統樹籍編號：{record.SystemTreeNo ?? "無"}，狀態：{TreeService.GetStatusText(record.Status)}，編輯狀態：{record.EditStatus}",
@@ -570,7 +559,7 @@ namespace protectTreesV2.backstage.tree
 
         private void BindLogs(int treeId)
         {
-            var logs = FunctionLogService.GetLogs(LogFunctionTypes.TreeCatalog, treeId) ?? new List<FunctionLogEntry>();
+            var logs = TreeLog.GetLogs(TreeLog.LogFunctionTypes.TreeCatalog, treeId) ?? new List<TreeLog.FunctionLogEntry>();
             pnlLogs.Visible = true;
             lblLogEmpty.Visible = logs.Count == 0;
             gvLogs.Visible = logs.Count > 0;

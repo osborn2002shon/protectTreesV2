@@ -283,9 +283,35 @@ namespace protectTreesV2
             //更新登入時間
             DateTime _currentDateTime = DateTime.Now;
             Update_LastLoginDateTime(info.accountID, _currentDateTime);
-            //TODO: 寫入User Log use _currentDateTime
+            //寫入User Log
             UserLog.Insert_UserLog(info.accountID, UserLog.enum_UserLogItem.登入, UserLog.enum_UserLogType.其他, "", _currentDateTime);
-            Response.Redirect("~/system/accountManage.aspx");
+            //依據身分權限跳轉
+            switch (info.auTypeID) {
+                case 1:
+                    //系統管理權限 本署
+                    Response.Redirect("~/backstage/dashboard/sm.aspx");
+                    return;
+                case 2:
+                    //檢視管理權限 分署
+                    Response.Redirect("~/backstage/dashboard/rm.aspx");
+                    return;
+                case 3:
+                    //健康管理權限 健檢中心
+                    Response.Redirect("~/backstage/dashboard/hm.aspx");
+                    return;
+                case 4:
+                    //樹木管理權限 縣市政府
+                    Response.Redirect("~/backstage/dashboard/tm.aspx");
+                    return;
+                case 5:
+                    //養護作業權限 縣市政府下的樹木權管單位或養護單位或養護廠商
+                    Response.Redirect("~/backstage/tree/query.aspx");
+                    return;
+                default:
+                    Response.Redirect("login.aspx");
+                    return;
+            }
+            
         }
     }
 }

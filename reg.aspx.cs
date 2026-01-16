@@ -17,7 +17,7 @@ namespace protectTreesV2
         /// </summary>
         public static void Bind_DropDownList_UnitGroup(DropDownList ddlUnit)
         {
-            string sql = @"SELECT auTypeID, unitGroup FROM System_Unit GROUP BY auTypeID, unitGroup ORDER BY auTypeID";
+            string sql = @"SELECT auTypeID, unitGroup FROM System_Unit WHERE auTypeID not in (1,2) GROUP BY auTypeID, unitGroup ORDER BY auTypeID";
 
             DataTable dt;
             using (var da = new DataAccess.MS_SQL())
@@ -153,7 +153,7 @@ namespace protectTreesV2
             list_mailTo.Add(new MailAddress(email, name));
             string DNS_Name = ConfigurationManager.AppSettings["DNS_Name"];
             string verifyURL = DNS_Name + "regVerify.aspx?vc=" + hashCode;
-            string mailSubject = "[受保護樹木管理系統]帳號申請電子信箱驗證信件";
+            string mailSubject = "[受保護樹木管理系統] 帳號申請電子信箱驗證信件";
             string mailBody = 
                 string.Format(
                     "{0} 您好，請點選下面網址進行電子信箱驗證：<br>" +

@@ -143,7 +143,7 @@ namespace protectTreesV2
                 //發信不會留LOG，但是會BCC到信箱
                 List<MailAddress> list_mailTo = Account.Get_MailTo(verifyInfo.unitID);
                 if (list_mailTo.Count > 0) { 
-                    string mailSubject = "[受保護樹木管理系統]帳號審核需求通知信";
+                    string mailSubject = "[受保護樹木管理系統] 帳號審核需求通知信";
                     string mailBody =
                         string.Format(
                             "您好，系統已接獲一筆帳號申請之需求（姓名：{0}），請盡速至系統查看並完成審核作業。<br><br>" +

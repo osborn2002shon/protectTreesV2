@@ -6,7 +6,6 @@ using System.Linq;
 using System.Web;
 using System.Web.UI.WebControls;
 using protectTreesV2.Base;
-using protectTreesV2.Log;
 using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.care
@@ -613,8 +612,8 @@ namespace protectTreesV2.backstage.care
             var tree = TreeService.GetTree(CurrentTreeID);
             UserLog.enum_UserLogType actionText = isNew ? UserLog.enum_UserLogType.新增 : UserLog.enum_UserLogType.修改;
             string logMemo = isNew ? "新增養護" : "編輯養護";
-            UserLog.Insert_UserLog(user.accountID, UserLog.enum_UserLogItem.養護紀錄管理, actionText, logMemo);
-            FunctionLogService.InsertLog(LogFunctionTypes.Care,
+            UserLog.Insert_UserLog(accountId, UserLog.enum_UserLogItem.養護紀錄管理, actionText, logMemo);
+            TreeLog.InsertLog(TreeLog.LogFunctionTypes.Care,
                 record.careID,
                 logMemo,
                 $"系統樹籍編號：{tree?.SystemTreeNo ?? "無"}，養護日期：{record.careDate:yyyy-MM-dd}，狀態：{(record.dataStatus == (int)Care.Care.CareRecordStatus.定稿 ? "定稿" : "草稿")}",
@@ -1152,7 +1151,7 @@ namespace protectTreesV2.backstage.care
 
         private void BindLogs(int careId)
         {
-            var logs = FunctionLogService.GetLogs(LogFunctionTypes.Care, careId) ?? new List<FunctionLogEntry>();
+            var logs = TreeLog.GetLogs(TreeLog.LogFunctionTypes.Care, careId) ?? new List<TreeLog.FunctionLogEntry>();
             pnlLogs.Visible = true;
             lblLogEmpty.Visible = logs.Count == 0;
             gvLogs.Visible = logs.Count > 0;

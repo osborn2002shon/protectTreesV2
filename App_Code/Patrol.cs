@@ -144,10 +144,10 @@ namespace protectTreesV2.Patrol
                     record.treeID, record.systemTreeNo, record.agencyTreeNo, record.agencyJurisdictionCode,
                     record.manager, record.treeStatus,
 
-                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+                    COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                    areaInfo.area AS areaName,
 
-                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    species.commonName AS speciesName,
 
                     latest_patrol.patrolID,
                     latest_patrol.patrolDate,
@@ -299,9 +299,9 @@ namespace protectTreesV2.Patrol
                        record.agencyTreeNo,
                        record.agencyJurisdictionCode,
 
-                       COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                       COALESCE(areaInfo.area, record.areaName) AS areaName,
-                       COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                       COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                       areaInfo.area AS areaName,
+                       species.commonName AS speciesName,
                        record.manager,
 
                        latest_patrol.patrolDate,
@@ -414,10 +414,10 @@ namespace protectTreesV2.Patrol
                     record.systemTreeNo,
                     record.agencyTreeNo,
 
-                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+                    COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                    areaInfo.area AS areaName,
 
-                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    species.commonName AS speciesName,
                     record.manager,
                     record.areaID
 
@@ -735,21 +735,20 @@ SELECT SCOPE_IDENTITY();";
             }
         }
 
-        public List<string> GetRiskNotificationEmails(int cityId)
+        public List<string> GetRiskNotificationEmails(int areaID)
         {
             const string sql = @"
-        SELECT DISTINCT ua.email
-        FROM User_Account ua
-        JOIN User_Area_Mapping map ON ua.accountID = map.accountID
-        WHERE (ua.auTypeID = 4 or ua.auTypeID = 1)
-          AND ua.isActive = 1
-          AND ua.removeDateTime IS NULL
-          AND (map.city = @cityId OR map.city = '-1')";
+            select distinct System_UserAccount.email from System_UserAccount
+            inner join System_UnitCityMapping on System_UserAccount.unitID = System_UnitCityMapping.unitID
+            where (System_UserAccount.auTypeID = 4 or System_UserAccount.auTypeID = 1)
+            and System_UserAccount.isActive = 1
+            and System_UserAccount.removeDateTime is null
+            and System_UnitCityMapping.twID = @areaID";
 
             var emails = new List<string>();
             using (var da = new DataAccess.MS_SQL())
             {
-                var dt = da.GetDataTable(sql, new SqlParameter("@cityId", cityId.ToString(CultureInfo.InvariantCulture)));
+                var dt = da.GetDataTable(sql, new SqlParameter("@areaID", areaID.ToString(CultureInfo.InvariantCulture)));
                 foreach (DataRow row in dt.Rows)
                 {
                     var mail = GetString(row, "email");

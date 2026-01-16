@@ -144,7 +144,7 @@ namespace protectTreesV2.Base
         /// <summary>
         /// 返回頁面
         /// </summary>
-        public void ReturnState()
+        public void ReturnState(string fallbackUrl = "/Login.aspx")
         {
             if (ViewState[PageStateInfo.viewStateKey] is PageStateInfo state)
             {
@@ -153,7 +153,7 @@ namespace protectTreesV2.Base
             }
             else
             {
-                Response.Redirect("/Login.aspx");
+                Response.Redirect(fallbackUrl);
             }
         }
 
@@ -376,6 +376,8 @@ namespace protectTreesV2.Base
         public static void Bind_DropDownList_City(ref DropDownList ddl, bool showAll = true)
         {
             ddl.Items.Clear();
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
 
             // 判斷是否要加入預設選項
             if (showAll)
@@ -385,9 +387,20 @@ namespace protectTreesV2.Base
 
             using (var da = new DataAccess.MS_SQL())
             {
-                const string sql = "SELECT DISTINCT cityID, city FROM System_Taiwan ORDER BY cityID";
+                const string sql = @"
+                    SELECT DISTINCT cityID, System_Taiwan.city 
+                    FROM System_Taiwan 
+                    inner join System_UnitCityMapping ON System_Taiwan.twID = System_UnitCityMapping.twID
+                    inner join System_UserAccount on System_UnitCityMapping.unitID = System_UserAccount.unitID
+                    where System_UserAccount.accountID = @userID
+                    ORDER BY cityID";
 
-                var dt = da.GetDataTable(sql);
+                var parameters = new System.Data.SqlClient.SqlParameter[]
+                    {
+                    new System.Data.SqlClient.SqlParameter("@userID", accountId)
+                    };
+
+                var dt = da.GetDataTable(sql, parameters);
                 foreach (DataRow row in dt.Rows)
                 {
                     ddl.Items.Add(new ListItem(row["city"].ToString(), row["cityID"].ToString()));
@@ -404,6 +417,8 @@ namespace protectTreesV2.Base
         public static void Bind_DropDownList_Area(ref DropDownList ddl, string cityID, bool showAll = true)
         {
             ddl.Items.Clear();
+            var user = UserInfo.GetCurrentUser;
+            int accountId = user?.accountID ?? 0;
 
             // 判斷是否要加入預設選項
             if (showAll)
@@ -416,11 +431,19 @@ namespace protectTreesV2.Base
 
             using (var da = new DataAccess.MS_SQL())
             {
-                const string sql = "SELECT twID, area FROM System_Taiwan WHERE cityID=@city ORDER BY area";
+                const string sql = @"
+                    SELECT DISTINCT area, System_Taiwan.twID 
+                    FROM System_Taiwan 
+                    inner join System_UnitCityMapping ON System_Taiwan.twID = System_UnitCityMapping.twID
+                    inner join System_UserAccount on System_UnitCityMapping.unitID = System_UserAccount.unitID
+                    where System_Taiwan.cityID = @city
+                    and System_UserAccount.accountID = @userID
+                    ORDER BY area";
 
                 var parameters = new System.Data.SqlClient.SqlParameter[]
                 {
-                new System.Data.SqlClient.SqlParameter("@city", cityID)
+                new System.Data.SqlClient.SqlParameter("@city", cityID),
+                new System.Data.SqlClient.SqlParameter("userID", accountId)
                 };
 
                 var dt = da.GetDataTable(sql, parameters);

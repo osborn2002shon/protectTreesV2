@@ -241,17 +241,6 @@ namespace protectTreesV2
         }
 
         /// <summary>
-        /// 是否已登入
-        /// </summary>
-        public static bool IsAuthenticated
-        {
-            get
-            {
-                return GetCurrentUser != null;
-            }
-        }
-
-        /// <summary>
         /// 登入成功時呼叫（唯一 SET Session 的地方）
         /// </summary>
         public static void SignIn(Account.stru_accountInfo user)

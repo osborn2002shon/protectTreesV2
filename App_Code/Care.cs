@@ -191,10 +191,10 @@ namespace protectTreesV2.Care
                     record.treeID, record.systemTreeNo, record.agencyTreeNo, record.agencyJurisdictionCode,
                     record.manager, record.treeStatus,
 
-                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+                    COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                    areaInfo.area AS areaName,
 
-                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    species.commonName AS speciesName,
 
                     latest_care.careID,
                     latest_care.careDate,
@@ -348,9 +348,9 @@ namespace protectTreesV2.Care
                        record.agencyTreeNo,
                        record.agencyJurisdictionCode,
 
-                       COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                       COALESCE(areaInfo.area, record.areaName) AS areaName,
-                       COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                       COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                       areaInfo.area AS areaName,
+                       species.commonName AS speciesName,
                        record.manager,
 
                        latest_care.careDate,
@@ -464,10 +464,10 @@ namespace protectTreesV2.Care
                     record.systemTreeNo,
                     record.agencyTreeNo,
 
-                    COALESCE(areaInfo.city, cityInfo.city, record.cityName) AS cityName,
-                    COALESCE(areaInfo.area, record.areaName) AS areaName,
+                    COALESCE(areaInfo.city, cityInfo.city) AS cityName,
+                    areaInfo.area AS areaName,
 
-                    COALESCE(species.commonName, record.speciesCommonName) AS speciesName,
+                    species.commonName AS speciesName,
                     record.manager,
                     record.areaID
 
