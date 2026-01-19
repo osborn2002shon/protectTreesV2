@@ -35,7 +35,7 @@
     </div>
     <div class="container-fluid gv-tb">
         <div class="table-responsive">
-            <asp:GridView ID="gvSpecies" runat="server" CssClass="gv" AutoGenerateColumns="false">
+            <asp:GridView ID="gvSpecies" runat="server" CssClass="gv" AutoGenerateColumns="false" AllowPaging="true" PageSize="10" PagerSettings-Mode="Numeric" PageButtonCount="10" OnPageIndexChanging="gvSpecies_PageIndexChanging">
                 <Columns>
                     <asp:BoundField DataField="commonName" ItemStyle-HorizontalAlign="Center" HeaderText="樹種名稱" />
                     <asp:TemplateField HeaderText="學名">

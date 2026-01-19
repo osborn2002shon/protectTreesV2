@@ -26,12 +26,14 @@ namespace protectTreesV2.backstage.system
 
         protected void btnSearch_Click(object sender, EventArgs e)
         {
+            gvSpecies.PageIndex = 0;
             BindSpecies();
         }
 
         protected void btnReset_Click(object sender, EventArgs e)
         {
             txtKeyword.Text = string.Empty;
+            gvSpecies.PageIndex = 0;
             BindSpecies();
         }
 
@@ -85,6 +87,12 @@ namespace protectTreesV2.backstage.system
             }
 
             return Convert.ToBoolean(value) ? "是" : "否";
+        }
+
+        protected void gvSpecies_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvSpecies.PageIndex = e.NewPageIndex;
+            BindSpecies();
         }
 
         private void BindSpecies()
