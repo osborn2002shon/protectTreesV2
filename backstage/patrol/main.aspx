@@ -70,7 +70,7 @@
             ShowHeaderWhenEmpty="true" OnPageIndexChanging="GridView_list_PageIndexChanging" OnRowCommand="GridView_list_RowCommand" OnRowDataBound="GridView_list_RowDataBound"
             OnSorting="GridView_list_Sorting">
             <Columns>
-                <asp:TemplateField HeaderText="上傳<br/>檔案製作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center">
+                <asp:TemplateField HeaderText="上傳<br/>檔案製作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center" Visible="false">
                     <ItemTemplate>
                         <asp:LinkButton ID="LinkButton_addToUpload" runat="server"
                             CssClass="btn btn-secondary"
@@ -148,7 +148,7 @@
         </asp:GridView>
     </div>
 
-    <div class="row mt-3">
+    <div class="row mt-3 d-none">
         <div class="col text-center">
             <asp:LinkButton ID="LinkButton_generateExcel" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_generateExcel_Click">
                產製多筆上傳Excel
@@ -161,7 +161,7 @@
         </div>
     </div>
 
-    <div class="table-responsive gv-tb mt-3">
+    <div class="table-responsive gv-tb mt-3 d-none">
         <asp:GridView ID="GridView_selectedList" runat="server" CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" OnRowCommand="GridView_selectedList_RowCommand">
             <Columns>
                 <asp:BoundField HtmlEncode="false" DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" />
