@@ -13,5 +13,50 @@ namespace protectTreesV2.backstage.system
 
     public partial class treeList
     {
+        
+        /// <summary>
+        /// txtKeyword 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtKeyword;
+        
+        /// <summary>
+        /// btnSearch 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSearch;
+        
+        /// <summary>
+        /// btnReset 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnReset;
+        
+        /// <summary>
+        /// lblCount 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblCount;
+        
+        /// <summary>
+        /// gvSpecies 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvSpecies;
     }
 }
