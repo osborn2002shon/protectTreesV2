@@ -11,8 +11,11 @@
     <style>
         .dashboard-card .card-body {
             display: flex;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
             gap: 12px;
+            text-align: center;
         }
 
         .dashboard-card-icon {
