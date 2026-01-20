@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="sm.aspx.cs" Inherits="protectTreesV2.backstage.dashboard.sm" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="sm.aspx.cs" Inherits="protectTreesV2.backstage.dashboard.sm" %>
 <%@ Register Src="~/_uc/dashboard/uc_treeStatusChart.ascx" TagPrefix="uc" TagName="TreeStatusChart" %>
 <%@ Register Src="~/_uc/dashboard/uc_areaGroupPieChart.ascx" TagPrefix="uc" TagName="AreaGroupPieChart" %>
 <%@ Register Src="~/_uc/dashboard/uc_speciesStatusChart.ascx" TagPrefix="uc" TagName="SpeciesStatusChart" %>
@@ -43,10 +43,10 @@
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
     <div class="container-fluid">
         <div class="row g-3 mb-3">
-            <div class="col-12 col-md-6 col-xl-2">
+            <div class="col">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-primary text-white">
+                        <div class="dashboard-card-icon bg-primary text-white d-none">
                             <i class="fa-solid fa-user-clock"></i>
                         </div>
                         <div>
@@ -55,16 +55,16 @@
                                 <asp:Literal ID="litPendingAccounts" runat="server" />
                             </div>
                             <div class="text-muted small">
-                                上月通過 <asp:Literal ID="litPendingApprovedLastMonth" runat="server" /> ・ 本月通過 <asp:Literal ID="litPendingApprovedCurrentMonth" runat="server" />
+                                上月通過 <asp:Literal ID="litPendingApprovedLastMonth" runat="server" /> <br />本月通過 <asp:Literal ID="litPendingApprovedCurrentMonth" runat="server" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-xl-2">
+            <div class="col">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-success text-white">
+                        <div class="dashboard-card-icon bg-success text-white d-none">
                             <i class="fa-solid fa-database"></i>
                         </div>
                         <div>
@@ -73,16 +73,16 @@
                                 <asp:Literal ID="litTreeRecordTotal" runat="server" />
                             </div>
                             <div class="text-muted small">
-                                上月新增 <asp:Literal ID="litTreeRecordLastMonth" runat="server" /> ・ 本月新增 <asp:Literal ID="litTreeRecordCurrentMonth" runat="server" />
+                                上月新增 <asp:Literal ID="litTreeRecordLastMonth" runat="server" />  <br /> 本月新增 <asp:Literal ID="litTreeRecordCurrentMonth" runat="server" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-xl-2">
+            <div class="col">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-info text-white">
+                        <div class="dashboard-card-icon bg-info text-white d-none">
                             <i class="fa-solid fa-clipboard-list"></i>
                         </div>
                         <div>
@@ -91,16 +91,16 @@
                                 <asp:Literal ID="litHealthRecordTotal" runat="server" />
                             </div>
                             <div class="text-muted small">
-                                上月新增 <asp:Literal ID="litHealthRecordLastMonth" runat="server" /> ・ 本月新增 <asp:Literal ID="litHealthRecordCurrentMonth" runat="server" />
+                                上月新增 <asp:Literal ID="litHealthRecordLastMonth" runat="server" /> <br /> 本月新增 <asp:Literal ID="litHealthRecordCurrentMonth" runat="server" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-xl-2">
+            <div class="col">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-warning text-white">
+                        <div class="dashboard-card-icon bg-warning text-white d-none">
                             <i class="fa-solid fa-camera"></i>
                         </div>
                         <div>
@@ -109,16 +109,16 @@
                                 <asp:Literal ID="litPatrolRecordTotal" runat="server" />
                             </div>
                             <div class="text-muted small">
-                                上月新增 <asp:Literal ID="litPatrolRecordLastMonth" runat="server" /> ・ 本月新增 <asp:Literal ID="litPatrolRecordCurrentMonth" runat="server" />
+                                上月新增 <asp:Literal ID="litPatrolRecordLastMonth" runat="server" /> <br /> 本月新增 <asp:Literal ID="litPatrolRecordCurrentMonth" runat="server" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 col-xl-2">
+            <div class="col">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-secondary text-white">
+                        <div class="dashboard-card-icon bg-secondary text-white d-none">
                             <i class="fa-solid fa-file-lines"></i>
                         </div>
                         <div>
@@ -127,7 +127,7 @@
                                 <asp:Literal ID="litCareRecordTotal" runat="server" />
                             </div>
                             <div class="text-muted small">
-                                上月新增 <asp:Literal ID="litCareRecordLastMonth" runat="server" /> ・ 本月新增 <asp:Literal ID="litCareRecordCurrentMonth" runat="server" />
+                                上月新增 <asp:Literal ID="litCareRecordLastMonth" runat="server" /> <br /> 本月新增 <asp:Literal ID="litCareRecordCurrentMonth" runat="server" />
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
             <div class="col-12 col-md-4">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-success text-white">
+                        <div class="dashboard-card-icon bg-success text-white d-none">
                             <i class="fa-solid fa-tree"></i>
                         </div>
                         <div>
@@ -154,7 +154,7 @@
             <div class="col-12 col-md-4">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-primary text-white">
+                        <div class="dashboard-card-icon bg-primary text-white d-none">
                             <i class="fa-solid fa-tree"></i>
                         </div>
                         <div>
@@ -169,7 +169,7 @@
             <div class="col-12 col-md-4">
                 <div class="card shadow-sm h-100 dashboard-card">
                     <div class="card-body">
-                        <div class="dashboard-card-icon bg-secondary text-white">
+                        <div class="dashboard-card-icon bg-secondary text-white d-none">
                             <i class="fa-solid fa-tree"></i>
                         </div>
                         <div>
