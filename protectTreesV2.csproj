@@ -192,6 +192,11 @@
     <Content Include="_js\jquery.mask.js" />
     <Content Include="_js\mp_default.js" />
     <Content Include="_uc\care\uc_careRecordModal.ascx" />
+    <Content Include="_uc\dashboard\uc_areaGroupPieChart.ascx" />
+    <Content Include="_uc\dashboard\uc_healthCompletionChart.ascx" />
+    <Content Include="_uc\dashboard\uc_speciesStatusChart.ascx" />
+    <Content Include="_uc\dashboard\uc_treeStatusChart.ascx" />
+    <Content Include="_uc\dashboard\uc_userLoginChart.ascx" />
     <Content Include="_uc\health\uc_healthRecordModal.ascx" />
     <Content Include="_uc\patrol\uc_patrolRecordModal.ascx" />
     <Content Include="_uc\TreePhotoAlbum.ascx" />
@@ -206,6 +211,7 @@
     <Compile Include="App_Code\Base\User.cs" />
     <Compile Include="App_Code\Batch.cs" />
     <Compile Include="App_Code\Care.cs" />
+    <Compile Include="App_Code\DashboardService.cs" />
     <Compile Include="App_Code\Health.cs" />
     <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\Patrol.cs" />
@@ -223,6 +229,36 @@
     </Compile>
     <Compile Include="backstage\care\list.aspx.designer.cs">
       <DependentUpon>list.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_areaGroupPieChart.ascx.cs">
+      <DependentUpon>uc_areaGroupPieChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_areaGroupPieChart.ascx.designer.cs">
+      <DependentUpon>uc_areaGroupPieChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_healthCompletionChart.ascx.cs">
+      <DependentUpon>uc_healthCompletionChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_healthCompletionChart.ascx.designer.cs">
+      <DependentUpon>uc_healthCompletionChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_speciesStatusChart.ascx.cs">
+      <DependentUpon>uc_speciesStatusChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_speciesStatusChart.ascx.designer.cs">
+      <DependentUpon>uc_speciesStatusChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_treeStatusChart.ascx.cs">
+      <DependentUpon>uc_treeStatusChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_treeStatusChart.ascx.designer.cs">
+      <DependentUpon>uc_treeStatusChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_userLoginChart.ascx.cs">
+      <DependentUpon>uc_userLoginChart.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="_uc\dashboard\uc_userLoginChart.ascx.designer.cs">
+      <DependentUpon>uc_userLoginChart.ascx</DependentUpon>
     </Compile>
     <Compile Include="backstage\care\main.aspx.cs">
       <DependentUpon>main.aspx</DependentUpon>
