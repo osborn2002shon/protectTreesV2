@@ -187,7 +187,7 @@
                     <asp:HiddenField ID="HiddenField_photoMetadata" runat="server" />
 
                     <div class="mb-3 text-muted small">
-                        <i class="fa-solid fa-circle-info me-1"></i> 可上傳多張照片，支援 JPG/PNG，單張上限 10MB。
+                        <i class="fa-solid fa-circle-info me-1"></i> 最多可上傳 <strong>5</strong> 張照片，支援 JPG/PNG，單張上限 10MB。
                     </div>
 
                     <div id="photoDropArea" class="photo-drop" title="拖曳照片到此處或點擊選擇">
@@ -257,6 +257,7 @@
             const $metadataField = $('#<%= HiddenField_photoMetadata.ClientID %>');
 
             const maxSize = 10 * 1024 * 1024;
+            const maxPhotos = 5;
             let existingPhotos = [];
             let newPhotos = [];
             let tempIdCounter = -1;
@@ -325,6 +326,13 @@
 
             function handleFiles(files) {
                 if (!files || files.length === 0) return;
+
+                const currentCount = existingPhotos.filter(p => !p.deleted).length + newPhotos.length;
+                if (currentCount + files.length > maxPhotos) {
+                    alert(`照片數量限制為 ${maxPhotos} 張。\n目前已有 ${currentCount} 張，您試圖加入 ${files.length} 張。`);
+                    $fileInput.val('');
+                    return;
+                }
 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
