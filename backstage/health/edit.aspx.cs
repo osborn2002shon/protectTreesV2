@@ -1582,7 +1582,7 @@ namespace protectTreesV2.backstage.health
                     fileName = sourceOriginalName,
                     filePath = finalDirVirtual + finalNameOnly,
                     fileSize = (int)new FileInfo(finalPath).Length,
-                    description = "健檢附件"
+                    description = ""
                 };
                 system_health.InsertHealthAttachment(att, accountId);
 

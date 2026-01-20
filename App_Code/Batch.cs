@@ -63,7 +63,7 @@ namespace protectTreesV2.Batch
         /// <summary>
         /// 處理過程中的暫存物件
         /// </summary>
-        public class TreePhotoInfo
+        public class TreeFileInfo
         {
             public HttpPostedFile uploadedFile { get; set; }
             public TreeBatchTaskLog log { get; set; }
@@ -72,19 +72,21 @@ namespace protectTreesV2.Batch
             public int healthID { get; set; } = 0;
             public int treeID { get; set; } = 0;
             public bool isProcessing { get; set; } = true;
+            public bool isOverwriteBehavior { get; set; } = false;
         }
 
         /// <summary>
-        /// 暫存照片資料
+        /// 暫存檔案資料
         /// </summary>
-        public class TempPhotoData
+        public class TempFileData
         {
             public int healthID { get; set; }
             public string originalFileName { get; set; }
             public string finalFileName { get; set; }
             public string fullPhysicalPath { get; set; }
             public string virtualPath { get; set; }
-            public TreePhotoInfo infoRef { get; set; }
+            public TreeFileInfo infoRef { get; set; }
+            public bool IsOverwriteAction { get; set; } = false;
         }
 
         /// <summary>
@@ -358,11 +360,11 @@ namespace protectTreesV2.Batch
         }
 
         /// <summary>
-        /// 取得樹籍編號對照表
+        /// 取得樹籍編號對照表(區分管轄)
         /// </summary>
         /// <param name="treeNos">要檢查的樹籍編號列表</param>
         /// <returns>資料庫中符合條件的樹籍編號列表</returns>
-        public Dictionary<string, int> GetTreeIDMap(List<string> treeNos)
+        public Dictionary<string, int> GetTreeIDMap(List<string> treeNos, int currentUserID)
         {
             Dictionary<string, int> map = new Dictionary<string, int>();
 
@@ -378,6 +380,7 @@ namespace protectTreesV2.Batch
                 paramNames.Add(pName);
                 parameters.Add(new SqlParameter(pName, treeNos[i]));
             }
+            parameters.Add(new SqlParameter("@currentUserID", currentUserID));
 
             // 條件：SystemTreeNo 在清單中 + 未刪除 (removeDateTime IS NULL) + 已定稿 (editStatus = 1)
             string inClause = string.Join(",", paramNames);
@@ -387,7 +390,13 @@ namespace protectTreesV2.Batch
                 FROM Tree_Record 
                 WHERE removeDateTime IS NULL 
                   AND editStatus = 1 
-                  AND systemTreeNo IN ({inClause})";
+                  AND systemTreeNo IN ({inClause})
+                  AND Tree_Record.areaID IN (
+                  SELECT map.twID 
+                      FROM System_UnitCityMapping map
+                      INNER JOIN System_UserAccount u ON u.unitID = map.unitID
+                      WHERE u.accountID = @currentUserID
+                  )";
 
             // 呼叫資料庫
             using (var da = new MS_SQL())
@@ -777,304 +786,696 @@ namespace protectTreesV2.Batch
             return dt;
         }
 
-        public void BulkUpdateHealthRecords(List<TreeHealthRecord> list, bool updateStatus)
+        /// <summary>
+        /// 批次更新健康紀錄
+        /// </summary>
+        public void BulkUpdateHealthRecords(List<TreeHealthRecord> list, bool updateStatus, string ipAddress, int accountID,string account, string accountName,string accountUnit)
         {
             if (list == null || list.Count == 0) return;
 
-            // 1. 產生 DataTable
+            // 產生 Update 用的 DataTable 
             System.Data.DataTable dt = CreateHealthRecordDataTable(list, forUpdate: true);
 
-            // 2. 使用您的 MS_SQL 類別
+            // ===============================================
+            // 準備 Log 的 DataTable
+            // ===============================================
+            System.Data.DataTable dtLog = new System.Data.DataTable();
+                dtLog.Columns.Add("functionType", typeof(string));
+                dtLog.Columns.Add("dataID", typeof(int));
+                dtLog.Columns.Add("actionType", typeof(string));
+                dtLog.Columns.Add("memo", typeof(string));
+                dtLog.Columns.Add("ipAddress", typeof(string));
+                dtLog.Columns.Add("accountID", typeof(int));
+                dtLog.Columns.Add("account", typeof(string));
+                dtLog.Columns.Add("accountName", typeof(string));
+                dtLog.Columns.Add("accountUnit", typeof(string));
+                dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            DateTime now = DateTime.Now;
+
+            // 填寫 Log 資料
+            foreach (var item in list)
+            {
+                System.Data.DataRow rowLog = dtLog.NewRow();
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
+                rowLog["dataID"] = item.healthID; 
+                rowLog["actionType"] = "批次上傳";
+                rowLog["memo"] = "編輯健檢";
+                rowLog["ipAddress"] = ipAddress;
+                rowLog["accountID"] = accountID;
+                rowLog["account"] = account;
+                rowLog["accountName"] = accountName;
+                rowLog["accountUnit"] = accountUnit;
+                rowLog["logDateTime"] = now;
+                dtLog.Rows.Add(rowLog);
+            }
+
             using (var da = new MS_SQL())
             {
-                // ===============================================
-                // Step A: 建立暫存表 (包含所有欄位)
-                // ===============================================
-                string createTempSql = @"
-            IF OBJECT_ID('tempdb..#TempHealthUpdate') IS NOT NULL DROP TABLE #TempHealthUpdate;
+                try
+                {
+                    // 開啟交易 (確保 Update 和 Log 同步成功)
+                    da.StartTransaction();
 
-            CREATE TABLE #TempHealthUpdate (
-                [healthID] [int] NOT NULL,
-                [treeID] [int] NULL,
-                [surveyDate] [date] NULL,
-                [surveyor] [nvarchar](100) NULL,
-                [dataStatus] [tinyint] NULL,
-                [memo] [nvarchar](max) NULL,
-                [treeSignStatus] [tinyint] NULL,
-                [latitude] [decimal](10, 6) NULL,
-                [longitude] [decimal](10, 6) NULL,
-                [treeHeight] [decimal](8, 2) NULL,
-                [canopyArea] [decimal](8, 2) NULL,
-                [girth100] [nvarchar](200) NULL,
-                [diameter100] [nvarchar](200) NULL,
-                [girth130] [nvarchar](200) NULL,
-                [diameter130] [nvarchar](200) NULL,
-                [measureNote] [nvarchar](200) NULL,
-                [majorDiseaseBrownRoot] [bit] NULL,
-                [majorDiseaseGanoderma] [bit] NULL,
-                [majorDiseaseWoodDecayFungus] [bit] NULL,
-                [majorDiseaseCanker] [bit] NULL,
-                [majorDiseaseOther] [bit] NULL,
-                [majorDiseaseOtherNote] [nvarchar](200) NULL,
-                [majorPestRootTunnel] [bit] NULL,
-                [majorPestRootChew] [bit] NULL,
-                [majorPestRootLive] [bit] NULL,
-                [majorPestBaseTunnel] [bit] NULL,
-                [majorPestBaseChew] [bit] NULL,
-                [majorPestBaseLive] [bit] NULL,
-                [majorPestTrunkTunnel] [bit] NULL,
-                [majorPestTrunkChew] [bit] NULL,
-                [majorPestTrunkLive] [bit] NULL,
-                [majorPestBranchTunnel] [bit] NULL,
-                [majorPestBranchChew] [bit] NULL,
-                [majorPestBranchLive] [bit] NULL,
-                [majorPestCrownTunnel] [bit] NULL,
-                [majorPestCrownChew] [bit] NULL,
-                [majorPestCrownLive] [bit] NULL,
-                [majorPestOtherTunnel] [bit] NULL,
-                [majorPestOtherChew] [bit] NULL,
-                [majorPestOtherLive] [bit] NULL,
-                [generalPestRoot] [nvarchar](200) NULL,
-                [generalPestBase] [nvarchar](200) NULL,
-                [generalPestTrunk] [nvarchar](200) NULL,
-                [generalPestBranch] [nvarchar](200) NULL,
-                [generalPestCrown] [nvarchar](200) NULL,
-                [generalPestOther] [nvarchar](200) NULL,
-                [generalDiseaseRoot] [nvarchar](200) NULL,
-                [generalDiseaseBase] [nvarchar](200) NULL,
-                [generalDiseaseTrunk] [nvarchar](200) NULL,
-                [generalDiseaseBranch] [nvarchar](200) NULL,
-                [generalDiseaseCrown] [nvarchar](200) NULL,
-                [generalDiseaseOther] [nvarchar](200) NULL,
-                [pestOtherNote] [nvarchar](200) NULL,
-                [rootDecayPercent] [decimal](5, 2) NULL,
-                [rootCavityMaxDiameter] [decimal](6, 2) NULL,
-                [rootWoundMaxDiameter] [decimal](6, 2) NULL,
-                [rootMechanicalDamage] [bit] NULL,
-                [rootMowingInjury] [bit] NULL,
-                [rootInjury] [bit] NULL,
-                [rootGirdling] [bit] NULL,
-                [rootOtherNote] [nvarchar](200) NULL,
-                [baseDecayPercent] [decimal](5, 2) NULL,
-                [baseCavityMaxDiameter] [decimal](6, 2) NULL,
-                [baseWoundMaxDiameter] [decimal](6, 2) NULL,
-                [baseMechanicalDamage] [bit] NULL,
-                [baseMowingInjury] [bit] NULL,
-                [baseOtherNote] [nvarchar](200) NULL,
-                [trunkDecayPercent] [decimal](5, 2) NULL,
-                [trunkCavityMaxDiameter] [decimal](6, 2) NULL,
-                [trunkWoundMaxDiameter] [decimal](6, 2) NULL,
-                [trunkMechanicalDamage] [bit] NULL,
-                [trunkIncludedBark] [bit] NULL,
-                [trunkOtherNote] [nvarchar](200) NULL,
-                [branchDecayPercent] [decimal](5, 2) NULL,
-                [branchCavityMaxDiameter] [decimal](6, 2) NULL,
-                [branchWoundMaxDiameter] [decimal](6, 2) NULL,
-                [branchMechanicalDamage] [bit] NULL,
-                [branchIncludedBark] [bit] NULL,
-                [branchDrooping] [bit] NULL,
-                [branchOtherNote] [nvarchar](200) NULL,
-                [crownLeafCoveragePercent] [decimal](5, 2) NULL,
-                [crownDeadBranchPercent] [decimal](5, 2) NULL,
-                [crownHangingBranch] [bit] NULL,
-                [crownOtherNote] [nvarchar](200) NULL,
-                [growthNote] [nvarchar](200) NULL,
-                [pruningWrongDamage] [nvarchar](50) NULL,
-                [pruningWoundHealing] [bit] NULL,
-                [pruningEpiphyte] [bit] NULL,
-                [pruningParasite] [bit] NULL,
-                [pruningVine] [bit] NULL,
-                [pruningOtherNote] [nvarchar](200) NULL,
-                [supportCount] [int] NULL,
-                [supportEmbedded] [bit] NULL,
-                [supportOtherNote] [nvarchar](200) NULL,
-                [siteCementPercent] [decimal](5, 2) NULL,
-                [siteAsphaltPercent] [decimal](5, 2) NULL,
-                [sitePlanter] [bit] NULL,
-                [siteRecreationFacility] [bit] NULL,
-                [siteDebrisStack] [bit] NULL,
-                [siteBetweenBuildings] [bit] NULL,
-                [siteSoilCompaction] [bit] NULL,
-                [siteOverburiedSoil] [bit] NULL,
-                [siteOtherNote] [nvarchar](200) NULL,
-                [soilPh] [nvarchar](200) NULL,
-                [soilOrganicMatter] [nvarchar](200) NULL,
-                [soilEc] [nvarchar](200) NULL,
-                [managementStatus] [nvarchar](max) NULL,
-                [priority] [nvarchar](50) NULL,
-                [treatmentDescription] [nvarchar](max) NULL,
-                [sourceUnit] [nvarchar](200) NULL,
-                [sourceUnitID] [int] NULL,
-                [updateAccountID] [int] NULL,
-                [updateDateTime] [datetime] NULL
-            );
-        ";
-                da.ExecNonQuery(createTempSql);
+                    // ===============================================
+                    // 建立暫存表
+                    // ===============================================
+                    string createTempSql = @"
+                        IF OBJECT_ID('tempdb..#TempHealthUpdate') IS NOT NULL DROP TABLE #TempHealthUpdate;
 
-                // ===============================================
-                // Step B: 批次寫入暫存表
-                // ===============================================
-                da.BulkCopy("#TempHealthUpdate", dt);
+                        CREATE TABLE #TempHealthUpdate (
+                            [healthID] [int] NOT NULL,
+                            [treeID] [int] NULL,
+                            [surveyDate] [date] NULL,
+                            [surveyor] [nvarchar](100) NULL,
+                            [dataStatus] [tinyint] NULL,
+                            [memo] [nvarchar](max) NULL,
+                            [treeSignStatus] [tinyint] NULL,
+                            [latitude] [decimal](10, 6) NULL,
+                            [longitude] [decimal](10, 6) NULL,
+                            [treeHeight] [decimal](8, 2) NULL,
+                            [canopyArea] [decimal](8, 2) NULL,
+                            [girth100] [nvarchar](200) NULL,
+                            [diameter100] [nvarchar](200) NULL,
+                            [girth130] [nvarchar](200) NULL,
+                            [diameter130] [nvarchar](200) NULL,
+                            [measureNote] [nvarchar](200) NULL,
+                            [majorDiseaseBrownRoot] [bit] NULL,
+                            [majorDiseaseGanoderma] [bit] NULL,
+                            [majorDiseaseWoodDecayFungus] [bit] NULL,
+                            [majorDiseaseCanker] [bit] NULL,
+                            [majorDiseaseOther] [bit] NULL,
+                            [majorDiseaseOtherNote] [nvarchar](200) NULL,
+                            [majorPestRootTunnel] [bit] NULL,
+                            [majorPestRootChew] [bit] NULL,
+                            [majorPestRootLive] [bit] NULL,
+                            [majorPestBaseTunnel] [bit] NULL,
+                            [majorPestBaseChew] [bit] NULL,
+                            [majorPestBaseLive] [bit] NULL,
+                            [majorPestTrunkTunnel] [bit] NULL,
+                            [majorPestTrunkChew] [bit] NULL,
+                            [majorPestTrunkLive] [bit] NULL,
+                            [majorPestBranchTunnel] [bit] NULL,
+                            [majorPestBranchChew] [bit] NULL,
+                            [majorPestBranchLive] [bit] NULL,
+                            [majorPestCrownTunnel] [bit] NULL,
+                            [majorPestCrownChew] [bit] NULL,
+                            [majorPestCrownLive] [bit] NULL,
+                            [majorPestOtherTunnel] [bit] NULL,
+                            [majorPestOtherChew] [bit] NULL,
+                            [majorPestOtherLive] [bit] NULL,
+                            [generalPestRoot] [nvarchar](200) NULL,
+                            [generalPestBase] [nvarchar](200) NULL,
+                            [generalPestTrunk] [nvarchar](200) NULL,
+                            [generalPestBranch] [nvarchar](200) NULL,
+                            [generalPestCrown] [nvarchar](200) NULL,
+                            [generalPestOther] [nvarchar](200) NULL,
+                            [generalDiseaseRoot] [nvarchar](200) NULL,
+                            [generalDiseaseBase] [nvarchar](200) NULL,
+                            [generalDiseaseTrunk] [nvarchar](200) NULL,
+                            [generalDiseaseBranch] [nvarchar](200) NULL,
+                            [generalDiseaseCrown] [nvarchar](200) NULL,
+                            [generalDiseaseOther] [nvarchar](200) NULL,
+                            [pestOtherNote] [nvarchar](200) NULL,
+                            [rootDecayPercent] [decimal](5, 2) NULL,
+                            [rootCavityMaxDiameter] [decimal](6, 2) NULL,
+                            [rootWoundMaxDiameter] [decimal](6, 2) NULL,
+                            [rootMechanicalDamage] [bit] NULL,
+                            [rootMowingInjury] [bit] NULL,
+                            [rootInjury] [bit] NULL,
+                            [rootGirdling] [bit] NULL,
+                            [rootOtherNote] [nvarchar](200) NULL,
+                            [baseDecayPercent] [decimal](5, 2) NULL,
+                            [baseCavityMaxDiameter] [decimal](6, 2) NULL,
+                            [baseWoundMaxDiameter] [decimal](6, 2) NULL,
+                            [baseMechanicalDamage] [bit] NULL,
+                            [baseMowingInjury] [bit] NULL,
+                            [baseOtherNote] [nvarchar](200) NULL,
+                            [trunkDecayPercent] [decimal](5, 2) NULL,
+                            [trunkCavityMaxDiameter] [decimal](6, 2) NULL,
+                            [trunkWoundMaxDiameter] [decimal](6, 2) NULL,
+                            [trunkMechanicalDamage] [bit] NULL,
+                            [trunkIncludedBark] [bit] NULL,
+                            [trunkOtherNote] [nvarchar](200) NULL,
+                            [branchDecayPercent] [decimal](5, 2) NULL,
+                            [branchCavityMaxDiameter] [decimal](6, 2) NULL,
+                            [branchWoundMaxDiameter] [decimal](6, 2) NULL,
+                            [branchMechanicalDamage] [bit] NULL,
+                            [branchIncludedBark] [bit] NULL,
+                            [branchDrooping] [bit] NULL,
+                            [branchOtherNote] [nvarchar](200) NULL,
+                            [crownLeafCoveragePercent] [decimal](5, 2) NULL,
+                            [crownDeadBranchPercent] [decimal](5, 2) NULL,
+                            [crownHangingBranch] [bit] NULL,
+                            [crownOtherNote] [nvarchar](200) NULL,
+                            [growthNote] [nvarchar](200) NULL,
+                            [pruningWrongDamage] [nvarchar](50) NULL,
+                            [pruningWoundHealing] [bit] NULL,
+                            [pruningEpiphyte] [bit] NULL,
+                            [pruningParasite] [bit] NULL,
+                            [pruningVine] [bit] NULL,
+                            [pruningOtherNote] [nvarchar](200) NULL,
+                            [supportCount] [int] NULL,
+                            [supportEmbedded] [bit] NULL,
+                            [supportOtherNote] [nvarchar](200) NULL,
+                            [siteCementPercent] [decimal](5, 2) NULL,
+                            [siteAsphaltPercent] [decimal](5, 2) NULL,
+                            [sitePlanter] [bit] NULL,
+                            [siteRecreationFacility] [bit] NULL,
+                            [siteDebrisStack] [bit] NULL,
+                            [siteBetweenBuildings] [bit] NULL,
+                            [siteSoilCompaction] [bit] NULL,
+                            [siteOverburiedSoil] [bit] NULL,
+                            [siteOtherNote] [nvarchar](200) NULL,
+                            [soilPh] [nvarchar](200) NULL,
+                            [soilOrganicMatter] [nvarchar](200) NULL,
+                            [soilEc] [nvarchar](200) NULL,
+                            [managementStatus] [nvarchar](max) NULL,
+                            [priority] [nvarchar](50) NULL,
+                            [treatmentDescription] [nvarchar](max) NULL,
+                            [sourceUnit] [nvarchar](200) NULL,
+                            [sourceUnitID] [int] NULL,
+                            [updateAccountID] [int] NULL,
+                            [updateDateTime] [datetime] NULL
+                        );
+                    ";
+                    da.ExecNonQuery(createTempSql);
 
-                // ===============================================
-                // Step C: 從暫存表更新主表 (列出所有欄位)
-                // ===============================================
-                string updateSql = @"
-            UPDATE T
-            SET 
-                T.treeID = S.treeID,
-                T.surveyDate = S.surveyDate,
-                T.surveyor = S.surveyor,
-                T.dataStatus = CASE WHEN @UpdateStatus = 1 THEN S.dataStatus ELSE T.dataStatus END,
-                T.memo = S.memo,
-                T.treeSignStatus = S.treeSignStatus,
-                T.latitude = S.latitude,
-                T.longitude = S.longitude,
-                T.treeHeight = S.treeHeight,
-                T.canopyArea = S.canopyArea,
-                T.girth100 = S.girth100,
-                T.diameter100 = S.diameter100,
-                T.girth130 = S.girth130,
-                T.diameter130 = S.diameter130,
-                T.measureNote = S.measureNote,
+                    // ===============================================
+                    // Step B: 批次寫入暫存表 - [保持不動]
+                    // ===============================================
+                    da.BulkCopy("#TempHealthUpdate", dt);
 
-                T.majorDiseaseBrownRoot = S.majorDiseaseBrownRoot,
-                T.majorDiseaseGanoderma = S.majorDiseaseGanoderma,
-                T.majorDiseaseWoodDecayFungus = S.majorDiseaseWoodDecayFungus,
-                T.majorDiseaseCanker = S.majorDiseaseCanker,
-                T.majorDiseaseOther = S.majorDiseaseOther,
-                T.majorDiseaseOtherNote = S.majorDiseaseOtherNote,
+                    // ===============================================
+                    // Step C: 從暫存表更新主表 - [保持不動]
+                    // ===============================================
+                    string updateSql = @"
+                        UPDATE T
+                        SET 
+                            T.treeID = S.treeID,
+                            T.surveyDate = S.surveyDate,
+                            T.surveyor = S.surveyor,
+                            T.dataStatus = CASE WHEN @UpdateStatus = 1 THEN S.dataStatus ELSE T.dataStatus END,
+                            T.memo = S.memo,
+                            T.treeSignStatus = S.treeSignStatus,
+                            T.latitude = S.latitude,
+                            T.longitude = S.longitude,
+                            T.treeHeight = S.treeHeight,
+                            T.canopyArea = S.canopyArea,
+                            T.girth100 = S.girth100,
+                            T.diameter100 = S.diameter100,
+                            T.girth130 = S.girth130,
+                            T.diameter130 = S.diameter130,
+                            T.measureNote = S.measureNote,
 
-                T.majorPestRootTunnel = S.majorPestRootTunnel,
-                T.majorPestRootChew = S.majorPestRootChew,
-                T.majorPestRootLive = S.majorPestRootLive,
-                T.majorPestBaseTunnel = S.majorPestBaseTunnel,
-                T.majorPestBaseChew = S.majorPestBaseChew,
-                T.majorPestBaseLive = S.majorPestBaseLive,
-                T.majorPestTrunkTunnel = S.majorPestTrunkTunnel,
-                T.majorPestTrunkChew = S.majorPestTrunkChew,
-                T.majorPestTrunkLive = S.majorPestTrunkLive,
-                T.majorPestBranchTunnel = S.majorPestBranchTunnel,
-                T.majorPestBranchChew = S.majorPestBranchChew,
-                T.majorPestBranchLive = S.majorPestBranchLive,
-                T.majorPestCrownTunnel = S.majorPestCrownTunnel,
-                T.majorPestCrownChew = S.majorPestCrownChew,
-                T.majorPestCrownLive = S.majorPestCrownLive,
-                T.majorPestOtherTunnel = S.majorPestOtherTunnel,
-                T.majorPestOtherChew = S.majorPestOtherChew,
-                T.majorPestOtherLive = S.majorPestOtherLive,
+                            T.majorDiseaseBrownRoot = S.majorDiseaseBrownRoot,
+                            T.majorDiseaseGanoderma = S.majorDiseaseGanoderma,
+                            T.majorDiseaseWoodDecayFungus = S.majorDiseaseWoodDecayFungus,
+                            T.majorDiseaseCanker = S.majorDiseaseCanker,
+                            T.majorDiseaseOther = S.majorDiseaseOther,
+                            T.majorDiseaseOtherNote = S.majorDiseaseOtherNote,
 
-                T.generalPestRoot = S.generalPestRoot,
-                T.generalPestBase = S.generalPestBase,
-                T.generalPestTrunk = S.generalPestTrunk,
-                T.generalPestBranch = S.generalPestBranch,
-                T.generalPestCrown = S.generalPestCrown,
-                T.generalPestOther = S.generalPestOther,
+                            T.majorPestRootTunnel = S.majorPestRootTunnel,
+                            T.majorPestRootChew = S.majorPestRootChew,
+                            T.majorPestRootLive = S.majorPestRootLive,
+                            T.majorPestBaseTunnel = S.majorPestBaseTunnel,
+                            T.majorPestBaseChew = S.majorPestBaseChew,
+                            T.majorPestBaseLive = S.majorPestBaseLive,
+                            T.majorPestTrunkTunnel = S.majorPestTrunkTunnel,
+                            T.majorPestTrunkChew = S.majorPestTrunkChew,
+                            T.majorPestTrunkLive = S.majorPestTrunkLive,
+                            T.majorPestBranchTunnel = S.majorPestBranchTunnel,
+                            T.majorPestBranchChew = S.majorPestBranchChew,
+                            T.majorPestBranchLive = S.majorPestBranchLive,
+                            T.majorPestCrownTunnel = S.majorPestCrownTunnel,
+                            T.majorPestCrownChew = S.majorPestCrownChew,
+                            T.majorPestCrownLive = S.majorPestCrownLive,
+                            T.majorPestOtherTunnel = S.majorPestOtherTunnel,
+                            T.majorPestOtherChew = S.majorPestOtherChew,
+                            T.majorPestOtherLive = S.majorPestOtherLive,
 
-                T.generalDiseaseRoot = S.generalDiseaseRoot,
-                T.generalDiseaseBase = S.generalDiseaseBase,
-                T.generalDiseaseTrunk = S.generalDiseaseTrunk,
-                T.generalDiseaseBranch = S.generalDiseaseBranch,
-                T.generalDiseaseCrown = S.generalDiseaseCrown,
-                T.generalDiseaseOther = S.generalDiseaseOther,
-                T.pestOtherNote = S.pestOtherNote,
+                            T.generalPestRoot = S.generalPestRoot,
+                            T.generalPestBase = S.generalPestBase,
+                            T.generalPestTrunk = S.generalPestTrunk,
+                            T.generalPestBranch = S.generalPestBranch,
+                            T.generalPestCrown = S.generalPestCrown,
+                            T.generalPestOther = S.generalPestOther,
 
-                T.rootDecayPercent = S.rootDecayPercent,
-                T.rootCavityMaxDiameter = S.rootCavityMaxDiameter,
-                T.rootWoundMaxDiameter = S.rootWoundMaxDiameter,
-                T.rootMechanicalDamage = S.rootMechanicalDamage,
-                T.rootMowingInjury = S.rootMowingInjury,
-                T.rootInjury = S.rootInjury,
-                T.rootGirdling = S.rootGirdling,
-                T.rootOtherNote = S.rootOtherNote,
+                            T.generalDiseaseRoot = S.generalDiseaseRoot,
+                            T.generalDiseaseBase = S.generalDiseaseBase,
+                            T.generalDiseaseTrunk = S.generalDiseaseTrunk,
+                            T.generalDiseaseBranch = S.generalDiseaseBranch,
+                            T.generalDiseaseCrown = S.generalDiseaseCrown,
+                            T.generalDiseaseOther = S.generalDiseaseOther,
+                            T.pestOtherNote = S.pestOtherNote,
 
-                T.baseDecayPercent = S.baseDecayPercent,
-                T.baseCavityMaxDiameter = S.baseCavityMaxDiameter,
-                T.baseWoundMaxDiameter = S.baseWoundMaxDiameter,
-                T.baseMechanicalDamage = S.baseMechanicalDamage,
-                T.baseMowingInjury = S.baseMowingInjury,
-                T.baseOtherNote = S.baseOtherNote,
+                            T.rootDecayPercent = S.rootDecayPercent,
+                            T.rootCavityMaxDiameter = S.rootCavityMaxDiameter,
+                            T.rootWoundMaxDiameter = S.rootWoundMaxDiameter,
+                            T.rootMechanicalDamage = S.rootMechanicalDamage,
+                            T.rootMowingInjury = S.rootMowingInjury,
+                            T.rootInjury = S.rootInjury,
+                            T.rootGirdling = S.rootGirdling,
+                            T.rootOtherNote = S.rootOtherNote,
 
-                T.trunkDecayPercent = S.trunkDecayPercent,
-                T.trunkCavityMaxDiameter = S.trunkCavityMaxDiameter,
-                T.trunkWoundMaxDiameter = S.trunkWoundMaxDiameter,
-                T.trunkMechanicalDamage = S.trunkMechanicalDamage,
-                T.trunkIncludedBark = S.trunkIncludedBark,
-                T.trunkOtherNote = S.trunkOtherNote,
+                            T.baseDecayPercent = S.baseDecayPercent,
+                            T.baseCavityMaxDiameter = S.baseCavityMaxDiameter,
+                            T.baseWoundMaxDiameter = S.baseWoundMaxDiameter,
+                            T.baseMechanicalDamage = S.baseMechanicalDamage,
+                            T.baseMowingInjury = S.baseMowingInjury,
+                            T.baseOtherNote = S.baseOtherNote,
 
-                T.branchDecayPercent = S.branchDecayPercent,
-                T.branchCavityMaxDiameter = S.branchCavityMaxDiameter,
-                T.branchWoundMaxDiameter = S.branchWoundMaxDiameter,
-                T.branchMechanicalDamage = S.branchMechanicalDamage,
-                T.branchIncludedBark = S.branchIncludedBark,
-                T.branchDrooping = S.branchDrooping,
-                T.branchOtherNote = S.branchOtherNote,
+                            T.trunkDecayPercent = S.trunkDecayPercent,
+                            T.trunkCavityMaxDiameter = S.trunkCavityMaxDiameter,
+                            T.trunkWoundMaxDiameter = S.trunkWoundMaxDiameter,
+                            T.trunkMechanicalDamage = S.trunkMechanicalDamage,
+                            T.trunkIncludedBark = S.trunkIncludedBark,
+                            T.trunkOtherNote = S.trunkOtherNote,
 
-                T.crownLeafCoveragePercent = S.crownLeafCoveragePercent,
-                T.crownDeadBranchPercent = S.crownDeadBranchPercent,
-                T.crownHangingBranch = S.crownHangingBranch,
-                T.crownOtherNote = S.crownOtherNote,
+                            T.branchDecayPercent = S.branchDecayPercent,
+                            T.branchCavityMaxDiameter = S.branchCavityMaxDiameter,
+                            T.branchWoundMaxDiameter = S.branchWoundMaxDiameter,
+                            T.branchMechanicalDamage = S.branchMechanicalDamage,
+                            T.branchIncludedBark = S.branchIncludedBark,
+                            T.branchDrooping = S.branchDrooping,
+                            T.branchOtherNote = S.branchOtherNote,
 
-                T.growthNote = S.growthNote,
+                            T.crownLeafCoveragePercent = S.crownLeafCoveragePercent,
+                            T.crownDeadBranchPercent = S.crownDeadBranchPercent,
+                            T.crownHangingBranch = S.crownHangingBranch,
+                            T.crownOtherNote = S.crownOtherNote,
 
-                T.pruningWrongDamage = S.pruningWrongDamage,
-                T.pruningWoundHealing = S.pruningWoundHealing,
-                T.pruningEpiphyte = S.pruningEpiphyte,
-                T.pruningParasite = S.pruningParasite,
-                T.pruningVine = S.pruningVine,
-                T.pruningOtherNote = S.pruningOtherNote,
+                            T.growthNote = S.growthNote,
 
-                T.supportCount = S.supportCount,
-                T.supportEmbedded = S.supportEmbedded,
-                T.supportOtherNote = S.supportOtherNote,
+                            T.pruningWrongDamage = S.pruningWrongDamage,
+                            T.pruningWoundHealing = S.pruningWoundHealing,
+                            T.pruningEpiphyte = S.pruningEpiphyte,
+                            T.pruningParasite = S.pruningParasite,
+                            T.pruningVine = S.pruningVine,
+                            T.pruningOtherNote = S.pruningOtherNote,
 
-                T.siteCementPercent = S.siteCementPercent,
-                T.siteAsphaltPercent = S.siteAsphaltPercent,
-                T.sitePlanter = S.sitePlanter,
-                T.siteRecreationFacility = S.siteRecreationFacility,
-                T.siteDebrisStack = S.siteDebrisStack,
-                T.siteBetweenBuildings = S.siteBetweenBuildings,
-                T.siteSoilCompaction = S.siteSoilCompaction,
-                T.siteOverburiedSoil = S.siteOverburiedSoil,
-                T.siteOtherNote = S.siteOtherNote,
+                            T.supportCount = S.supportCount,
+                            T.supportEmbedded = S.supportEmbedded,
+                            T.supportOtherNote = S.supportOtherNote,
 
-                T.soilPh = S.soilPh,
-                T.soilOrganicMatter = S.soilOrganicMatter,
-                T.soilEc = S.soilEc,
+                            T.siteCementPercent = S.siteCementPercent,
+                            T.siteAsphaltPercent = S.siteAsphaltPercent,
+                            T.sitePlanter = S.sitePlanter,
+                            T.siteRecreationFacility = S.siteRecreationFacility,
+                            T.siteDebrisStack = S.siteDebrisStack,
+                            T.siteBetweenBuildings = S.siteBetweenBuildings,
+                            T.siteSoilCompaction = S.siteSoilCompaction,
+                            T.siteOverburiedSoil = S.siteOverburiedSoil,
+                            T.siteOtherNote = S.siteOtherNote,
 
-                T.managementStatus = S.managementStatus,
-                T.priority = S.priority,
-                T.treatmentDescription = S.treatmentDescription,
-                T.sourceUnit = S.sourceUnit,
-                T.sourceUnitID = S.sourceUnitID,
+                            T.soilPh = S.soilPh,
+                            T.soilOrganicMatter = S.soilOrganicMatter,
+                            T.soilEc = S.soilEc,
 
-                T.updateAccountID = S.updateAccountID,
-                T.updateDateTime = GETDATE()
-            FROM Tree_HealthRecord T
-            INNER JOIN #TempHealthUpdate S ON T.healthID = S.healthID;
+                            T.managementStatus = S.managementStatus,
+                            T.priority = S.priority,
+                            T.treatmentDescription = S.treatmentDescription,
+                            T.sourceUnit = S.sourceUnit,
+                            T.sourceUnitID = S.sourceUnitID,
 
-            DROP TABLE #TempHealthUpdate;
-        ";
+                            T.updateAccountID = S.updateAccountID,
+                            T.updateDateTime = GETDATE()
+                        FROM Tree_HealthRecord T
+                        INNER JOIN #TempHealthUpdate S ON T.healthID = S.healthID;
 
-                // Step D: 執行 Update
-                da.ExecNonQuery(updateSql, new System.Data.SqlClient.SqlParameter("@UpdateStatus", updateStatus ? 1 : 0));
+                        DROP TABLE #TempHealthUpdate;
+                    ";
+
+                    // 執行 Update
+                    da.ExecNonQuery(updateSql, new System.Data.SqlClient.SqlParameter("@UpdateStatus", updateStatus ? 1 : 0));
+
+                    // ===============================================
+                    // 批次寫入 Log 
+                    // ===============================================
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        da.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    // 全部成功，提交交易
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    da.RollBack();
+                    throw ex;
+                }
             }
         }
 
         /// <summary>
         /// 批次新增健康紀錄
         /// </summary>
-        /// <param name="list">要新增的資料清單</param>
-        public void BulkInsertHealthRecords(List<TreeHealthRecord> list)
+        /// <param name="list">要新增的資料清單 (請確認物件屬性與 DB 欄位對應)</param>
+        /// <param name="accountID">操作者 ID</param>
+        /// <param name="accountName">操作者姓名</param>
+        /// <param name="ipAddress">來源 IP</param>
+        public void BulkInsertHealthRecords(List<TreeHealthRecord> list, string ipAddress, int accountID, string account, string accountName, string accountUnit)
         {
             if (list == null || list.Count == 0) return;
 
-            // 1. 產生 DataTable (Insert 模式)
-            System.Data.DataTable dt = CreateHealthRecordDataTable(list, forUpdate: false);
+            // 準備 Log 的 DataTable
+            System.Data.DataTable dtLog = new System.Data.DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            DateTime now = DateTime.Now;
 
             using (var da = new MS_SQL())
             {
-                da.BulkCopy("Tree_HealthRecord", dt);
+                try
+                {
+                    da.StartTransaction();
+
+                    // 2. 準備超長 SQL (包含所有欄位)
+                    string sqlInsert = @"
+                        INSERT INTO Tree_HealthRecord 
+                        (
+                            /* [基本資料] */
+                            treeID, surveyDate, surveyor, dataStatus, memo, treeSignStatus,
+                    
+                            /* [量測資料] */
+                            latitude, longitude, treeHeight, canopyArea, 
+                            girth100, diameter100, girth130, diameter130, measureNote,
+
+                            /* [主要病害] */
+                            majorDiseaseBrownRoot, majorDiseaseGanoderma, majorDiseaseWoodDecayFungus, 
+                            majorDiseaseCanker, majorDiseaseOther, majorDiseaseOtherNote,
+
+                            /* [主要害蟲] */
+                            majorPestRootTunnel, majorPestRootChew, majorPestRootLive,
+                            majorPestBaseTunnel, majorPestBaseChew, majorPestBaseLive,
+                            majorPestTrunkTunnel, majorPestTrunkChew, majorPestTrunkLive,
+                            majorPestBranchTunnel, majorPestBranchChew, majorPestBranchLive,
+                            majorPestCrownTunnel, majorPestCrownChew, majorPestCrownLive,
+                            majorPestOtherTunnel, majorPestOtherChew, majorPestOtherLive,
+
+                            /* [一般病蟲害描述] */
+                            generalPestRoot, generalPestBase, generalPestTrunk, 
+                            generalPestBranch, generalPestCrown, generalPestOther,
+                            generalDiseaseRoot, generalDiseaseBase, generalDiseaseTrunk, 
+                            generalDiseaseBranch, generalDiseaseCrown, generalDiseaseOther,
+                            pestOtherNote,
+
+                            /* [根部細節] */
+                            rootDecayPercent, rootCavityMaxDiameter, rootWoundMaxDiameter,
+                            rootMechanicalDamage, rootMowingInjury, rootInjury, rootGirdling, rootOtherNote,
+
+                            /* [基部細節] */
+                            baseDecayPercent, baseCavityMaxDiameter, baseWoundMaxDiameter,
+                            baseMechanicalDamage, baseMowingInjury, baseOtherNote,
+
+                            /* [樹幹細節] */
+                            trunkDecayPercent, trunkCavityMaxDiameter, trunkWoundMaxDiameter,
+                            trunkMechanicalDamage, trunkIncludedBark, trunkOtherNote,
+
+                            /* [枝條細節] */
+                            branchDecayPercent, branchCavityMaxDiameter, branchWoundMaxDiameter,
+                            branchMechanicalDamage, branchIncludedBark, branchDrooping, branchOtherNote,
+
+                            /* [樹冠與生長] */
+                            crownLeafCoveragePercent, crownDeadBranchPercent, crownHangingBranch, crownOtherNote,
+                            growthNote,
+
+                            /* [修剪與維護] */
+                            pruningWrongDamage, pruningWoundHealing, pruningEpiphyte, 
+                            pruningParasite, pruningVine, pruningOtherNote,
+                            supportCount, supportEmbedded, supportOtherNote,
+
+                            /* [棲地環境] */
+                            siteCementPercent, siteAsphaltPercent, sitePlanter, 
+                            siteRecreationFacility, siteDebrisStack, siteBetweenBuildings,
+                            siteSoilCompaction, siteOverburiedSoil, siteOtherNote,
+
+                            /* [土壤與管理] */
+                            soilPh, soilOrganicMatter, soilEc,
+                            managementStatus, priority, treatmentDescription,
+                            sourceUnit, sourceUnitID,
+
+                            /* [系統欄位] */
+                            insertAccountID, insertDateTime
+                        )
+                        VALUES 
+                        (
+                            /* [基本資料] */
+                            @treeID, @surveyDate, @surveyor, @dataStatus, @memo, @treeSignStatus,
+
+                            /* [量測資料] */
+                            @latitude, @longitude, @treeHeight, @canopyArea, 
+                            @girth100, @diameter100, @girth130, @diameter130, @measureNote,
+
+                            /* [主要病害] */
+                            @majorDiseaseBrownRoot, @majorDiseaseGanoderma, @majorDiseaseWoodDecayFungus, 
+                            @majorDiseaseCanker, @majorDiseaseOther, @majorDiseaseOtherNote,
+
+                            /* [主要害蟲] */
+                            @majorPestRootTunnel, @majorPestRootChew, @majorPestRootLive,
+                            @majorPestBaseTunnel, @majorPestBaseChew, @majorPestBaseLive,
+                            @majorPestTrunkTunnel, @majorPestTrunkChew, @majorPestTrunkLive,
+                            @majorPestBranchTunnel, @majorPestBranchChew, @majorPestBranchLive,
+                            @majorPestCrownTunnel, @majorPestCrownChew, @majorPestCrownLive,
+                            @majorPestOtherTunnel, @majorPestOtherChew, @majorPestOtherLive,
+
+                            /* [一般病蟲害描述] */
+                            @generalPestRoot, @generalPestBase, @generalPestTrunk, 
+                            @generalPestBranch, @generalPestCrown, @generalPestOther,
+                            @generalDiseaseRoot, @generalDiseaseBase, @generalDiseaseTrunk, 
+                            @generalDiseaseBranch, @generalDiseaseCrown, @generalDiseaseOther,
+                            @pestOtherNote,
+
+                            /* [根部細節] */
+                            @rootDecayPercent, @rootCavityMaxDiameter, @rootWoundMaxDiameter,
+                            @rootMechanicalDamage, @rootMowingInjury, @rootInjury, @rootGirdling, @rootOtherNote,
+
+                            /* [基部細節] */
+                            @baseDecayPercent, @baseCavityMaxDiameter, @baseWoundMaxDiameter,
+                            @baseMechanicalDamage, @baseMowingInjury, @baseOtherNote,
+
+                            /* [樹幹細節] */
+                            @trunkDecayPercent, @trunkCavityMaxDiameter, @trunkWoundMaxDiameter,
+                            @trunkMechanicalDamage, @trunkIncludedBark, @trunkOtherNote,
+
+                            /* [枝條細節] */
+                            @branchDecayPercent, @branchCavityMaxDiameter, @branchWoundMaxDiameter,
+                            @branchMechanicalDamage, @branchIncludedBark, @branchDrooping, @branchOtherNote,
+
+                            /* [樹冠與生長] */
+                            @crownLeafCoveragePercent, @crownDeadBranchPercent, @crownHangingBranch, @crownOtherNote,
+                            @growthNote,
+
+                            /* [修剪與維護] */
+                            @pruningWrongDamage, @pruningWoundHealing, @pruningEpiphyte, 
+                            @pruningParasite, @pruningVine, @pruningOtherNote,
+                            @supportCount, @supportEmbedded, @supportOtherNote,
+
+                            /* [棲地環境] */
+                            @siteCementPercent, @siteAsphaltPercent, @sitePlanter, 
+                            @siteRecreationFacility, @siteDebrisStack, @siteBetweenBuildings,
+                            @siteSoilCompaction, @siteOverburiedSoil, @siteOtherNote,
+
+                            /* [土壤與管理] */
+                            @soilPh, @soilOrganicMatter, @soilEc,
+                            @managementStatus, @priority, @treatmentDescription,
+                            @sourceUnit, @sourceUnitID,
+
+                            /* [系統欄位] */
+                            @acc, @time
+                        );
+                
+                        SELECT CAST(SCOPE_IDENTITY() AS int); 
+                    ";
+
+                    foreach (var item in list)
+                    {
+                        List<System.Data.SqlClient.SqlParameter> p = new List<System.Data.SqlClient.SqlParameter>();
+
+                        // --- 基本資料 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@treeID", item.treeID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@surveyDate", item.surveyDate));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@surveyor", item.surveyor ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@dataStatus", item.dataStatus)); // 預設 0
+                        p.Add(new System.Data.SqlClient.SqlParameter("@memo", item.memo ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@treeSignStatus", item.treeSignStatus ?? (object)DBNull.Value));
+
+                        // --- 量測 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@latitude", item.latitude ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@longitude", item.longitude ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@treeHeight", item.treeHeight ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@canopyArea", item.canopyArea ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@girth100", item.girth100 ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@diameter100", item.diameter100 ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@girth130", item.girth130 ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@diameter130", item.diameter130 ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@measureNote", item.measureNote ?? (object)DBNull.Value));
+
+                        // --- 主要病害 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorDiseaseBrownRoot", item.majorDiseaseBrownRoot ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorDiseaseGanoderma", item.majorDiseaseGanoderma ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorDiseaseWoodDecayFungus", item.majorDiseaseWoodDecayFungus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorDiseaseCanker", item.majorDiseaseCanker ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorDiseaseOther", item.majorDiseaseOther ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorDiseaseOtherNote", item.majorDiseaseOtherNote ?? (object)DBNull.Value));
+
+                        // --- 主要害蟲 (簡化寫法，請確保物件有這些屬性) ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestRootTunnel", item.majorPestRootTunnel ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestRootChew", item.majorPestRootChew ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestRootLive", item.majorPestRootLive ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestBaseTunnel", item.majorPestBaseTunnel ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestBaseChew", item.majorPestBaseChew ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestBaseLive", item.majorPestBaseLive ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestTrunkTunnel", item.majorPestTrunkTunnel ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestTrunkChew", item.majorPestTrunkChew ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestTrunkLive", item.majorPestTrunkLive ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestBranchTunnel", item.majorPestBranchTunnel ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestBranchChew", item.majorPestBranchChew ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestBranchLive", item.majorPestBranchLive ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestCrownTunnel", item.majorPestCrownTunnel ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestCrownChew", item.majorPestCrownChew ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestCrownLive", item.majorPestCrownLive ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestOtherTunnel", item.majorPestOtherTunnel ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestOtherChew", item.majorPestOtherChew ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@majorPestOtherLive", item.majorPestOtherLive ?? (object)DBNull.Value));
+
+                        // --- 一般病蟲害 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalPestRoot", item.generalPestRoot ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalPestBase", item.generalPestBase ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalPestTrunk", item.generalPestTrunk ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalPestBranch", item.generalPestBranch ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalPestCrown", item.generalPestCrown ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalPestOther", item.generalPestOther ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalDiseaseRoot", item.generalDiseaseRoot ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalDiseaseBase", item.generalDiseaseBase ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalDiseaseTrunk", item.generalDiseaseTrunk ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalDiseaseBranch", item.generalDiseaseBranch ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalDiseaseCrown", item.generalDiseaseCrown ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@generalDiseaseOther", item.generalDiseaseOther ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pestOtherNote", item.pestOtherNote ?? (object)DBNull.Value));
+
+                        // --- 根部 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootDecayPercent", item.rootDecayPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootCavityMaxDiameter", item.rootCavityMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootWoundMaxDiameter", item.rootWoundMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootMechanicalDamage", item.rootMechanicalDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootMowingInjury", item.rootMowingInjury ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootInjury", item.rootInjury ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootGirdling", item.rootGirdling ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootOtherNote", item.rootOtherNote ?? (object)DBNull.Value));
+
+                        // --- 基部 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@baseDecayPercent", item.baseDecayPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@baseCavityMaxDiameter", item.baseCavityMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@baseWoundMaxDiameter", item.baseWoundMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@baseMechanicalDamage", item.baseMechanicalDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@baseMowingInjury", item.baseMowingInjury ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@baseOtherNote", item.baseOtherNote ?? (object)DBNull.Value));
+
+                        // --- 樹幹 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkDecayPercent", item.trunkDecayPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkCavityMaxDiameter", item.trunkCavityMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkWoundMaxDiameter", item.trunkWoundMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkMechanicalDamage", item.trunkMechanicalDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkIncludedBark", item.trunkIncludedBark ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkOtherNote", item.trunkOtherNote ?? (object)DBNull.Value));
+
+                        // --- 枝條 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchDecayPercent", item.branchDecayPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchCavityMaxDiameter", item.branchCavityMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchWoundMaxDiameter", item.branchWoundMaxDiameter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchMechanicalDamage", item.branchMechanicalDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchIncludedBark", item.branchIncludedBark ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchDrooping", item.branchDrooping ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@branchOtherNote", item.branchOtherNote ?? (object)DBNull.Value));
+
+                        // --- 樹冠與生長 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownLeafCoveragePercent", item.crownLeafCoveragePercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownDeadBranchPercent", item.crownDeadBranchPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownHangingBranch", item.crownHangingBranch ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownOtherNote", item.crownOtherNote ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@growthNote", item.growthNote ?? (object)DBNull.Value));
+
+                        // --- 修剪與維護 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pruningWrongDamage", item.pruningWrongDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pruningWoundHealing", item.pruningWoundHealing ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pruningEpiphyte", item.pruningEpiphyte ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pruningParasite", item.pruningParasite ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pruningVine", item.pruningVine ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pruningOtherNote", item.pruningOtherNote ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@supportCount", item.supportCount ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@supportEmbedded", item.supportEmbedded ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@supportOtherNote", item.supportOtherNote ?? (object)DBNull.Value));
+
+                        // --- 棲地環境 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteCementPercent", item.siteCementPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteAsphaltPercent", item.siteAsphaltPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@sitePlanter", item.sitePlanter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteRecreationFacility", item.siteRecreationFacility ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteDebrisStack", item.siteDebrisStack ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteBetweenBuildings", item.siteBetweenBuildings ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteSoilCompaction", item.siteSoilCompaction ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteOverburiedSoil", item.siteOverburiedSoil ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@siteOtherNote", item.siteOtherNote ?? (object)DBNull.Value));
+
+                        // --- 土壤與管理 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@soilPh", item.soilPh ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@soilOrganicMatter", item.soilOrganicMatter ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@soilEc", item.soilEc ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@managementStatus", item.managementStatus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@priority", item.priority ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@treatmentDescription", item.treatmentDescription ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@sourceUnit", item.sourceUnit ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@sourceUnitID", item.sourceUnitID ?? (object)DBNull.Value));
+
+                        // --- 系統 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@acc", accountID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@time", now));
+
+                        // 執行 SQL
+                        object result = da.ExcuteScalar(sqlInsert, p.ToArray());
+
+                        if (result != null && int.TryParse(result.ToString(), out int newHealthID))
+                        {
+                            // 建立 Log 
+                            System.Data.DataRow rowLog = dtLog.NewRow();
+                            rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
+                            rowLog["dataID"] = newHealthID;
+                            rowLog["actionType"] = "批次上傳";
+                            rowLog["memo"] = "新增健檢";
+                            rowLog["ipAddress"] = ipAddress;
+                            rowLog["accountID"] = accountID;
+                            rowLog["account"] = account;
+                            rowLog["accountName"] = accountName;
+                            rowLog["accountUnit"] = accountUnit;
+                            rowLog["logDateTime"] = now;
+                            dtLog.Rows.Add(rowLog);
+                        }
+                    }
+
+                    // 批次寫入 Log
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        da.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    da.RollBack();
+                    throw ex;
+                }
             }
         }
 
@@ -1198,48 +1599,105 @@ namespace protectTreesV2.Batch
         }
 
         /// <summary>
-        /// 批次寫入健檢照片紀錄 
+        /// 批次寫入健檢照片紀錄
         /// </summary>
-        /// <param name="photos">準備寫入的照片清單</param>
-        /// <param name="accountID">上傳者 ID</param>
-        public void BatchInsertHealthPhotoRecords(List<TempPhotoData> photos, int accountID)
+        public void BatchInsertHealthPhotoRecords(List<TempFileData> photos, string ipAddress, int accountID,string account, string accountName,string accountUnit)
         {
             if (photos == null || photos.Count == 0) return;
 
-            DataTable dt = new DataTable();
-            dt.Columns.Add("healthID", typeof(int));
-            dt.Columns.Add("fileName", typeof(string));
-            dt.Columns.Add("filePath", typeof(string));
-            dt.Columns.Add("fileSize", typeof(int));
-            dt.Columns.Add("caption", typeof(string)); 
-            dt.Columns.Add("insertAccountID", typeof(int));
-            dt.Columns.Add("insertDateTime", typeof(DateTime));
+            // 準備照片資料表
+            DataTable dtPhoto = new DataTable();
+            dtPhoto.Columns.Add("healthID", typeof(int));
+            dtPhoto.Columns.Add("fileName", typeof(string));
+            dtPhoto.Columns.Add("filePath", typeof(string));
+            dtPhoto.Columns.Add("fileSize", typeof(int));
+            dtPhoto.Columns.Add("caption", typeof(string));
+            dtPhoto.Columns.Add("insertAccountID", typeof(int));
+            dtPhoto.Columns.Add("insertDateTime", typeof(DateTime));
 
-            // 填入資料
+            // 準備 Log 資料表 
+            DataTable dtLog = new DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            DateTime now = DateTime.Now;
+
+            // ==========================================
+            // 填寫照片資料 (每張都要寫)
+            // ==========================================
             foreach (var p in photos)
             {
-                DataRow row = dt.NewRow();
+                DataRow row = dtPhoto.NewRow();
                 row["healthID"] = p.healthID;
                 row["fileName"] = p.originalFileName;
-
-                // 組合虛擬路徑
                 row["filePath"] = p.virtualPath;
 
-                // 檔案大小
                 int fSize = (p.infoRef != null && p.infoRef.uploadedFile != null)
-                            ? p.infoRef.uploadedFile.ContentLength
-                            : 0;
+                            ? p.infoRef.uploadedFile.ContentLength : 0;
                 row["fileSize"] = fSize;
                 row["caption"] = DBNull.Value;
                 row["insertAccountID"] = accountID;
-                row["insertDateTime"] = DateTime.Now; 
-
-                dt.Rows.Add(row);
+                row["insertDateTime"] = now;
+                dtPhoto.Rows.Add(row);
             }
 
-            using (var da = new MS_SQL())
+            // ==========================================
+            // B: 填寫 Log 資料 (依 HealthID 分組)
+            // ==========================================
+
+            // 使用 LINQ 依 healthID 分組
+            var groupedPhotos = photos.GroupBy(p => p.healthID);
+
+            foreach (var group in groupedPhotos)
             {
-                da.BulkCopy("Tree_HealthPhoto", dt);
+                int currentHealthID = group.Key;
+                int count = group.Count();
+
+                // 組合備註文字：顯示數量與檔名 (例如：批次上傳 3 張：a.jpg, b.jpg, c.jpg)
+                string fileNames = string.Join("、", group.Select(x => x.originalFileName));
+                string memoStr = $"批次上傳 {count} 張照片";
+
+                DataRow rowLog = dtLog.NewRow();
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
+                rowLog["dataID"] = currentHealthID;
+                rowLog["actionType"] = "批次上傳";
+                rowLog["memo"] = memoStr;
+                rowLog["ipAddress"] = ipAddress;
+                rowLog["accountID"] = accountID;
+                rowLog["account"] = account;
+                rowLog["accountName"] = accountName;
+                rowLog["accountUnit"] = accountUnit;
+                rowLog["logDateTime"] = now;
+                dtLog.Rows.Add(rowLog);
+            }
+
+            using (var db = new MS_SQL())
+            {
+                try
+                {
+                    db.StartTransaction();
+
+                    if (dtPhoto.Rows.Count > 0)
+                        db.BulkCopy("Tree_HealthPhoto", dtPhoto);
+
+                    if (dtLog.Rows.Count > 0)
+                        db.BulkCopy("Tree_Log", dtLog);
+
+                    db.Commit();
+                }
+                catch (Exception ex)
+                {
+                    db.RollBack();
+                    throw ex;
+                }
             }
         }
 
@@ -1485,190 +1943,610 @@ namespace protectTreesV2.Batch
             return dt;
         }
         /// <summary>
-        /// 批次新增養護紀錄
+        /// 批次新增養護紀錄 
         /// </summary>
         /// <param name="list">要新增的資料清單</param>
-        public void BulkInsertCareRecords(List<CareRecord> list)
+        /// <param name="accountID">操作者 ID</param>
+        /// <param name="accountName">操作者姓名</param>
+        /// <param name="ipAddress">來源 IP</param>
+        public void BulkInsertCareRecords(List<CareRecord> list, string ipAddress, int accountID, string account, string accountName, string accountUnit)
         {
             if (list == null || list.Count == 0) return;
 
-            // 1. 產生 DataTable (Insert 模式)
-            System.Data.DataTable dt = CreateCareRecordDataTable(list, forUpdate: false);
+            // 準備 Log 的 DataTable
+            System.Data.DataTable dtLog = new System.Data.DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            DateTime now = DateTime.Now;
 
             using (var da = new MS_SQL())
             {
-                da.BulkCopy("Tree_CareRecord", dt);
+                try
+                {
+                    // 開啟交易
+                    da.StartTransaction();
+
+                    string sqlInsert = @"
+                        INSERT INTO Tree_CareRecord 
+                        (
+                            /* [基本資料] */
+                            treeID, careDate, recorder, reviewer, dataStatus,
+
+                            /* [樹冠狀態] */
+                            crownStatus, crownSeasonalDormant, crownDeadBranch, crownDeadBranchPercent,
+                            crownPest, crownForeignObject, crownOtherNote,
+
+                            /* [主莖幹狀態] */
+                            trunkStatus, trunkBarkDamage, trunkDecay, trunkTermiteTrail,
+                            trunkLean, trunkFungus, trunkGummosis, trunkVine, trunkOtherNote,
+
+                            /* [根部狀態] */
+                            rootStatus, rootDamage, rootDecay, rootExpose,
+                            rootRot, rootSucker, rootOtherNote,
+
+                            /* [生育地環境] */
+                            envStatus, envPitSmall, envPaved, envDebris,
+                            envSoilCover, envCompaction, envWaterlog, envNearFacility, envOtherNote,
+
+                            /* [鄰接物] */
+                            adjacentStatus, adjacentBuilding, adjacentWire, adjacentSignal, adjacentOtherNote,
+
+                            /* [維護作業項目] */
+                            task1Status, task1Note,
+                            task2Status, task2Note,
+                            task3Status, task3Note,
+                            task4Status, task4Note,
+                            task5Status, task5Note,
+
+                            /* [系統欄位] */
+                            insertAccountID, insertDateTime
+                        )
+                        VALUES 
+                        (
+                            /* [基本資料] */
+                            @treeID, @careDate, @recorder, @reviewer, @dataStatus,
+
+                            /* [樹冠狀態] */
+                            @crownStatus, @crownSeasonalDormant, @crownDeadBranch, @crownDeadBranchPercent,
+                            @crownPest, @crownForeignObject, @crownOtherNote,
+
+                            /* [主莖幹狀態] */
+                            @trunkStatus, @trunkBarkDamage, @trunkDecay, @trunkTermiteTrail,
+                            @trunkLean, @trunkFungus, @trunkGummosis, @trunkVine, @trunkOtherNote,
+
+                            /* [根部狀態] */
+                            @rootStatus, @rootDamage, @rootDecay, @rootExpose,
+                            @rootRot, @rootSucker, @rootOtherNote,
+
+                            /* [生育地環境] */
+                            @envStatus, @envPitSmall, @envPaved, @envDebris,
+                            @envSoilCover, @envCompaction, @envWaterlog, @envNearFacility, @envOtherNote,
+
+                            /* [鄰接物] */
+                            @adjacentStatus, @adjacentBuilding, @adjacentWire, @adjacentSignal, @adjacentOtherNote,
+
+                            /* [維護作業項目] */
+                            @task1Status, @task1Note,
+                            @task2Status, @task2Note,
+                            @task3Status, @task3Note,
+                            @task4Status, @task4Note,
+                            @task5Status, @task5Note,
+
+                            /* [系統欄位] */
+                            @acc, @time
+                        );
+                
+                        SELECT CAST(SCOPE_IDENTITY() AS int); 
+                    ";
+
+                    foreach (var item in list)
+                    {
+                        List<System.Data.SqlClient.SqlParameter> p = new List<System.Data.SqlClient.SqlParameter>();
+
+                        // --- 基本資料 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@treeID", item.treeID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@careDate", item.careDate));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@recorder", item.recorder ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@reviewer", item.reviewer ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@dataStatus", item.dataStatus)); 
+
+                        // --- 樹冠狀態 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownStatus", item.crownStatus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownSeasonalDormant", item.crownSeasonalDormant ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownDeadBranch", item.crownDeadBranch ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownDeadBranchPercent", item.crownDeadBranchPercent ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownPest", item.crownPest ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownForeignObject", item.crownForeignObject ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@crownOtherNote", item.crownOtherNote ?? (object)DBNull.Value));
+
+                        // --- 主莖幹狀態 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkStatus", item.trunkStatus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkBarkDamage", item.trunkBarkDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkDecay", item.trunkDecay ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkTermiteTrail", item.trunkTermiteTrail ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkLean", item.trunkLean ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkFungus", item.trunkFungus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkGummosis", item.trunkGummosis ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkVine", item.trunkVine ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@trunkOtherNote", item.trunkOtherNote ?? (object)DBNull.Value));
+
+                        // --- 根部狀態 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootStatus", item.rootStatus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootDamage", item.rootDamage ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootDecay", item.rootDecay ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootExpose", item.rootExpose ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootRot", item.rootRot ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootSucker", item.rootSucker ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@rootOtherNote", item.rootOtherNote ?? (object)DBNull.Value));
+
+                        // --- 生育地環境 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envStatus", item.envStatus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envPitSmall", item.envPitSmall ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envPaved", item.envPaved ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envDebris", item.envDebris ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envSoilCover", item.envSoilCover ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envCompaction", item.envCompaction ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envWaterlog", item.envWaterlog ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envNearFacility", item.envNearFacility ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@envOtherNote", item.envOtherNote ?? (object)DBNull.Value));
+
+                        // --- 鄰接物 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@adjacentStatus", item.adjacentStatus ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@adjacentBuilding", item.adjacentBuilding ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@adjacentWire", item.adjacentWire ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@adjacentSignal", item.adjacentSignal ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@adjacentOtherNote", item.adjacentOtherNote ?? (object)DBNull.Value));
+
+                        // --- 維護作業項目 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task1Status", item.task1Status ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task1Note", item.task1Note ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task2Status", item.task2Status ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task2Note", item.task2Note ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task3Status", item.task3Status ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task3Note", item.task3Note ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task4Status", item.task4Status ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task4Note", item.task4Note ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task5Status", item.task5Status ?? (object)DBNull.Value));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@task5Note", item.task5Note ?? (object)DBNull.Value));
+
+                        // --- 系統欄位 ---
+                        p.Add(new System.Data.SqlClient.SqlParameter("@acc", accountID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@time", now));
+
+                        // 執行 SQL 並取得 ID
+                        object result = da.ExcuteScalar(sqlInsert, p.ToArray());
+
+                        if (result != null && int.TryParse(result.ToString(), out int newCareID))
+                        {
+                            // 建立 Log 
+                            System.Data.DataRow rowLog = dtLog.NewRow();
+                            rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Care;
+                            rowLog["dataID"] = newCareID;    
+                            rowLog["actionType"] = "批次上傳";
+                            rowLog["memo"] = "新增養護";
+                            rowLog["ipAddress"] = ipAddress;
+                            rowLog["accountID"] = accountID;
+                            rowLog["account"] = account;
+                            rowLog["accountName"] = accountName;
+                            rowLog["accountUnit"] = accountUnit;
+                            rowLog["logDateTime"] = now;
+                            dtLog.Rows.Add(rowLog);
+                        }
+                    }
+
+                    // 批次寫入 Log
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        da.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    // 提交交易
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    da.RollBack();
+                    throw ex;
+                }
             }
         }
 
         /// <summary>
-        /// 批次更新養護紀錄
+        /// 批次更新養護紀錄 
         /// </summary>
-        public void BulkUpdateCareRecords(List<CareRecord> list)
+        public void BulkUpdateCareRecords(List<CareRecord> list, string ipAddress, int accountID, string account, string accountName, string accountUnit)
         {
             if (list == null || list.Count == 0) return;
 
-            // 1. 產生 DataTable
+            // 產生 Update 用的 DataTable
             System.Data.DataTable dt = CreateCareRecordDataTable(list, forUpdate: true);
 
-            // 2. 使用您的 MS_SQL 類別
+            // ===============================================
+            // 準備 Log 的 DataTable
+            // ===============================================
+            System.Data.DataTable dtLog = new System.Data.DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+
+            DateTime now = DateTime.Now;
+
+            // 填寫 Log 資料
+            foreach (var item in list)
+            {
+                System.Data.DataRow rowLog = dtLog.NewRow();
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Care; 
+                rowLog["dataID"] = item.careID;  
+                rowLog["actionType"] = "批次上傳";
+                rowLog["memo"] = "更新養護";
+                rowLog["ipAddress"] = ipAddress;
+                rowLog["accountID"] = accountID;
+                rowLog["account"] = account;
+                rowLog["accountName"] = accountName;
+                rowLog["accountUnit"] = accountUnit;
+                rowLog["logDateTime"] = now;
+                dtLog.Rows.Add(rowLog);
+            }
+
             using (var da = new MS_SQL())
             {
-                // ===============================================
-                // Step A: 建立暫存表 (包含所有欄位)
-                // ===============================================
-                string createTempSql = @"
-            IF OBJECT_ID('tempdb..#TempCareUpdate') IS NOT NULL DROP TABLE #TempCareUpdate;
+                try
+                {
+                    // 開啟交易
+                    da.StartTransaction();
 
-            CREATE TABLE #TempCareUpdate (
-                [careID] [int] NOT NULL,
-                [treeID] [int] NULL,
-                [careDate] [date] NULL,
-                [recorder] [nvarchar](100) NULL,
-                [reviewer] [nvarchar](100) NULL,
-                [dataStatus] [tinyint] NULL,
+                    // ===============================================
+                    // 建立暫存表
+                    // ===============================================
+                    string createTempSql = @"
+                        IF OBJECT_ID('tempdb..#TempCareUpdate') IS NOT NULL DROP TABLE #TempCareUpdate;
 
-                [crownStatus] [tinyint] NULL,
-                [crownSeasonalDormant] [bit] NULL,
-                [crownDeadBranch] [bit] NULL,
-                [crownDeadBranchPercent] [decimal](5, 2) NULL,
-                [crownPest] [bit] NULL,
-                [crownForeignObject] [bit] NULL,
-                [crownOtherNote] [nvarchar](200) NULL,
+                        CREATE TABLE #TempCareUpdate (
+                            [careID] [int] NOT NULL,
+                            [treeID] [int] NULL,
+                            [careDate] [date] NULL,
+                            [recorder] [nvarchar](100) NULL,
+                            [reviewer] [nvarchar](100) NULL,
+                            [dataStatus] [tinyint] NULL,
 
-                [trunkStatus] [tinyint] NULL,
-                [trunkBarkDamage] [bit] NULL,
-                [trunkDecay] [bit] NULL,
-                [trunkTermiteTrail] [bit] NULL,
-                [trunkLean] [bit] NULL,
-                [trunkFungus] [bit] NULL,
-                [trunkGummosis] [bit] NULL,
-                [trunkVine] [bit] NULL,
-                [trunkOtherNote] [nvarchar](200) NULL,
+                            [crownStatus] [tinyint] NULL,
+                            [crownSeasonalDormant] [bit] NULL,
+                            [crownDeadBranch] [bit] NULL,
+                            [crownDeadBranchPercent] [decimal](5, 2) NULL,
+                            [crownPest] [bit] NULL,
+                            [crownForeignObject] [bit] NULL,
+                            [crownOtherNote] [nvarchar](200) NULL,
 
-                [rootStatus] [tinyint] NULL,
-                [rootDamage] [bit] NULL,
-                [rootDecay] [bit] NULL,
-                [rootExpose] [bit] NULL,
-                [rootRot] [bit] NULL,
-                [rootSucker] [bit] NULL,
-                [rootOtherNote] [nvarchar](200) NULL,
+                            [trunkStatus] [tinyint] NULL,
+                            [trunkBarkDamage] [bit] NULL,
+                            [trunkDecay] [bit] NULL,
+                            [trunkTermiteTrail] [bit] NULL,
+                            [trunkLean] [bit] NULL,
+                            [trunkFungus] [bit] NULL,
+                            [trunkGummosis] [bit] NULL,
+                            [trunkVine] [bit] NULL,
+                            [trunkOtherNote] [nvarchar](200) NULL,
 
-                [envStatus] [tinyint] NULL,
-                [envPitSmall] [bit] NULL,
-                [envPaved] [bit] NULL,
-                [envDebris] [bit] NULL,
-                [envSoilCover] [bit] NULL,
-                [envCompaction] [bit] NULL,
-                [envWaterlog] [bit] NULL,
-                [envNearFacility] [bit] NULL,
-                [envOtherNote] [nvarchar](200) NULL,
+                            [rootStatus] [tinyint] NULL,
+                            [rootDamage] [bit] NULL,
+                            [rootDecay] [bit] NULL,
+                            [rootExpose] [bit] NULL,
+                            [rootRot] [bit] NULL,
+                            [rootSucker] [bit] NULL,
+                            [rootOtherNote] [nvarchar](200) NULL,
 
-                [adjacentStatus] [tinyint] NULL,
-                [adjacentBuilding] [bit] NULL,
-                [adjacentWire] [bit] NULL,
-                [adjacentSignal] [bit] NULL,
-                [adjacentOtherNote] [nvarchar](200) NULL,
+                            [envStatus] [tinyint] NULL,
+                            [envPitSmall] [bit] NULL,
+                            [envPaved] [bit] NULL,
+                            [envDebris] [bit] NULL,
+                            [envSoilCover] [bit] NULL,
+                            [envCompaction] [bit] NULL,
+                            [envWaterlog] [bit] NULL,
+                            [envNearFacility] [bit] NULL,
+                            [envOtherNote] [nvarchar](200) NULL,
 
-                [task1Status] [tinyint] NULL,
-                [task1Note] [nvarchar](500) NULL,
-                [task2Status] [tinyint] NULL,
-                [task2Note] [nvarchar](500) NULL,
-                [task3Status] [tinyint] NULL,
-                [task3Note] [nvarchar](500) NULL,
-                [task4Status] [tinyint] NULL,
-                [task4Note] [nvarchar](500) NULL,
-                [task5Status] [tinyint] NULL,
-                [task5Note] [nvarchar](500) NULL,
+                            [adjacentStatus] [tinyint] NULL,
+                            [adjacentBuilding] [bit] NULL,
+                            [adjacentWire] [bit] NULL,
+                            [adjacentSignal] [bit] NULL,
+                            [adjacentOtherNote] [nvarchar](200) NULL,
 
-                [updateAccountID] [int] NULL,
-                [updateDateTime] [datetime] NULL
-            );
-        ";
-                da.ExecNonQuery(createTempSql);
+                            [task1Status] [tinyint] NULL,
+                            [task1Note] [nvarchar](500) NULL,
+                            [task2Status] [tinyint] NULL,
+                            [task2Note] [nvarchar](500) NULL,
+                            [task3Status] [tinyint] NULL,
+                            [task3Note] [nvarchar](500) NULL,
+                            [task4Status] [tinyint] NULL,
+                            [task4Note] [nvarchar](500) NULL,
+                            [task5Status] [tinyint] NULL,
+                            [task5Note] [nvarchar](500) NULL,
 
-                // ===============================================
-                // Step B: 批次寫入暫存表
-                // ===============================================
-                da.BulkCopy("#TempCareUpdate", dt);
+                            [updateAccountID] [int] NULL,
+                            [updateDateTime] [datetime] NULL
+                        );
+                    ";
+                    da.ExecNonQuery(createTempSql);
 
-                // ===============================================
-                // Step C: 從暫存表更新主表 (列出所有欄位)
-                // ===============================================
-                string updateSql = @"
-            UPDATE T
-            SET 
-                T.treeID = S.treeID,
-                T.careDate = S.careDate,
-                T.recorder = S.recorder,
-                T.reviewer = S.reviewer,
-                /*T.dataStatus = CASE WHEN @UpdateStatus = 1 THEN S.dataStatus ELSE T.dataStatus END,*/
+                    // ===============================================
+                    // Step B: 批次寫入暫存表 - [保持不動]
+                    // ===============================================
+                    da.BulkCopy("#TempCareUpdate", dt);
 
-                T.crownStatus = S.crownStatus,
-                T.crownSeasonalDormant = S.crownSeasonalDormant,
-                T.crownDeadBranch = S.crownDeadBranch,
-                T.crownDeadBranchPercent = S.crownDeadBranchPercent,
-                T.crownPest = S.crownPest,
-                T.crownForeignObject = S.crownForeignObject,
-                T.crownOtherNote = S.crownOtherNote,
+                    // ===============================================
+                    // Step C: 從暫存表更新主表 (列出所有欄位) - [保持不動]
+                    // ===============================================
+                    string updateSql = @"
+                    UPDATE T
+                    SET 
+                        T.treeID = S.treeID,
+                        T.careDate = S.careDate,
+                        T.recorder = S.recorder,
+                        T.reviewer = S.reviewer,
+                        /*T.dataStatus = CASE WHEN @UpdateStatus = 1 THEN S.dataStatus ELSE T.dataStatus END,*/
 
-                T.trunkStatus = S.trunkStatus,
-                T.trunkBarkDamage = S.trunkBarkDamage,
-                T.trunkDecay = S.trunkDecay,
-                T.trunkTermiteTrail = S.trunkTermiteTrail,
-                T.trunkLean = S.trunkLean,
-                T.trunkFungus = S.trunkFungus,
-                T.trunkGummosis = S.trunkGummosis,
-                T.trunkVine = S.trunkVine,
-                T.trunkOtherNote = S.trunkOtherNote,
+                        T.crownStatus = S.crownStatus,
+                        T.crownSeasonalDormant = S.crownSeasonalDormant,
+                        T.crownDeadBranch = S.crownDeadBranch,
+                        T.crownDeadBranchPercent = S.crownDeadBranchPercent,
+                        T.crownPest = S.crownPest,
+                        T.crownForeignObject = S.crownForeignObject,
+                        T.crownOtherNote = S.crownOtherNote,
 
-                T.rootStatus = S.rootStatus,
-                T.rootDamage = S.rootDamage,
-                T.rootDecay = S.rootDecay,
-                T.rootExpose = S.rootExpose,
-                T.rootRot = S.rootRot,
-                T.rootSucker = S.rootSucker,
-                T.rootOtherNote = S.rootOtherNote,
+                        T.trunkStatus = S.trunkStatus,
+                        T.trunkBarkDamage = S.trunkBarkDamage,
+                        T.trunkDecay = S.trunkDecay,
+                        T.trunkTermiteTrail = S.trunkTermiteTrail,
+                        T.trunkLean = S.trunkLean,
+                        T.trunkFungus = S.trunkFungus,
+                        T.trunkGummosis = S.trunkGummosis,
+                        T.trunkVine = S.trunkVine,
+                        T.trunkOtherNote = S.trunkOtherNote,
 
-                T.envStatus = S.envStatus,
-                T.envPitSmall = S.envPitSmall,
-                T.envPaved = S.envPaved,
-                T.envDebris = S.envDebris,
-                T.envSoilCover = S.envSoilCover,
-                T.envCompaction = S.envCompaction,
-                T.envWaterlog = S.envWaterlog,
-                T.envNearFacility = S.envNearFacility,
-                T.envOtherNote = S.envOtherNote,
+                        T.rootStatus = S.rootStatus,
+                        T.rootDamage = S.rootDamage,
+                        T.rootDecay = S.rootDecay,
+                        T.rootExpose = S.rootExpose,
+                        T.rootRot = S.rootRot,
+                        T.rootSucker = S.rootSucker,
+                        T.rootOtherNote = S.rootOtherNote,
 
-                T.adjacentStatus = S.adjacentStatus,
-                T.adjacentBuilding = S.adjacentBuilding,
-                T.adjacentWire = S.adjacentWire,
-                T.adjacentSignal = S.adjacentSignal,
-                T.adjacentOtherNote = S.adjacentOtherNote,
+                        T.envStatus = S.envStatus,
+                        T.envPitSmall = S.envPitSmall,
+                        T.envPaved = S.envPaved,
+                        T.envDebris = S.envDebris,
+                        T.envSoilCover = S.envSoilCover,
+                        T.envCompaction = S.envCompaction,
+                        T.envWaterlog = S.envWaterlog,
+                        T.envNearFacility = S.envNearFacility,
+                        T.envOtherNote = S.envOtherNote,
 
-                T.task1Status = S.task1Status,
-                T.task1Note = S.task1Note,
-                T.task2Status = S.task2Status,
-                T.task2Note = S.task2Note,
-                T.task3Status = S.task3Status,
-                T.task3Note = S.task3Note,
-                T.task4Status = S.task4Status,
-                T.task4Note = S.task4Note,
-                T.task5Status = S.task5Status,
-                T.task5Note = S.task5Note,
+                        T.adjacentStatus = S.adjacentStatus,
+                        T.adjacentBuilding = S.adjacentBuilding,
+                        T.adjacentWire = S.adjacentWire,
+                        T.adjacentSignal = S.adjacentSignal,
+                        T.adjacentOtherNote = S.adjacentOtherNote,
 
-                T.updateAccountID = S.updateAccountID,
-                T.updateDateTime = GETDATE()
-            FROM Tree_CareRecord T
-            INNER JOIN #TempCareUpdate S ON T.careID = S.careID;
+                        T.task1Status = S.task1Status,
+                        T.task1Note = S.task1Note,
+                        T.task2Status = S.task2Status,
+                        T.task2Note = S.task2Note,
+                        T.task3Status = S.task3Status,
+                        T.task3Note = S.task3Note,
+                        T.task4Status = S.task4Status,
+                        T.task4Note = S.task4Note,
+                        T.task5Status = S.task5Status,
+                        T.task5Note = S.task5Note,
 
-            DROP TABLE #TempCareUpdate;
-        ";
+                        T.updateAccountID = S.updateAccountID,
+                        T.updateDateTime = GETDATE()
+                    FROM Tree_CareRecord T
+                    INNER JOIN #TempCareUpdate S ON T.careID = S.careID;
 
-                // Step D: 執行 Update
-                da.ExecNonQuery(updateSql);
+                    DROP TABLE #TempCareUpdate;
+                ";
+
+                    // 執行 Update
+                    da.ExecNonQuery(updateSql);
+
+                    // ===============================================
+                    // 批次寫入 Log
+                    // ===============================================
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        da.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    // 全部成功，提交交易
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    da.RollBack();
+                    throw ex;
+                }
             }
         }
+        /// <summary>
+        /// 批次取得指定 HealthID 目前擁有的【附件檔案】數量
+        /// </summary>
+        public Dictionary<int, int> GetBatchHealthAttachmentCounts(List<int> healthIDs)
+        {
+            Dictionary<int, int> map = new Dictionary<int, int>();
+            if (healthIDs == null || healthIDs.Count == 0) return map;
 
+            // 動態組建 SQL
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(@"
+                SELECT healthID, COUNT(*) as Cnt 
+                FROM Tree_HealthAttachment 
+                WHERE removeDateTime IS NULL 
+                  AND healthID IN (
+            ");
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<string> paramNames = new List<string>();
+
+            for (int i = 0; i < healthIDs.Count; i++)
+            {
+                string pName = $"@p{i}";
+                paramNames.Add(pName);
+                // 參數化查詢，防止 SQL Injection
+                parameters.Add(new SqlParameter(pName, healthIDs[i]));
+            }
+
+            sb.Append(string.Join(",", paramNames));
+            sb.Append(") GROUP BY healthID");
+
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sb.ToString(), parameters.ToArray());
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    int hID = Convert.ToInt32(row["healthID"]);
+                    int count = Convert.ToInt32(row["Cnt"]);
+
+                    if (!map.ContainsKey(hID))
+                    {
+                        map.Add(hID, count);
+                    }
+                }
+            }
+
+            return map;
+        }
+        /// <summary>
+        /// 批次覆蓋/新增健檢附件並寫入操作 Log
+        /// </summary>
+        /// <param name="insertList">要新增的附件清單</param>
+        /// <param name="accountID">操作者 ID </param>
+        /// <param name="accountName">操作者姓名 </param>
+        /// <param name="isOverwrite">是否執行覆蓋 (軟刪除)</param>
+        public void BatchReplaceHealthDocs(List<TempFileData> insertList, string ipAddress, int accountID, string account,string accountName,string accountUnit, bool isOverwrite)
+        {
+            if (insertList == null || insertList.Count == 0) return;
+
+            //檔案欄位
+            DataTable dtAttach = new DataTable();
+            dtAttach.Columns.Add("healthID", typeof(int));
+            dtAttach.Columns.Add("fileName", typeof(string));
+            dtAttach.Columns.Add("filePath", typeof(string));
+            dtAttach.Columns.Add("fileSize", typeof(int));
+            dtAttach.Columns.Add("description", typeof(string));
+            dtAttach.Columns.Add("insertAccountID", typeof(int));
+            dtAttach.Columns.Add("insertDateTime", typeof(DateTime));
+
+            //log欄位
+            DataTable dtLog = new DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            // 填寫資料 
+            DateTime now = DateTime.Now;
+
+            foreach (var item in insertList)
+            {
+                // --- A. 填寫附件資料 ---
+                DataRow rowAttach = dtAttach.NewRow();
+                rowAttach["healthID"] = item.healthID;
+                rowAttach["fileName"] = item.originalFileName;
+                rowAttach["filePath"] = item.virtualPath;
+
+                int fSize = (item.infoRef != null && item.infoRef.uploadedFile != null)
+                            ? item.infoRef.uploadedFile.ContentLength : 0;
+                rowAttach["fileSize"] = fSize;
+                rowAttach["description"] = "批次上傳";
+                rowAttach["insertAccountID"] = accountID;
+                rowAttach["insertDateTime"] = now;
+                dtAttach.Rows.Add(rowAttach);
+
+                // --- B. 填寫 Log 資料 ---
+                DataRow rowLog = dtLog.NewRow();
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
+                rowLog["dataID"] = item.healthID;
+                rowLog["actionType"] = "批次上傳";
+                rowLog["memo"] = item.IsOverwriteAction ? "覆蓋附件" : "上傳附件";
+                rowLog["ipAddress"] = ipAddress; 
+                rowLog["accountID"] = accountID;
+                rowLog["account"] = account;
+                rowLog["accountName"] = accountName;
+                rowLog["accountUnit"] = accountUnit;
+                rowLog["logDateTime"] = now;
+                dtLog.Rows.Add(rowLog);
+            }
+
+            // 開始執行資料庫交易
+            using (var db = new MS_SQL())
+            {
+                try
+                {
+                    //開啟交易
+                    db.StartTransaction();
+
+                    // 軟刪除 
+                    if (isOverwrite)
+                    {
+                        // 取出所有涉及的 HealthID
+                        var distinctIDs = insertList.Select(x => x.healthID).Distinct().ToList();
+                        if (distinctIDs.Count > 0)
+                        {
+                            string idList = string.Join(",", distinctIDs);
+                            string sqlUpdate = $@"
+                                UPDATE Tree_HealthAttachment 
+                                SET removeDateTime = GETDATE(), removeAccountID = @acc
+                                WHERE healthID IN ({idList}) AND removeDateTime IS NULL";
+
+                            db.ExecNonQuery(sqlUpdate, new System.Data.SqlClient.SqlParameter("@acc", accountID));
+                        }
+                    }
+
+                    // 批次寫入附件
+                    if (dtAttach.Rows.Count > 0)
+                    {
+                        db.BulkCopy("Tree_HealthAttachment", dtAttach);
+                    }
+
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        db.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    // 全部成功，提交
+                    db.Commit();
+                }
+                catch (Exception ex)
+                {
+                    db.RollBack();
+                    throw ex; 
+                }
+            }
+        }
     }
 }

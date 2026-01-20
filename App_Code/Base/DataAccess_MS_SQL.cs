@@ -111,8 +111,17 @@ namespace DataAccess
         /// <param name="dt"></param>
         public void BulkCopy(string tableName, System.Data.DataTable dt) {
             this.OpenConnection();
-            using (System.Data.SqlClient.SqlBulkCopy bulk = new System.Data.SqlClient.SqlBulkCopy(this._conn) { BatchSize = 1000, DestinationTableName = tableName }) {
-                foreach (System.Data.DataColumn col in dt.Columns) { bulk.ColumnMappings.Add(col.ColumnName, col.ColumnName); }
+            using (System.Data.SqlClient.SqlBulkCopy bulk = new System.Data.SqlClient.SqlBulkCopy(
+                 this._conn,
+                 System.Data.SqlClient.SqlBulkCopyOptions.Default,
+                 this.myTranscation)) 
+            {
+                bulk.BatchSize = 1000;
+                bulk.DestinationTableName = tableName;
+                foreach (System.Data.DataColumn col in dt.Columns)
+                {
+                    bulk.ColumnMappings.Add(col.ColumnName, col.ColumnName);
+                }
                 bulk.WriteToServer(dt);
             }
         }

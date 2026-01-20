@@ -79,13 +79,16 @@ namespace protectTreesV2.backstage.health
 
         protected void GridView_Detail_RowCommand(object sender, GridViewCommandEventArgs e)
         {
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
+
             // 檢視樹籍資料 (ViewTree)
             if (e.CommandName == "ViewTree")
             {
                 string treeNo = e.CommandArgument.ToString();
 
                 List<string> searchList = new List<string> { treeNo };
-                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList);
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList, accountID);
 
                 if (treeIdMap.ContainsKey(treeNo))
                 {
@@ -122,7 +125,7 @@ namespace protectTreesV2.backstage.health
 
                 // 先查 TreeID
                 List<string> searchTreeList = new List<string> { treeNo };
-                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList);
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList, accountID);
 
                 if (treeIdMap.ContainsKey(treeNo))
                 {
@@ -417,7 +420,7 @@ namespace protectTreesV2.backstage.health
                             continue; 
                         }
 
-                        // 民國年自動校正 (ROC Logic)
+                        // 民國年自動校正
                         if (validSurveyDate.Year < 1911)
                         {
                             validSurveyDate = validSurveyDate.AddYears(1911);
@@ -454,7 +457,7 @@ namespace protectTreesV2.backstage.health
                             var errs = ParseAndValidatePestInfo(pestRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-                        else if (isStrictMode)
+                        else 
                         {
                             rowErrors.Add("缺漏資料：[病蟲害調查] 頁籤中找不到此調查記數的資料。");
                         }
@@ -465,7 +468,7 @@ namespace protectTreesV2.backstage.health
                             var errs = ParseAndValidateAppearance(appRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-                        else if (isStrictMode)
+                        else 
                         {
                             rowErrors.Add("缺漏資料：[樹木生長外觀情況] 頁籤中找不到此調查記數的資料。");
                         }
@@ -476,7 +479,7 @@ namespace protectTreesV2.backstage.health
                             var errs = ParseAndValidatePruning(prunRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-                        else if (isStrictMode)
+                        else
                         {
                             rowErrors.Add("缺漏資料：[樹木修剪與支撐情況] 頁籤中找不到此調查記數的資料。");
                         }
@@ -487,7 +490,7 @@ namespace protectTreesV2.backstage.health
                             var errs = ParseAndValidateSoil(soilRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-                        else if (isStrictMode)
+                        else
                         {
                             rowErrors.Add("缺漏資料：[生育地環境與土讓檢測情況] 頁籤中找不到此調查記數的資料。");
                         }
@@ -498,7 +501,7 @@ namespace protectTreesV2.backstage.health
                             var errs = ParseAndValidateRisk(riskRow, draftRecord, isStrictMode);
                             if (errs.Count > 0) rowErrors.AddRange(errs);
                         }
-                        else if (isStrictMode)
+                        else 
                         {
                             rowErrors.Add("缺漏資料：[健康檢查結果及風險評估] 頁籤中找不到此調查記數的資料。");
                         }
@@ -562,7 +565,7 @@ namespace protectTreesV2.backstage.health
                 if (validDataList.Count > 0)
                 {
                     List<string> distinctTreeNos = validDataList.Select(x => x.record.systemTreeNo).Distinct().ToList();
-                    Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos);
+                    Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos, accountID);
 
                     for (int i = validDataList.Count - 1; i >= 0; i--)
                     {
@@ -576,7 +579,7 @@ namespace protectTreesV2.backstage.health
                         else
                         {
                             item.log.isSuccess = false;
-                            item.log.resultMsg = $"失敗：查無系統樹籍編號 ({tNo})";
+                            item.log.resultMsg = $"失敗：查無系統樹籍編號";
                             validDataList.RemoveAt(i);
                         }
                     }
@@ -621,6 +624,8 @@ namespace protectTreesV2.backstage.health
                 // -----------------------------------------------------
                 // 執行更新 
                 // -----------------------------------------------------
+                string clientIP = Request?.UserHostAddress ?? "";
+
                 if (updateModels.Count > 0)
                 {
                     try
@@ -637,7 +642,7 @@ namespace protectTreesV2.backstage.health
                         }
 
                         // 3. 執行 SQL
-                        system_batch.BulkUpdateHealthRecords(recordsToUpdate, updateStatus: isSetFinal);
+                        system_batch.BulkUpdateHealthRecords(recordsToUpdate, isSetFinal, clientIP, accountID,user?.account,user?.name,user?.unitName);
 
                         // 成功：保持原本 Log 的 isSuccess = true
                     }
@@ -670,7 +675,7 @@ namespace protectTreesV2.backstage.health
                         }
 
                         // 3. 執行 SQL
-                        system_batch.BulkInsertHealthRecords(recordsToInsert);
+                        system_batch.BulkInsertHealthRecords(recordsToInsert, clientIP, accountID, user?.account, user?.name, user?.unitName);
 
                         // 成功：保持原本 Log 的 isSuccess = true
                     }
@@ -978,6 +983,10 @@ namespace protectTreesV2.backstage.health
             CheckMultiVal(14, "米徑", v => data.diameter100 = v);
             CheckMultiVal(15, "胸圍", v => data.girth130 = v);
             CheckMultiVal(16, "胸徑", v => data.diameter130 = v);
+
+            // 量測備註 (Col 17)
+            data.measureNote = GetCellValue(row, 17);
+
 
             return result;
         }
@@ -1467,7 +1476,7 @@ namespace protectTreesV2.backstage.health
         }
 
         /// <summary>
-        /// 驗證並解析布林欄位 (有/無)
+        /// 驗證並解析布林欄位 (有/沒有)
         /// </summary>
         /// <param name="isStrictMode">是否為嚴格模式 (定稿或覆蓋時為 true)</param>
         private bool? ParseBoolColumn(IRow row, int col, string fieldName, List<string> errors, bool isStrictMode)
@@ -1490,7 +1499,7 @@ namespace protectTreesV2.backstage.health
             val = val.Trim(); // 去除空白
 
             if (val == "有") return true;
-            if (val == "無") return false;
+            if (val == "沒有") return false;
 
             // 2. 內容錯誤 (不管是不是嚴格模式，填錯字就是錯)
             errors.Add($"{fieldName} (選項錯誤: {val})");

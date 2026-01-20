@@ -163,6 +163,7 @@
     <Content Include="backstage\tree\edit.aspx" />
     <Content Include="backstage\tree\edit_photos.aspx" />
     <Content Include="backstage\tree\query.aspx" />
+    <Content Include="default.aspx" />
     <Content Include="login.aspx" />
     <Content Include="reg.aspx" />
     <Content Include="regVerify.aspx" />
@@ -171,6 +172,7 @@
     <Content Include="_css\bootstrap-table.css" />
     <Content Include="_css\bootstrap.css" />
     <Content Include="_css\control.css" />
+    <Content Include="_css\default.css" />
     <Content Include="_css\fontawesome-all.css" />
     <Content Include="_css\mp_default.css" />
     <Content Include="_css\mp_public.css" />
@@ -396,6 +398,13 @@
     </Compile>
     <Compile Include="backstage\tree\query.aspx.designer.cs">
       <DependentUpon>query.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="default.aspx.cs">
+      <DependentUpon>default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="default.aspx.designer.cs">
+      <DependentUpon>default.aspx</DependentUpon>
     </Compile>
     <Compile Include="reg.aspx.cs">
       <DependentUpon>reg.aspx</DependentUpon>

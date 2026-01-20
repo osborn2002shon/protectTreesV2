@@ -75,13 +75,16 @@ namespace protectTreesV2.backstage.care
         }
         protected void GridView_Detail_RowCommand(object sender, GridViewCommandEventArgs e)
         {
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
+
             // 檢視樹籍資料 (ViewTree)
             if (e.CommandName == "ViewTree")
             {
                 string treeNo = e.CommandArgument.ToString();
 
                 List<string> searchList = new List<string> { treeNo };
-                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList);
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList, accountID);
 
                 if (treeIdMap.ContainsKey(treeNo))
                 {
@@ -118,7 +121,7 @@ namespace protectTreesV2.backstage.care
 
                 // 先查 TreeID
                 List<string> searchTreeList = new List<string> { treeNo };
-                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList);
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList,accountID);
 
                 if (treeIdMap.ContainsKey(treeNo))
                 {
@@ -445,12 +448,7 @@ namespace protectTreesV2.backstage.care
                         }
                         else
                         {
-                            // 資料不存在
-                            if (isOverwrite)
-                            {
-                                rowErrors.Add("缺漏資料：[生長情形概況] 頁籤中找不到此調查記數的資料。");
-                            }
-                            // 非嚴格模式：允許不填 (維持預設值 null)
+                            rowErrors.Add("缺漏資料：[生長情形概況] 頁籤中找不到此調查記數的資料。");
                         }
 
                         // 養護作業管理 
@@ -465,12 +463,7 @@ namespace protectTreesV2.backstage.care
                         }
                         else
                         {
-                           
-                            if (isOverwrite)
-                            {
-                                rowErrors.Add("缺漏資料：[養護作業管理] 頁籤中找不到此調查記數的資料 (若無作業請保留樹號列，內容留空)。");
-                                
-                            }
+                            rowErrors.Add("缺漏資料：[養護作業管理] 頁籤中找不到此調查記數的資料 (若無作業請保留樹號列，內容留空)。");
                         }
 
 
@@ -531,7 +524,7 @@ namespace protectTreesV2.backstage.care
                 if (validDataList.Count > 0)
                 {
                     List<string> distinctTreeNos = validDataList.Select(x => x.systemTreeNo).Distinct().ToList();
-                    Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos);
+                    Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos, accountID);
 
                     for (int i = validDataList.Count - 1; i >= 0; i--)
                     {
@@ -590,6 +583,7 @@ namespace protectTreesV2.backstage.care
                 // -----------------------------------------------------
                 // 執行更新 
                 // -----------------------------------------------------
+                string clientIP = Request?.UserHostAddress ?? "";
                 if (updateModels.Count > 0)
                 {
                     try
@@ -601,8 +595,8 @@ namespace protectTreesV2.backstage.care
                             rec.updateDateTime = DateTime.Now;
                         }
 
-                        // 3. 執行 SQL
-                        system_batch.BulkUpdateCareRecords(recordsToUpdate);
+                        // 執行 SQL
+                        system_batch.BulkUpdateCareRecords(recordsToUpdate, clientIP, accountID, user?.account, user?.name, user?.unitName);
 
                         // 成功：保持原本 Log 的 isSuccess = true
                     }
@@ -630,7 +624,7 @@ namespace protectTreesV2.backstage.care
                             rec.insertAccountID = accountID;
                             rec.insertDateTime = DateTime.Now;
                         }
-                        system_batch.BulkInsertCareRecords(recordsToInsert);
+                        system_batch.BulkInsertCareRecords(recordsToInsert, clientIP, accountID, user?.account, user?.name, user?.unitName);
 
                         // 成功：保持原本 Log 的 isSuccess = true
                     }

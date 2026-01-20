@@ -67,7 +67,7 @@ namespace protectTreesV2.backstage.health
             List<TreeBatchTaskLog> allLogList = new List<TreeBatchTaskLog>();
 
             // 工作佇列：只有解析成功的項目會進入此清單往下跑
-            List<TreePhotoInfo> processQueue = new List<TreePhotoInfo>();
+            List<TreeFileInfo> processQueue = new List<TreeFileInfo>();
 
             // =========================================================
             // 解析與格式驗證
@@ -88,7 +88,7 @@ namespace protectTreesV2.backstage.health
                 };
                 allLogList.Add(myLog);
 
-                TreePhotoInfo info = new TreePhotoInfo
+                TreeFileInfo info = new TreeFileInfo
                 {
                     uploadedFile = f,
                     log = myLog
@@ -161,7 +161,7 @@ namespace protectTreesV2.backstage.health
             if (processQueue.Count > 0)
             {
                 List<string> distinctTreeNos = processQueue.Select(x => x.systemTreeNo).Distinct().ToList();
-                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos);
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos,accountID);
 
                 foreach (var info in processQueue)
                 {
@@ -286,7 +286,7 @@ namespace protectTreesV2.backstage.health
                 int remaining = limit - currentDbCount;
 
                 // 建立本組的暫存清單 (準備批次寫入)
-                List<TempPhotoData> batchInsertList = new List<TempPhotoData>();
+                List<TempFileData> batchInsertList = new List<TempFileData>();
 
                 // 只做實體存檔 & 收集名單 ---
                 foreach (var info in group)
@@ -315,7 +315,7 @@ namespace protectTreesV2.backstage.health
                             info.uploadedFile.SaveAs(fullPath);
 
                             // 加入待寫入清單 
-                            batchInsertList.Add(new TempPhotoData
+                            batchInsertList.Add(new TempFileData
                             {
                                 healthID = hID,
                                 originalFileName = info.uploadedFile.FileName,
@@ -347,8 +347,10 @@ namespace protectTreesV2.backstage.health
                 {
                     try
                     {
+                        string clientIP = Request?.UserHostAddress ?? "";
+
                         //批次寫入照片表
-                        system_batch.BatchInsertHealthPhotoRecords(batchInsertList,accountID);
+                        system_batch.BatchInsertHealthPhotoRecords(batchInsertList, clientIP, accountID,user?.account,user?.name,user?.unitName );
 
                         // 寫入成功：更新 Log 狀態
                         foreach (var item in batchInsertList)
@@ -429,7 +431,7 @@ namespace protectTreesV2.backstage.health
             {
                 //成功上傳
                 ShowMessage("處理完成", $"成功：{successCount}，失敗：{failCount}");
-                BindData(); // 這會去撈 DB，因為我們剛剛存進去了，所以撈得到
+                BindData(); 
             }
             else
             {
@@ -440,6 +442,97 @@ namespace protectTreesV2.backstage.health
                 GridView_Detail.DataBind();
             }
         }
-       
+
+        protected void GridView_Detail_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
+
+            // 檢視樹籍資料 (ViewTree)
+            if (e.CommandName == "ViewTree")
+            {
+                string treeNo = e.CommandArgument.ToString();
+
+                List<string> searchList = new List<string> { treeNo };
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList, accountID);
+
+                if (treeIdMap.ContainsKey(treeNo))
+                {
+                    int treeID = treeIdMap[treeNo];
+
+                    // 設定 Session 
+                    setTreeID = treeID.ToString();
+
+                    // 開啟新視窗
+                    string targetUrl = ResolveUrl("~/Backstage/tree/detail.aspx");
+                    string script = $"window.open('{targetUrl}', '_blank');";
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenTreeWindow", script, true);
+                }
+                else
+                {
+                    ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，可能尚未建立或已被刪除。");
+                }
+            }
+            // 檢視健檢紀錄 (ViewHealth)
+            else if (e.CommandName == "ViewHealth")
+            {
+                // 解析參數：樹號,日期
+                string[] args = e.CommandArgument.ToString().Split(',');
+                if (args.Length < 2) return;
+
+                string treeNo = args[0];
+                string dateStr = args[1];
+
+                if (!DateTime.TryParse(dateStr, out DateTime checkDate))
+                {
+                    ShowMessage("提示", "日期格式錯誤");
+                    return;
+                }
+
+                // 先查 TreeID
+                List<string> searchTreeList = new List<string> { treeNo };
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList, accountID);
+
+                if (treeIdMap.ContainsKey(treeNo))
+                {
+                    int treeID = treeIdMap[treeNo];
+
+                    // 2組裝查詢 Key (TreeID + Date)
+                    var queryKeys = new List<TreeQueryKey>
+                    {
+                        new TreeQueryKey { treeID = treeID, checkDate = checkDate }
+                    };
+
+                    // 反查 HealthID
+                    Dictionary<string, int> healthMap = system_batch.GetHealthIDMap(queryKeys);
+
+                    // Key 的格式通常是 $"{treeID}_{yyyyMMdd}"
+                    string mapKey = $"{treeID}_{checkDate:yyyyMMdd}";
+
+                    if (healthMap.ContainsKey(mapKey))
+                    {
+                        int healthID = healthMap[mapKey];
+
+                        // 設定 Session 並跳轉
+                        setHealthID = healthID.ToString(); // 設定健檢 ID
+                        setTreeID = null;                  // 清空樹木 ID 
+
+                        // 開啟新視窗到編輯頁
+                        string targetUrl = ResolveUrl("edit.aspx");
+                        string script = $"window.open('{targetUrl}', '_blank');";
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenHealthWindow", script, true);
+                    }
+                    else
+                    {
+                        ShowMessage("提示", $"查無此日期的健檢紀錄 ({dateStr})。");
+                    }
+                }
+                else
+                {
+                    ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，無法查詢健檢紀錄。");
+                }
+            }
+        }
+
     }
 }

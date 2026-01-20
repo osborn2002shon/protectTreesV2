@@ -304,6 +304,7 @@ namespace protectTreesV2.backstage.health
                     if (isDeleted)
                     {
                         // 成功
+                        UserLog.Insert_UserLog(userID, UserLog.enum_UserLogItem.健檢紀錄管理, UserLog.enum_UserLogType.刪除, "刪除健檢");
                         ShowMessage("提示", "刪除成功！");
                         BindResult();
                     }
@@ -311,6 +312,7 @@ namespace protectTreesV2.backstage.health
                     {
                         // 失敗
                         ShowMessage("提示", "刪除失敗！<br/>可能原因：資料已定稿(無法刪除) 或 資料已被他人刪除。");
+                        BindResult();
                     }
                 }
             }

@@ -1,17 +1,541 @@
-﻿using System;
+﻿using protectTreesV2.Base;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using static protectTreesV2.Batch.Batch;
 
 namespace protectTreesV2.backstage.health
 {
-    public partial class uploadFile : System.Web.UI.Page
+    public partial class uploadFile : BasePage
     {
+        protectTreesV2.Batch.Batch system_batch = new Batch.Batch();
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                BindData();
+            }
+        }
+        private void BindData()
+        {
+            // 取得當前使用者 ID
+            var user = UserInfo.GetCurrentUser;
+            int userId = user?.accountID ?? 0;
 
+            // 綁定歷史紀錄
+            var historyList = system_batch.GetBatchTaskList(enum_treeBatchType.Health_File, userId);
+            GridView_History.DataSource = historyList.Take(5).ToList();
+            GridView_History.DataBind();
+
+            // 綁定最新一筆的明細 (若有歷史紀錄)
+            if (historyList.Count > 0)
+            {
+                var latest = historyList[0];
+                Label_LastStatus.Text = $"最新上傳：{latest.insertDateTime?.ToString("yyyy/MM/dd HH:mm")} (成功 {latest.successCount} / 失敗 {latest.failCount})";
+
+                var details = system_batch.GetLatestBatchTaskLogs(latest.taskID);
+                GridView_Detail.DataSource = details;
+                GridView_Detail.DataBind();
+            }
+            else
+            {
+                Label_LastStatus.Text = "目前尚無上傳紀錄";
+                GridView_Detail.DataSource = null;
+                GridView_Detail.DataBind();
+            }
+        }
+        protected void Button_StartUpload_Click(object sender, EventArgs e)
+        {
+            if (!FileUpload_Batch.HasFiles)
+            {
+                ShowMessage("提示", "請先選擇要上傳的檔案！");
+                return;
+            }
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
+
+            HttpFileCollection files = Request.Files;
+
+            // 取得前端勾選狀態
+            bool isAutoCreateDraft = CheckBox_autoCreateDraft.Checked;
+            bool isOverwriteExisting = CheckBox_OverwriteExisting.Checked; //
+
+            // 總表：最後要寫入資料庫的紀錄
+            List<TreeBatchTaskLog> allLogList = new List<TreeBatchTaskLog>();
+
+            // 工作佇列：只有解析成功的項目會進入此清單往下跑
+            List<TreeFileInfo> processQueue = new List<TreeFileInfo>();
+
+            HashSet<string> currentBatchKeys = new HashSet<string>();
+
+            // =========================================================
+            // 解析與格式驗證
+            // =========================================================
+            for (int i = 0; i < files.Count; i++)
+            {
+                HttpPostedFile f = files[i];
+
+                // 略過瀏覽器空的 input
+                if (string.IsNullOrEmpty(f.FileName)) continue;
+
+                TreeBatchTaskLog myLog = new TreeBatchTaskLog
+                {
+                    taskID = 0,
+                    sourceItem = Path.GetFileName(f.FileName),
+                    isSuccess = false,
+                    resultMsg = ""
+                };
+                allLogList.Add(myLog);
+
+                TreeFileInfo info = new TreeFileInfo
+                {
+                    uploadedFile = f,
+                    log = myLog
+                };
+
+                // --- 檢查 1: 空檔案 ---
+                if (f.ContentLength == 0)
+                {
+                    info.isProcessing = false;
+                    myLog.resultMsg = "失敗：檔案內容為空或損毀";
+                    continue;
+                }
+
+                // --- 檢查 2: 檔案大小 (> 30MB) ---
+                int maxSizeBytes = 30 * 1024 * 1024; // 10MB
+                if (f.ContentLength > maxSizeBytes)
+                {
+                    info.isProcessing = false;
+                    myLog.resultMsg = $"失敗：檔案大小超過 30MB";
+                    continue;
+                }
+
+                // --- 檢查 3: 副檔名 (zip) ---
+                string ext = Path.GetExtension(f.FileName).ToLower();
+                string[] allowedExts = { ".zip" };
+                if (!allowedExts.Contains(ext))
+                {
+                    info.isProcessing = false;
+                    myLog.resultMsg = "失敗：檔案格式不正確";
+                    continue;
+                }
+
+                // --- 檢查 4: 檔名解析 ---
+                string[] parts = myLog.sourceItem.Split('_');
+                if (parts.Length < 2)
+                {
+                    info.isProcessing = false;
+                    myLog.resultMsg = "失敗：檔名格式錯誤";
+                    continue;
+                }
+
+                // 解析 SystemTreeNo
+                string tNo = parts[0].Trim();
+                info.systemTreeNo = tNo;
+                myLog.refKey = tNo;
+
+                // 解析 Date
+                string dStr = parts[1].Trim();
+                if (DateTime.TryParseExact(dStr, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out DateTime d))
+                {
+                    info.checkDate = d;
+                    myLog.refDate = d;
+                }
+                else
+                {
+                    info.isProcessing = false;
+                    myLog.resultMsg = $"失敗：日期格式無效";
+                    continue;
+                }
+
+                // 同批次重複檢查 (防止一次上傳兩個 A001_20250101)
+                string uniqueKey = $"{tNo}_{d:yyyyMMdd}";
+                if (currentBatchKeys.Contains(uniqueKey))
+                {
+                    info.isProcessing = false;
+                    myLog.resultMsg = "失敗：重複上傳";
+                    continue;
+                }
+
+                // 全部通過，加入處理佇列
+                processQueue.Add(info);
+            }
+
+            // =========================================================
+            // 資料庫批次驗證
+            // =========================================================
+
+            // 檢查樹籍編號
+            if (processQueue.Count > 0)
+            {
+                List<string> distinctTreeNos = processQueue.Select(x => x.systemTreeNo).Distinct().ToList();
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(distinctTreeNos, accountID);
+
+                foreach (var info in processQueue)
+                {
+                    // 檢查是否存在
+                    if (treeIdMap.ContainsKey(info.systemTreeNo))
+                    {
+                        info.treeID = treeIdMap[info.systemTreeNo];
+                    }
+                    else
+                    {
+                        info.isProcessing = false;
+                        info.log.resultMsg = $"失敗：查無系統樹籍編號";
+                    }
+                }
+            }
+
+            // 批次取得 HealthID
+            var activeItems = processQueue.Where(x => x.isProcessing).ToList();
+            if (activeItems.Count > 0)
+            {
+                var queryKeys = activeItems
+                    .Select(x => new TreeQueryKey { treeID = x.treeID, checkDate = x.checkDate })
+                    .Distinct().ToList();
+
+                Dictionary<string, int> healthMap = system_batch.GetHealthIDMap(queryKeys);
+
+                foreach (var info in activeItems)
+                {
+                    string key = $"{info.treeID}_{info.checkDate:yyyyMMdd}";
+                    if (healthMap.ContainsKey(key))
+                    {
+                        info.healthID = healthMap[key];
+                    }
+                }
+            }
+
+            // 自動新增處理
+            if (isAutoCreateDraft)
+            {
+                // 找出還沒有 healthID 的項目
+                var toCreateList = activeItems.Where(x => x.healthID == 0).ToList();
+
+                if (toCreateList.Count > 0)
+                {
+                    var createKeys = toCreateList
+                        .GroupBy(x => new { x.treeID, x.checkDate })
+                        .Select(g => new TreeQueryKey
+                        {
+                            treeID = g.Key.treeID,
+                            checkDate = g.Key.checkDate
+                        })
+                        .ToList();
+                    try
+                    {
+                        Dictionary<string, int> newHealthMap = system_batch.BatchCreateHealthRecords(createKeys, accountID);
+
+                        foreach (var info in toCreateList)
+                        {
+                            // Key 組成：treeID_yyyyMMdd
+                            string key = $"{info.treeID}_{info.checkDate:yyyyMMdd}";
+
+                            if (newHealthMap.ContainsKey(key))
+                            {
+                                // 成功新增
+                                info.healthID = newHealthMap[key];
+                                info.log.resultMsg = "提醒：指定日期已自動新增健檢紀錄草稿";
+                            }
+                            else
+                            {
+                                // 失敗
+                                info.isProcessing = false;
+                                info.log.resultMsg = "失敗：自動新增失敗";
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // --- 系統錯誤 ---
+                        foreach (var info in toCreateList)
+                        {
+                            info.isProcessing = false;
+                            info.log.isSuccess = false;
+                            info.log.resultMsg = $"失敗：自動新增失敗";
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // 沒勾選自動新增，且沒 ID 的，直接失敗
+                foreach (var info in activeItems.Where(x => x.healthID == 0))
+                {
+                    info.isProcessing = false;
+                    info.log.resultMsg = "失敗：指定日期查無健檢紀錄";
+                }
+            }
+            // =========================================================
+            // 實體儲存與批次寫入控管 
+            // =========================================================
+
+            // 取出已有 HealthID 且準備上傳的項目
+            var readyToSaveList = processQueue.Where(x => x.isProcessing && x.healthID > 0).ToList();
+
+            if (readyToSaveList.Any())
+            {
+                // 查詢 DB 中這些 HealthID 是否已有附件 (回傳數量)
+                List<int> distinctHealthIDs = readyToSaveList.Select(x => x.healthID).Distinct().ToList();
+                Dictionary<int, int> dbCountMap = system_batch.GetBatchHealthAttachmentCounts(distinctHealthIDs);
+
+                foreach (var info in readyToSaveList)
+                {
+                    int currentCount = dbCountMap.ContainsKey(info.healthID) ? dbCountMap[info.healthID] : 0;
+                    bool hasExisting = currentCount > 0; // 是否已有舊檔
+
+                    if (hasExisting)
+                    {
+                        if (isOverwriteExisting)
+                        {
+                            // [允許覆蓋]：狀態保持 Processing
+                            // 後續在 DB 階段會先執行軟刪除，再新增
+                            info.isOverwriteBehavior = true;
+                            info.log.resultMsg = "提醒：已取代原有附件";
+                        }
+                        else
+                        {
+                            // [阻擋上傳]：因為已存在且使用者沒勾選覆蓋
+                            info.isProcessing = false;
+                            info.log.resultMsg = "失敗：該紀錄已存在附件";
+                        }
+                    }
+                   
+                }
+            }
+
+            // =========================================================
+            // 實體檔案存檔
+            // =========================================================
+
+            // 過濾出經過所有檢查，最終確定要寫入的項目
+            var finalSaveList = processQueue.Where(x => x.isProcessing && x.healthID > 0).ToList();
+            List<TempFileData> batchInsertList = new List<TempFileData>();
+
+            foreach (var info in finalSaveList)
+            {
+                try
+                {
+                    string virtualDir = $"~/_file/health/doc/{info.healthID}/";
+                    string physicalDir = Server.MapPath(virtualDir);
+
+                    if (!Directory.Exists(physicalDir)) Directory.CreateDirectory(physicalDir);
+
+                    // 檔名加上 Ticks 時間戳記，確保物理檔名唯一，不會跟舊檔名衝突
+                    string saveName = $"{DateTime.Now.Ticks}_{info.uploadedFile.FileName}";
+                    string fullPath = Path.Combine(physicalDir, saveName);
+
+                    // 執行實體存檔
+                    info.uploadedFile.SaveAs(fullPath);
+
+                    // 加入資料庫待寫入清單
+                    batchInsertList.Add(new TempFileData
+                    {
+                        healthID = info.healthID,
+                        originalFileName = info.uploadedFile.FileName,
+                        finalFileName = saveName,
+                        fullPhysicalPath = fullPath,
+                        virtualPath = virtualDir + saveName,
+                        infoRef = info,
+                        IsOverwriteAction = info.isOverwriteBehavior
+                    });
+                }
+                catch (Exception ex)
+                {
+                    info.isProcessing = false;
+                    info.log.isSuccess = false;
+                    info.log.resultMsg = $"失敗：實體存檔錯誤 ({ex.Message})";
+                }
+            }
+
+            if (batchInsertList.Any())
+            {
+                try
+                {
+                    string clientIP = Request?.UserHostAddress ?? "";
+
+                    // 批次寫入
+                    system_batch.BatchReplaceHealthDocs(batchInsertList, clientIP, accountID,user?.account, user?.name,user?.unitName, isOverwriteExisting);
+
+                    // 寫入成功：更新 Log 狀態
+                    foreach (var item in batchInsertList)
+                    {
+                        item.infoRef.log.isSuccess = true;
+                    }
+                }
+                catch (Exception dbEx)
+                {
+                    // 若資料庫寫入失敗 (已自動 Rollback)，手動刪除剛剛上傳的實體檔案
+                    foreach (var item in batchInsertList)
+                    {
+                        try
+                        {
+                            if (File.Exists(item.fullPhysicalPath)) File.Delete(item.fullPhysicalPath);
+                        }
+                        catch { /* 忽略刪檔錯誤 */ }
+
+                        item.infoRef.log.isSuccess = false;
+                        item.infoRef.log.resultMsg = $"失敗：資料庫寫入錯誤 ({dbEx.Message})";
+                    }
+                }
+            }
+
+            // =========================================================
+            // 寫入紀錄
+            // =========================================================
+            int successCount = allLogList.Count(x => x.isSuccess);
+            int failCount = allLogList.Count(x => !x.isSuccess);
+            int totalCount = allLogList.Count;
+
+            bool isLogSavedToDB = false;
+            string dbErrorMsg = "";
+
+            try
+            {
+                // 取得 Task ID
+                int newBatchTaskID = system_batch.CreateBatchTask(
+                    enum_treeBatchType.Health_Photo,
+                    "批次附件上傳",
+                    accountID,
+                    totalCount,
+                    successCount,
+                    failCount
+                );
+
+                // 回填 TaskID
+                foreach (var log in allLogList)
+                {
+                    log.taskID = newBatchTaskID;
+                }
+
+                // 批次寫入 TaskLog
+                system_batch.BulkInsertTaskLogs(allLogList);
+
+                //寫入操作紀錄
+                UserLog.Insert_UserLog(accountID, UserLog.enum_UserLogItem.健檢紀錄管理, UserLog.enum_UserLogType.上傳, "批次上傳附件");
+
+                // 標記寫入成功
+                isLogSavedToDB = true;
+            }
+            catch (Exception ex)
+            {
+                isLogSavedToDB = false;
+                dbErrorMsg = ex.Message;
+            }
+
+            // =========================================================
+            // 結果顯示
+            // =========================================================
+
+            if (isLogSavedToDB)
+            {
+                //成功上傳
+                ShowMessage("處理完成", $"成功：{successCount}，失敗：{failCount}");
+                BindData(); 
+            }
+            else
+            {
+
+                //db紀錄寫入失敗
+                ShowMessage("警告", $"照片上傳作業已執行，但「操作紀錄」寫入資料庫失敗。\n(原因：{dbErrorMsg})\n\n請參考下方列表確認結果。");
+                GridView_Detail.DataSource = allLogList;
+                GridView_Detail.DataBind();
+            }
+        }
+
+        protected void GridView_Detail_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            var user = UserInfo.GetCurrentUser;
+            int accountID = user?.accountID ?? 0;
+
+            // 檢視樹籍資料 (ViewTree)
+            if (e.CommandName == "ViewTree")
+            {
+                string treeNo = e.CommandArgument.ToString();
+
+                List<string> searchList = new List<string> { treeNo };
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchList, accountID);
+
+                if (treeIdMap.ContainsKey(treeNo))
+                {
+                    int treeID = treeIdMap[treeNo];
+
+                    // 設定 Session 
+                    setTreeID = treeID.ToString();
+
+                    // 開啟新視窗
+                    string targetUrl = ResolveUrl("~/Backstage/tree/detail.aspx");
+                    string script = $"window.open('{targetUrl}', '_blank');";
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenTreeWindow", script, true);
+                }
+                else
+                {
+                    ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，可能尚未建立或已被刪除。");
+                }
+            }
+            // 檢視健檢紀錄 (ViewHealth)
+            else if (e.CommandName == "ViewHealth")
+            {
+                // 解析參數：樹號,日期
+                string[] args = e.CommandArgument.ToString().Split(',');
+                if (args.Length < 2) return;
+
+                string treeNo = args[0];
+                string dateStr = args[1];
+
+                if (!DateTime.TryParse(dateStr, out DateTime checkDate))
+                {
+                    ShowMessage("提示", "日期格式錯誤");
+                    return;
+                }
+
+                // 先查 TreeID
+                List<string> searchTreeList = new List<string> { treeNo };
+                Dictionary<string, int> treeIdMap = system_batch.GetTreeIDMap(searchTreeList, accountID);
+
+                if (treeIdMap.ContainsKey(treeNo))
+                {
+                    int treeID = treeIdMap[treeNo];
+
+                    // 2組裝查詢 Key (TreeID + Date)
+                    var queryKeys = new List<TreeQueryKey>
+                    {
+                        new TreeQueryKey { treeID = treeID, checkDate = checkDate }
+                    };
+
+                    // 反查 HealthID
+                    Dictionary<string, int> healthMap = system_batch.GetHealthIDMap(queryKeys);
+
+                    // Key 的格式通常是 $"{treeID}_{yyyyMMdd}"
+                    string mapKey = $"{treeID}_{checkDate:yyyyMMdd}";
+
+                    if (healthMap.ContainsKey(mapKey))
+                    {
+                        int healthID = healthMap[mapKey];
+
+                        // 設定 Session 並跳轉
+                        setHealthID = healthID.ToString(); // 設定健檢 ID
+                        setTreeID = null;                  // 清空樹木 ID 
+
+                        // 開啟新視窗到編輯頁
+                        string targetUrl = ResolveUrl("edit.aspx");
+                        string script = $"window.open('{targetUrl}', '_blank');";
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "OpenHealthWindow", script, true);
+                    }
+                    else
+                    {
+                        ShowMessage("提示", $"查無此日期的健檢紀錄 ({dateStr})。");
+                    }
+                }
+                else
+                {
+                    ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，無法查詢健檢紀錄。");
+                }
+            }
         }
     }
 }

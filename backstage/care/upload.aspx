@@ -187,7 +187,7 @@
                                      </ItemTemplate>
                                  </asp:TemplateField>
 
-                                 <%-- 調查日期  --%>
+                                 <%-- 養護日期  --%>
                                  <asp:TemplateField HeaderText="養護日期" ItemStyle-Width="120px">
                                      <ItemTemplate>
                                          <%--  成功 -> 顯示 LinkButton --%>
