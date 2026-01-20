@@ -1,0 +1,59 @@
+﻿/* === 項目區塊 === */
+
+.div_item {
+    display: flex;
+    flex-wrap: wrap; /* 允許換行 */
+    gap: 30px; /* 項目之間的間距，可以調整 */
+    padding: 30px;
+    /*background-size: cover;
+    background-image: url('../../_img/_temp/bg1.jpg');
+    background-color: rgba(235, 232, 225, 0.8);
+    background-blend-mode: screen;*/
+    background-color: #f2f0e9;
+}
+
+    .div_item > .item {
+        flex: 1 1 calc(25% - 30px); /* 平均分配，扣除 gap */
+        min-width: 200px; /* 最小寬度，小於這個寬度就會換行 */
+        /*height: 150px;*/ /* 設定高度，根據需求調整 */
+    }
+
+    .div_item img {
+        width: 40%;
+    }
+
+        .div_item img:hover {
+            /*transition: all 0.3s ease;*/
+            transition: transform 0.5s ease, opacity 0.5s linear;
+            transform: translate(-5px,-5px);
+        }
+
+/*@media (max-width: 1200px) {
+    .div_item > div {
+        flex: 1 1 calc(33.333% - 20px);*/ /* 三個一排 */
+    /*}
+}
+
+@media (max-width: 768px) {
+    .div_item > div {
+        flex: 1 1 calc(50% - 20px);*/ /* 兩個一排 */
+    /*}
+}
+
+@media (max-width: 480px) {
+    .div_item > div {
+        flex: 1 1 100%;*/ /* 一個一排 */
+    /*}
+}*/
+
+@media (min-width: 768px) {
+    .div_item > div {
+        flex: 1 1 calc(50% - 0px)
+    }
+}
+
+@media (min-width: 992px) {
+    .div_item > div {
+        flex: 1 1 calc(50% - 0px)
+    }
+}

@@ -35,7 +35,7 @@ namespace protectTreesV2._uc.dashboard
                 WITH HealthTrees AS (
                     SELECT DISTINCT treeID
                     FROM Tree_HealthRecord
-                    WHERE editStatus = 1 AND removeDateTime IS NULL
+                    WHERE dataStatus = 1 AND removeDateTime IS NULL
                 )
                 SELECT t.city AS CityName,
                        SUM(CASE WHEN h.treeID IS NOT NULL THEN 1 ELSE 0 END) AS CompletedCount,

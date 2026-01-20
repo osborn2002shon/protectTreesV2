@@ -85,7 +85,7 @@ namespace protectTreesV2.Dashboard
                 FROM Tree_HealthRecord hr
                 INNER JOIN Tree_Record r ON hr.treeID = r.treeID
                 INNER JOIN System_UnitCityMapping map ON r.areaID = map.twID AND map.unitID = @unitID
-                WHERE hr.editStatus = 1 AND hr.removeDateTime IS NULL AND r.removeDateTime IS NULL";
+                WHERE hr.dataStatus = 1 AND hr.removeDateTime IS NULL AND r.removeDateTime IS NULL";
 
             return GetMonthlySummary(sql, unitId);
         }
@@ -100,7 +100,7 @@ namespace protectTreesV2.Dashboard
                 FROM Tree_PatrolRecord pr
                 INNER JOIN Tree_Record r ON pr.treeID = r.treeID
                 INNER JOIN System_UnitCityMapping map ON r.areaID = map.twID AND map.unitID = @unitID
-                WHERE pr.editStatus = 1 AND pr.removeDateTime IS NULL AND r.removeDateTime IS NULL";
+                WHERE pr.dataStatus = 1 AND pr.removeDateTime IS NULL AND r.removeDateTime IS NULL";
 
             return GetMonthlySummary(sql, unitId);
         }
@@ -115,7 +115,7 @@ namespace protectTreesV2.Dashboard
                 FROM Tree_CareRecord cr
                 INNER JOIN Tree_Record r ON cr.treeID = r.treeID
                 INNER JOIN System_UnitCityMapping map ON r.areaID = map.twID AND map.unitID = @unitID
-                WHERE cr.editStatus = 1 AND cr.removeDateTime IS NULL AND r.removeDateTime IS NULL";
+                WHERE cr.dataStatus = 1 AND cr.removeDateTime IS NULL AND r.removeDateTime IS NULL";
 
             return GetMonthlySummary(sql, unitId);
         }

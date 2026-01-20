@@ -1,0 +1,259 @@
+﻿* {
+    /*box-sizing: border-box;*/ /* 這個很重要 */
+    font-family: "Noto Sans Mono", "Noto Sans TC", "微軟正黑體";
+    /* font-family:"Noto Serif TC" */
+}
+html {
+    scroll-behavior: smooth;
+}
+
+html {
+    font-size: 16px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) {
+    html {
+        font-size: 20px;
+    }
+}
+
+body {
+    /*background-size: cover;
+    background-image: url('../_img/_temp/bg1.jpg');
+    background-color: rgba(235, 232, 225, 0.8);
+    background-blend-mode: screen;*/
+}
+
+.div_banner {
+    position: relative;
+    height: calc(100vh - 103px);
+    background-image: url('../_img/_temp/gpt10.png');
+    background-repeat: no-repeat;
+    background-position: center 40%;
+    background-size: cover;
+    /*color: #FFFFFF;*/
+}
+
+.div_banner_title {
+    /*position: absolute;*/ /* 絕對定位 */
+    /*top: 50%;*/ /* 垂直置中 */
+    /*left: 50%;*/ /* 水平置中 */
+    /*transform: translate(-50%, -50%);*/ /* 精確置中 */
+    /*width: 80%;
+    border: 2px solid red;
+    font-size: 3rem;
+    padding: 50px 0px;*/
+    position: absolute;
+    top: 60%; /* 或者你想要的位置,例如 40% */
+    left: 0%; /* 靠左,距離左邊 0% */
+    transform: translateY(-50%); /* 只垂直置中 */
+    width: 750px; /* 或調整成你想要的寬度,例如 50% */
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #517c4e;
+    border-left: none;
+    border-radius: 0px 20px 20px 0px;
+    padding: 50px 50px;
+    text-align: left; /* 文字靠左對齊 */
+}
+
+.div_footer {
+    background-color: rgba(213, 224, 221, 0.9);
+    padding: 10px 0px;
+    font-size:16px;
+    color:rgba(99, 99, 99, 0.9)
+}
+
+h1 {
+    font-size: 40px;
+}
+
+p {
+    font-size:24px;
+    margin:10px 0px;
+}
+
+.navbar_cust {
+    background-color: #FFFFFF;
+    padding: 10px 20px;
+    border-bottom: 1px solid #517c4e;
+}
+
+.navbar-brand > img {
+    height:50px;
+    margin-right:10px;
+}
+.navbar-brand {
+    font-size: 48px;
+    font-weight: 700;
+    color: #517c4e;
+}
+.nav-item {
+    padding:0px 10px;
+}
+.nav-link {
+    font-size: 28px;
+    color: #517c4e;
+    font-weight: 500;
+}
+
+.div_item {
+    display: flex;
+    flex-wrap: wrap; /* 允許換行 */
+    gap: 30px; /* 項目之間的間距，可以調整 */
+    padding: 30px;
+
+    background-size: cover;
+    background-image: url('../_img/_temp/bg1.jpg');
+    background-color: rgba(235, 232, 225, 0.8);
+    background-blend-mode: screen;
+}
+
+    .div_item > .item {
+        flex: 1 1 calc(25% - 30px); /* 平均分配，扣除 gap */
+        min-width: 200px; /* 最小寬度，小於這個寬度就會換行 */
+        /*height: 150px;*/ /* 設定高度，根據需求調整 */
+    }
+
+    .div_item img {
+        width: 40%;
+    }
+
+        .div_item img:hover {
+            /*transition: all 0.3s ease;*/
+            transition: transform 0.5s ease, opacity 0.5s linear;
+            transform: translate(-5px,-5px);
+        }
+
+/* 確保卡片完整顯示 */
+.card {
+    background-color: transparent;
+    border: none;
+}
+
+.card-header {
+    background-color: transparent;
+    border: none;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center !important;
+    color: #fe9b9b;
+    border-bottom: 2px solid #fe9b9b;
+    display:none;
+}
+
+.card-body {
+    background-color: transparent;
+    border: none;
+    text-align: center;
+}
+    .card-body span {
+        display:inline-block;
+        margin:15px 0px;
+        font-size:24px;
+    }
+
+.card-footer {
+    border: none;
+    background-color: transparent;
+    text-align: center;
+}
+
+.btn_link {
+    padding: 10px 10px;
+    background-color: #FFFFFF;
+    color: #c99765;
+    border: 1px solid #c99765;
+    border-radius: 20px;
+    padding: 8px 30px;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+    .btn_link:hover {
+        background-color: #c99765;
+        color: #ffffff;
+        transition: all 0.3s ease;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    }
+
+    /* 如果你想要更精確的響應式控制 */
+    @media (max-width: 1200px) {
+        .div_item > div {
+        flex: 1 1 calc(33.333% - 20px); /* 三個一排 */
+    }
+}
+
+@media (max-width: 768px) {
+    .div_item > div {
+        flex: 1 1 calc(50% - 20px); /* 兩個一排 */
+    }
+}
+
+@media (max-width: 480px) {
+    .div_item > div {
+        flex: 1 1 100%; /* 一個一排 */
+    }
+}
+
+
+/* 基本連結樣式 */
+.highlight {
+    position: relative;
+    padding: 0px 2px;
+    z-index: 1; /* 確保連結元素本身有適當的堆疊順序 */
+}
+
+    /* 螢光筆效果 - 無動畫，半高度 */
+    .highlight::before {
+        content: "";
+        position: absolute;
+        bottom: 0; /* 從底部開始 */
+        left: 0;
+        width: 100%;
+        height: 0; /* 初始為 0 高度 */
+        background-color: rgba(177, 127, 89, 0.3); /* 使用與懸停顏色相符的顏色 */
+        z-index: -1; /* 確保在文字下面 */
+        transition: height 0.2s; /* 添加小動畫使效果更順暢 */
+        transform: skew(-12deg); /* 加入傾斜效果，負值為向左傾斜 */
+    }
+
+    /* 滑鼠懸停時立即顯示螢光效果 */
+    .highlight:hover::before {
+        height: 40%; /* 懸停時只顯示一半高度 */
+    }
+
+
+/* 回到頂部按鈕樣式 */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #5aafb6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: none; /* 初始隱藏 */
+}
+
+    .back-to-top:hover {
+        background-color: #4a9ba2;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .back-to-top.show {
+        display: block;
+    }

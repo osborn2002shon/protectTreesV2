@@ -165,6 +165,11 @@
     <Content Include="backstage\tree\query.aspx" />
     <Content Include="default.aspx" />
     <Content Include="login.aspx" />
+    <Content Include="pages\about.aspx" />
+    <Content Include="pages\analysis.aspx" />
+    <Content Include="pages\link.aspx" />
+    <Content Include="pages\map.aspx" />
+    <Content Include="pages\map_sample.aspx" />
     <Content Include="reg.aspx" />
     <Content Include="regVerify.aspx" />
     <Content Include="Web.config" />
@@ -172,10 +177,19 @@
     <Content Include="_css\bootstrap-table.css" />
     <Content Include="_css\bootstrap.css" />
     <Content Include="_css\control.css" />
+    <Content Include="_css\default\accordion.css" />
+    <Content Include="_css\public\control.css" />
+    <Content Include="_css\public\main.css" />
+    <Content Include="_css\public\menu.css" />
     <Content Include="_css\default.css" />
+    <Content Include="_css\default\control.css" />
+    <Content Include="_css\default\item.css" />
+    <Content Include="_css\default\main.css" />
+    <Content Include="_css\default\menu.css" />
     <Content Include="_css\fontawesome-all.css" />
     <Content Include="_css\mp_default.css" />
     <Content Include="_css\mp_public.css" />
+    <Content Include="_css\public\tab.css" />
     <Content Include="_img\logo.png" />
     <Content Include="_img\logo_mini.png" />
     <Content Include="_js\bootstrap-table-zh-TW.js" />
@@ -188,6 +202,7 @@
     <Content Include="_js\highcharts_export-data.js" />
     <Content Include="_js\highcharts_exporting.js" />
     <Content Include="_js\image-upload.js" />
+    <Content Include="_js\tab.js" />
     <Content Include="_js\jquery-3.7.1.js" />
     <Content Include="_js\jquery.mask.js" />
     <Content Include="_js\mp_default.js" />
@@ -232,30 +247,35 @@
     </Compile>
     <Compile Include="_uc\dashboard\uc_areaGroupPieChart.ascx.cs">
       <DependentUpon>uc_areaGroupPieChart.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="_uc\dashboard\uc_areaGroupPieChart.ascx.designer.cs">
       <DependentUpon>uc_areaGroupPieChart.ascx</DependentUpon>
     </Compile>
     <Compile Include="_uc\dashboard\uc_healthCompletionChart.ascx.cs">
       <DependentUpon>uc_healthCompletionChart.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="_uc\dashboard\uc_healthCompletionChart.ascx.designer.cs">
       <DependentUpon>uc_healthCompletionChart.ascx</DependentUpon>
     </Compile>
     <Compile Include="_uc\dashboard\uc_speciesStatusChart.ascx.cs">
       <DependentUpon>uc_speciesStatusChart.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="_uc\dashboard\uc_speciesStatusChart.ascx.designer.cs">
       <DependentUpon>uc_speciesStatusChart.ascx</DependentUpon>
     </Compile>
     <Compile Include="_uc\dashboard\uc_treeStatusChart.ascx.cs">
       <DependentUpon>uc_treeStatusChart.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="_uc\dashboard\uc_treeStatusChart.ascx.designer.cs">
       <DependentUpon>uc_treeStatusChart.ascx</DependentUpon>
     </Compile>
     <Compile Include="_uc\dashboard\uc_userLoginChart.ascx.cs">
       <DependentUpon>uc_userLoginChart.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="_uc\dashboard\uc_userLoginChart.ascx.designer.cs">
       <DependentUpon>uc_userLoginChart.ascx</DependentUpon>
@@ -442,6 +462,41 @@
     <Compile Include="default.aspx.designer.cs">
       <DependentUpon>default.aspx</DependentUpon>
     </Compile>
+    <Compile Include="pages\about.aspx.cs">
+      <DependentUpon>about.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="pages\about.aspx.designer.cs">
+      <DependentUpon>about.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="pages\analysis.aspx.cs">
+      <DependentUpon>analysis.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="pages\analysis.aspx.designer.cs">
+      <DependentUpon>analysis.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="pages\link.aspx.cs">
+      <DependentUpon>link.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="pages\link.aspx.designer.cs">
+      <DependentUpon>link.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="pages\map.aspx.cs">
+      <DependentUpon>map.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="pages\map.aspx.designer.cs">
+      <DependentUpon>map.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="pages\map_sample.aspx.cs">
+      <DependentUpon>map_sample.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="pages\map_sample.aspx.designer.cs">
+      <DependentUpon>map_sample.aspx</DependentUpon>
+    </Compile>
     <Compile Include="reg.aspx.cs">
       <DependentUpon>reg.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -477,6 +532,20 @@
     </Compile>
     <Compile Include="_mp\mp_login.Master.designer.cs">
       <DependentUpon>mp_login.Master</DependentUpon>
+    </Compile>
+    <Compile Include="_mp\mp_public.Master.cs">
+      <DependentUpon>mp_public.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_mp\mp_public.Master.designer.cs">
+      <DependentUpon>mp_public.Master</DependentUpon>
+    </Compile>
+    <Compile Include="_mp\mp_publicMap.Master.cs">
+      <DependentUpon>mp_publicMap.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="_mp\mp_publicMap.Master.designer.cs">
+      <DependentUpon>mp_publicMap.Master</DependentUpon>
     </Compile>
     <Compile Include="_uc\care\uc_careRecordModal.ascx.cs">
       <DependentUpon>uc_careRecordModal.ascx</DependentUpon>
@@ -527,9 +596,10 @@
     <Content Include="_doc\受保護樹木健檢資料蒐集用表格.xlsx" />
     <Content Include="_doc\受保護樹木巡查資料蒐集用表格.xlsx" />
     <Content Include="_doc\受保護樹木養護資料蒐集用表格.xlsx" />
+    <Content Include="_mp\mp_public.Master" />
+    <Content Include="_mp\mp_publicMap.Master" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="pages\" />
     <Folder Include="_file\health\" />
     <Folder Include="_file\tree\" />
   </ItemGroup>

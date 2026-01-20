@@ -1,0 +1,114 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="mp_public.master.cs" Inherits="protectTreesV2._mp.mp_public" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>受保護樹木資訊網</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet" />
+    <script src="../../_js/bootstrap.bundle.js"></script>
+    <script src="../../_js/jquery-3.7.1.js"></script>
+    <link href="../_css/bootstrap.css" rel="stylesheet" />
+    <link href="../_css/fontawesome-all.css" rel="stylesheet" />  
+    <link href="../_css/public/main.css" rel="stylesheet" />
+    <link href="../_css/public/menu.css" rel="stylesheet" />
+    <link href="../_css/public/control.css" rel="stylesheet" />
+    <link href="../_css/public/tab.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">        
+        <!-- Header 區域 - 100% 寬度 -->
+        <header class="container-fluid p-0 m-0">
+            <nav class="navbar navbar-expand-lg navbar_cust">
+                <div class="container-fluid">
+                    <!-- 網站標題 -->
+                    <div class="d-none d-md-block">
+                        <a class="navbar-brand" href="/"><img src="../../_img/logo.png"/>受保護樹木資訊網</a>
+                    </div>
+                    <div class="d-block d-md-none">
+                        <a class="navbar-brand" href="/"><img src="../../_img/logo_mini.png"/>受保護樹木資訊網</a>
+                    </div>
+                    
+                    <!-- 手機版漢堡按鈕 -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>            
+                    <!-- 選單項目 -->
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link highlight" href="../pages/about.aspx">說明介紹</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link highlight" href="../pages/analysis.aspx">保護成果</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link highlight" href="../pages/map.aspx">樹木地圖</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link highlight" href="../pages/link.aspx">其他資源</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>    
+        <!-- 主要內容區 - 固定寬度 -->
+        <main class="container-fluid p-0 m-0">
+            <div class="container path">
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder_path" runat="server"></asp:ContentPlaceHolder>
+            </div>
+            <div class="container p-0">
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder_content" runat="server"></asp:ContentPlaceHolder>
+            </div>            
+        </main>
+        <div class="container m-0 p-0" style="max-height:calc(100vh - 93px); max-width: 100% !important;">
+            <asp:ContentPlaceHolder ID="ContentPlaceHolder_map" runat="server"></asp:ContentPlaceHolder>
+        </div>  
+        <!-- Footer 區域 - 100% 寬度 -->
+        <footer class="container-fluid div_footer">
+            <div class="text-center">
+                Copyright © 2025 Forestry and Nature Conservation Agency<br />
+                電話：(02)2351-5441<br />
+                地址：100024 臺北市中正區杭州南路一段2號<br />
+            </div>
+        </footer>        
+    </form>
+    <!-- 回到頂部按鈕 -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+    <script type="text/javascript">
+        //頁面載入動畫
+        $(window).on('load', function() {
+            $('.div_banner_title').hide().fadeIn(2000);
+        });
+
+        // 取得按鈕元素
+        const backToTopBtn = document.getElementById('backToTop');
+
+        // 監聽滾動事件
+        window.addEventListener('scroll', function () {
+            // 當滾動超過 300px 時顯示按鈕
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        // 點擊按鈕回到頂部
+        backToTopBtn.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
