@@ -429,6 +429,7 @@
 
             <div class="section-block">
                 <div class="section-subtitle">養護照片上傳</div>
+                <div class="text-muted small mb-2">最多可新增 5 組照片</div>
                 <asp:Repeater ID="Repeater_carePhotos" runat="server" OnItemDataBound="Repeater_carePhotos_ItemDataBound">
                     <ItemTemplate>
                         <div class="photo-block">

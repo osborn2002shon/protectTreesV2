@@ -13,6 +13,7 @@ namespace protectTreesV2.backstage.care
     public partial class edit : BasePage
     {
         private readonly Care.Care system_care = new Care.Care();
+        private const int MaxPhotoBlocks = 5;
 
         [Serializable]
         private class CarePhotoViewModel
@@ -211,6 +212,12 @@ namespace protectTreesV2.backstage.care
         {
             SavePendingUploadsFromRepeater();
             var blocks = PhotoBlocks;
+            if (blocks.Count >= MaxPhotoBlocks)
+            {
+                ShowMessage("限制", "最多只能新增到五組的照片", "warning");
+                BindCarePhotoBlocks();
+                return;
+            }
             blocks.Add(new CarePhotoViewModel());
             PhotoBlocks = blocks;
             BindCarePhotoBlocks();
@@ -249,6 +256,7 @@ namespace protectTreesV2.backstage.care
             AttachTempInfoToBlocks(blocks);
             Repeater_carePhotos.DataSource = blocks;
             Repeater_carePhotos.DataBind();
+            Button_addCarePhotoBlock.Enabled = blocks.Count < MaxPhotoBlocks;
         }
 
         protected void Repeater_carePhotos_ItemDataBound(object sender, RepeaterItemEventArgs e)
