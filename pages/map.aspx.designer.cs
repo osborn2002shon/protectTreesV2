@@ -13,5 +13,10 @@ namespace protectTreesV2.pages
 
     public partial class map1
     {
+        
+        /// <summary>
+        /// TreeDataJson 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.HiddenField TreeDataJson;
     }
 }

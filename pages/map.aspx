@@ -137,6 +137,12 @@
             font-weight: 600;
         }
 
+        .map-tools .map-filter-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
         .map-pill {
             display: inline-flex;
             align-items: center;
@@ -210,58 +216,46 @@
                     </h2>
                     <div id="collapseFilter" class="accordion-collapse collapse" aria-labelledby="headingFilter" data-bs-parent="#mapToolsAccordion">
                         <div class="accordion-body">
-                            <div class="mb-3">
-                                <label class="form-label">縣市</label>
-                                <select class="form-select">
-                                    <option>臺北市</option>
-                                    <option>新北市</option>
-                                    <option>臺中市</option>
-                                    <option>臺南市</option>
-                                    <option>高雄市</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">鄉鎮區</label>
-                                <select class="form-select">
-                                    <option>中正區</option>
-                                    <option>信義區</option>
-                                    <option>大安區</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">樹種</label>
-                                <select class="form-select">
-                                    <option>黑板樹</option>
-                                    <option>榕樹</option>
-                                    <option>樟樹</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">樹齡</label>
-                                <div class="range-input-group">
-                                    <input class="form-control" type="number" placeholder="最小值" />
-                                    <span class="range-separator">~</span>
-                                    <input class="form-control" type="number" placeholder="最大值" />
+                            <div class="map-filter-scroll">
+                                <div class="mb-3">
+                                    <label class="form-label" for="filterCity">縣市</label>
+                                    <select id="filterCity" class="form-select"></select>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">胸高直徑 (m)</label>
-                                <div class="range-input-group">
-                                    <input class="form-control" type="number" placeholder="最小值" />
-                                    <span class="range-separator">~</span>
-                                    <input class="form-control" type="number" placeholder="最大值" />
+                                <div class="mb-3">
+                                    <label class="form-label" for="filterArea">鄉鎮區</label>
+                                    <select id="filterArea" class="form-select"></select>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">胸高樹圍 (m)</label>
-                                <div class="range-input-group">
-                                    <input class="form-control" type="number" placeholder="最小值" />
-                                    <span class="range-separator">~</span>
-                                    <input class="form-control" type="number" placeholder="最大值" />
+                                <div class="mb-3">
+                                    <label class="form-label" for="filterSpecies">樹種</label>
+                                    <select id="filterSpecies" class="form-select"></select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">樹齡</label>
+                                    <div class="range-input-group">
+                                        <input id="filterAgeMin" class="form-control" type="number" placeholder="最小值" />
+                                        <span class="range-separator">~</span>
+                                        <input id="filterAgeMax" class="form-control" type="number" placeholder="最大值" />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">胸高直徑 (cm)</label>
+                                    <div class="range-input-group">
+                                        <input id="filterDiameterMin" class="form-control" type="number" placeholder="最小值" />
+                                        <span class="range-separator">~</span>
+                                        <input id="filterDiameterMax" class="form-control" type="number" placeholder="最大值" />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">胸高樹圍 (cm)</label>
+                                    <div class="range-input-group">
+                                        <input id="filterCircumferenceMin" class="form-control" type="number" placeholder="最小值" />
+                                        <span class="range-separator">~</span>
+                                        <input id="filterCircumferenceMax" class="form-control" type="number" placeholder="最大值" />
+                                    </div>
                                 </div>
                             </div>
                             <div class="d-grid">
-                                <button class="btn btn-primary" type="button">查詢</button>
+                                <button class="btn btn-primary" type="button" id="btnFilterApply">查詢</button>
                             </div>
                         </div>
                     </div>
@@ -291,16 +285,21 @@
             </div>
         </div>
     </div>
+    <asp:HiddenField ID="TreeDataJson" runat="server" />
 
     <script>
         const loadingElement = document.getElementById("mapLoading");
+        const treeDataInput = document.getElementById("<%= TreeDataJson.ClientID %>");
+        const treeData = treeDataInput && treeDataInput.value ? JSON.parse(treeDataInput.value) : [];
 
         require([
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/WMTSLayer",
-            "esri/widgets/Zoom"
-        ], (Map, MapView, WMTSLayer, Zoom) => {
+            "esri/widgets/Zoom",
+            "esri/Graphic",
+            "esri/layers/GraphicsLayer"
+        ], (Map, MapView, WMTSLayer, Zoom, Graphic, GraphicsLayer) => {
             const baseMapLayer = new WMTSLayer({
                 url: "https://wmts.nlsc.gov.tw/wmts",
                 activeLayer: { id: "EMAP" },
@@ -319,6 +318,9 @@
                 basemap: "streets",
                 layers: [baseMapLayer, orthoLayer]
             });
+
+            const graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer);
 
             const view = new MapView({
                 container: "mapView",
@@ -405,6 +407,191 @@
                 orthoLayer.visible = false;
                 map.basemap = selection;
             });
+
+            const treeSymbol = {
+                type: "picture-marker",
+                url: "/_img/icon/tree.png",
+                width: "28px",
+                height: "28px"
+            };
+
+            const popupTemplate = {
+                title: "{systemTreeNo}",
+                content: [{
+                    type: "fields",
+                    fieldInfos: [
+                        { fieldName: "species", label: "樹種" },
+                        { fieldName: "city", label: "縣市" },
+                        { fieldName: "area", label: "鄉鎮區" },
+                        { fieldName: "age", label: "樹齡", format: { digitSeparator: true } },
+                        { fieldName: "diameter", label: "胸高直徑 (cm)" },
+                        { fieldName: "circumference", label: "胸高樹圍 (cm)" }
+                    ]
+                }]
+            };
+
+            const parseNumber = (value) => {
+                if (value === null || value === undefined || value === "") {
+                    return null;
+                }
+                const parsed = Number(String(value).replace(/,/g, ""));
+                return Number.isFinite(parsed) ? parsed : null;
+            };
+
+            const matchesRange = (value, min, max) => {
+                if (value === null) {
+                    return min === null && max === null;
+                }
+                if (min !== null && value < min) {
+                    return false;
+                }
+                if (max !== null && value > max) {
+                    return false;
+                }
+                return true;
+            };
+
+            const renderTrees = (records) => {
+                graphicsLayer.removeAll();
+                records.forEach((tree) => {
+                    const latitude = parseNumber(tree.Latitude);
+                    const longitude = parseNumber(tree.Longitude);
+                    if (latitude === null || longitude === null) {
+                        return;
+                    }
+
+                    const graphic = new Graphic({
+                        geometry: {
+                            type: "point",
+                            latitude,
+                            longitude
+                        },
+                        symbol: treeSymbol,
+                        attributes: {
+                            systemTreeNo: tree.SystemTreeNo || "樹木資料",
+                            species: tree.Species || "—",
+                            city: tree.City || "—",
+                            area: tree.Area || "—",
+                            age: tree.Age ?? "—",
+                            diameter: tree.BreastHeightDiameter || "—",
+                            circumference: tree.BreastHeightCircumference || "—"
+                        },
+                        popupTemplate
+                    });
+                    graphicsLayer.add(graphic);
+                });
+            };
+
+            const citySelect = document.getElementById("filterCity");
+            const areaSelect = document.getElementById("filterArea");
+            const speciesSelect = document.getElementById("filterSpecies");
+            const ageMinInput = document.getElementById("filterAgeMin");
+            const ageMaxInput = document.getElementById("filterAgeMax");
+            const diameterMinInput = document.getElementById("filterDiameterMin");
+            const diameterMaxInput = document.getElementById("filterDiameterMax");
+            const circumferenceMinInput = document.getElementById("filterCircumferenceMin");
+            const circumferenceMaxInput = document.getElementById("filterCircumferenceMax");
+            const filterButton = document.getElementById("btnFilterApply");
+
+            const getDistinctValues = (records, selector) => {
+                const values = new Set();
+                records.forEach((record) => {
+                    const value = selector(record);
+                    if (value) {
+                        values.add(value);
+                    }
+                });
+                return Array.from(values).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+            };
+
+            const buildSelectOptions = (selectElement, values) => {
+                selectElement.innerHTML = "";
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "全部";
+                selectElement.appendChild(defaultOption);
+                values.forEach((value) => {
+                    const option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = value;
+                    selectElement.appendChild(option);
+                });
+            };
+
+            const refreshAreaOptions = () => {
+                const selectedCity = citySelect.value;
+                const areas = getDistinctValues(
+                    treeData.filter((tree) => !selectedCity || tree.City === selectedCity),
+                    (tree) => tree.Area
+                );
+                buildSelectOptions(areaSelect, areas);
+            };
+
+            const initializeFilters = () => {
+                buildSelectOptions(citySelect, getDistinctValues(treeData, (tree) => tree.City));
+                buildSelectOptions(speciesSelect, getDistinctValues(treeData, (tree) => tree.Species));
+                refreshAreaOptions();
+            };
+
+            const applyFilters = () => {
+                const selectedCity = citySelect.value;
+                const selectedArea = areaSelect.value;
+                const selectedSpecies = speciesSelect.value;
+                const ageMin = parseNumber(ageMinInput.value);
+                const ageMax = parseNumber(ageMaxInput.value);
+                const diameterMin = parseNumber(diameterMinInput.value);
+                const diameterMax = parseNumber(diameterMaxInput.value);
+                const circumferenceMin = parseNumber(circumferenceMinInput.value);
+                const circumferenceMax = parseNumber(circumferenceMaxInput.value);
+
+                const filtered = treeData.filter((tree) => {
+                    if (selectedCity && tree.City !== selectedCity) {
+                        return false;
+                    }
+                    if (selectedArea && tree.Area !== selectedArea) {
+                        return false;
+                    }
+                    if (selectedSpecies && tree.Species !== selectedSpecies) {
+                        return false;
+                    }
+
+                    const ageValue = tree.Age !== null && tree.Age !== undefined ? Number(tree.Age) : null;
+                    if (!matchesRange(ageValue, ageMin, ageMax)) {
+                        return false;
+                    }
+
+                    const diameterValue = parseNumber(tree.BreastHeightDiameter);
+                    if (!matchesRange(diameterValue, diameterMin, diameterMax)) {
+                        return false;
+                    }
+
+                    const circumferenceValue = parseNumber(tree.BreastHeightCircumference);
+                    if (!matchesRange(circumferenceValue, circumferenceMin, circumferenceMax)) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                renderTrees(filtered);
+            };
+
+            if (citySelect && areaSelect && speciesSelect) {
+                initializeFilters();
+                citySelect.addEventListener("change", () => {
+                    const currentArea = areaSelect.value;
+                    refreshAreaOptions();
+                    if (currentArea) {
+                        areaSelect.value = currentArea;
+                    }
+                });
+            }
+
+            if (filterButton) {
+                filterButton.addEventListener("click", applyFilters);
+            }
+
+            renderTrees(treeData);
         });
     </script>
 </asp:Content>
