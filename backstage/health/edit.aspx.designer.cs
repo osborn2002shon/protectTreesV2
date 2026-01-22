@@ -771,13 +771,13 @@ namespace protectTreesV2.backstage.health
         protected global::System.Web.UI.WebControls.TextBox TextBox_branchOtherNote;
 
         /// <summary>
-        /// TextBox_crownLeafCoveragePercent 控制項。
+        /// DropDownList_crownLeafCoveragePercent 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox TextBox_crownLeafCoveragePercent;
+        protected global::System.Web.UI.WebControls.DropDownList DropDownList_crownLeafCoveragePercent;
 
         /// <summary>
         /// TextBox_crownDeadBranchPercent 控制項。

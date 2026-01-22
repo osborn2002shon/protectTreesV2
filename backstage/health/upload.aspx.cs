@@ -11,8 +11,6 @@ using NPOI.XSSF.UserModel;
 using NPOI.HSSF.UserModel; 
 using static protectTreesV2.Batch.Batch;
 using static protectTreesV2.Health.Health;
-using NPOI.HSSF.Record.Chart;
-using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.backstage.health
 {
@@ -895,7 +893,7 @@ namespace protectTreesV2.backstage.health
                         data.treeSignStatus = (int)enum_treeSignStatus.沒有; break;
                     case "毀損":
                         data.treeSignStatus = (int)enum_treeSignStatus.毀損; break;
-                    default: errors.Add($"樹牌狀態 (選項錯誤: {valTreeSign})"); break;
+                    default: errors.Add($"樹牌狀態 (選項錯誤)"); break;
                 }
             }
 
@@ -1130,7 +1128,7 @@ namespace protectTreesV2.backstage.health
             // 1. 根系 (Root) - Index 3~10
             // 標頭: 腐朽百分比%, 樹洞最大直徑(m), 傷口最大直徑(m), 機具損傷, 打草傷, 根傷, 盤根, 其他
             // =========================================================================
-            record.rootDecayPercent = ParseDecimalColumn(row, 3, "根系-腐朽百分比%", isStrictMode, 0, 100, errors);
+            record.rootDecayPercent = ParsePercentageColumn(row, 3, "根系-腐朽百分比%", isStrictMode, 0, 100, errors);
             record.rootCavityMaxDiameter = ParseDecimalColumn(row, 4, "根系-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.rootWoundMaxDiameter = ParseDecimalColumn(row, 5, "根系-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
@@ -1147,7 +1145,7 @@ namespace protectTreesV2.backstage.health
             // 2. 樹基部 (Base) - Index 11~16
             // 標頭: 腐朽百分比%, 樹洞最大直徑(m), 傷口最大直徑(m), 機具損傷, 打草傷, 其他
             // =========================================================================
-            record.baseDecayPercent = ParseDecimalColumn(row, 11, "樹基部-腐朽百分比%", isStrictMode, 0, 100, errors);
+            record.baseDecayPercent = ParsePercentageColumn(row, 11, "樹基部-腐朽百分比%", isStrictMode, 0, 100, errors);
             record.baseCavityMaxDiameter = ParseDecimalColumn(row, 12, "樹基部-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.baseWoundMaxDiameter = ParseDecimalColumn(row, 13, "樹基部-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
@@ -1160,7 +1158,7 @@ namespace protectTreesV2.backstage.health
             // 3. 主幹 (Trunk) - Index 17~22
             // 標頭: 腐朽百分比%, 樹洞最大直徑(m), 傷口最大直徑(m), 機具損傷, 內生夾皮, 其他
             // =========================================================================
-            record.trunkDecayPercent = ParseDecimalColumn(row, 17, "主幹-腐朽百分比%", isStrictMode, 0, 100, errors);
+            record.trunkDecayPercent = ParsePercentageColumn(row, 17, "主幹-腐朽百分比%", isStrictMode, 0, 100, errors);
             record.trunkCavityMaxDiameter = ParseDecimalColumn(row, 18, "主幹-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.trunkWoundMaxDiameter = ParseDecimalColumn(row, 19, "主幹-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
@@ -1173,7 +1171,7 @@ namespace protectTreesV2.backstage.health
             // 4. 枝幹 (Branch) - Index 23~29
             // 標頭: 腐朽百分比%, 樹洞最大直徑(m), 傷口最大直徑(m), 機具損傷, 內生夾皮, 下垂枝, 其他
             // =========================================================================
-            record.branchDecayPercent = ParseDecimalColumn(row, 23, "枝幹-腐朽百分比%", isStrictMode, 0, 100, errors);
+            record.branchDecayPercent = ParsePercentageColumn(row, 23, "枝幹-腐朽百分比%", isStrictMode, 0, 100, errors);
             record.branchCavityMaxDiameter = ParseDecimalColumn(row, 24, "枝幹-樹洞最大直徑(m)", false, 0, 9999.99m, errors);
             record.branchWoundMaxDiameter = ParseDecimalColumn(row, 25, "枝幹-傷口最大直徑(m)", false, 0, 9999.99m, errors);
 
@@ -1187,8 +1185,27 @@ namespace protectTreesV2.backstage.health
             // 5. 樹冠 (Crown) - Index 30~33
             // 標頭: 樹葉生長覆蓋度百分比%, 一般枯枝%, 懸掛枝, 其他
             // =========================================================================
-            record.crownLeafCoveragePercent = ParseDecimalColumn(row, 30, "樹冠-樹葉生長覆蓋度百分比%", isStrictMode, 0, 100, errors);
-            record.crownDeadBranchPercent = ParseDecimalColumn(row, 31, "樹冠-一般枯枝%", isStrictMode, 0, 100, errors);
+            string valCoverage = GetCellValue(row, 30);
+            if (!string.IsNullOrEmpty(valCoverage))
+            {
+                valCoverage = valCoverage.Trim();
+
+                // 檢查輸入文字是否在 CrownCoverageTypes 定義的清單中
+                // (例如: "0~40%生長不良", "40~70%尚可", "70~100%正常")
+                if (CrownCoverageTypes.AllList.Contains(valCoverage))
+                {
+                    record.crownLeafCoveragePercent = valCoverage;
+                }
+                else
+                {
+                    errors.Add($"樹冠-樹葉生長覆蓋度百分比% (選項錯誤)");
+                }
+            }
+            else if (isStrictMode)
+            {
+                errors.Add("樹冠-樹葉生長覆蓋度百分比% (必填)");
+            }
+            record.crownDeadBranchPercent = ParsePercentageColumn(row, 31, "樹冠-一般枯枝%", isStrictMode, 0, 100, errors);
 
             record.crownHangingBranch = ParseBoolColumn(row, 32, "樹冠-懸掛枝", errors, isStrictMode);
 
@@ -1228,7 +1245,7 @@ namespace protectTreesV2.backstage.health
                 }
                 else
                 {
-                    errors.Add($"錯誤修剪傷害 (選項錯誤: {valDamage})");
+                    errors.Add($"錯誤修剪傷害 (選項錯誤)");
                 }
             }
             // 若為 null 或空字串，視為無錯誤修剪，不報錯 (除非這是必填，看您需求)
@@ -1278,8 +1295,8 @@ namespace protectTreesV2.backstage.health
             // 1. 生育地環境 - 鋪面比例 (Index 3~4)
             // 標頭: 水泥鋪面%, 柏油鋪面%
             // =========================================================================
-            record.siteCementPercent = ParseDecimalColumn(row, 3, "水泥鋪面%", isStrictMode, 0, 100, errors);
-            record.siteAsphaltPercent = ParseDecimalColumn(row, 4, "柏油鋪面%", isStrictMode, 0, 100, errors);
+            record.siteCementPercent = ParsePercentageColumn(row, 3, "水泥鋪面%", isStrictMode, 0, 100, errors);
+            record.siteAsphaltPercent = ParsePercentageColumn(row, 4, "柏油鋪面%", isStrictMode, 0, 100, errors);
 
             // =========================================================================
             // 2. 生育地環境 - 單選題 (Index 5~10)
@@ -1347,7 +1364,7 @@ namespace protectTreesV2.backstage.health
                 }
                 else
                 {
-                    errors.Add($"建議處理優先順序 (選項錯誤: {valPriority})");
+                    errors.Add($"建議處理優先順序 (選項錯誤)");
                 }
             }
 
@@ -1474,7 +1491,87 @@ namespace protectTreesV2.backstage.health
 
             return num; // 驗證成功，回傳數值
         }
+        /// <summary>
+        /// 解析百分比欄位 
+        /// </summary>
+        private decimal? ParsePercentageColumn(IRow row, int col, string fieldName, bool isRequired, decimal min, decimal max, List<string> errors)
+        {
+            // 直接取得 Cell 
+            var cell = row.GetCell(col);
 
+            // 空值檢查
+            if (cell == null || cell.CellType == NPOI.SS.UserModel.CellType.Blank)
+            {
+                if (isRequired) errors.Add($"{fieldName} (必填)");
+                return null;
+            }
+
+            decimal resultValue = 0;
+            bool isParsed = false;
+
+            // 判斷是否為數值型 (包含公式計算結果為數值的狀況)
+            if (cell.CellType == NPOI.SS.UserModel.CellType.Numeric ||
+               (cell.CellType == NPOI.SS.UserModel.CellType.Formula && cell.CachedFormulaResultType == NPOI.SS.UserModel.CellType.Numeric))
+            {
+                try
+                {
+                    // 取得 Excel 裡的原始數值
+                    double rawVal = cell.NumericCellValue;
+                    string styleFmt = cell.CellStyle.GetDataFormatString();
+
+                    // 如果格式字串包含 "%" (例如 "0%" 或 "0.00%")
+                    // 代表這是 Excel 的百分比格式，數值需要 * 100
+                    if (!string.IsNullOrEmpty(styleFmt) && styleFmt.Contains("%"))
+                    {
+                        rawVal = rawVal * 100;
+                    }
+
+                    resultValue = Convert.ToDecimal(rawVal);
+                    isParsed = true;
+                }
+                catch
+                {
+                    isParsed = false;
+                }
+            }
+            else
+            {
+                // 處理文字型 
+                string strVal = (cell.CellType == NPOI.SS.UserModel.CellType.Formula) ? cell.StringCellValue : cell.ToString();
+
+                if (!string.IsNullOrEmpty(strVal))
+                {
+                    // 移除 % 與空白
+                    strVal = strVal.Replace("%", "").Trim();
+
+                    if (decimal.TryParse(strVal, out decimal d))
+                    {
+                        resultValue = d;
+                        isParsed = true;
+                    }
+                }
+                else
+                {
+                    if (isRequired) errors.Add($"{fieldName} (必填)");
+                    return null;
+                }
+            }
+
+            if (!isParsed)
+            {
+                errors.Add($"{fieldName} (格式錯誤)");
+                return null;
+            }
+
+   
+            if (resultValue < min || resultValue > max)
+            {
+                errors.Add($"{fieldName} (須介於 {min}~{max})");
+                return null;
+            }
+
+            return resultValue;
+        }
         /// <summary>
         /// 驗證並解析布林欄位 (有/沒有)
         /// </summary>
@@ -1502,7 +1599,7 @@ namespace protectTreesV2.backstage.health
             if (val == "沒有") return false;
 
             // 2. 內容錯誤 (不管是不是嚴格模式，填錯字就是錯)
-            errors.Add($"{fieldName} (選項錯誤: {val})");
+            errors.Add($"{fieldName} (選項錯誤)");
             return null;
         }
 

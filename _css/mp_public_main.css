@@ -1,0 +1,129 @@
+﻿@font-face {
+    font-family: 'SweiSpringCJKtc';
+    src: url(../_fonts/SweiSpringSugarCJKtc-Regular.woff2) format("woff2"), url(../_fonts/SweiSpringSugarCJKtc-Regular.woff) format("woff");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'SweiSpringCJKtc';
+    src: url(../_fonts/SweiSpringSugarCJKtc-SemiBold.woff2) format("woff2"), url(../_fonts/SweiSpringSugarCJKtc-SemiBold.woff) format("woff");
+    font-weight: 500;
+}
+
+@font-face {
+    font-family: 'SweiSpringCJKtc';
+    src: url(../_fonts/SweiSpringSugarCJKtc-Bold.woff2) format("woff2"), url(../_fonts/SweiSpringSugarCJKtc-Bold.woff) format("woff");
+    font-weight: 700;
+}
+
+* {
+    font-family: "SweiSpringCJKtc", "Noto Sans Mono", "Noto Sans TC", "微軟正黑體";
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    background-image: url('../_img/bg.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-color: rgba(255, 255, 255, 0.5);
+    background-blend-mode: screen;
+}
+
+.div_header {
+    background-color: rgba(255, 255, 255, 1);
+    padding: 10px 20px;
+    border-bottom: 1px solid #517c4e;
+}
+
+main {
+    min-height: calc(100vh - 93px - 97px - 175px);
+}
+
+.div_path {
+    padding: 20px 0px;
+    font-size: 1.25rem;
+    color: #808080;
+}
+
+.div_footer_img {
+    vertical-align: bottom;
+    text-align: center;
+    margin-top:50px;
+    margin-bottom: -5px
+}
+
+    .div_footer_img img {
+        height:180px
+    }
+
+    .div_footer {
+        background-color: rgba(112, 101, 82, 1);
+        padding: 15px 0px 10px 0px;
+        font-size: 1rem;
+        color: #FFFFFF;
+    }
+
+/* === 回到頂部按鈕 === */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #BD2A34;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    /*transition: all 0.3s ease;*/
+    transition: transform 0.5s ease, opacity 0.5s linear;
+    z-index: 1000;
+    display: none; /* 初始隱藏 */
+}
+
+    .back-to-top:hover {
+        background-color: #D94551;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .back-to-top.show {
+        display: block;
+    }
+
+/* 平板以下的手機裝置 */
+@media (max-width: 767px) {
+    html {
+        font-size: 16px;
+    }
+    .div_banner {
+        height: calc(100vh - 62.5px);
+    }
+}
+
+/* 針對2560x1440 + 200% */
+/* 針對1600x 900 + 100%...右 */
+@media 
+    (min-width: 1280px) and (resolution: 2dppx), 
+    (min-width: 1600px) and (resolution: 1dppx) {
+    html {
+        font-size: 12px;
+    }
+}
+
+/* 針對2560x1440 + 150%...中 */
+/* 針對1920x1080 + 100%...左 */
+@media 
+    (min-width: 1280px) and (resolution: 1.5dppx),
+    (min-width: 1920px) and (resolution: 1dppx) {
+    html {
+        font-size: 16px;
+    }
+}

@@ -163,6 +163,9 @@ namespace protectTreesV2.backstage.health
             // 錯誤修剪傷害
             Base.DropdownBinder.Bind_enum_pruningDamageType(ref DropDownList_pruningWrongDamage, true);
 
+            //樹葉生長覆蓋度百分比%
+            Base.DropdownBinder.Bind_CrownCoverageTypes(ref DropDownList_crownLeafCoveragePercent, true);
+
             // 建議處理優先順序
             Base.DropdownBinder.Bind_enum_treatmentPriority(ref DropDownList_priority, true);
         }
@@ -421,7 +424,7 @@ namespace protectTreesV2.backstage.health
             SetCheck(CheckBox_branchDrooping, data.branchDrooping);
             TextBox_branchOtherNote.Text = data.branchOtherNote;
 
-            TextBox_crownLeafCoveragePercent.Text = data.crownLeafCoveragePercent?.ToString();
+            DropDownList_crownLeafCoveragePercent.SelectedValue = data.crownLeafCoveragePercent;
             TextBox_crownDeadBranchPercent.Text = data.crownDeadBranchPercent?.ToString();
             SetCheck(CheckBox_crownHangingBranch, data.crownHangingBranch);
             TextBox_crownOtherNote.Text = data.crownOtherNote;
@@ -891,7 +894,7 @@ namespace protectTreesV2.backstage.health
             r.branchOtherNote = TextBox_branchOtherNote.Text.Trim();
 
             // 樹冠
-            r.crownLeafCoveragePercent = ParseDec(TextBox_crownLeafCoveragePercent.Text);
+            r.crownLeafCoveragePercent = DropDownList_crownLeafCoveragePercent.SelectedValue;
             r.crownDeadBranchPercent = ParseDec(TextBox_crownDeadBranchPercent.Text);
             r.crownHangingBranch = CheckBox_crownHangingBranch.Checked;
             r.crownOtherNote = TextBox_crownOtherNote.Text.Trim();
@@ -1061,7 +1064,15 @@ namespace protectTreesV2.backstage.health
             if (!CheckStringLength(TextBox_branchOtherNote.Text, 200, false)) errors.Add("枝幹備註 (長度須小於200字)");
 
             // 樹冠
-            if (!CheckDecimalRange(TextBox_crownLeafCoveragePercent.Text, 0, 100, isFinalized)) errors.Add("樹冠葉生長覆蓋度 (0~100)");
+            string valCrown = DropDownList_crownLeafCoveragePercent.SelectedValue;
+            if (isFinalized && string.IsNullOrEmpty(valCrown))
+            {
+                errors.Add("樹冠葉生長覆蓋度 (必填)");
+            }
+            else if (!string.IsNullOrEmpty(valCrown) && !CrownCoverageTypes.AllList.Contains(valCrown))
+            {
+                errors.Add("樹冠葉生長覆蓋度 (選項數值錯誤)");
+            }
             if (!CheckDecimalRange(TextBox_crownDeadBranchPercent.Text, 0, 100, isFinalized)) errors.Add("一般枯枝百分比 (0~100)");
             if (!CheckStringLength(TextBox_crownOtherNote.Text, 200, false)) errors.Add("樹冠備註 (長度須小於200字)");
 

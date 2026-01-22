@@ -160,6 +160,10 @@ namespace protectTreesV2.backstage.health
                     myLog.resultMsg = "失敗：重複上傳";
                     continue;
                 }
+                else
+                {
+                    currentBatchKeys.Add(uniqueKey);
+                }
 
                 // 全部通過，加入處理佇列
                 processQueue.Add(info);
@@ -205,7 +209,7 @@ namespace protectTreesV2.backstage.health
                     string key = $"{info.treeID}_{info.checkDate:yyyyMMdd}";
                     if (healthMap.ContainsKey(key))
                     {
-                        info.healthID = healthMap[key];
+                        info.targetID = healthMap[key];
                     }
                 }
             }
@@ -214,7 +218,7 @@ namespace protectTreesV2.backstage.health
             if (isAutoCreateDraft)
             {
                 // 找出還沒有 healthID 的項目
-                var toCreateList = activeItems.Where(x => x.healthID == 0).ToList();
+                var toCreateList = activeItems.Where(x => x.targetID == 0).ToList();
 
                 if (toCreateList.Count > 0)
                 {
@@ -238,7 +242,7 @@ namespace protectTreesV2.backstage.health
                             if (newHealthMap.ContainsKey(key))
                             {
                                 // 成功新增
-                                info.healthID = newHealthMap[key];
+                                info.targetID = newHealthMap[key];
                                 info.log.resultMsg = "提醒：指定日期已自動新增健檢紀錄草稿";
                             }
                             else
@@ -264,7 +268,7 @@ namespace protectTreesV2.backstage.health
             else
             {
                 // 沒勾選自動新增，且沒 ID 的，直接失敗
-                foreach (var info in activeItems.Where(x => x.healthID == 0))
+                foreach (var info in activeItems.Where(x => x.targetID == 0))
                 {
                     info.isProcessing = false;
                     info.log.resultMsg = "失敗：指定日期查無健檢紀錄";
@@ -275,17 +279,17 @@ namespace protectTreesV2.backstage.health
             // =========================================================
 
             // 取出已有 HealthID 且準備上傳的項目
-            var readyToSaveList = processQueue.Where(x => x.isProcessing && x.healthID > 0).ToList();
+            var readyToSaveList = processQueue.Where(x => x.isProcessing && x.targetID > 0).ToList();
 
             if (readyToSaveList.Any())
             {
                 // 查詢 DB 中這些 HealthID 是否已有附件 (回傳數量)
-                List<int> distinctHealthIDs = readyToSaveList.Select(x => x.healthID).Distinct().ToList();
+                List<int> distinctHealthIDs = readyToSaveList.Select(x => x.targetID).Distinct().ToList();
                 Dictionary<int, int> dbCountMap = system_batch.GetBatchHealthAttachmentCounts(distinctHealthIDs);
 
                 foreach (var info in readyToSaveList)
                 {
-                    int currentCount = dbCountMap.ContainsKey(info.healthID) ? dbCountMap[info.healthID] : 0;
+                    int currentCount = dbCountMap.ContainsKey(info.targetID) ? dbCountMap[info.targetID] : 0;
                     bool hasExisting = currentCount > 0; // 是否已有舊檔
 
                     if (hasExisting)
@@ -313,14 +317,14 @@ namespace protectTreesV2.backstage.health
             // =========================================================
 
             // 過濾出經過所有檢查，最終確定要寫入的項目
-            var finalSaveList = processQueue.Where(x => x.isProcessing && x.healthID > 0).ToList();
+            var finalSaveList = processQueue.Where(x => x.isProcessing && x.targetID > 0).ToList();
             List<TempFileData> batchInsertList = new List<TempFileData>();
 
             foreach (var info in finalSaveList)
             {
                 try
                 {
-                    string virtualDir = $"~/_file/health/doc/{info.healthID}/";
+                    string virtualDir = $"~/_file/health/doc/{info.targetID}/";
                     string physicalDir = Server.MapPath(virtualDir);
 
                     if (!Directory.Exists(physicalDir)) Directory.CreateDirectory(physicalDir);
@@ -335,7 +339,7 @@ namespace protectTreesV2.backstage.health
                     // 加入資料庫待寫入清單
                     batchInsertList.Add(new TempFileData
                     {
-                        healthID = info.healthID,
+                        targetID = info.targetID,
                         originalFileName = info.uploadedFile.FileName,
                         finalFileName = saveName,
                         fullPhysicalPath = fullPath,
@@ -398,7 +402,7 @@ namespace protectTreesV2.backstage.health
             {
                 // 取得 Task ID
                 int newBatchTaskID = system_batch.CreateBatchTask(
-                    enum_treeBatchType.Health_Photo,
+                    enum_treeBatchType.Health_File,
                     "批次附件上傳",
                     accountID,
                     totalCount,

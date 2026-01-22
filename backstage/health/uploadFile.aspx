@@ -46,7 +46,7 @@
    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    健檢資料管理 / 上傳多筆健檢附件
+    健檢資料管理 / 健檢紀錄
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     上傳多筆健檢附件

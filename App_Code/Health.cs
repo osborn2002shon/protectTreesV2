@@ -42,6 +42,23 @@ namespace protectTreesV2.Health
         }
 
         /// <summary>
+        /// 樹冠葉片覆蓋率定義
+        /// </summary>
+        public class CrownCoverageTypes
+        {
+            // 定義常數
+            public const string LevelLow = "0~40%生長不良";
+            public const string LevelMid = "40~70%尚可";
+            public const string LevelHigh = "70~100%正常";
+
+            public static readonly List<string> AllList = new List<string>
+            {
+                LevelLow,
+                LevelMid,
+                LevelHigh
+            };
+        }
+        /// <summary>
         /// 建議處理優先順序 
         /// </summary>
         public enum enum_treatmentPriority
@@ -189,7 +206,7 @@ namespace protectTreesV2.Health
             public string branchOtherNote { get; set; }
 
             // 樹冠
-            public decimal? crownLeafCoveragePercent { get; set; }
+            public string crownLeafCoveragePercent { get; set; }
             public decimal? crownDeadBranchPercent { get; set; }
             public bool? crownHangingBranch { get; set; }
             public string crownOtherNote { get; set; }
@@ -233,12 +250,6 @@ namespace protectTreesV2.Health
             public string managementStatus { get; set; }
             public string priority { get; set; }
             public string treatmentDescription { get; set; }
-
-            // ==========================================
-            // 系統資訊
-            // ==========================================
-            public string sourceUnit { get; set; }
-            public int? sourceUnitID { get; set; }
 
             public int insertAccountID { get; set; }
             public DateTime insertDateTime { get; set; }
@@ -1051,7 +1062,7 @@ namespace protectTreesV2.Health
                             siteCementPercent, siteAsphaltPercent, sitePlanter, siteRecreationFacility, siteDebrisStack, siteBetweenBuildings, siteSoilCompaction, siteOverburiedSoil, siteOtherNote,
                             soilPh, soilOrganicMatter, soilEc,
                             managementStatus, priority, treatmentDescription,
-                            sourceUnit, sourceUnitID, insertAccountID, insertDateTime
+                            insertAccountID, insertDateTime
                         )
                         OUTPUT INSERTED.healthID
                         VALUES
@@ -1079,7 +1090,7 @@ namespace protectTreesV2.Health
                             @siteCementPercent, @siteAsphaltPercent, @sitePlanter, @siteRecreationFacility, @siteDebrisStack, @siteBetweenBuildings, @siteSoilCompaction, @siteOverburiedSoil, @siteOtherNote,
                             @soilPh, @soilOrganicMatter, @soilEc,
                             @managementStatus, @priority, @treatmentDescription,
-                            @sourceUnit, @sourceUnitID, @accountID, GETDATE()
+                            @accountID, GETDATE()
                         )";
 
                     return Convert.ToInt32(da.ExcuteScalar(insertSql, parameters.ToArray()));
@@ -1123,7 +1134,6 @@ namespace protectTreesV2.Health
                             soilPh=@soilPh, soilOrganicMatter=@soilOrganicMatter, soilEc=@soilEc,
                             
                             managementStatus=@managementStatus, priority=@priority, treatmentDescription=@treatmentDescription,
-                            sourceUnit=@sourceUnit, sourceUnitID=@sourceUnitID,
                             
                             updateAccountID=@accountID, updateDateTime=GETDATE()
                         WHERE healthID=@id AND removeDateTime IS NULL";
@@ -1452,7 +1462,7 @@ namespace protectTreesV2.Health
                 branchDrooping = GetNullableBoolean(row, "branchDrooping"),
                 branchOtherNote = GetString(row, "branchOtherNote"),
 
-                crownLeafCoveragePercent = GetNullableDecimal(row, "crownLeafCoveragePercent"),
+                crownLeafCoveragePercent = GetString(row, "crownLeafCoveragePercent"),
                 crownDeadBranchPercent = GetNullableDecimal(row, "crownDeadBranchPercent"),
                 crownHangingBranch = GetNullableBoolean(row, "crownHangingBranch"),
                 crownOtherNote = GetString(row, "crownOtherNote"),
@@ -1488,9 +1498,6 @@ namespace protectTreesV2.Health
                 priority = GetString(row, "priority"),
                 treatmentDescription = GetString(row, "treatmentDescription"),
 
-                // 系統
-                sourceUnit = GetString(row, "sourceUnit"),
-                sourceUnitID = GetNullableInt(row, "sourceUnitID"),
                 insertAccountID = GetNullableInt(row, "insertAccountID") ?? 0,
                 insertDateTime = GetNullableDateTime(row, "insertDateTime") ?? DateTime.MinValue,
                 updateAccountID = GetNullableInt(row, "updateAccountID"),
@@ -1628,8 +1635,6 @@ namespace protectTreesV2.Health
             yield return new SqlParameter("@managementStatus", ToDbValue(record.managementStatus));
             yield return new SqlParameter("@priority", ToDbValue(record.priority));
             yield return new SqlParameter("@treatmentDescription", ToDbValue(record.treatmentDescription));
-            yield return new SqlParameter("@sourceUnit", ToDbValue(record.sourceUnit));
-            yield return new SqlParameter("@sourceUnitID", ToDbValue(record.sourceUnitID));
         }
 
         

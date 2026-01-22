@@ -616,8 +616,8 @@
                     <h5 class="border-bottom pb-2 mb-3 text-primary">樹冠</h5>
                     <div class="row mb-3">
                         <div class="col">
-                            <label class="form-label">樹葉生長覆蓋度百分比(%) <span class="text-danger">*</span></label>
-                            <asp:TextBox ID="TextBox_crownLeafCoveragePercent" runat="server" CssClass="form-control" TextMode="Number" step="0.01" min="0" max="100" placeholder="請輸入樹冠葉量比例" />
+                            <label class="form-label">樹葉生長覆蓋度百分比 <span class="text-danger">*</span></label>
+                            <asp:DropDownList ID="DropDownList_crownLeafCoveragePercent" runat="server" CssClass="form-select"></asp:DropDownList>
                         </div>
                         <div class="col">
                             <label class="form-label">一般枯枝(%) <span class="text-danger">*</span></label>

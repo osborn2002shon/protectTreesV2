@@ -1,0 +1,57 @@
+﻿.div_banner {
+    position: relative;
+    height: calc(100vh - 93px);
+    background-image: url('../_img/banner.png');
+    background-repeat: no-repeat;
+    background-position: center 40%;
+    background-size: cover;
+}
+    /*一般螢幕*/
+    .div_banner .div_banner_title {
+        position: absolute;
+        top: 60%; /* 或者你想要的位置,例如 40% */
+        left: 0%; /* 靠左,距離左邊 0% */
+        transform: translateY(-50%); /* 只垂直置中 */
+        width: 750px; /* 或調整成你想要的寬度,例如 50% */
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #517c4e;
+        border-left: none;
+        border-radius: 0px 20px 20px 0px;
+        padding: 50px 50px;
+        text-align: left;
+    }
+
+    /*手機螢幕*/
+    .div_banner .div_banner_title_s {
+        position: absolute; /* 絕對定位 */
+        top: 50%; /* 垂直置中 */
+        left: 50%; /* 水平置中 */
+        transform: translate(-50%, -50%); /* 精確置中 */
+        width: 80%;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #517c4e;
+        border-radius: 20px;
+        padding: 20px 10px;
+        text-align: center;
+    }
+
+        .div_banner .div_banner_title_s h1 {
+            font-size: 2rem;
+            line-height: 3rem;
+        }
+
+.div_item { }
+.div_faq { background-color: rgba(255, 255, 255, 0.4);}
+.div_unit { }
+
+@media (min-width: 768px) {
+    .div_item > div {
+        flex: 1 1 calc(50% - 0px)
+    }
+}
+
+@media (min-width: 992px) {
+    .div_item > div {
+        flex: 1 1 calc(50% - 0px)
+    }
+}

@@ -9,28 +9,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet" />
-    <script src="../../_js/bootstrap.bundle.js"></script>
-    <script src="../../_js/jquery-3.7.1.js"></script>
+    <script src="../_js/bootstrap.bundle.js"></script>
+    <script src="../_js/jquery-3.7.1.js"></script>
     <link href="../_css/bootstrap.css" rel="stylesheet" />
     <link href="../_css/fontawesome-all.css" rel="stylesheet" />  
-    <link href="../_css/public/main.css" rel="stylesheet" />
-    <link href="../_css/public/menu.css" rel="stylesheet" />
-    <link href="../_css/public/control.css" rel="stylesheet" />
-    <link href="../_css/public/tab.css" rel="stylesheet" />
+    <link href="../_css/mp_public_main.css" rel="stylesheet" />
+    <link href="../_css/mp_public_menu.css" rel="stylesheet" />
+    <link href="../_css/mp_public_control.css" rel="stylesheet" />
+    <link href="../_css/mp_public_tab.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
     <form id="form1" runat="server">        
         <!-- Header 區域 - 100% 寬度 -->
         <header class="container-fluid p-0 m-0">
-            <nav class="navbar navbar-expand-lg navbar_cust">
+            <nav class="div_header navbar navbar-expand-lg">
                 <div class="container-fluid">
                     <!-- 網站標題 -->
                     <div class="d-none d-md-block">
-                        <a class="navbar-brand" href="/"><img src="../../_img/logo.png"/>受保護樹木資訊網</a>
+                        <a class="navbar-brand" href="../default.aspx"><img src="../_img/logo.png"/>受保護樹木資訊網</a>
                     </div>
                     <div class="d-block d-md-none">
-                        <a class="navbar-brand" href="/"><img src="../../_img/logo_mini.png"/>受保護樹木資訊網</a>
+                        <a class="navbar-brand" href="../default.aspx"><img src="../_img/logo_mini.png"/>受保護樹木資訊網</a>
                     </div>
                     
                     <!-- 手機版漢堡按鈕 -->
@@ -60,17 +60,16 @@
         </header>    
         <!-- 主要內容區 - 固定寬度 -->
         <main class="container-fluid p-0 m-0">
-            <div class="container path">
+            <div class="div_path container">
                 <asp:ContentPlaceHolder ID="ContentPlaceHolder_path" runat="server"></asp:ContentPlaceHolder>
             </div>
-            <div class="container p-0">
+            <div class="div_content container p-0">
                 <asp:ContentPlaceHolder ID="ContentPlaceHolder_content" runat="server"></asp:ContentPlaceHolder>
             </div>            
         </main>
-        <div class="container m-0 p-0" style="max-height:calc(100vh - 93px); max-width: 100% !important;">
-            <asp:ContentPlaceHolder ID="ContentPlaceHolder_map" runat="server"></asp:ContentPlaceHolder>
-        </div>  
-        <!-- Footer 區域 - 100% 寬度 -->
+        <div class="div_footer_img">
+            <img src="../_img/icon/forest2.png"/>
+        </div>
         <footer class="container-fluid div_footer">
             <div class="text-center">
                 Copyright © 2025 Forestry and Nature Conservation Agency<br />
@@ -85,9 +84,9 @@
     </button>
     <script type="text/javascript">
         //頁面載入動畫
-        $(window).on('load', function() {
-            $('.div_banner_title').hide().fadeIn(2000);
-        });
+        //$(window).on('load', function () {
+        //    $('.div_banner_title').hide().fadeIn(2000);
+        //});
 
         // 取得按鈕元素
         const backToTopBtn = document.getElementById('backToTop');

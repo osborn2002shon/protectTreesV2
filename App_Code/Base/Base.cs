@@ -502,6 +502,29 @@ namespace protectTreesV2.Base
         }
 
         /// <summary>
+        /// 綁定樹冠葉片覆蓋率 
+        /// </summary>
+        /// <param name="ddl">下拉選單</param>
+        /// <param name="showSelect">是否顯示「請選擇」，預設 true</param>
+        public static void Bind_CrownCoverageTypes(ref DropDownList ddl, bool showSelect = true)
+        {
+            ddl.Items.Clear();
+
+            if (showSelect)
+            {
+                ddl.Items.Add(new ListItem("請選擇", ""));
+            }
+
+            foreach (string item in protectTreesV2.Health.Health.CrownCoverageTypes.AllList)
+            {
+                string text = item;
+                string value = item;
+
+                ddl.Items.Add(new ListItem(text, value));
+            }
+        }
+
+        /// <summary>
         /// 綁定建議處理優先順序
         /// </summary>
         /// <param name="ddl">下拉選單</param>

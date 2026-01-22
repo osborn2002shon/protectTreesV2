@@ -69,7 +69,7 @@ namespace protectTreesV2.Batch
             public TreeBatchTaskLog log { get; set; }
             public string systemTreeNo { get; set; }
             public DateTime checkDate { get; set; }
-            public int healthID { get; set; } = 0;
+            public int targetID { get; set; } = 0;
             public int treeID { get; set; } = 0;
             public bool isProcessing { get; set; } = true;
             public bool isOverwriteBehavior { get; set; } = false;
@@ -80,7 +80,7 @@ namespace protectTreesV2.Batch
         /// </summary>
         public class TempFileData
         {
-            public int healthID { get; set; }
+            public int targetID { get; set; }
             public string originalFileName { get; set; }
             public string finalFileName { get; set; }
             public string fullPhysicalPath { get; set; }
@@ -216,7 +216,7 @@ namespace protectTreesV2.Batch
         }
 
         /// <summary>
-        /// 取得某個使用者的所有上傳紀錄 (歷史列表) - 依照類型篩選
+        /// 取得使用者的所有上傳紀錄
         /// </summary>
         /// <param name="batchType">批次類型</param>
         /// <param name="accountID">使用者ID</param>
@@ -225,7 +225,6 @@ namespace protectTreesV2.Batch
         {
             var list = new List<TreeBatchTask>();
 
-            // [修改 1] SQL 增加 batchType 篩選條件
             string sql = @"
                 SELECT t.*, u.name AS userName 
                 FROM Tree_BatchTask t
@@ -245,7 +244,7 @@ namespace protectTreesV2.Batch
 
                 foreach (DataRow row in dt.Rows)
                 {
-                    // 1. 處理 Enum (先安全取得字串，再嘗試解析)
+                    // 處理 Enum 
                     Batch.enum_treeBatchType typeEnum = Batch.enum_treeBatchType.Health_Record; // 預設值
                     string typeStr = DataRowHelper.GetString(row, "batchType");
 
@@ -398,7 +397,6 @@ namespace protectTreesV2.Batch
                       WHERE u.accountID = @currentUserID
                   )";
 
-            // 呼叫資料庫
             using (var da = new MS_SQL())
             {
                 DataTable dt = da.GetDataTable(sql, parameters.ToArray());
@@ -417,7 +415,7 @@ namespace protectTreesV2.Batch
         }
 
         /// <summary>
-        /// 批次取得 HealthID
+        /// 批次取得健檢流水號
         /// </summary>
         /// <param name="keys">查詢條件 (TreeID + CheckDate)</param>
         public Dictionary<string, int> GetHealthIDMap(List<TreeQueryKey> keys)
@@ -441,10 +439,7 @@ namespace protectTreesV2.Batch
                 string pTreeID = $"@t{i}";
                 string pDate = $"@d{i}";
 
-                // [改] 條件直接對應 treeID (int)
                 conditions.Add($" (treeID = {pTreeID} AND surveyDate = {pDate}) ");
-
-                // [改] 傳入 int 型別的 treeID
                 parameters.Add(new SqlParameter(pTreeID, keys[i].treeID));
                 parameters.Add(new SqlParameter(pDate, keys[i].checkDate));
             }
@@ -482,7 +477,7 @@ namespace protectTreesV2.Batch
             System.Data.DataTable dt = new System.Data.DataTable();
 
             // ==========================================
-            // A. 定義欄位 (共約 100+ 個欄位)
+            // A. 定義欄位
             // ==========================================
             if (forUpdate) dt.Columns.Add("healthID", typeof(int));
 
@@ -584,7 +579,7 @@ namespace protectTreesV2.Batch
             dt.Columns.Add("branchOtherNote", typeof(string));
 
             // 細部檢測 - 樹冠 & 生長
-            dt.Columns.Add("crownLeafCoveragePercent", typeof(decimal));
+            dt.Columns.Add("crownLeafCoveragePercent", typeof(string));
             dt.Columns.Add("crownDeadBranchPercent", typeof(decimal));
             dt.Columns.Add("crownHangingBranch", typeof(bool));
             dt.Columns.Add("crownOtherNote", typeof(string));
@@ -619,8 +614,6 @@ namespace protectTreesV2.Batch
             dt.Columns.Add("managementStatus", typeof(string));
             dt.Columns.Add("priority", typeof(string));
             dt.Columns.Add("treatmentDescription", typeof(string));
-            dt.Columns.Add("sourceUnit", typeof(string));
-            dt.Columns.Add("sourceUnitID", typeof(int));
 
             // 系統資訊
             if (forUpdate)
@@ -766,9 +759,6 @@ namespace protectTreesV2.Batch
                 row["managementStatus"] = item.managementStatus ?? (object)DBNull.Value;
                 row["priority"] = item.priority ?? (object)DBNull.Value;
                 row["treatmentDescription"] = item.treatmentDescription ?? (object)DBNull.Value;
-                row["sourceUnit"] = item.sourceUnit ?? (object)DBNull.Value;
-                row["sourceUnitID"] = item.sourceUnitID ?? (object)DBNull.Value;
-
                 if (forUpdate)
                 {
                     row["updateAccountID"] = item.updateAccountID ?? (object)DBNull.Value;
@@ -924,7 +914,7 @@ namespace protectTreesV2.Batch
                             [branchIncludedBark] [bit] NULL,
                             [branchDrooping] [bit] NULL,
                             [branchOtherNote] [nvarchar](200) NULL,
-                            [crownLeafCoveragePercent] [decimal](5, 2) NULL,
+                            [crownLeafCoveragePercent] [nvarchar](50) NULL,
                             [crownDeadBranchPercent] [decimal](5, 2) NULL,
                             [crownHangingBranch] [bit] NULL,
                             [crownOtherNote] [nvarchar](200) NULL,
@@ -953,8 +943,6 @@ namespace protectTreesV2.Batch
                             [managementStatus] [nvarchar](max) NULL,
                             [priority] [nvarchar](50) NULL,
                             [treatmentDescription] [nvarchar](max) NULL,
-                            [sourceUnit] [nvarchar](200) NULL,
-                            [sourceUnitID] [int] NULL,
                             [updateAccountID] [int] NULL,
                             [updateDateTime] [datetime] NULL
                         );
@@ -962,12 +950,12 @@ namespace protectTreesV2.Batch
                     da.ExecNonQuery(createTempSql);
 
                     // ===============================================
-                    // Step B: 批次寫入暫存表 - [保持不動]
+                    // Step B: 批次寫入暫存表
                     // ===============================================
                     da.BulkCopy("#TempHealthUpdate", dt);
 
                     // ===============================================
-                    // Step C: 從暫存表更新主表 - [保持不動]
+                    // Step C: 從暫存表更新主表
                     // ===============================================
                     string updateSql = @"
                         UPDATE T
@@ -1095,9 +1083,6 @@ namespace protectTreesV2.Batch
                             T.managementStatus = S.managementStatus,
                             T.priority = S.priority,
                             T.treatmentDescription = S.treatmentDescription,
-                            T.sourceUnit = S.sourceUnit,
-                            T.sourceUnitID = S.sourceUnitID,
-
                             T.updateAccountID = S.updateAccountID,
                             T.updateDateTime = GETDATE()
                         FROM Tree_HealthRecord T
@@ -1131,7 +1116,7 @@ namespace protectTreesV2.Batch
         /// <summary>
         /// 批次新增健康紀錄
         /// </summary>
-        /// <param name="list">要新增的資料清單 (請確認物件屬性與 DB 欄位對應)</param>
+        /// <param name="list">要新增的資料清單)</param>
         /// <param name="accountID">操作者 ID</param>
         /// <param name="accountName">操作者姓名</param>
         /// <param name="ipAddress">來源 IP</param>
@@ -1160,7 +1145,6 @@ namespace protectTreesV2.Batch
                 {
                     da.StartTransaction();
 
-                    // 2. 準備超長 SQL (包含所有欄位)
                     string sqlInsert = @"
                         INSERT INTO Tree_HealthRecord 
                         (
@@ -1223,7 +1207,6 @@ namespace protectTreesV2.Batch
                             /* [土壤與管理] */
                             soilPh, soilOrganicMatter, soilEc,
                             managementStatus, priority, treatmentDescription,
-                            sourceUnit, sourceUnitID,
 
                             /* [系統欄位] */
                             insertAccountID, insertDateTime
@@ -1289,7 +1272,6 @@ namespace protectTreesV2.Batch
                             /* [土壤與管理] */
                             @soilPh, @soilOrganicMatter, @soilEc,
                             @managementStatus, @priority, @treatmentDescription,
-                            @sourceUnit, @sourceUnitID,
 
                             /* [系統欄位] */
                             @acc, @time
@@ -1435,8 +1417,6 @@ namespace protectTreesV2.Batch
                         p.Add(new System.Data.SqlClient.SqlParameter("@managementStatus", item.managementStatus ?? (object)DBNull.Value));
                         p.Add(new System.Data.SqlClient.SqlParameter("@priority", item.priority ?? (object)DBNull.Value));
                         p.Add(new System.Data.SqlClient.SqlParameter("@treatmentDescription", item.treatmentDescription ?? (object)DBNull.Value));
-                        p.Add(new System.Data.SqlClient.SqlParameter("@sourceUnit", item.sourceUnit ?? (object)DBNull.Value));
-                        p.Add(new System.Data.SqlClient.SqlParameter("@sourceUnitID", item.sourceUnitID ?? (object)DBNull.Value));
 
                         // --- 系統 ---
                         p.Add(new System.Data.SqlClient.SqlParameter("@acc", accountID));
@@ -1480,7 +1460,7 @@ namespace protectTreesV2.Batch
         }
 
         /// <summary>
-        /// 批次新增健檢紀錄 (直接使用 treeID 寫入)
+        /// 批次新增健檢紀錄 
         /// </summary>
         /// <param name="keys">要新增的鍵值 (TreeID + Date)</param>
         /// <param name="accountID">建立者 ID</param>
@@ -1489,65 +1469,67 @@ namespace protectTreesV2.Batch
         {
             Dictionary<string, int> newMap = new Dictionary<string, int>();
             if (keys == null || keys.Count == 0) return newMap;
-            string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["SQL_Connection"].ConnectionString;
-            using (SqlConnection conn = new SqlConnection(connStr)) 
+
+            using (var da = new MS_SQL())
             {
-                conn.Open();
-                using (SqlTransaction trans = conn.BeginTransaction())
+                try
                 {
-                    try
+                    // 開啟交易
+                    da.StartTransaction();
+
+                    string sql = @"
+                        INSERT INTO Tree_HealthRecord 
+                        (
+                            treeID, surveyDate, dataStatus, 
+                            insertAccountID, insertDateTime
+                        ) 
+                        VALUES 
+                        (
+                            @tid, @sDate, 0,  /* 0:草稿 */
+                            @accID, GETDATE()
+                        );
+                
+                        /* 取回新 ID (建議轉型為 int 避免 decimal 問題) */
+                        SELECT CAST(SCOPE_IDENTITY() AS int); 
+                    ";
+
+                    foreach (var k in keys)
                     {
-                        foreach (var k in keys)
+                        List<System.Data.SqlClient.SqlParameter> p = new List<System.Data.SqlClient.SqlParameter>();
+                        p.Add(new System.Data.SqlClient.SqlParameter("@tid", k.treeID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@sDate", k.checkDate));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@accID", accountID));
+
+                        object result = da.ExcuteScalar(sql, p.ToArray());
+
+                        if (result != null && result != DBNull.Value)
                         {
-                            string sql = @"
-                                INSERT INTO Tree_HealthRecord 
-                                (
-                                    treeID, surveyDate, dataStatus, 
-                                    insertAccountID, insertDateTime
-                                ) 
-                                VALUES 
-                                (
-                                    @tid, @sDate, 0,  /* 0:草稿 */
-                                    @accID, GETDATE()
-                                );
-                                SELECT SCOPE_IDENTITY(); /* 取回新 ID */
-                            ";
+                            int newID = Convert.ToInt32(result);
+                            string key = $"{k.treeID}_{k.checkDate:yyyyMMdd}";
 
-                            using (SqlCommand cmd = new SqlCommand(sql, conn, trans))
+                            if (!newMap.ContainsKey(key))
                             {
-                                // 參數直接給 int
-                                cmd.Parameters.AddWithValue("@tid", k.treeID);
-                                cmd.Parameters.AddWithValue("@sDate", k.checkDate);
-                                cmd.Parameters.AddWithValue("@accID", accountID);
-
-                                object result = cmd.ExecuteScalar();
-
-                                if (result != null && result != DBNull.Value)
-                                {
-                                    int newID = Convert.ToInt32(result);
-                                    string key = $"{k.treeID}_{k.checkDate:yyyyMMdd}";
-
-                                    if (!newMap.ContainsKey(key))
-                                    {
-                                        newMap.Add(key, newID);
-                                    }
-                                }
+                                newMap.Add(key, newID);
                             }
                         }
-                        trans.Commit();
                     }
-                    catch
-                    {
-                        trans.Rollback();
-                        throw;
-                    }
+
+                    // 全部成功，提交交易
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    // 發生錯誤，回滾
+                    da.RollBack();
+                    throw ex; 
                 }
             }
+
             return newMap;
         }
 
         /// <summary>
-        /// 批次取得指定 HealthID 目前擁有的照片數量 
+        /// 批次取得指定健檢紀錄照片數量 
         /// </summary>
         public Dictionary<int, int> GetBatchHealthPhotoCounts(List<int> healthIDs)
         {
@@ -1570,17 +1552,14 @@ namespace protectTreesV2.Batch
             {
                 string pName = $"@p{i}";
                 paramNames.Add(pName);
-                // 參數化查詢，防止 SQL Injection
                 parameters.Add(new SqlParameter(pName, healthIDs[i]));
             }
 
             sb.Append(string.Join(",", paramNames));
             sb.Append(") GROUP BY healthID");
 
-            // 2. 使用 MS_SQL Helper 執行查詢
             using (var da = new MS_SQL())
             {
-                // 呼叫 GetDataTable (傳入 SQL 和 參數陣列)
                 DataTable dt = da.GetDataTable(sb.ToString(), parameters.ToArray());
 
                 foreach (DataRow row in dt.Rows)
@@ -1636,7 +1615,7 @@ namespace protectTreesV2.Batch
             foreach (var p in photos)
             {
                 DataRow row = dtPhoto.NewRow();
-                row["healthID"] = p.healthID;
+                row["healthID"] = p.targetID;
                 row["fileName"] = p.originalFileName;
                 row["filePath"] = p.virtualPath;
 
@@ -1654,7 +1633,7 @@ namespace protectTreesV2.Batch
             // ==========================================
 
             // 使用 LINQ 依 healthID 分組
-            var groupedPhotos = photos.GroupBy(p => p.healthID);
+            var groupedPhotos = photos.GroupBy(p => p.targetID);
 
             foreach (var group in groupedPhotos)
             {
@@ -1701,6 +1680,170 @@ namespace protectTreesV2.Batch
             }
         }
 
+        /// <summary>
+        /// 批次取得指定健檢流水號擁有的附件檔案數量
+        /// </summary>
+        public Dictionary<int, int> GetBatchHealthAttachmentCounts(List<int> healthIDs)
+        {
+            Dictionary<int, int> map = new Dictionary<int, int>();
+            if (healthIDs == null || healthIDs.Count == 0) return map;
+
+            // 動態組建 SQL
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(@"
+                SELECT healthID, COUNT(*) as Cnt 
+                FROM Tree_HealthAttachment 
+                WHERE removeDateTime IS NULL 
+                  AND healthID IN (
+            ");
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<string> paramNames = new List<string>();
+
+            for (int i = 0; i < healthIDs.Count; i++)
+            {
+                string pName = $"@p{i}";
+                paramNames.Add(pName);
+                // 參數化查詢，防止 SQL Injection
+                parameters.Add(new SqlParameter(pName, healthIDs[i]));
+            }
+
+            sb.Append(string.Join(",", paramNames));
+            sb.Append(") GROUP BY healthID");
+
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sb.ToString(), parameters.ToArray());
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    int hID = Convert.ToInt32(row["healthID"]);
+                    int count = Convert.ToInt32(row["Cnt"]);
+
+                    if (!map.ContainsKey(hID))
+                    {
+                        map.Add(hID, count);
+                    }
+                }
+            }
+
+            return map;
+        }
+        /// <summary>
+        /// 批次覆蓋/新增健檢附件並寫入操作 Log
+        /// </summary>
+        /// <param name="insertList">要新增的附件清單</param>
+        /// <param name="accountID">操作者 ID </param>
+        /// <param name="accountName">操作者姓名 </param>
+        /// <param name="isOverwrite">是否執行覆蓋 (軟刪除)</param>
+        public void BatchReplaceHealthDocs(List<TempFileData> insertList, string ipAddress, int accountID, string account, string accountName, string accountUnit, bool isOverwrite)
+        {
+            if (insertList == null || insertList.Count == 0) return;
+
+            //檔案欄位
+            DataTable dtAttach = new DataTable();
+            dtAttach.Columns.Add("healthID", typeof(int));
+            dtAttach.Columns.Add("fileName", typeof(string));
+            dtAttach.Columns.Add("filePath", typeof(string));
+            dtAttach.Columns.Add("fileSize", typeof(int));
+            dtAttach.Columns.Add("description", typeof(string));
+            dtAttach.Columns.Add("insertAccountID", typeof(int));
+            dtAttach.Columns.Add("insertDateTime", typeof(DateTime));
+
+            //log欄位
+            DataTable dtLog = new DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            // 填寫資料 
+            DateTime now = DateTime.Now;
+
+            foreach (var item in insertList)
+            {
+                // --- A. 填寫附件資料 ---
+                DataRow rowAttach = dtAttach.NewRow();
+                rowAttach["healthID"] = item.targetID;
+                rowAttach["fileName"] = item.originalFileName;
+                rowAttach["filePath"] = item.virtualPath;
+
+                int fSize = (item.infoRef != null && item.infoRef.uploadedFile != null)
+                            ? item.infoRef.uploadedFile.ContentLength : 0;
+                rowAttach["fileSize"] = fSize;
+                rowAttach["description"] = "批次上傳";
+                rowAttach["insertAccountID"] = accountID;
+                rowAttach["insertDateTime"] = now;
+                dtAttach.Rows.Add(rowAttach);
+
+                // --- B. 填寫 Log 資料 ---
+                DataRow rowLog = dtLog.NewRow();
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
+                rowLog["dataID"] = item.targetID;
+                rowLog["actionType"] = "批次上傳";
+                rowLog["memo"] = item.IsOverwriteAction ? "覆蓋附件" : "上傳附件";
+                rowLog["ipAddress"] = ipAddress;
+                rowLog["accountID"] = accountID;
+                rowLog["account"] = account;
+                rowLog["accountName"] = accountName;
+                rowLog["accountUnit"] = accountUnit;
+                rowLog["logDateTime"] = now;
+                dtLog.Rows.Add(rowLog);
+            }
+
+            // 開始執行資料庫交易
+            using (var db = new MS_SQL())
+            {
+                try
+                {
+                    //開啟交易
+                    db.StartTransaction();
+
+                    // 軟刪除 
+                    if (isOverwrite)
+                    {
+                        // 取出所有涉及的 HealthID
+                        var distinctIDs = insertList.Select(x => x.targetID).Distinct().ToList();
+                        if (distinctIDs.Count > 0)
+                        {
+                            string idList = string.Join(",", distinctIDs);
+                            string sqlUpdate = $@"
+                                UPDATE Tree_HealthAttachment 
+                                SET removeDateTime = GETDATE(), removeAccountID = @acc
+                                WHERE healthID IN ({idList}) AND removeDateTime IS NULL";
+
+                            db.ExecNonQuery(sqlUpdate, new System.Data.SqlClient.SqlParameter("@acc", accountID));
+                        }
+                    }
+
+                    // 批次寫入附件
+                    if (dtAttach.Rows.Count > 0)
+                    {
+                        db.BulkCopy("Tree_HealthAttachment", dtAttach);
+                    }
+
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        db.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    // 全部成功，提交
+                    db.Commit();
+                }
+                catch (Exception ex)
+                {
+                    db.RollBack();
+                    throw ex;
+                }
+            }
+        }
 
         /// <summary>
         /// 批次取得養護記錄流水號
@@ -2384,37 +2527,41 @@ namespace protectTreesV2.Batch
                 }
             }
         }
-        /// <summary>
-        /// 批次取得指定 HealthID 目前擁有的【附件檔案】數量
-        /// </summary>
-        public Dictionary<int, int> GetBatchHealthAttachmentCounts(List<int> healthIDs)
-        {
-            Dictionary<int, int> map = new Dictionary<int, int>();
-            if (healthIDs == null || healthIDs.Count == 0) return map;
 
-            // 動態組建 SQL
+        /// <summary>
+        /// 批次取得巡查流水號
+        /// </summary>
+        /// <param name="keys">查詢條件 (TreeID + PatrolDate)</param>
+        public Dictionary<string, int> GetPatrolIDMap(List<TreeQueryKey> keys)
+        {
+            Dictionary<string, int> map = new Dictionary<string, int>();
+            if (keys == null || keys.Count == 0) return map;
+
             StringBuilder sb = new StringBuilder();
 
             sb.Append(@"
-                SELECT healthID, COUNT(*) as Cnt 
-                FROM Tree_HealthAttachment 
+                SELECT treeID, patrolDate, patrolID 
+                FROM Tree_PatrolRecord
                 WHERE removeDateTime IS NULL 
-                  AND healthID IN (
+                AND (
             ");
 
             List<SqlParameter> parameters = new List<SqlParameter>();
-            List<string> paramNames = new List<string>();
+            List<string> conditions = new List<string>();
 
-            for (int i = 0; i < healthIDs.Count; i++)
+            for (int i = 0; i < keys.Count; i++)
             {
-                string pName = $"@p{i}";
-                paramNames.Add(pName);
-                // 參數化查詢，防止 SQL Injection
-                parameters.Add(new SqlParameter(pName, healthIDs[i]));
+                string pTreeID = $"@t{i}";
+                string pDate = $"@d{i}";
+
+                conditions.Add($" (treeID = {pTreeID} AND patrolDate = {pDate}) ");
+
+                parameters.Add(new SqlParameter(pTreeID, keys[i].treeID));
+                parameters.Add(new SqlParameter(pDate, keys[i].checkDate)); 
             }
 
-            sb.Append(string.Join(",", paramNames));
-            sb.Append(") GROUP BY healthID");
+            sb.Append(string.Join(" OR ", conditions));
+            sb.Append(" )");
 
             using (var da = new MS_SQL())
             {
@@ -2422,40 +2569,165 @@ namespace protectTreesV2.Batch
 
                 foreach (DataRow row in dt.Rows)
                 {
-                    int hID = Convert.ToInt32(row["healthID"]);
-                    int count = Convert.ToInt32(row["Cnt"]);
+                    int dbTreeID = Convert.ToInt32(row["treeID"]);
 
-                    if (!map.ContainsKey(hID))
+                    DateTime dbDate = Convert.ToDateTime(row["patrolDate"]);
+                    int dbPatrolID = Convert.ToInt32(row["patrolID"]);
+
+                    // 組合 Key
+                    string key = $"{dbTreeID}_{dbDate:yyyyMMdd}";
+
+                    if (!map.ContainsKey(key))
                     {
-                        map.Add(hID, count);
+                        map.Add(key, dbPatrolID);
                     }
                 }
             }
 
             return map;
         }
+
         /// <summary>
-        /// 批次覆蓋/新增健檢附件並寫入操作 Log
+        /// 批次新增巡查紀錄 
         /// </summary>
-        /// <param name="insertList">要新增的附件清單</param>
-        /// <param name="accountID">操作者 ID </param>
-        /// <param name="accountName">操作者姓名 </param>
-        /// <param name="isOverwrite">是否執行覆蓋 (軟刪除)</param>
-        public void BatchReplaceHealthDocs(List<TempFileData> insertList, string ipAddress, int accountID, string account,string accountName,string accountUnit, bool isOverwrite)
+        /// <param name="keys">要新增的鍵值 (TreeID + Date)</param>
+        /// <param name="accountID">建立者 ID</param>
+        /// <returns>Map: "treeID_yyyyMMdd" -> 新產生的 PatrolID</returns>
+        public Dictionary<string, int> BatchCreatePatrolRecords(List<TreeQueryKey> keys, int accountID)
         {
-            if (insertList == null || insertList.Count == 0) return;
+            Dictionary<string, int> newMap = new Dictionary<string, int>();
+            if (keys == null || keys.Count == 0) return newMap;
 
-            //檔案欄位
-            DataTable dtAttach = new DataTable();
-            dtAttach.Columns.Add("healthID", typeof(int));
-            dtAttach.Columns.Add("fileName", typeof(string));
-            dtAttach.Columns.Add("filePath", typeof(string));
-            dtAttach.Columns.Add("fileSize", typeof(int));
-            dtAttach.Columns.Add("description", typeof(string));
-            dtAttach.Columns.Add("insertAccountID", typeof(int));
-            dtAttach.Columns.Add("insertDateTime", typeof(DateTime));
+            using (var da = new MS_SQL())
+            {
+                try
+                {
+                    // 開啟交易
+                    da.StartTransaction();
 
-            //log欄位
+                    // SQL 語句
+                    string sql = @"
+                        INSERT INTO Tree_PatrolRecord 
+                        (
+                            treeID, patrolDate, dataStatus, 
+                            hasPublicSafetyRisk, /* 必填欄位，需給預設值 */
+                            insertAccountID, insertDateTime
+                        ) 
+                        VALUES 
+                        (
+                            @tid, @pDate, 0,  /* 0:草稿 */
+                            0,                /* 0:預設無風險 */
+                            @accID, GETDATE()
+                        );
+                
+                        /* 取回新 ID */
+                        SELECT CAST(SCOPE_IDENTITY() AS int); 
+                    ";
+
+                    foreach (var k in keys)
+                    {
+                        List<System.Data.SqlClient.SqlParameter> p = new List<System.Data.SqlClient.SqlParameter>();
+                        p.Add(new System.Data.SqlClient.SqlParameter("@tid", k.treeID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@pDate", k.checkDate)); // 假設您的 QueryKey 日期屬性名為 checkDate
+                        p.Add(new System.Data.SqlClient.SqlParameter("@accID", accountID));
+
+                        object result = da.ExcuteScalar(sql, p.ToArray());
+
+                        if (result != null && result != DBNull.Value)
+                        {
+                            int newID = Convert.ToInt32(result);
+                            // 組合 Key: TreeID_yyyyMMdd
+                            string key = $"{k.treeID}_{k.checkDate:yyyyMMdd}";
+
+                            if (!newMap.ContainsKey(key))
+                            {
+                                newMap.Add(key, newID);
+                            }
+                        }
+                    }
+
+                    // 全部成功，提交交易
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    // 發生錯誤，回滾
+                    da.RollBack();
+                    throw ex;
+                }
+            }
+
+            return newMap;
+        }
+
+        /// <summary>
+        /// 批次取得指定巡查紀錄照片數量 
+        /// </summary>
+        /// <param name="patrolIDs">巡查紀錄 ID 清單</param>
+        public Dictionary<int, int> GetBatchPatrolPhotoCounts(List<int> patrolIDs)
+        {
+            Dictionary<int, int> map = new Dictionary<int, int>();
+            if (patrolIDs == null || patrolIDs.Count == 0) return map;
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(@"
+                SELECT patrolID, COUNT(*) as Cnt 
+                FROM Tree_PatrolPhoto 
+                WHERE removeDateTime IS NULL 
+                  AND patrolID IN (
+            ");
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<string> paramNames = new List<string>();
+
+            for (int i = 0; i < patrolIDs.Count; i++)
+            {
+                string pName = $"@p{i}";
+                paramNames.Add(pName);
+                parameters.Add(new SqlParameter(pName, patrolIDs[i]));
+            }
+
+            sb.Append(string.Join(",", paramNames));
+            sb.Append(") GROUP BY patrolID");
+
+            using (var da = new MS_SQL())
+            {
+                DataTable dt = da.GetDataTable(sb.ToString(), parameters.ToArray());
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    int pID = Convert.ToInt32(row["patrolID"]);
+                    int count = Convert.ToInt32(row["Cnt"]);
+
+                    if (!map.ContainsKey(pID))
+                    {
+                        map.Add(pID, count);
+                    }
+                }
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// 批次寫入巡查照片紀錄
+        /// </summary>
+        public void BatchInsertPatrolPhotoRecords(List<TempFileData> photos, string ipAddress, int accountID, string account, string accountName, string accountUnit)
+        {
+            if (photos == null || photos.Count == 0) return;
+
+            // 準備照片資料表
+            DataTable dtPhoto = new DataTable();
+            dtPhoto.Columns.Add("patrolID", typeof(int)); 
+            dtPhoto.Columns.Add("fileName", typeof(string));
+            dtPhoto.Columns.Add("filePath", typeof(string));
+            dtPhoto.Columns.Add("fileSize", typeof(int));
+            dtPhoto.Columns.Add("caption", typeof(string));
+            dtPhoto.Columns.Add("insertAccountID", typeof(int));
+            dtPhoto.Columns.Add("insertDateTime", typeof(DateTime));
+
+            // 準備 Log 資料表 
             DataTable dtLog = new DataTable();
             dtLog.Columns.Add("functionType", typeof(string));
             dtLog.Columns.Add("dataID", typeof(int));
@@ -2468,32 +2740,46 @@ namespace protectTreesV2.Batch
             dtLog.Columns.Add("accountUnit", typeof(string));
             dtLog.Columns.Add("logDateTime", typeof(DateTime));
 
-            // 填寫資料 
             DateTime now = DateTime.Now;
 
-            foreach (var item in insertList)
+            // ==========================================
+            // 填寫照片資料
+            // ==========================================
+            foreach (var p in photos)
             {
-                // --- A. 填寫附件資料 ---
-                DataRow rowAttach = dtAttach.NewRow();
-                rowAttach["healthID"] = item.healthID;
-                rowAttach["fileName"] = item.originalFileName;
-                rowAttach["filePath"] = item.virtualPath;
+                DataRow row = dtPhoto.NewRow();
+                row["patrolID"] = p.targetID;
+                row["fileName"] = p.originalFileName;
+                row["filePath"] = p.virtualPath;
 
-                int fSize = (item.infoRef != null && item.infoRef.uploadedFile != null)
-                            ? item.infoRef.uploadedFile.ContentLength : 0;
-                rowAttach["fileSize"] = fSize;
-                rowAttach["description"] = "批次上傳";
-                rowAttach["insertAccountID"] = accountID;
-                rowAttach["insertDateTime"] = now;
-                dtAttach.Rows.Add(rowAttach);
+                int fSize = (p.infoRef != null && p.infoRef.uploadedFile != null)
+                            ? p.infoRef.uploadedFile.ContentLength : 0;
+                row["fileSize"] = fSize;
+                row["caption"] = DBNull.Value;
+                row["insertAccountID"] = accountID;
+                row["insertDateTime"] = now;
+                dtPhoto.Rows.Add(row);
+            }
 
-                // --- B. 填寫 Log 資料 ---
+            // ==========================================
+            // 填寫 Log 資料 (依 PatrolID 分組)
+            // ==========================================
+            var groupedPhotos = photos.GroupBy(p => p.targetID);
+
+            foreach (var group in groupedPhotos)
+            {
+                int currentPatrolID = group.Key;
+                int count = group.Count();
+
+                // 組合備註
+                string memoStr = $"批次上傳 {count} 張照片";
+
                 DataRow rowLog = dtLog.NewRow();
-                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
-                rowLog["dataID"] = item.healthID;
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Patrol;
+                rowLog["dataID"] = currentPatrolID;
                 rowLog["actionType"] = "批次上傳";
-                rowLog["memo"] = item.IsOverwriteAction ? "覆蓋附件" : "上傳附件";
-                rowLog["ipAddress"] = ipAddress; 
+                rowLog["memo"] = memoStr;
+                rowLog["ipAddress"] = ipAddress;
                 rowLog["accountID"] = accountID;
                 rowLog["account"] = account;
                 rowLog["accountName"] = accountName;
@@ -2502,49 +2788,27 @@ namespace protectTreesV2.Batch
                 dtLog.Rows.Add(rowLog);
             }
 
-            // 開始執行資料庫交易
+            // ==========================================
+            // 執行寫入
+            // ==========================================
             using (var db = new MS_SQL())
             {
                 try
                 {
-                    //開啟交易
                     db.StartTransaction();
 
-                    // 軟刪除 
-                    if (isOverwrite)
-                    {
-                        // 取出所有涉及的 HealthID
-                        var distinctIDs = insertList.Select(x => x.healthID).Distinct().ToList();
-                        if (distinctIDs.Count > 0)
-                        {
-                            string idList = string.Join(",", distinctIDs);
-                            string sqlUpdate = $@"
-                                UPDATE Tree_HealthAttachment 
-                                SET removeDateTime = GETDATE(), removeAccountID = @acc
-                                WHERE healthID IN ({idList}) AND removeDateTime IS NULL";
-
-                            db.ExecNonQuery(sqlUpdate, new System.Data.SqlClient.SqlParameter("@acc", accountID));
-                        }
-                    }
-
-                    // 批次寫入附件
-                    if (dtAttach.Rows.Count > 0)
-                    {
-                        db.BulkCopy("Tree_HealthAttachment", dtAttach);
-                    }
+                    if (dtPhoto.Rows.Count > 0)
+                        db.BulkCopy("Tree_PatrolPhoto", dtPhoto);
 
                     if (dtLog.Rows.Count > 0)
-                    {
                         db.BulkCopy("Tree_Log", dtLog);
-                    }
 
-                    // 全部成功，提交
                     db.Commit();
                 }
                 catch (Exception ex)
                 {
                     db.RollBack();
-                    throw ex; 
+                    throw ex;
                 }
             }
         }

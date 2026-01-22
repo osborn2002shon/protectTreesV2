@@ -11,8 +11,8 @@
     <script src="../../_js/jquery-3.7.1.js"></script>
     <link href="../_css/bootstrap.css" rel="stylesheet" />
     <link href="../_css/fontawesome-all.css" rel="stylesheet" />
-    <link href="../_css/mp_default.css" rel="stylesheet" />
-    <link href="../_css/control.css" rel="stylesheet" />
+    <link href="../_css/mp_backstage_main.css" rel="stylesheet" />
+    <link href="../_css/mp_backstage_control.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>

@@ -103,8 +103,8 @@ namespace protectTreesV2.backstage.care
                     ShowMessage("提示", $"查無此樹籍資料 ({treeNo})，可能尚未建立或已被刪除。");
                 }
             }
-            // 檢視健檢紀錄 (ViewHealth)
-            else if (e.CommandName == "ViewHealth")
+            // 檢視健檢紀錄 (ViewCare)
+            else if (e.CommandName == "ViewCare")
             {
                 // 解析參數：樹號,日期
                 string[] args = e.CommandArgument.ToString().Split(',');
@@ -127,16 +127,16 @@ namespace protectTreesV2.backstage.care
                 {
                     int treeID = treeIdMap[treeNo];
 
-                    // 2組裝查詢 Key (TreeID + Date)
+                    // 組裝查詢 Key (TreeID + Date)
                     var queryKeys = new List<TreeQueryKey>
                     {
                         new TreeQueryKey { treeID = treeID, checkDate = checkDate }
                     };
 
-                    // 反查 HealthID
+                    // 反查流水號
                     Dictionary<string, int> carehMap = system_batch.GetCareIDMap(queryKeys);
 
-                    // Key 的格式通常是 $"{treeID}_{yyyyMMdd}"
+                    // Key 的格式是 $"{treeID}_{yyyyMMdd}"
                     string mapKey = $"{treeID}_{checkDate:yyyyMMdd}";
 
                     if (carehMap.ContainsKey(mapKey))
@@ -241,7 +241,7 @@ namespace protectTreesV2.backstage.care
 
             // Sheet 2: 生長情形概況 (雙層標題，檢查第 1 列的子項目)
             { "生長情形概況", (1, new[] {
-                // 前三欄通常是有合併儲存格，但在程式讀取第 1 列時，我們預期這裡要有標題
+
                 "調查記數", "樹籍編號", "樹種",
 
                 // 樹冠枝葉
@@ -272,7 +272,7 @@ namespace protectTreesV2.backstage.care
         };
 
             // ==========================================
-            // 4. 開始解析與處理
+            // 開始解析與處理
             // ==========================================
             // 所有的 Log 
             List<TreeBatchTaskLog> allLogList = new List<TreeBatchTaskLog>();
@@ -357,7 +357,7 @@ namespace protectTreesV2.backstage.care
                     // 讀取資料 
                     // ---------------------------------------------------------
                     var growthMap = ScanSideSheet(workbook, "生長情形概況", 3, 0, allLogList);
-                    var maintenanceMap = ScanSideSheet(workbook, "養護作業管理", 3, 0, allLogList);
+                    var maintenanceMap = ScanSideSheet(workbook, "養護作業管理", 2, 0, allLogList);
 
                     ISheet mainSheet = workbook.GetSheet("基本資料");
 
@@ -538,7 +538,7 @@ namespace protectTreesV2.backstage.care
                         else
                         {
                             item.log.isSuccess = false;
-                            item.log.resultMsg = $"失敗：查無系統樹籍編號 ({tNo})";
+                            item.log.resultMsg = $"失敗：查無系統樹籍編號";
                             validDataList.RemoveAt(i);
                         }
                     }
@@ -564,7 +564,7 @@ namespace protectTreesV2.backstage.care
                                 if (isOverwrite)
                                 {
                                     item.record.careID = oldCareID;
-                                    item.log.resultMsg += "提醒：已覆蓋同日調查資料";
+                                    item.log.resultMsg += "提醒：已覆蓋同日養護資料";
                                 }
                                 else
                                 {

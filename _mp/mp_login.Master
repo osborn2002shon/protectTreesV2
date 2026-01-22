@@ -10,7 +10,7 @@
     <script src="_js/jquery-3.7.1.js"></script>
     <link href="_css/bootstrap.css" rel="stylesheet" />
     <link href="_css/fontawesome-all.css" rel="stylesheet" />
-    <link href="_css/mp_public.css" rel="stylesheet" />
+    <link href="_css/mp_login.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>

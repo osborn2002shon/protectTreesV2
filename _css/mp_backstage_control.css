@@ -1,0 +1,237 @@
+﻿/** 查詢條件樣式 **/
+.queryBox {
+    /*border: 1px solid black;*/
+    border-radius: 5px 5px;
+    background: linear-gradient(135deg, #0f2350, #1a3b6b);
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+}
+
+.queryBox-header {
+    color: white;
+    padding: 20px 20px;
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.queryBox-body {
+    background-color: white;
+    padding: 0px 0px;
+}
+    .queryBox-body .row {
+        margin: 0px 0px;
+        padding: 10px 5px;
+    }
+        .queryBox-body .row .col label, .queryBox-body .row [class^="col-"] label {
+            font-weight: 500;
+        }
+
+/** 列表樣式 **/
+
+/*應對GV自動多生出外面的DIV導致卷軸失效*/
+.table-responsive.gv-tb > div {
+/*    width:500px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;*/
+}
+
+.gv-tb {
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    padding:0px;
+}
+
+.gv {
+    min-width:100%;    
+    background-color:white;
+    border:none;
+}
+
+    .gv tr th {
+        min-width:50px;
+        background: #d3d3d3;
+        /*color: #0f2350;*/
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        padding: 15px 10px;
+        /*white-space: nowrap;*/
+    }
+
+    .gv tr td {
+        padding: 10px 10px;
+    }
+
+    .gv tr {
+        border-bottom: 1px solid #e1e1e1;
+    }
+    .gv tr:first-child {
+        border-bottom: none;
+    }
+    .gv tr:last-child {
+        border-bottom: none;
+    }
+
+        .gv tr td table {
+            margin:0 auto;
+        }
+
+/** 填寫表單樣式 **/
+.formCard {
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    margin-bottom:15px;
+}
+
+    .formCard .card-header {
+        background: linear-gradient(135deg, #0f2350, #1a3b6b);
+        color: white;
+        padding: 20px;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .formCard .card-body {
+        background-color:white;
+    }
+
+        .formCard .card-body label {
+            font-weight:500;
+        }
+
+        .formCard .card-body .row:not(:last-child) {
+            margin-bottom: 15px;
+        }
+
+    .formCard .star {
+        color:red;
+    }
+    .formCard .info {
+        font-size:0.85rem;
+        color:gray;
+    }
+    .formCard .card-footer .msg {
+        text-align:center;
+        color:tomato;
+    }
+
+    .formCard .card-footer {
+        text-align:center;
+        padding:0px 0px 15px 0px;
+        background-color:white;
+        border-top:none;
+    }
+
+    .formCard .card-header.green {
+        background: linear-gradient(135deg, #316745, #47885e);
+    }
+
+    .formCard .card-header.orange {
+        background: linear-gradient(135deg, #e17b34, #e49e61);
+    }
+
+    .formCard .card-header.red {
+        background: linear-gradient(135deg, #9e3d3f, #b7282e);
+    }
+
+/*表格樣式*/
+.tb {
+    width:100%;
+    border:none;
+    border-collapse:collapse;
+    background:white;
+}
+
+    .tb tr th, .tb tr td {
+        text-align: center;
+        padding:10px 10px;
+        border:1px solid #e1e1e1;
+    }
+
+    .tb tr th {
+        background-color: #f8f9fa;
+    }
+
+/*文字樣式*/
+.text_info {
+    font-size: 0.85rem;
+    color: gray;
+}
+
+.link {
+    display:inline-block;
+    text-decoration: none;
+    color: white;
+    padding:10px;
+    border:1px solid white;
+    border-radius:5px;
+}
+
+    .link:hover {
+        background-color:rgba(255,255,255,0.1)
+    }
+
+    .link:active {
+        color: white;
+    }
+
+
+/*標籤樣式*/
+.tag_red {
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c92a2a 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(201, 42, 42, 0.3);
+    display: inline-block;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag_blue {
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #4dabf7 0%, #339af0 50%, #1971c2 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(25, 113, 194, 0.3);
+    display: inline-block;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag_green {
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #51cf66 0%, #37b24d 50%, #2b8a3e 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(43, 138, 62, 0.3);
+    display: inline-block;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag_orange {
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #ff922b 0%, #fd7e14 50%, #e8590c 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(232, 89, 12, 0.3);
+    display: inline-block;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag_purple {
+    padding: 5px 10px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #cc5de8 0%, #ae3ec9 50%, #9c36b5 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(156, 54, 181, 0.3);
+    display: inline-block;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}

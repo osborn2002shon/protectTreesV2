@@ -309,8 +309,8 @@ namespace protectTreesV2._uc.health
         {
             var details = new List<string>();
 
-            if (record.crownLeafCoveragePercent.HasValue)
-                details.Add($"葉量比例 {FormatDecimal(record.crownLeafCoveragePercent)}%");
+            if (!string.IsNullOrWhiteSpace(record.crownLeafCoveragePercent))
+                details.Add($"葉量比例 {FormatText(record.crownLeafCoveragePercent)}");
 
             if (record.crownDeadBranchPercent.HasValue)
                 details.Add($"枯枝比例 {FormatDecimal(record.crownDeadBranchPercent)}%");
@@ -444,7 +444,6 @@ namespace protectTreesV2._uc.health
             target.Add($"{label}：{value}");
         }
 
-        // 核心修改：改用 params (bool?, string)[] 語法，這比 params Tuple<bool?, string>[] 乾淨很多
         private static string FormatSelections(params (bool? IsSelected, string Label)[] items)
         {
             var selected = new List<string>();

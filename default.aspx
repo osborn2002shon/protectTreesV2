@@ -7,29 +7,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet" />
-    <script src="../../_js/bootstrap.bundle.js"></script>
-    <script src="../../_js/jquery-3.7.1.js"></script>
-    <link href="../_css/bootstrap.css" rel="stylesheet" />
-    <link href="../_css/fontawesome-all.css" rel="stylesheet" />
-    <%--<link href="../_css/default.css" rel="stylesheet" />--%>
-    <link href="_css/default/main.css" rel="stylesheet" />
-    <link href="_css/default/menu.css" rel="stylesheet" />
-    <link href="_css/default/control.css" rel="stylesheet" />
-    <link href="_css/default/item.css" rel="stylesheet" />
-    <link href="_css/default/accordion.css" rel="stylesheet" />
+    <script src="_js/bootstrap.bundle.js"></script>
+    <script src="_js/jquery-3.7.1.js"></script>
+    <link href="_css/bootstrap.css" rel="stylesheet" />
+    <link href="_css/fontawesome-all.css" rel="stylesheet" />
+    <link href="_css/mp_public_menu.css" rel="stylesheet" />
+    <link href="_css/mp_public_main.css" rel="stylesheet" />
+    <link href="_css/mp_public_control.css" rel="stylesheet" />
+    <link href="_css/mp_public_default.css" rel="stylesheet" />
 </head>
 <body>
     <form id="form1" runat="server">        
-        <!-- Header 區域 - 100% 寬度 -->
         <header class="container-fluid p-0 m-0">
-            <nav class="navbar navbar-expand-lg navbar_cust">
+            <nav class="div_header navbar navbar-expand-lg">
                 <div class="container-fluid">
                     <!-- 網站標題 -->
                     <div class="d-none d-md-block">
-                        <a class="navbar-brand" href="/"><img src="../../_img/logo.png"/>受保護樹木資訊網</a>
+                        <a class="navbar-brand" href="default.aspx"><img src="_img/logo.png"/>受保護樹木資訊網</a>
                     </div>
                     <div class="d-block d-md-none">
-                        <a class="navbar-brand" href="/"><img src="../../_img/logo_mini.png"/>受保護樹木資訊網</a>
+                        <a class="navbar-brand" href="default.aspx"><img src="_img/logo_mini.png"/>受保護樹木資訊網</a>
                     </div>
                     
                     <!-- 手機版漢堡按鈕 -->
@@ -57,86 +54,46 @@
                 </div>
             </nav>
         </header>    
-        <!-- 主要內容區 - 固定寬度 -->
         <main class="container-fluid p-0 m-0">
             <div class="div_banner">
                 <div class="div_banner_title d-none d-md-block">
                     <h1>讓珍貴的樹木，持續成為城市的風景</h1>
-                    <p>一起守護街角的綠蔭，讓下一代抬頭就能看見</p>
+                    <span style="font-size:1.5rem">一起守護街角的綠蔭，讓下一代抬頭就能看見</span>
                 </div>
                 <div class="div_banner_title_s d-block d-md-none">
                     <h1>讓珍貴的樹木<br />持續成為城市的風景</h1>
-                    <p>一起守護街角的綠蔭<br />讓下一代抬頭就能看見</p>
+                    <span style="font-size:1.25rem">一起守護街角的綠蔭<br />讓下一代抬頭就能看見</span>
                 </div>
             </div>
             <div class="div_item p-5">
-                <div class="item">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            說明介紹
-                        </div>
-                        <div class="card-body">                            
-                            <div class="text-center">
-                                <img src="../../_img/icon/faq.png" />
-                            </div>
-                            <span>保護緣起、認定標準<br />一次看懂</span>
-                        </div>
-                        <div class="card-footer">
-                            <a href="pages/about.aspx" title="開始了解" class="btn_link">開始了解</a>
-                        </div>
+                <div class="container itemBox">
+                    <div class="item">
+                        <img src="_img/icon/faq.png" />
+                        <div>保護緣起、認定標準<br />一次看懂</div>
+                        <a href="pages/about.aspx" title="開始了解" class="btn_link">開始了解</a>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            保護成果
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center">
-                                <img src="../../_img/icon/analysis.png" />
-                            </div>
-                            <span>統計成果<br />與管理概況一覽</span>
-                        </div>
-                        <div class="card-footer">
-                            <a href="pages/analysis.aspx" title="查看統計資訊" class="btn_link">查看統計資訊</a>
-                        </div>
+                    <div class="item">
+                        <img src="_img/icon/analysis.png" />
+                        <div>統計成果<br />與管理概況一覽</div>
+                        <a href="pages/analysis.aspx" title="查看統計資訊" class="btn_link">查看統計資訊</a>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            樹木地圖
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center">
-                                <img src="../../_img/icon/street-map.png" />
-                            </div>
-                            <span>探索附近樹木位置<br />與基本資訊</span>
-                        </div>
-                        <div class="card-footer">
-                            <a href="pages/map.aspx" title="開啟地圖" class="btn_link">開啟地圖</a>
-                        </div>
+                    <div class="item">
+                        <img src="_img/icon/street-map.png" />
+                        <div>探索附近樹木位置<br />與基本資訊</div>
+                        <a href="pages/map.aspx" title="開啟地圖" class="btn_link">開啟地圖</a>
                     </div>
-                </div>
-                <div class="item">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            其他資源
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center">
-                                <img src="../../_img/icon/union.png" />
-                            </div>
-                            <span>相關法規、文件<br />與延伸資訊外部網站整理</span>
-                        </div>
-                        <div class="card-footer">
-                            <a href="pages/link.aspx" title="查看資源" class="btn_link">查看資源</a>
-                        </div>
+                    <div class="item">
+                        <img src="_img/icon/search.png" />
+                        <div>相關法規、文件<br />與延伸資訊外部網站整理</div>
+                        <a href="pages/link.aspx" title="查看資源" class="btn_link">查看資源</a>
                     </div>
                 </div>
             </div>
-            <div class="div_faq p-5" style="background-color:#e1e1e1;">
-                <div class="container ">
+            <div class="div_faq p-5">
+                <div class="blockTitle">
+                    <span>常見問答</span>
+                </div>
+                <div class="container">
                     <div class="accordion" id="accordionExample">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
@@ -201,56 +158,97 @@
                     </div>
                 </div>
             </div>
-            <div class="div_unit p-5" style="background-color:#808080;">
+            <div class="div_unit p-5">
+                <div class="blockTitle">
+                    <span>聯絡窗口</span>
+                </div>
                 <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <asp:RadioButtonList ID="RadioButtonList_area" runat="server" CssClass="rbl" RepeatDirection="Horizontal" RepeatLayout="Flow">
+                                <asp:ListItem Selected="True">北部</asp:ListItem>
+                                <asp:ListItem>中部</asp:ListItem>
+                                <asp:ListItem>南部</asp:ListItem>
+                                <asp:ListItem>東部</asp:ListItem>
+                                <asp:ListItem>外島</asp:ListItem>
+                            </asp:RadioButtonList>
+                        </div>
+                    </div>
                     <div class="row g-3 mt-1">
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 card_cust">
                                 <div class="card-header">
-                                    臺北市政府
+                                    臺北市政府文化局
                                 </div>
                                 <div class="card-body">
-                                    文化局
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 card_cust">
                                 <div class="card-header">
-                                    臺北市政府
+                                    臺北市政府文化局
                                 </div>
                                 <div class="card-body">
-                                    文化局
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 card_cust">
                                 <div class="card-header">
-                                    臺北市政府
+                                    臺北市政府文化局
                                 </div>
                                 <div class="card-body">
-                                    文化局
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 card_cust">
                                 <div class="card-header">
-                                    臺北市政府
+                                    臺北市政府文化局
                                 </div>
                                 <div class="card-body">
-                                    文化局
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100 card_cust">
                                 <div class="card-header">
-                                    臺北市政府
+                                    臺北市政府文化局
                                 </div>
                                 <div class="card-body">
-                                    文化局
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 card_cust">
+                                <div class="card-header">
+                                    臺北市政府文化局
+                                </div>
+                                <div class="card-body">
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100 card_cust">
+                                <div class="card-header">
+                                    臺北市政府文化局
+                                </div>
+                                <div class="card-body">
+                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
+                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
                                 </div>
                             </div>
                         </div>
@@ -272,8 +270,10 @@
                 </div>
             </div>
         </main>
-        <!-- Footer 區域 - 100% 寬度 -->
-        <footer class="container-fluid div_footer">
+        <div class="div_footer_img">
+            <img src="_img/icon/forest2.png"/>
+        </div>
+        <footer class="div_footer container-fluid">
             <div class="text-center">
                 Copyright © 2025 Forestry and Nature Conservation Agency<br />
                 電話：(02)2351-5441<br />

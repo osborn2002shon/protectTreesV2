@@ -140,6 +140,7 @@
     <Content Include="backstage\care\list.aspx" />
     <Content Include="backstage\care\main.aspx" />
     <Content Include="backstage\care\upload.aspx" />
+    <Content Include="backstage\care\uploadPhoto.aspx" />
     <Content Include="backstage\dashboard\hm.aspx" />
     <Content Include="backstage\dashboard\rm.aspx" />
     <Content Include="backstage\dashboard\sm.aspx" />
@@ -153,6 +154,7 @@
     <Content Include="backstage\patrol\edit.aspx" />
     <Content Include="backstage\patrol\list.aspx" />
     <Content Include="backstage\patrol\main.aspx" />
+    <Content Include="backstage\patrol\uploadPhoto.aspx" />
     <Content Include="backstage\statistics\treeHealth.aspx" />
     <Content Include="backstage\statistics\treeSum.aspx" />
     <Content Include="backstage\system\accountManage.aspx" />
@@ -176,20 +178,24 @@
     <Content Include="_css\bootstrap-icons.css" />
     <Content Include="_css\bootstrap-table.css" />
     <Content Include="_css\bootstrap.css" />
-    <Content Include="_css\control.css" />
-    <Content Include="_css\default\accordion.css" />
-    <Content Include="_css\public\control.css" />
-    <Content Include="_css\public\main.css" />
-    <Content Include="_css\public\menu.css" />
-    <Content Include="_css\default.css" />
-    <Content Include="_css\default\control.css" />
-    <Content Include="_css\default\item.css" />
-    <Content Include="_css\default\main.css" />
-    <Content Include="_css\default\menu.css" />
+    <Content Include="_css\mp_backstage_control.css" />
+    <Content Include="_css\mp_public_control.css" />
+    <Content Include="_css\mp_public_default.css" />
+    <Content Include="_css\mp_public_main.css" />
+    <Content Include="_css\mp_public_menu.css" />
     <Content Include="_css\fontawesome-all.css" />
-    <Content Include="_css\mp_default.css" />
-    <Content Include="_css\mp_public.css" />
-    <Content Include="_css\public\tab.css" />
+    <Content Include="_css\mp_backstage_main.css" />
+    <Content Include="_css\mp_login.css" />
+    <Content Include="_css\mp_public_tab.css" />
+    <Content Include="_img\banner.png" />
+    <Content Include="_img\bg.jpg" />
+    <Content Include="_img\icon\analysis.png" />
+    <Content Include="_img\icon\faq.png" />
+    <Content Include="_img\icon\forest2.png" />
+    <Content Include="_img\icon\search.png" />
+    <Content Include="_img\icon\street-map.png" />
+    <Content Include="_img\icon\tree.png" />
+    <Content Include="_img\icon\union.png" />
     <Content Include="_img\logo.png" />
     <Content Include="_img\logo_mini.png" />
     <Content Include="_js\bootstrap-table-zh-TW.js" />
@@ -294,6 +300,13 @@
     <Compile Include="backstage\care\upload.aspx.designer.cs">
       <DependentUpon>upload.aspx</DependentUpon>
     </Compile>
+    <Compile Include="backstage\care\uploadPhoto.aspx.cs">
+      <DependentUpon>uploadPhoto.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\care\uploadPhoto.aspx.designer.cs">
+      <DependentUpon>uploadPhoto.aspx</DependentUpon>
+    </Compile>
     <Compile Include="backstage\dashboard\hm.aspx.cs">
       <DependentUpon>hm.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -384,6 +397,13 @@
     </Compile>
     <Compile Include="backstage\patrol\main.aspx.designer.cs">
       <DependentUpon>main.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="backstage\patrol\uploadPhoto.aspx.cs">
+      <DependentUpon>uploadPhoto.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\patrol\uploadPhoto.aspx.designer.cs">
+      <DependentUpon>uploadPhoto.aspx</DependentUpon>
     </Compile>
     <Compile Include="backstage\statistics\treeHealth.aspx.cs">
       <DependentUpon>treeHealth.aspx</DependentUpon>
@@ -598,10 +618,15 @@
     <Content Include="_doc\受保護樹木養護資料蒐集用表格.xlsx" />
     <Content Include="_mp\mp_public.Master" />
     <Content Include="_mp\mp_publicMap.Master" />
+    <Content Include="_fonts\SweiSpringSugarCJKtc-SemiBold.woff" />
+    <Content Include="_fonts\SweiSpringSugarCJKtc-SemiBold.woff2" />
+    <Content Include="_fonts\SweiSpringSugarCJKtc-Bold.woff" />
+    <Content Include="_fonts\SweiSpringSugarCJKtc-Bold.woff2" />
+    <Content Include="_fonts\SweiSpringSugarCJKtc-Regular.woff" />
+    <Content Include="_fonts\SweiSpringSugarCJKtc-Regular.woff2" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="_file\health\" />
-    <Folder Include="_file\tree\" />
+    <Folder Include="_file\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

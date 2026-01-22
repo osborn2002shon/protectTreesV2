@@ -193,7 +193,7 @@
                                          <%--  成功 -> 顯示 LinkButton --%>
                                          <asp:LinkButton ID="btnSurveyDate" runat="server" 
                                              Text='<%# Eval("refDate", "{0:yyyy/MM/dd}") %>'
-                                             CommandName="ViewHealth" 
+                                             CommandName="ViewCare" 
                                              CommandArgument='<%# Eval("refKey") + "," + Eval("refDate", "{0:yyyy/MM/dd}") %>'
                                              CssClass="text-decoration-underline text-primary"
                                              Visible='<%# (bool)Eval("isSuccess") %>'>

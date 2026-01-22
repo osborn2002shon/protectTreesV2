@@ -1,0 +1,432 @@
+﻿* {
+    font-family: 'Noto Sans Mono', 'Noto Sans TC';
+}
+
+/* 平滑滾動效果 */
+html {
+    scroll-behavior: smooth;
+    font-size:16px;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+/* 側邊欄樣式 */
+.sidebar {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #006948 0%, #54917f 50%, #79c06e 100%);
+    width: 280px;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+    .sidebar.collapsed {
+        margin-left: -280px;
+    }
+
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar-header {
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+.sidebar-logo {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+    .sidebar-logo img {
+        max-width:100%;
+    }
+
+    .sidebar-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+.sidebar-subtitle {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+/* 導航樣式 */
+.nav-section {
+    padding: 20px 0px 0px 0px;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    font-size:1.25rem;
+}
+
+    .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border-left-color: #ffc107;
+    }
+
+    .nav-link.active {
+        color: white;
+        border-left-color: #fef263;
+    }
+
+    .nav-link i {
+        margin-right: 10px;
+    }
+
+    .nav-link:focus {
+        color: #fef263 !important
+    }
+
+    /* 子選單樣式 */
+    .nav-submenu {
+        background: rgba(0,0,0,0.2);
+    }
+
+    .nav-submenu .nav-link {
+        padding-left: 30px;
+        font-size: 1.25rem;
+    }
+
+        .nav-submenu .nav-link.active {
+            color: #fef263 !important; /* Bootstrap 紅色 */
+            font-weight: bold;
+        }
+
+            .nav-submenu .nav-link.active i {
+                color: #fef263;
+            }
+
+/* 主要內容區域 */
+.main-content {
+    flex: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    width:calc(100vw - 280px); /*避免被內容撐開導致MENU縮減*/
+}
+
+    .main-content.expanded {
+        margin-left: 0;
+    }
+
+/* 頂部導航欄 */
+.top-navbar {
+    background: white;
+    /*box-shadow: 0 2px 10px rgba(0,0,0,0.1);*/
+    padding: 10px 0px;
+    z-index: 999;
+    border-bottom:1px solid #e1e1e1;
+}
+
+.navbar-brand {
+    color: #0f2350 !important;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #0f2350;
+    font-size: 1.2rem;
+    padding: 10px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-name {
+    color: #0f2350;
+    font-weight: 500;
+    margin: 0;
+}
+
+.btn-logout {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+    .btn-logout:hover {
+        color:white;
+        background: linear-gradient(135deg, #c82333, #a71e2a);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220,53,69,0.3);
+    }
+
+/* 路徑導航 */
+.breadcrumb-container {
+    background: white;
+    padding: 15px 30px;
+    border-bottom: 1px solid #dee2e6;
+    font-size:1.25rem;
+    font-weight:500;
+}
+
+.breadcrumb {
+    margin: 0;
+    background: none;
+    padding: 0;
+}
+
+.breadcrumb-item a {
+    color: #0f2350;
+    text-decoration: none;
+}
+
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+.breadcrumb-item.active {
+    color: #6c757d;
+}
+
+/* 內容區域 */
+.content-area {
+    flex: 1;
+    padding: 30px;
+}
+
+.page-title {
+    /*color: #0f2350;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 30px;*/
+    display:none;
+}
+
+/* Footer */
+.footer {
+    background: #caac71;
+    color: white;
+    padding: 10px 30px;
+    text-align: center;
+    margin-top: auto;
+}
+
+/* 動畫效果 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* 回到頂部按鈕樣式 */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #5aafb6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: none; /* 初始隱藏 */
+}
+
+    .back-to-top:hover {
+        background-color: #4a9ba2;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .back-to-top.show {
+        display: block;
+    }
+
+
+/*燈箱*/
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.modal-body .msg {
+    font-size:1.25rem;
+    color:tomato;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 手機版樣式修正 */
+@media (max-width: 768px) {
+    .layout-container {
+        flex-direction: column;
+        position: relative;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    /* 手機版關閉按鈕 */
+    .mobile-close-btn {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        z-index: 1060;
+    }
+
+        .mobile-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+    .content-area {
+        padding: 20px 15px;
+    }
+
+    .breadcrumb-container {
+        padding: 15px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .user-info {
+        gap: 10px;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+
+    .table-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .table-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    /* 確保遮罩層在正確位置 */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+}
+
+/* 桌面版隱藏關閉按鈕 */
+@media (min-width: 769px) {
+    .mobile-close-btn {
+        display: none;
+    }
+}
+
+
+
+@media (min-width: 1920px) and (resolution: 1dppx) {
+    html, body, * {
+        font-size: 24px; /* 投影機顯示 */
+    }
+
+    .sidebar {
+        width: 400px;
+    }
+}
+
+@media (min-resolution: 1.25dppx) and (max-resolution: 1.5dppx) {
+    html {
+        font-size: 16px; /* 筆電預設 */
+    }
+}
+
+@media (min-resolution: 2dppx) {
+    html {
+        font-size: 14px; /* 高解析度螢幕 */
+    }
+}

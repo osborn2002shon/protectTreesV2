@@ -193,7 +193,7 @@ namespace protectTreesV2.backstage.health
                     string key = $"{info.treeID}_{info.checkDate:yyyyMMdd}";
                     if (healthMap.ContainsKey(key))
                     {
-                        info.healthID = healthMap[key];
+                        info.targetID = healthMap[key];
                     }
                 }
             }
@@ -202,7 +202,7 @@ namespace protectTreesV2.backstage.health
             if (CheckBox_autoCreateDraft.Checked)
             {
                 // 找出還沒有 healthID 的項目
-                var toCreateList = activeItems.Where(x => x.healthID == 0).ToList();
+                var toCreateList = activeItems.Where(x => x.targetID == 0).ToList();
 
                 if (toCreateList.Count > 0)
                 {
@@ -226,7 +226,7 @@ namespace protectTreesV2.backstage.health
                             if (newHealthMap.ContainsKey(key))
                             {
                                 // 成功新增
-                                info.healthID = newHealthMap[key];
+                                info.targetID = newHealthMap[key];
                                 info.log.resultMsg = "提醒：指定日期已自動新增健檢紀錄草稿";
                             }
                             else
@@ -252,7 +252,7 @@ namespace protectTreesV2.backstage.health
             else
             {
                 // 沒勾選自動新增，且沒 ID 的，直接失敗
-                foreach (var info in activeItems.Where(x => x.healthID == 0))
+                foreach (var info in activeItems.Where(x => x.targetID == 0))
                 {
                     info.isProcessing = false;
                     info.log.resultMsg = "失敗：指定日期查無健檢紀錄";
@@ -264,8 +264,8 @@ namespace protectTreesV2.backstage.health
 
             // 1. 先分組
             var readyToSave = processQueue
-                .Where(x => x.isProcessing && x.healthID > 0)
-                .GroupBy(x => x.healthID)
+                .Where(x => x.isProcessing && x.targetID > 0)
+                .GroupBy(x => x.targetID)
                 .ToList();
 
             // 批次取得目前 DB 計數 (避免 N+1 查詢)
@@ -317,7 +317,7 @@ namespace protectTreesV2.backstage.health
                             // 加入待寫入清單 
                             batchInsertList.Add(new TempFileData
                             {
-                                healthID = hID,
+                                targetID = hID,
                                 originalFileName = info.uploadedFile.FileName,
                                 finalFileName = finalSaveName,
                                 fullPhysicalPath = fullPath,

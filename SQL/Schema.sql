@@ -504,7 +504,7 @@ CREATE TABLE [dbo].[Tree_HealthRecord](
 	[branchIncludedBark] [bit] NULL, -- 枝條夾皮
 	[branchDrooping] [bit] NULL, -- 枝條垂落
 	[branchOtherNote] [nvarchar](200) NULL, -- 枝條其他說明
-	[crownLeafCoveragePercent] [decimal](5, 2) NULL, -- 樹冠葉片覆蓋率(%)
+	[crownLeafCoveragePercent] [nvarchar](50) NULL, -- 樹冠葉片覆蓋率(%)
 	[crownDeadBranchPercent] [decimal](5, 2) NULL, -- 樹冠枯枝比例(%)
 	[crownHangingBranch] [bit] NULL, -- 樹冠掛枝
 	[crownOtherNote] [nvarchar](200) NULL, -- 樹冠其他說明
@@ -533,8 +533,6 @@ CREATE TABLE [dbo].[Tree_HealthRecord](
 	[managementStatus] [nvarchar](max) NULL, -- 管理狀態說明
 	[priority] [nvarchar](50) NULL, -- 處置優先順序
 	[treatmentDescription] [nvarchar](max) NULL, -- 處置或維護建議
-	[sourceUnit] [nvarchar](200) NULL, -- 資料來源單位名稱
-	[sourceUnitID] [int] NULL, -- 資料來源單位代碼
 	[insertAccountID] [int] NOT NULL, -- 建立者帳號ID
 	[insertDateTime] [datetime] NOT NULL, -- 建立時間
 	[updateAccountID] [int] NULL, -- 最後更新者帳號ID

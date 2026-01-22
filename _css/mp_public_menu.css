@@ -1,0 +1,79 @@
+﻿    .div_header .navbar-brand {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #517c4e;
+    }
+
+        .div_header .navbar-brand:hover {
+            text-decoration: none;
+            color: #93a74e;
+        }
+
+        .div_header .navbar-brand > img {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+.nav-item {
+    padding: 0px 10px;
+    text-align:center;
+}
+
+.nav-link {
+    font-size: 1.75rem;
+    color: #517c4e;
+    font-weight: 500;
+}
+
+    .nav-link:hover {
+        text-decoration:none;
+    }
+
+    /* 基本連結樣式 */
+    .highlight {
+        position: relative;
+        padding: 0px 2px;
+        z-index: 1; /* 確保連結元素本身有適當的堆疊順序 */
+    }
+
+    /* 螢光筆效果 - 無動畫，半高度 */
+    .highlight::before {
+        content: "";
+        position: absolute;
+        bottom: 0; /* 從底部開始 */
+        left: 0;
+        width: 100%;
+        height: 0; /* 初始為 0 高度 */
+        background-color: rgba(177, 127, 89, 0.3); /* 使用與懸停顏色相符的顏色 */
+        z-index: -1; /* 確保在文字下面 */
+        transition: height 0.2s; /* 添加小動畫使效果更順暢 */
+        transform: skew(-12deg); /* 加入傾斜效果，負值為向左傾斜 */
+    }
+
+    /* 滑鼠懸停時立即顯示螢光效果 */
+    .highlight:hover::before {
+        height: 40%; /* 懸停時只顯示一半高度 */
+    }
+
+/* 平板以下的手機裝置 */
+@media (max-width: 767px) {
+    .navbar_cust .navbar-brand > img {
+        height: 30px;
+        margin-right: 10px;
+    }
+    .navbar_cust .navbar-brand {
+        font-size:1.75rem;
+    }
+    .nav-link {
+        font-size: 1.25rem;
+        color: #517c4e;
+        font-weight: 500;
+    }
+}
+
+/* 平板以下的手機裝置 */
+@media (max-width: 376px) {
+    .navbar_cust .navbar-brand {
+        font-size: 1.5rem;
+    }
+}
