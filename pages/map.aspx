@@ -410,9 +410,9 @@
 
             const treeSymbol = {
                 type: "picture-marker",
-                url: "/_img/icon/tree.png",
-                width: "28px",
-                height: "28px"
+                url: "/_img/icon/pin.png",
+                width: "30px",
+                height: "30px"
             };
 
             const popupTemplate = {

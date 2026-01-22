@@ -114,7 +114,6 @@ input[type="radio"] {
     }
 
 .accordion-button.collapsed {
-    font-weight: 300;
     color: #000000;
     background: linear-gradient(90deg,rgba(29, 105, 196, 0.2) 0%, rgba(102, 189, 189, 0.2) 100%);
 }
@@ -165,30 +164,6 @@ input[type="radio"] {
         transition: transform 0.5s ease, opacity 0.5s linear;
         transform: translate(0px,-5px);
     }
-
-/* 範例區塊 */
-.exampleBox {
-    margin: 0px 30px;
-    border: 10px solid #dff0f2;
-    padding: 30px;
-    background-color: rgba(255,255,255,0.2);
-    font-size: 1.25rem;
-}
-
-    .exampleBox div:first-child {
-        font-size: 1.25rem;
-        color: #21C4C4;
-        text-align: center
-    }
-
-    .exampleBox ul li {
-        line-height: 28px;
-    }
-
-.ul li {
-    font-size: 1.25rem;
-    line-height: 32px;
-}
 
 /* 連結資源 */
 .linkBox {
@@ -256,4 +231,52 @@ input[type="radio"] {
 
     .tb tr:last-child td {
         border-bottom: none;
+    }
+
+/* 範例區塊 */
+.exampleBox {
+    margin: 0px 30px;
+    padding: 30px;
+    /*border: 10px solid #dff0f2;*/
+    /*background-color: rgba(255,255,255,0.2);*/
+    border: 10px solid transparent;
+    background: 
+        linear-gradient(white, white) padding-box, 
+        linear-gradient(90deg,rgba(29, 105, 196, 0.2) 0%, rgba(102, 189, 189, 0.2) 100%) border-box;
+    font-size: 1.25rem;
+}
+
+    .exampleBox div:first-child {
+        font-size: 1.25rem;
+        font-weight:500;
+        color: #21C4C4;
+        text-align: center
+    }
+
+    .exampleBox ul li {
+        line-height: 28px;
+    }
+
+.ul li {
+    font-size: 1.25rem;
+    line-height: 32px;
+}
+
+/* 統計區塊 */
+.chartBox {
+    background: rgba(255, 255, 255, 0.95);
+    border: 10px solid transparent;
+    padding:25px;
+    border-radius:25px;
+    background: 
+        linear-gradient(white, white) padding-box,
+        linear-gradient(90deg,rgba(29, 105, 196, 0.2) 0%, rgba(102, 189, 189, 0.2) 100%) border-box;
+    /*border-radius: 65% 35% 70% 30% / 40% 60% 40% 60%;*/
+    margin:100px 0px !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+}
+    .chartBox:hover {
+        transform: translateY(-5px);
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     }

@@ -20,7 +20,8 @@
     <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
-    <form id="form1" runat="server">        
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager_main" runat="server"></asp:ScriptManager>
         <!-- Header 區域 - 100% 寬度 -->
         <header class="container-fluid p-0 m-0">
             <nav class="div_header navbar navbar-expand-lg">

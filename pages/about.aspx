@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="exampleBox">
-                        <div>例如(1)</div>
+                        <div class="mb-2">案例</div>
                         與當地居民生活、情感、祭祀、民俗或信仰具有重大連結性
                         <ul>
                             <li>臺東縣延平鄉老茄苳為卑南族祭儀之守靈者</li>
@@ -47,7 +47,7 @@
             <div class="row">
                 <div class="col-12 col-md-6">
                     <div class="exampleBox">
-                        <div>例如(2)</div>
+                        <div class="mb-2">案例</div>
                         具重大美學欣賞價值之景觀
                         <ul>
                             <li>南投縣集集鎮綠色隧道</li>                            

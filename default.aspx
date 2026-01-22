@@ -18,6 +18,7 @@
 </head>
 <body>
     <form id="form1" runat="server">        
+        <asp:ScriptManager ID="ScriptManager_main" runat="server"></asp:ScriptManager>
         <header class="container-fluid p-0 m-0">
             <nav class="div_header navbar navbar-expand-lg">
                 <div class="container-fluid">
@@ -69,23 +70,23 @@
                 <div class="container itemBox">
                     <div class="item">
                         <img src="_img/icon/faq.png" />
-                        <div>保護緣起、認定標準<br />一次看懂</div>
-                        <a href="pages/about.aspx" title="開始了解" class="btn_link">開始了解</a>
+                        <div>保護緣起、認定標準<br />說明介紹</div>
+                        <a href="pages/about.aspx" title="開始了解" class="btn_link">前往了解</a>
                     </div>
                     <div class="item">
                         <img src="_img/icon/analysis.png" />
-                        <div>統計成果<br />與管理概況一覽</div>
-                        <a href="pages/analysis.aspx" title="查看統計資訊" class="btn_link">查看統計資訊</a>
+                        <div>受保護樹木<br />統計與概況</div>
+                        <a href="pages/analysis.aspx" title="查看統計資訊" class="btn_link">查看資訊</a>
                     </div>
                     <div class="item">
                         <img src="_img/icon/street-map.png" />
-                        <div>探索附近樹木位置<br />與基本資訊</div>
+                        <div>查詢受保護樹木<br />位置與基本資料</div>
                         <a href="pages/map.aspx" title="開啟地圖" class="btn_link">開啟地圖</a>
                     </div>
                     <div class="item">
                         <img src="_img/icon/search.png" />
-                        <div>相關法規、文件<br />與延伸資訊外部網站整理</div>
-                        <a href="pages/link.aspx" title="查看資源" class="btn_link">查看資源</a>
+                        <div>法規文件下載<br />與相關資源查詢</div>
+                        <a href="pages/link.aspx" title="查看資源" class="btn_link">前往運用</a>
                     </div>
                 </div>
             </div>
@@ -163,110 +164,44 @@
                     <span>聯絡窗口</span>
                 </div>
                 <div class="container">
-                    <div class="row">
-                        <div class="col">
-                            <asp:RadioButtonList ID="RadioButtonList_area" runat="server" CssClass="rbl" RepeatDirection="Horizontal" RepeatLayout="Flow">
-                                <asp:ListItem Selected="True">北部</asp:ListItem>
-                                <asp:ListItem>中部</asp:ListItem>
-                                <asp:ListItem>南部</asp:ListItem>
-                                <asp:ListItem>東部</asp:ListItem>
-                                <asp:ListItem>外島</asp:ListItem>
-                            </asp:RadioButtonList>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-1">
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
+                    <asp:UpdatePanel ID="UpadtePanel_main" runat="server">
+                        <ContentTemplate>
+                            <div class="row">
+                                <div class="col">
+                                    <asp:RadioButtonList ID="RadioButtonList_area" runat="server" CssClass="rbl"
+                                        RepeatDirection="Horizontal" RepeatLayout="Flow"
+                                        AutoPostBack="true"
+                                        OnSelectedIndexChanged="RadioButtonList_area_SelectedIndexChanged">
+                                        <asp:ListItem Selected="True">北部</asp:ListItem>
+                                        <asp:ListItem>中部</asp:ListItem>
+                                        <asp:ListItem>南部</asp:ListItem>
+                                        <asp:ListItem>東部</asp:ListItem>
+                                        <asp:ListItem>外島</asp:ListItem>
+                                    </asp:RadioButtonList>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
-                                </div>
+                            <div class="row g-3 mt-1">
+                                <asp:Repeater ID="Repeater_Unit" runat="server">
+                                    <ItemTemplate>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                            <div class="card h-100 card_cust">
+                                                <div class="card-header">
+                                                    <%# Eval("unitName") %>
+                                                </div>
+                                                <div class="card-body">
+                                                    <%# Eval("contectName") %><br />
+                                                    <%# Eval("contectTel") %><br />
+                                                    <span style="color:#808080;font-size:1rem">
+                                                        <%# Eval("contectAddress") %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
                             </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 card_cust">
-                                <div class="card-header">
-                                    臺北市政府文化局
-                                </div>
-                                <div class="card-body">
-                                    11008 臺北市信義區<br />市府路一號四樓東北區<br />
-                                    <span style="color:#808080;font-size:1rem">(02)2781-5085#1234</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <%--<asp:Repeater ID="Repeater_data" runat="server">
-                        <ItemTemplate>
-                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                                <div class="card h-100 card_cust">
-                                    <div class="card-header">
-                                        臺北市政府
-                                    </div>
-                                    <div class="card-body">
-                                        文化局
-                                    </div>
-                                </div>
-                            </div>
-                        </ItemTemplate>
-                    </asp:Repeater>--%>
+                        </ContentTemplate>
+                    </asp:UpdatePanel>
                 </div>
             </div>
         </main>

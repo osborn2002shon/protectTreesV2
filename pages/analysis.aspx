@@ -132,25 +132,6 @@
                 font-size: 42px;
             }
         }
-
-        .box {
-            background: rgba(255, 255, 255, 0.95);
-            border: 10px solid transparent;
-            padding:25px;
-            border-radius:25px;
-            background: 
-                linear-gradient(white, white) padding-box,
-                linear-gradient(90deg,rgba(29, 105, 196, 0.2) 0%, rgba(102, 189, 189, 0.2) 100%) border-box;
-            /*border-radius: 65% 35% 70% 30% / 40% 60% 40% 60%;*/
-            margin:100px 0px !important;
-                        transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-        }
-        .box:hover {
-            transform: translateY(-5px);
-            box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-        }
-
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
@@ -199,7 +180,7 @@
             <div class="stat-description">臺南市</div>
         </div>
     </div>
-    <div class="box">
+    <div class="chartBox">
         <div class="blockTitle">
             <span>各縣市受保護樹木數量</span>
         </div>
@@ -211,7 +192,7 @@
         </div>
         <div id="cityChart"></div>
     </div>
-    <div class="box">
+    <div class="chartBox">
         <div class="blockTitle">
             <span>
                 指定縣市受保護樹木分析
