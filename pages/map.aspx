@@ -230,7 +230,7 @@
         .map-tree-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 1rem;
             color: #0f172a;
         }
 
