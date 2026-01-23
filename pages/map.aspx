@@ -227,6 +227,71 @@
             display: block;
         }
 
+        .map-tree-detail {
+            display: grid;
+            gap: 14px;
+        }
+
+        .map-tree-detail-section {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: rgba(248, 250, 252, 0.7);
+        }
+
+        .map-tree-detail-section h4 {
+            margin: 0 0 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .map-tree-detail-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .map-tree-detail-item {
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .map-tree-detail-item dt {
+            margin: 0;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .map-tree-detail-item dd {
+            margin: 0;
+            color: #0f172a;
+            word-break: break-word;
+        }
+
+        .map-tree-detail-item dd .map-note {
+            margin: 0;
+        }
+
+        .map-tree-detail-photo {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            object-fit: cover;
+            max-height: 220px;
+        }
+
+        .map-tree-detail-criteria {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .map-tree-detail-criteria li {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
         .map-tree-table {
             width: 100%;
             border-collapse: collapse;
@@ -628,6 +693,32 @@
                 treeListNext.disabled = currentPage >= totalPages;
             };
 
+            const normalizePhotoUrl = (url) => {
+                if (!url) {
+                    return null;
+                }
+                if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+                    return url;
+                }
+                return `/${url}`;
+            };
+
+            const buildRecognitionList = (htmlContent) => {
+                if (!htmlContent) {
+                    return "<span class=\"map-note\">無資料</span>";
+                }
+                const sanitized = String(htmlContent).replace(/\n/g, "<br />");
+                const items = sanitized
+                    .split(/<br\s*\/?\s*>/i)
+                    .map((item) => item.trim())
+                    .filter(Boolean);
+                if (items.length === 0) {
+                    return "<span class=\"map-note\">無資料</span>";
+                }
+                const listItems = items.map((item) => `<li>${item}</li>`).join("");
+                return `<ul class=\"map-tree-detail-criteria\">${listItems}</ul>`;
+            };
+
             const renderTrees = (records) => {
                 graphicsLayer.removeAll();
                 const entries = [];
@@ -752,6 +843,104 @@
                 updatePaginationState();
             };
 
+            const renderTreeDetail = (entry) => {
+                if (!treeListContent) {
+                    return;
+                }
+                const tree = entry.tree || {};
+                const latText = entry.latitude !== null && entry.latitude !== undefined ? entry.latitude : "—";
+                const lngText = entry.longitude !== null && entry.longitude !== undefined ? entry.longitude : "—";
+                const scientificName = tree.SpeciesScientificName ? ` (${tree.SpeciesScientificName})` : "";
+                const speciesDisplay = tree.Species ? `${tree.Species}${scientificName}` : "—";
+                const treeCount = tree.TreeCount ?? "—";
+                const locationDisplay = [tree.City, tree.Area].filter(Boolean).join(" ") || "—";
+                const siteDisplay = tree.Site || "—";
+                const managerDisplay = tree.Manager || "—";
+                const statusDisplay = tree.TreeStatus || "—";
+                const announcementDisplay = tree.AnnouncementDate || "—";
+                const culturalDisplay = tree.CulturalHistoryIntro || "—";
+                const heightDisplay = tree.TreeHeight || "—";
+                const diameterDisplay = tree.BreastHeightDiameter || "—";
+                const circumferenceDisplay = tree.BreastHeightCircumference || "—";
+                const photoUrl = normalizePhotoUrl(tree.PhotoUrl);
+
+                treeListContent.innerHTML = `
+                    <div class="map-tree-detail">
+                        <div class="map-tree-detail-section">
+                            <h4>基本資訊</h4>
+                            <dl class="map-tree-detail-grid">
+                                <div class="map-tree-detail-item">
+                                    <dt>樹種及學名</dt>
+                                    <dd>${speciesDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>數量</dt>
+                                    <dd>${treeCount}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>縣市鄉鎮</dt>
+                                    <dd>${locationDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>坐落地點</dt>
+                                    <dd>${siteDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>座標經緯度</dt>
+                                    <dd>${latText}, ${lngText}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>管理人</dt>
+                                    <dd>${managerDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>樹籍狀態</dt>
+                                    <dd>${statusDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>公告日期</dt>
+                                    <dd>${announcementDisplay}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="map-tree-detail-section">
+                            <h4>受保護認定理由</h4>
+                            ${buildRecognitionList(tree.RecognitionReasonsHtml)}
+                        </div>
+                        <div class="map-tree-detail-section">
+                            <h4>文化歷史價值介紹</h4>
+                            <div>${culturalDisplay}</div>
+                        </div>
+                        <div class="map-tree-detail-section">
+                            <h4>生長資訊</h4>
+                            <dl class="map-tree-detail-grid">
+                                <div class="map-tree-detail-item">
+                                    <dt>樹高</dt>
+                                    <dd>${heightDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>胸高直徑</dt>
+                                    <dd>${diameterDisplay}</dd>
+                                </div>
+                                <div class="map-tree-detail-item">
+                                    <dt>胸高樹圍</dt>
+                                    <dd>${circumferenceDisplay}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="map-tree-detail-section">
+                            <h4>照片</h4>
+                            ${photoUrl ? `<img class="map-tree-detail-photo" src="${photoUrl}" alt="${tree.SystemTreeNo || "樹木"}" />` : "<div class=\"map-note\">無照片</div>"}
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" type="button" id="treeDetailBack">
+                                返回清單
+                            </button>
+                        </div>
+                    </div>
+                `;
+            };
+
             const getDistinctValues = (records, selector) => {
                 const values = new Set();
                 records.forEach((record) => {
@@ -868,6 +1057,23 @@
                         features: [entry.graphic],
                         location: { latitude: entry.latitude, longitude: entry.longitude }
                     });
+                    renderTreeDetail(entry);
+                    if (treeListCount) {
+                        treeListCount.textContent = entry.tree.SystemTreeNo || "樹木資料";
+                    }
+                    if (treeListPagination) {
+                        treeListPagination.classList.add("is-hidden");
+                    }
+                });
+            }
+
+            if (treeListContent) {
+                treeListContent.addEventListener("click", (event) => {
+                    const backButton = event.target.closest("#treeDetailBack");
+                    if (!backButton) {
+                        return;
+                    }
+                    updateTreeList(treeListEntries);
                 });
             }
 
