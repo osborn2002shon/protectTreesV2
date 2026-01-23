@@ -1,7 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_publicMap.Master" AutoEventWireup="true" CodeBehind="map.aspx.cs" Inherits="protectTreesV2.pages.map1" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         :root {
             --map-panel-bg: rgba(255, 255, 255, 0.9);
@@ -22,7 +21,6 @@
             width: 100%;
             height: calc(100vh - 170px);
             min-height: 560px;
-            margin:0;
         }
 
         .map-loading {
@@ -163,210 +161,6 @@
             line-height: 1.5;
         }
 
-        .map-tree-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: min(360px, calc(100% - 40px));
-            max-height: calc(100vh - 220px);
-            background: var(--map-panel-bg);
-            border: 1px solid var(--map-panel-border);
-            border-radius: 18px;
-            box-shadow: var(--map-panel-shadow);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
-        }
-
-        .map-tree-panel.is-hidden {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(16px);
-            pointer-events: none;
-        }
-
-        .map-tree-panel .is-hidden {
-            display: none;
-        }
-
-        .map-tree-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 18px 10px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-        }
-
-        .map-tree-header h3 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        .map-tree-count {
-            font-size: 0.85rem;
-            color: var(--map-muted);
-        }
-
-        .map-tree-close {
-            border: none;
-            background: transparent;
-            color: var(--map-muted);
-            font-size: 1.1rem;
-            padding: 4px;
-        }
-
-        .map-tree-close:hover {
-            color: var(--map-accent);
-        }
-
-        .map-tree-content {
-            overflow-y: auto;
-            padding: 12px 16px 18px;
-            display: block;
-        }
-
-        .map-tree-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 1.25rem;
-            color: #0f172a;
-        }
-
-        .map-tree-table th,
-        .map-tree-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-            vertical-align: middle;
-        }
-
-        .map-tree-table th {
-            font-weight: 600;
-            color: #1e293b;
-            text-align: left;
-            background: rgba(226, 232, 240, 0.6);
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-
-        .map-tree-table tbody tr:hover {
-            background: rgba(226, 232, 240, 0.35);
-        }
-
-        .map-tree-locate {
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
-
-        .map-tree-pagination {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 16px 14px;
-            border-top: 1px solid rgba(148, 163, 184, 0.2);
-            gap: 8px;
-        }
-
-        .map-tree-pagination .btn {
-            border-radius: 999px;
-            padding: 4px 12px;
-            font-size: 0.85rem;
-        }
-
-        .map-tree-pagination .map-page-info {
-            font-size: 0.85rem;
-            color: var(--map-muted);
-        }
-
-        .map-tree-detail-panel {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            width: min(420px, calc(100% - 40px));
-            max-height: calc(100vh - 260px);
-            font-size: 1.25rem;
-        }
-
-        .map-tree-detail-panel .map-tree-content {
-            padding-bottom: 20px;
-        }
-
-        .map-tree-detail-grid {
-            display: grid;
-            gap: 12px;
-        }
-
-        .map-tree-detail-item {
-            border-bottom: 1px dashed rgba(148, 163, 184, 0.45);
-            padding-bottom: 10px;
-        }
-
-        .map-tree-detail-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .map-tree-detail-label {
-            font-size: 1.25rem;
-            color: var(--map-muted);
-            margin-bottom: 4px;
-        }
-
-        .map-tree-detail-value {
-            font-weight: 600;
-            color: #0f172a;
-            line-height: 1.5;
-            word-break: break-word;
-        }
-
-        .map-tree-detail-value.map-muted {
-            font-weight: 500;
-            color: var(--map-muted);
-        }
-
-        .map-photo-album {
-            display: grid;
-            gap: 12px;
-        }
-
-        .map-photo-cover,
-        .map-photo-thumb img {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-        }
-
-        .map-photo-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .map-photo-thumb {
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            aspect-ratio: 4 / 3;
-            background: #e2e8f0;
-        }
-
-        .map-photo-cover {
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            aspect-ratio: 4 / 3;
-            background: #e2e8f0;
-        }
-
-        .map-photo-note {
-            font-size: 1.25rem;
-            color: var(--map-muted);
-        }
-
         @media (max-width: 768px) {
             #mapView {
                 height: calc(100vh - 200px);
@@ -376,20 +170,6 @@
                 left: 12px;
                 right: 12px;
                 width: auto;
-            }
-
-            .map-tree-panel {
-                right: 12px;
-                left: 12px;
-                width: auto;
-                max-height: calc(100vh - 240px);
-            }
-
-            .map-tree-detail-panel {
-                right: 12px;
-                left: 12px;
-                width: auto;
-                max-height: calc(100vh - 260px);
             }
         }
     </style>
@@ -504,39 +284,9 @@
                 </div>
             </div>
         </div>
-        <div id="treeListPanel" class="map-tree-panel is-hidden" aria-hidden="true">
-            <div class="map-tree-header">
-                <div>
-                    <h3>樹籍資料</h3>
-                    <div class="map-tree-count" id="treeListCount">0 筆</div>
-                </div>
-                <button class="map-tree-close" type="button" id="treeListClose" aria-label="關閉樹籍資料清單">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="map-tree-content" id="treeListContent"></div>
-            <div class="map-tree-pagination" id="treeListPagination">
-                <button class="btn btn-outline-secondary btn-sm" type="button" id="treeListPrev">上一頁</button>
-                <span class="map-page-info" id="treeListPageInfo">第 1 頁 / 共 1 頁</span>
-                <button class="btn btn-outline-secondary btn-sm" type="button" id="treeListNext">下一頁</button>
-            </div>
-        </div>
-        <div id="treeDetailPanel" class="map-tree-panel map-tree-detail-panel is-hidden" aria-hidden="true">
-            <div class="map-tree-header">
-                <div>
-                    <h3>樹籍資料明細</h3>
-                    <div class="map-tree-count" id="treeDetailTitle">請點選地圖上的樹籍點位</div>
-                </div>
-                <button class="map-tree-close" type="button" id="treeDetailClose" aria-label="關閉樹籍資料明細">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="map-tree-content" id="treeDetailContent"></div>
-        </div>
     </div>
     <asp:HiddenField ID="TreeDataJson" runat="server" />
 
-    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
         const loadingElement = document.getElementById("mapLoading");
         const treeDataInput = document.getElementById("<%= TreeDataJson.ClientID %>");
@@ -665,7 +415,20 @@
                 height: "30px"
             };
 
-            view.popup.enabled = false;
+            const popupTemplate = {
+                title: "{systemTreeNo}",
+                content: [{
+                    type: "fields",
+                    fieldInfos: [
+                        { fieldName: "species", label: "樹種" },
+                        { fieldName: "city", label: "縣市" },
+                        { fieldName: "area", label: "鄉鎮區" },
+                        { fieldName: "age", label: "樹齡", format: { digitSeparator: true } },
+                        { fieldName: "diameter", label: "胸高直徑 (cm)" },
+                        { fieldName: "circumference", label: "胸高樹圍 (cm)" }
+                    ]
+                }]
+            };
 
             const parseNumber = (value) => {
                 if (value === null || value === undefined || value === "") {
@@ -688,184 +451,8 @@
                 return true;
             };
 
-            const treeListPanel = document.getElementById("treeListPanel");
-            const treeListContent = document.getElementById("treeListContent");
-            const treeListCount = document.getElementById("treeListCount");
-            const treeListClose = document.getElementById("treeListClose");
-            const treeListPagination = document.getElementById("treeListPagination");
-            const treeListPrev = document.getElementById("treeListPrev");
-            const treeListNext = document.getElementById("treeListNext");
-            const treeListPageInfo = document.getElementById("treeListPageInfo");
-            const treeDetailPanel = document.getElementById("treeDetailPanel");
-            const treeDetailContent = document.getElementById("treeDetailContent");
-            const treeDetailTitle = document.getElementById("treeDetailTitle");
-            const treeDetailClose = document.getElementById("treeDetailClose");
-            let treeListEntries = [];
-            let treeListPage = 1;
-            const treeListPageSize = 10;
-            let lightboxInstance = null;
-
-            const setTreeListOpen = (open) => {
-                if (!treeListPanel) {
-                    return;
-                }
-                treeListPanel.classList.toggle("is-hidden", !open);
-                treeListPanel.setAttribute("aria-hidden", open ? "false" : "true");
-            };
-
-            const setTreeDetailOpen = (open) => {
-                if (!treeDetailPanel) {
-                    return;
-                }
-                treeDetailPanel.classList.toggle("is-hidden", !open);
-                treeDetailPanel.setAttribute("aria-hidden", open ? "false" : "true");
-            };
-
-            const escapeHtml = (value) => {
-                if (value === null || value === undefined) {
-                    return "";
-                }
-                return String(value)
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#39;");
-            };
-
-            const formatDisplayValue = (value) => {
-                if (value === null || value === undefined || value === "") {
-                    return "—";
-                }
-                return value;
-            };
-
-            const buildSpeciesDisplay = (tree) => {
-                const commonName = tree.Species || "";
-                const scientificName = tree.SpeciesScientificName || "";
-                if (commonName && scientificName) {
-                    return `${commonName}（${scientificName}）`;
-                }
-                return commonName || scientificName || "—";
-            };
-
-            const initLightbox = () => {
-                if (!window.GLightbox) {
-                    return;
-                }
-                if (lightboxInstance) {
-                    lightboxInstance.destroy();
-                }
-                lightboxInstance = GLightbox({
-                    selector: ".map-tree-lightbox",
-                    loop: true,
-                    touchNavigation: true
-                });
-            };
-
-            const renderTreeDetail = (entry) => {
-                if (!treeDetailContent || !entry) {
-                    return;
-                }
-                const tree = entry.tree;
-                const recognitionList = Array.isArray(tree.RecognitionCriteriaDisplay)
-                    ? tree.RecognitionCriteriaDisplay.filter((item) => item)
-                    : [];
-                const photos = Array.isArray(tree.Photos) ? tree.Photos : [];
-                const galleryName = `tree-gallery-${tree.TreeId || "map"}`;
-
-                const buildItem = (label, value, isMuted = false) => `
-                    <div class="map-tree-detail-item">
-                        <div class="map-tree-detail-label">${escapeHtml(label)}</div>
-                        <div class="map-tree-detail-value ${isMuted ? "map-muted" : ""}">${escapeHtml(formatDisplayValue(value))}</div>
-                    </div>`;
-
-                const recognitionHtml = recognitionList.length
-                    ? `<div class="map-tree-detail-item">
-                            <div class="map-tree-detail-label">受保護認定理由</div>
-                            <div class="map-tree-detail-value">${recognitionList.map((item) => escapeHtml(item)).join("<br />")}</div>
-                        </div>`
-                    : buildItem("受保護認定理由", "—", true);
-
-                const announcementHtml = tree.AnnouncementDate
-                    ? buildItem("公告日期", tree.AnnouncementDate)
-                    : "";
-
-                let photoHtml = `<div class="map-photo-note">尚無照片</div>`;
-                if (photos.length) {
-                    const coverPhoto = photos.find((photo) => photo.IsCover) || photos[0];
-                    const coverTitle = coverPhoto.Caption || tree.SystemTreeNo || "樹木照片";
-                    const coverLink = escapeHtml(coverPhoto.FilePath || "");
-                    const coverAlt = escapeHtml(coverTitle);
-                    const thumbHtml = photos
-                        .map((photo) => {
-                            const filePath = escapeHtml(photo.FilePath || "");
-                            const caption = escapeHtml(photo.Caption || "樹木照片");
-                            return `
-                                <a href="${filePath}" class="map-tree-lightbox" data-gallery="${galleryName}" data-title="${caption}">
-                                    <div class="map-photo-thumb">
-                                        <img src="${filePath}" alt="${caption}" loading="lazy" />
-                                    </div>
-                                </a>`;
-                        })
-                        .join("");
-
-                    photoHtml = `
-                        <div class="map-photo-album">
-                            <a href="${coverLink}" class="map-tree-lightbox" data-gallery="${galleryName}" data-title="${coverAlt}">
-                                <div class="map-photo-cover">
-                                    <img src="${coverLink}" alt="${coverAlt}" />
-                                </div>
-                            </a>
-                            <div class="map-photo-grid">
-                                ${thumbHtml}
-                            </div>
-                        </div>`;
-                }
-
-                if (treeDetailTitle) {
-                    treeDetailTitle.textContent = tree.SystemTreeNo || "樹籍資料";
-                }
-                treeDetailContent.innerHTML = `
-                    <div class="map-tree-detail-grid">
-                        ${buildItem("樹種及學名", buildSpeciesDisplay(tree))}
-                        ${buildItem("數量", tree.TreeCount)}
-                        ${buildItem("縣市鄉鎮", [tree.City, tree.Area].filter(Boolean).join(" "))}
-                        ${buildItem("座落地點", tree.Site)}
-                        ${buildItem("座標經緯度", tree.Latitude && tree.Longitude ? `${tree.Latitude}, ${tree.Longitude}` : "—")}
-                        ${buildItem("管理人", tree.Manager)}
-                        ${buildItem("樹籍狀態", tree.TreeStatus)}
-                        ${announcementHtml}
-                        ${recognitionHtml}
-                        ${buildItem("文化歷史價值介紹", tree.CulturalHistoryIntro)}
-                        ${buildItem("樹高", tree.TreeHeight)}
-                        ${buildItem("胸高直徑", tree.BreastHeightDiameter)}
-                        ${buildItem("胸高樹圍", tree.BreastHeightCircumference)}
-                        <div class="map-tree-detail-item">
-                            <div class="map-tree-detail-label">照片</div>
-                            <div class="map-tree-detail-value map-muted">${photoHtml}</div>
-                        </div>
-                    </div>`;
-
-                initLightbox();
-                setTreeDetailOpen(true);
-            };
-
-            const updatePaginationState = () => {
-                if (!treeListPagination || !treeListPrev || !treeListNext || !treeListPageInfo) {
-                    return;
-                }
-                const totalPages = Math.max(1, Math.ceil(treeListEntries.length / treeListPageSize));
-                const currentPage = Math.min(treeListPage, totalPages);
-                treeListPage = currentPage;
-                treeListPageInfo.textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
-                treeListPrev.disabled = currentPage <= 1;
-                treeListNext.disabled = currentPage >= totalPages;
-            };
-
             const renderTrees = (records) => {
                 graphicsLayer.removeAll();
-                const entries = [];
                 records.forEach((tree) => {
                     const latitude = parseNumber(tree.Latitude);
                     const longitude = parseNumber(tree.Longitude);
@@ -882,20 +469,17 @@
                         symbol: treeSymbol,
                         attributes: {
                             systemTreeNo: tree.SystemTreeNo || "樹木資料",
-                            species: tree.Species || "—"
-                        }
+                            species: tree.Species || "—",
+                            city: tree.City || "—",
+                            area: tree.Area || "—",
+                            age: tree.Age ?? "—",
+                            diameter: tree.BreastHeightDiameter || "—",
+                            circumference: tree.BreastHeightCircumference || "—"
+                        },
+                        popupTemplate
                     });
                     graphicsLayer.add(graphic);
-                    entries.push({
-                        tree,
-                        graphic,
-                        latitude,
-                        longitude
-                    });
                 });
-                treeListEntries = entries;
-                treeListPage = 1;
-                return entries;
             };
 
             const citySelect = document.getElementById("filterCity");
@@ -908,78 +492,6 @@
             const circumferenceMinInput = document.getElementById("filterCircumferenceMin");
             const circumferenceMaxInput = document.getElementById("filterCircumferenceMax");
             const filterButton = document.getElementById("btnFilterApply");
-
-            const updateTreeList = (entries) => {
-                if (!treeListContent || !treeListCount) {
-                    return;
-                }
-                treeListContent.innerHTML = "";
-                treeListCount.textContent = `${entries.length} 筆`;
-
-                if (entries.length === 0) {
-                    const emptyState = document.createElement("div");
-                    emptyState.className = "map-note";
-                    emptyState.textContent = "目前篩選條件下沒有可顯示的樹籍資料。";
-                    treeListContent.appendChild(emptyState);
-                    if (treeListPagination) {
-                        treeListPagination.classList.add("is-hidden");
-                    }
-                    return;
-                }
-
-                if (treeListPagination) {
-                    treeListPagination.classList.remove("is-hidden");
-                }
-
-                const startIndex = (treeListPage - 1) * treeListPageSize;
-                const pageEntries = entries.slice(startIndex, startIndex + treeListPageSize);
-                const table = document.createElement("table");
-                table.className = "map-tree-table";
-                const thead = document.createElement("thead");
-                const headRow = document.createElement("tr");
-                ["樹籍編號", "縣市", "鄉鎮", "樹種", "定位"].forEach((label) => {
-                    const th = document.createElement("th");
-                    th.textContent = label;
-                    headRow.appendChild(th);
-                });
-                thead.appendChild(headRow);
-                table.appendChild(thead);
-
-                const tbody = document.createElement("tbody");
-                pageEntries.forEach((entry, index) => {
-                    const row = document.createElement("tr");
-
-                    const treeIdCell = document.createElement("td");
-                    treeIdCell.textContent = entry.tree.SystemTreeNo || "—";
-                    row.appendChild(treeIdCell);
-
-                    const cityCell = document.createElement("td");
-                    cityCell.textContent = entry.tree.City || "未知縣市";
-                    row.appendChild(cityCell);
-
-                    const areaCell = document.createElement("td");
-                    areaCell.textContent = entry.tree.Area || "未知鄉鎮區";
-                    row.appendChild(areaCell);
-
-                    const speciesCell = document.createElement("td");
-                    speciesCell.textContent = entry.tree.Species || "未知樹種";
-                    row.appendChild(speciesCell);
-
-                    const locateCell = document.createElement("td");
-                    const locateButton = document.createElement("button");
-                    locateButton.type = "button";
-                    locateButton.className = "btn btn-outline-primary btn-sm map-tree-locate";
-                    locateButton.textContent = "定位";
-                    locateButton.dataset.index = String(startIndex + index);
-                    locateCell.appendChild(locateButton);
-                    row.appendChild(locateCell);
-
-                    tbody.appendChild(row);
-                });
-                table.appendChild(tbody);
-                treeListContent.appendChild(table);
-                updatePaginationState();
-            };
 
             const getDistinctValues = (records, selector) => {
                 const values = new Set();
@@ -1061,9 +573,7 @@
                     return true;
                 });
 
-                const entries = renderTrees(filtered);
-                updateTreeList(entries);
-                setTreeListOpen(true);
+                renderTrees(filtered);
             };
 
             if (citySelect && areaSelect && speciesSelect) {
@@ -1080,64 +590,6 @@
             if (filterButton) {
                 filterButton.addEventListener("click", applyFilters);
             }
-
-            if (treeListContent) {
-                treeListContent.addEventListener("click", (event) => {
-                    const button = event.target.closest(".map-tree-locate");
-                    if (!button) {
-                        return;
-                    }
-                    const index = Number(button.dataset.index);
-                    const entry = treeListEntries[index];
-                    if (!entry) {
-                        return;
-                    }
-                    view.goTo({ center: [entry.longitude, entry.latitude], zoom: 16 });
-                    renderTreeDetail(entry);
-                });
-            }
-
-            if (treeListPrev && treeListNext) {
-                treeListPrev.addEventListener("click", () => {
-                    if (treeListPage > 1) {
-                        treeListPage -= 1;
-                        updateTreeList(treeListEntries);
-                    }
-                });
-                treeListNext.addEventListener("click", () => {
-                    const totalPages = Math.max(1, Math.ceil(treeListEntries.length / treeListPageSize));
-                    if (treeListPage < totalPages) {
-                        treeListPage += 1;
-                        updateTreeList(treeListEntries);
-                    }
-                });
-            }
-
-            if (treeListClose) {
-                treeListClose.addEventListener("click", () => {
-                    setTreeListOpen(false);
-                });
-            }
-
-            if (treeDetailClose) {
-                treeDetailClose.addEventListener("click", () => {
-                    setTreeDetailOpen(false);
-                });
-            }
-
-            view.on("click", (event) => {
-                view.hitTest(event).then((response) => {
-                    const results = response.results || [];
-                    const match = results.find((result) => result.graphic && result.graphic.layer === graphicsLayer);
-                    if (!match) {
-                        return;
-                    }
-                    const entry = treeListEntries.find((item) => item.graphic === match.graphic);
-                    if (entry) {
-                        renderTreeDetail(entry);
-                    }
-                });
-            });
 
             renderTrees(treeData);
         });
