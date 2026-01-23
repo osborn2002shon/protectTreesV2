@@ -282,6 +282,35 @@
             color: var(--map-muted);
         }
 
+        .map-tree-popup {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .map-tree-popup .popup-row {
+            margin-bottom: 6px;
+        }
+
+        .map-tree-popup .popup-label {
+            color: var(--map-muted);
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .map-tree-popup .popup-photo {
+            margin-top: 10px;
+        }
+
+        .map-tree-popup .popup-photo img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+        }
+
+        .map-tree-popup .popup-empty {
+            color: var(--map-muted);
+        }
+
         @media (max-width: 768px) {
             #mapView {
                 height: calc(100vh - 200px);
@@ -560,19 +589,71 @@
                 height: "30px"
             };
 
+            const escapeHtml = (value) => {
+                if (value === null || value === undefined) {
+                    return "";
+                }
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            };
+
+            const formatValue = (value) => {
+                if (value === null || value === undefined || value === "") {
+                    return "—";
+                }
+                return escapeHtml(value);
+            };
+
+            const formatMultiLine = (value) => {
+                if (!value) {
+                    return "—";
+                }
+                return escapeHtml(value).replace(/\n/g, "<br />");
+            };
+
+            const buildPopupContent = (attributes) => {
+                const species = attributes.species || "";
+                const scientificName = attributes.speciesScientificName || "";
+                const speciesDisplay = scientificName
+                    ? `${escapeHtml(species)} (${escapeHtml(scientificName)})`
+                    : formatValue(species);
+
+                const announcementDate = attributes.announcementDate;
+                const announcementRow = announcementDate
+                    ? `<div class="popup-row"><span class="popup-label">公告日期：</span>${formatValue(announcementDate)}</div>`
+                    : "";
+
+                const photoSection = attributes.photoUrl
+                    ? `<div class="popup-photo"><img src="${escapeHtml(attributes.photoUrl)}" alt="樹木照片"></div>`
+                    : `<div class="popup-row popup-empty">無照片</div>`;
+
+                return `
+                    <div class="map-tree-popup">
+                        <div class="popup-row"><span class="popup-label">樹種及學名：</span>${speciesDisplay}</div>
+                        <div class="popup-row"><span class="popup-label">數量：</span>${formatValue(attributes.treeCount)}</div>
+                        <div class="popup-row"><span class="popup-label">縣市鄉鎮：</span>${formatValue(attributes.city)} ${formatValue(attributes.area)}</div>
+                        <div class="popup-row"><span class="popup-label">座落地點：</span>${formatValue(attributes.site)}</div>
+                        <div class="popup-row"><span class="popup-label">座標經緯度：</span>${formatValue(attributes.latitude)}, ${formatValue(attributes.longitude)}</div>
+                        <div class="popup-row"><span class="popup-label">管理人：</span>${formatValue(attributes.manager)}</div>
+                        <div class="popup-row"><span class="popup-label">樹籍狀態：</span>${formatValue(attributes.treeStatus)}</div>
+                        ${announcementRow}
+                        <div class="popup-row"><span class="popup-label">受保護認定理由：</span>${formatMultiLine(attributes.recognitionCriteria)}</div>
+                        <div class="popup-row"><span class="popup-label">文化歷史價值介紹：</span>${formatValue(attributes.culturalHistoryIntro)}</div>
+                        <div class="popup-row"><span class="popup-label">樹高：</span>${formatValue(attributes.treeHeight)}</div>
+                        <div class="popup-row"><span class="popup-label">胸高直徑：</span>${formatValue(attributes.diameter)}</div>
+                        <div class="popup-row"><span class="popup-label">胸高樹圍：</span>${formatValue(attributes.circumference)}</div>
+                        ${photoSection}
+                    </div>
+                `;
+            };
+
             const popupTemplate = {
                 title: "{systemTreeNo}",
-                content: [{
-                    type: "fields",
-                    fieldInfos: [
-                        { fieldName: "species", label: "樹種" },
-                        { fieldName: "city", label: "縣市" },
-                        { fieldName: "area", label: "鄉鎮區" },
-                        { fieldName: "age", label: "樹齡", format: { digitSeparator: true } },
-                        { fieldName: "diameter", label: "胸高直徑 (cm)" },
-                        { fieldName: "circumference", label: "胸高樹圍 (cm)" }
-                    ]
-                }]
+                content: (feature) => buildPopupContent(feature.graphic.attributes)
             };
 
             const parseNumber = (value) => {
@@ -648,11 +729,23 @@
                         attributes: {
                             systemTreeNo: tree.SystemTreeNo || "樹木資料",
                             species: tree.Species || "—",
+                            speciesScientificName: tree.SpeciesScientificName || "",
                             city: tree.City || "—",
                             area: tree.Area || "—",
                             age: tree.Age ?? "—",
                             diameter: tree.BreastHeightDiameter || "—",
-                            circumference: tree.BreastHeightCircumference || "—"
+                            circumference: tree.BreastHeightCircumference || "—",
+                            treeCount: tree.TreeCount ?? "—",
+                            site: tree.Site || "—",
+                            latitude: tree.Latitude || "—",
+                            longitude: tree.Longitude || "—",
+                            manager: tree.Manager || "—",
+                            treeStatus: tree.TreeStatus || "—",
+                            announcementDate: tree.AnnouncementDate || "",
+                            recognitionCriteria: tree.RecognitionCriteria || "",
+                            culturalHistoryIntro: tree.CulturalHistoryIntro || "—",
+                            treeHeight: tree.TreeHeight || "—",
+                            photoUrl: tree.PhotoUrl || ""
                         },
                         popupTemplate
                     });

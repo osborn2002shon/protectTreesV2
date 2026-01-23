@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using System.Web.UI;
 using DataAccess;
 using protectTreesV2.Base;
+using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2.pages
 {
@@ -28,14 +30,30 @@ SELECT r.treeID,
        r.longitude,
        r.breastHeightDiameter,
        r.breastHeightCircumference,
+       r.treeCount,
+       r.site,
+       r.manager,
+       r.treeStatus,
+       r.announcementDate,
+       r.recognitionCriteria,
+       r.culturalHistoryIntro,
+       r.treeHeight,
        r.estimatedPlantingYear,
        cityInfo.city,
        areaInfo.area,
-       species.commonName
+       species.commonName,
+       species.scientificName,
+       photoInfo.filePath AS photoUrl
 FROM Tree_Record r
 OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) cityInfo
 LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = r.areaID
 LEFT JOIN Tree_Species species ON species.speciesID = r.speciesID
+OUTER APPLY (
+    SELECT TOP 1 filePath
+    FROM Tree_RecordPhoto
+    WHERE treeID = r.treeID AND removeDateTime IS NULL
+    ORDER BY CASE WHEN isCover = 1 THEN 0 ELSE 1 END, photoID
+) photoInfo
 WHERE r.editStatus = 1
   AND r.treeStatus = N'已公告列管'
   AND r.latitude IS NOT NULL
@@ -47,10 +65,17 @@ WHERE r.editStatus = 1
             {
                 DataTable dt = db.GetDataTable(sql);
                 var records = new List<TreeMapRecord>();
+                var criteriaLookup = TreeService.GetRecognitionCriteria()
+                    .GroupBy(c => c.Code)
+                    .ToDictionary(g => g.Key, g => g.First().Name);
 
                 foreach (DataRow row in dt.Rows)
                 {
                     var estimatedAge = ParseEstimatedAge(DataRowHelper.GetString(row, "estimatedPlantingYear"));
+                    var recognitionText = BuildRecognitionText(
+                        DataRowHelper.GetString(row, "recognitionCriteria"),
+                        criteriaLookup);
+                    var announcementDate = DataRowHelper.GetNullableDateTime(row, "announcementDate");
                     records.Add(new TreeMapRecord
                     {
                         TreeId = DataRowHelper.GetNullableInt(row, "treeID") ?? 0,
@@ -58,11 +83,21 @@ WHERE r.editStatus = 1
                         City = DataRowHelper.GetString(row, "city"),
                         Area = DataRowHelper.GetString(row, "area"),
                         Species = DataRowHelper.GetString(row, "commonName"),
+                        SpeciesScientificName = DataRowHelper.GetString(row, "scientificName"),
                         Latitude = DataRowHelper.GetString(row, "latitude"),
                         Longitude = DataRowHelper.GetString(row, "longitude"),
                         Age = estimatedAge,
                         BreastHeightDiameter = DataRowHelper.GetString(row, "breastHeightDiameter"),
-                        BreastHeightCircumference = DataRowHelper.GetString(row, "breastHeightCircumference")
+                        BreastHeightCircumference = DataRowHelper.GetString(row, "breastHeightCircumference"),
+                        TreeCount = DataRowHelper.GetNullableInt(row, "treeCount"),
+                        Site = DataRowHelper.GetString(row, "site"),
+                        Manager = DataRowHelper.GetString(row, "manager"),
+                        TreeStatus = DataRowHelper.GetString(row, "treeStatus"),
+                        AnnouncementDate = announcementDate?.ToString("yyyy/MM/dd"),
+                        RecognitionCriteria = recognitionText,
+                        CulturalHistoryIntro = DataRowHelper.GetString(row, "culturalHistoryIntro"),
+                        TreeHeight = DataRowHelper.GetString(row, "treeHeight"),
+                        PhotoUrl = DataRowHelper.GetString(row, "photoUrl")
                     });
                 }
 
@@ -93,6 +128,38 @@ WHERE r.editStatus = 1
             return age >= 0 ? (int?)age : null;
         }
 
+        private static string BuildRecognitionText(string recognitionCriteriaRaw, Dictionary<string, string> criteriaLookup)
+        {
+            if (string.IsNullOrWhiteSpace(recognitionCriteriaRaw))
+            {
+                return null;
+            }
+
+            var codes = recognitionCriteriaRaw
+                .Split(',')
+                .Select(code => code.Trim())
+                .Where(code => !string.IsNullOrWhiteSpace(code))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!codes.Any())
+            {
+                return null;
+            }
+
+            var names = codes
+                .Select(code => criteriaLookup.TryGetValue(code, out var name) ? name : null)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToList();
+
+            if (names.Any())
+            {
+                return string.Join("\n", names);
+            }
+
+            return string.Join(",", codes);
+        }
+
         private class TreeMapRecord
         {
             public int TreeId { get; set; }
@@ -100,11 +167,21 @@ WHERE r.editStatus = 1
             public string City { get; set; }
             public string Area { get; set; }
             public string Species { get; set; }
+            public string SpeciesScientificName { get; set; }
             public string Latitude { get; set; }
             public string Longitude { get; set; }
             public int? Age { get; set; }
             public string BreastHeightDiameter { get; set; }
             public string BreastHeightCircumference { get; set; }
+            public int? TreeCount { get; set; }
+            public string Site { get; set; }
+            public string Manager { get; set; }
+            public string TreeStatus { get; set; }
+            public string AnnouncementDate { get; set; }
+            public string RecognitionCriteria { get; set; }
+            public string CulturalHistoryIntro { get; set; }
+            public string TreeHeight { get; set; }
+            public string PhotoUrl { get; set; }
         }
     }
 }
