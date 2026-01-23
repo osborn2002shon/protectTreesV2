@@ -16,13 +16,13 @@
         .tbSticky {
             width: 100%;
             border-collapse: collapse;
-            white-space: nowrap; /* 防止縣市名稱換行 */
+            white-space: nowrap; 
         }
 
         .tbSticky th, .tbSticky td {
             padding: 8px 12px;
             border: 1px solid #dee2e6;
-            text-align: right; /* 數字靠右對齊 */
+            text-align: right; 
         }
 
         /* 第一欄 (樹種) 靠左對齊 */
@@ -45,7 +45,6 @@
             text-align: center;
         }
 
-        /* 左上角那格特別處理 (z-index 要最高) */
         .tbSticky thead th:first-child {
             left: 0;
             z-index: 3;
@@ -53,7 +52,7 @@
 
         /* 合計列樣式 (第一列資料) */
         .row-total {
-            background-color: #fff3cd !important; /* 淺黃色底 */
+            background-color: #fff3cd !important; 
             font-weight: bold;
         }
     </style>
@@ -161,10 +160,10 @@
 
             // --- 判斷資料量，動態調整 X 軸樣式 ---
             // 如果鄉鎮數量超過 20 個 (例如高雄有 38 個)，就進入「密集模式」
-            var isDense = categories.length > 20;
+            var isDense = categories.length > 23;
 
             // 設定字體大小：密集時 9px，一般時 12px
-            var fontSize = isDense ? '9px' : '12px';
+            var fontSize = isDense ? '10px' : '12px';
 
             // 設定旋轉角度：密集時 -90度(垂直)，一般時 -45度(斜向)
             var rotation = isDense ? -90 : -45;
@@ -234,9 +233,7 @@
                                 return null;
                             },
                             style: {
-                                color: 'white',
-                                textOutline: 'none',
-                                fontSize: '11px' 
+                                fontSize: fontSize 
                             }
                         }
                     }

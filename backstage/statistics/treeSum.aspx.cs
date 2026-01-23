@@ -80,6 +80,10 @@ namespace protectTreesV2.backstage.statistics
             if (!IsPostBack)
             {
                 InitSearchFilters();
+
+                UpdateSearchParameters();
+
+                BindData();
             }
         }
 
@@ -90,14 +94,14 @@ namespace protectTreesV2.backstage.statistics
 
             //樹籍狀態
             Base.DropdownBinder.Bind_Checkbox_TreeStatus(ref CheckBoxList_treeStatus);
-
+            foreach (ListItem item in CheckBoxList_treeStatus.Items)
+            {
+                item.Selected = true;
+            }
         }
 
         public DataTable GetChartData(string statType, int? cityId, List<string> statusNames)
         {
-            // 定義欄位與排序依據
-            // tw模式: 顯示 T.city, 排序依據 T.cityID
-            // city模式: 顯示 T.area, 排序依據 T.twID
             string locationCol = (statType == "tw") ? "T.city" : "T.area";
             string sortCol = (statType == "tw") ? "T.cityID" : "T.twID";
 
@@ -106,22 +110,16 @@ namespace protectTreesV2.backstage.statistics
             sql.Append($@"
                 SELECT {locationCol} AS Location, 
                        r.treeStatus AS Status, 
-                       COUNT(*) AS Count
-                FROM Tree_Record r
-                LEFT JOIN System_Taiwan T ON r.areaID = T.twID
-                WHERE r.editStatus = 1 AND r.removeDateTime IS NULL
+                       COUNT(r.treeID) AS Count
+                FROM System_Taiwan T
+                LEFT JOIN Tree_Record r ON T.twID = r.areaID 
+                     AND r.editStatus = 1 
+                     AND r.removeDateTime IS NULL
             ");
 
             var parameters = new List<SqlParameter>();
 
-            // 鄉鎮模式過濾
-            if (statType == "city" && cityId.HasValue)
-            {
-                sql.Append(" AND T.cityID = @CityID ");
-                parameters.Add(new SqlParameter("@CityID", cityId.Value));
-            }
-
-            // 狀態過濾
+            string statusCondition = "";
             if (statusNames != null && statusNames.Count > 0)
             {
                 List<string> paramNames = new List<string>();
@@ -131,7 +129,17 @@ namespace protectTreesV2.backstage.statistics
                     paramNames.Add(pName);
                     parameters.Add(new SqlParameter(pName, statusNames[i]));
                 }
-                sql.Append($" AND r.treeStatus IN ({string.Join(",", paramNames)}) ");
+                statusCondition = $" AND r.treeStatus IN ({string.Join(",", paramNames)}) ";
+
+                sql.Append(statusCondition);
+            }
+
+            sql.Append(" WHERE 1=1 "); // 方便串接
+
+            if (statType == "city" && cityId.HasValue)
+            {
+                sql.Append(" AND T.cityID = @CityID ");
+                parameters.Add(new SqlParameter("@CityID", cityId.Value));
             }
 
             // GROUP BY
@@ -146,19 +154,8 @@ namespace protectTreesV2.backstage.statistics
             }
         }
 
-        /// <summary>
-        /// 取得樹種統計資料 (含 LocationID 與 SpeciesID 以供排序)
-        /// </summary>
-        /// <param name="statType">統計模式 ("tw"=依縣市, "city"=依鄉鎮)</param>
-        /// <param name="cityId">指定縣市ID (依鄉鎮模式時必填)</param>
-        /// <param name="statusNames">篩選的樹籍狀態中文名稱 (可多選)</param>
-        /// <returns>DataTable (包含 Location, LocationID, Species, SpeciesID, Count)</returns>
         public DataTable GetSpeciesData(string statType, int? cityId, List<string> statusNames)
         {
-            // 顯示欄位與排序欄位
-            // T 代表 System_Taiwan 表
-            // statType == "tw"   -> 顯示 T.city, 排序依據 T.cityID
-            // statType == "city" -> 顯示 T.area, 排序依據 T.twID 
             string locationCol = (statType == "tw") ? "T.city" : "T.area";
             string sortCol = (statType == "tw") ? "T.cityID" : "T.twID";
 
@@ -168,26 +165,18 @@ namespace protectTreesV2.backstage.statistics
                 SELECT {locationCol} AS Location, 
                        {sortCol}     AS LocationID,   
                        ISNULL(s.commonName, N'未填寫') AS Species, 
-                       ISNULL(s.speciesID, 99999)     AS SpeciesID,    /* 撈出樹種 ID (若無則給大數墊底)*/
-                       COUNT(*) AS Count
-                FROM Tree_Record r
-                LEFT JOIN System_Taiwan T ON r.areaID = T.twID
-                LEFT JOIN Tree_Species s ON r.speciesID = s.speciesID
-                WHERE r.editStatus = 1 AND r.removeDateTime IS NULL
+                       ISNULL(s.speciesID, 99999)     AS SpeciesID,
+                       COUNT(r.treeID) AS Count
+                FROM System_Taiwan T
             ");
 
+            // 準備參數物件
             var parameters = new List<SqlParameter>();
 
-            // 動態加入 WHERE 條件
-
-            // 鄉鎮模式：必須過濾特定縣市 (透過 T.cityID)
-            if (statType == "city" && cityId.HasValue)
-            {
-                sql.Append(" AND T.cityID = @CityID ");
-                parameters.Add(new SqlParameter("@CityID", cityId.Value));
-            }
-
-            // 樹籍狀態篩選
+            // ------------------------------------------------------------
+            // 處理樹籍狀態 (Status)，必須放在 JOIN 的 ON 裡面
+            // ------------------------------------------------------------
+            string statusCondition = "";
             if (statusNames != null && statusNames.Count > 0)
             {
                 List<string> paramNames = new List<string>();
@@ -197,14 +186,33 @@ namespace protectTreesV2.backstage.statistics
                     paramNames.Add(pName);
                     parameters.Add(new SqlParameter(pName, statusNames[i]));
                 }
-                // 串接 SQL: AND r.treeStatus IN (@Status0, @Status1, ...)
-                sql.Append($" AND r.treeStatus IN ({string.Join(",", paramNames)}) ");
+                statusCondition = $" AND r.treeStatus IN ({string.Join(",", paramNames)}) ";
             }
 
-            // GROUP BY 
+            // 串接 JOIN
+            // 將 treeStatus 和 editStatus 的條件都寫在 ON 後面
+            sql.Append($@"
+                LEFT JOIN Tree_Record r ON T.twID = r.areaID 
+                          AND r.editStatus = 1 
+                          AND r.removeDateTime IS NULL
+                          {statusCondition}
+                LEFT JOIN Tree_Species s ON r.speciesID = s.speciesID
+            ");
+
+            
+            sql.Append(" WHERE 1=1 ");
+
+            // 鄉鎮模式：只撈特定縣市的鄉鎮
+            if (statType == "city" && cityId.HasValue)
+            {
+                sql.Append(" AND T.cityID = @CityID ");
+                parameters.Add(new SqlParameter("@CityID", cityId.Value));
+            }
+
+            // GROUP BY
             sql.Append($" GROUP BY {locationCol}, {sortCol}, s.commonName, s.speciesID ");
 
-            // ORDER BY 
+            // ORDER BY
             sql.Append($" ORDER BY {sortCol} ASC, s.speciesID ASC ");
 
             using (var da = new MS_SQL())
@@ -285,6 +293,7 @@ namespace protectTreesV2.backstage.statistics
 
             // 取出 [樹種+ID] -> 去重複 -> 依照 ID 排序
             var speciesList = dtRaw.AsEnumerable()
+                                   .Where(r => Convert.ToInt32(r["Count"]) > 0)
                                    .Select(r => new {
                                        Name = r["Species"].ToString(),
                                        Id = Convert.ToInt32(r["SpeciesID"])
@@ -423,22 +432,19 @@ namespace protectTreesV2.backstage.statistics
             BindPivotTable(statType, filterCityId, searchStatusNames);
         }
 
-
-        protected void LinkButton_query_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 將畫面上的搜尋條件儲存到 ViewState
+        /// </summary>
+        private void UpdateSearchParameters()
         {
-            if (CheckBoxList_treeStatus.SelectedIndex == -1)
-            {
-                ShowMessage("提示", "請至少勾選一種樹籍狀態");
-                return;
-            }
-
+            // 決定統計模式
             if (RadioButton_city.Checked)
             {
-                ViewState_StatItem = "city"; // 依鄉鎮
+                ViewState_StatItem = "city";
             }
             else
             {
-                ViewState_StatItem = "tw";   // 依縣市 (預設)
+                ViewState_StatItem = "tw";
             }
 
             // 儲存縣市
@@ -457,14 +463,21 @@ namespace protectTreesV2.backstage.statistics
                 }
             }
             ViewState_FilterTreeStatus = selectedStatus;
+        }
 
+        protected void LinkButton_query_Click(object sender, EventArgs e)
+        {
+            if (CheckBoxList_treeStatus.SelectedIndex == -1)
+            {
+                ShowMessage("提示", "請至少勾選一種樹籍狀態");
+                return;
+            }
+
+            UpdateSearchParameters();
 
             BindData();
         }
       
- 
-       
-
         protected void GridView_SpeciesPivot_PreRender(object sender, EventArgs e)
         {
             // 確保 GridView 有資料且有標題列
@@ -529,11 +542,15 @@ namespace protectTreesV2.backstage.statistics
             // ==========================================
             //  設定樣式 
             // ==========================================
+            string fontName = "標楷體";
+            short fontHeight = 12; // 字體大小
 
             // 標題樣式 
             ICellStyle headerStyle = workbook.CreateCellStyle();
             headerStyle.Alignment = HorizontalAlignment.Center;
             IFont headerFont = workbook.CreateFont();
+            headerFont.FontName = fontName; 
+            headerFont.FontHeightInPoints = fontHeight;
             headerFont.IsBold = true;
             headerStyle.SetFont(headerFont);
             headerStyle.BorderBottom = NPOI.SS.UserModel.BorderStyle.Thin;
@@ -544,6 +561,8 @@ namespace protectTreesV2.backstage.statistics
             totalRowStyle.BorderBottom = NPOI.SS.UserModel.BorderStyle.Thin;
             totalRowStyle.BorderRight = NPOI.SS.UserModel.BorderStyle.Thin;
             IFont totalFont = workbook.CreateFont();
+            totalFont.FontName = fontName; 
+            totalFont.FontHeightInPoints = fontHeight;
             totalFont.IsBold = true;
             totalRowStyle.SetFont(totalFont);
             // 設定數值格式為千分位 "#,##0"
@@ -555,6 +574,12 @@ namespace protectTreesV2.backstage.statistics
             dataStyle.BorderBottom = NPOI.SS.UserModel.BorderStyle.Thin;
             dataStyle.BorderRight = NPOI.SS.UserModel.BorderStyle.Thin;
             dataStyle.DataFormat = dataFormat.GetFormat("#,##0");
+
+            IFont dataFont = workbook.CreateFont();
+            dataFont.FontName = fontName;
+            dataFont.FontHeightInPoints = fontHeight;
+            dataFont.IsBold = false;
+            dataStyle.SetFont(dataFont);
 
             // ==========================================
             // 寫入資料
@@ -645,7 +670,5 @@ namespace protectTreesV2.backstage.statistics
                 Response.End();
             }
         }
-
-       
     }
 }
