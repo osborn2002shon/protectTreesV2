@@ -162,6 +162,126 @@
             line-height: 1.5;
         }
 
+        .map-tree-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: min(360px, calc(100% - 40px));
+            max-height: calc(100vh - 220px);
+            background: var(--map-panel-bg);
+            border: 1px solid var(--map-panel-border);
+            border-radius: 18px;
+            box-shadow: var(--map-panel-shadow);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        }
+
+        .map-tree-panel.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(16px);
+            pointer-events: none;
+        }
+
+        .map-tree-panel .is-hidden {
+            display: none;
+        }
+
+        .map-tree-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .map-tree-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .map-tree-count {
+            font-size: 0.85rem;
+            color: var(--map-muted);
+        }
+
+        .map-tree-close {
+            border: none;
+            background: transparent;
+            color: var(--map-muted);
+            font-size: 1.1rem;
+            padding: 4px;
+        }
+
+        .map-tree-close:hover {
+            color: var(--map-accent);
+        }
+
+        .map-tree-content {
+            overflow-y: auto;
+            padding: 12px 16px 18px;
+            display: block;
+        }
+
+        .map-tree-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            color: #0f172a;
+        }
+
+        .map-tree-table th,
+        .map-tree-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+            vertical-align: middle;
+        }
+
+        .map-tree-table th {
+            font-weight: 600;
+            color: #1e293b;
+            text-align: left;
+            background: rgba(226, 232, 240, 0.6);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .map-tree-table tbody tr:hover {
+            background: rgba(226, 232, 240, 0.35);
+        }
+
+        .map-tree-locate {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .map-tree-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            gap: 8px;
+        }
+
+        .map-tree-pagination .btn {
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+        }
+
+        .map-tree-pagination .map-page-info {
+            font-size: 0.85rem;
+            color: var(--map-muted);
+        }
+
         @media (max-width: 768px) {
             #mapView {
                 height: calc(100vh - 200px);
@@ -171,6 +291,13 @@
                 left: 12px;
                 right: 12px;
                 width: auto;
+            }
+
+            .map-tree-panel {
+                right: 12px;
+                left: 12px;
+                width: auto;
+                max-height: calc(100vh - 240px);
             }
         }
     </style>
@@ -283,6 +410,23 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div id="treeListPanel" class="map-tree-panel is-hidden" aria-hidden="true">
+            <div class="map-tree-header">
+                <div>
+                    <h3>樹籍資料</h3>
+                    <div class="map-tree-count" id="treeListCount">0 筆</div>
+                </div>
+                <button class="map-tree-close" type="button" id="treeListClose" aria-label="關閉樹籍資料清單">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="map-tree-content" id="treeListContent"></div>
+            <div class="map-tree-pagination" id="treeListPagination">
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="treeListPrev">上一頁</button>
+                <span class="map-page-info" id="treeListPageInfo">第 1 頁 / 共 1 頁</span>
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="treeListNext">下一頁</button>
             </div>
         </div>
     </div>
@@ -452,8 +596,41 @@
                 return true;
             };
 
+            const treeListPanel = document.getElementById("treeListPanel");
+            const treeListContent = document.getElementById("treeListContent");
+            const treeListCount = document.getElementById("treeListCount");
+            const treeListClose = document.getElementById("treeListClose");
+            const treeListPagination = document.getElementById("treeListPagination");
+            const treeListPrev = document.getElementById("treeListPrev");
+            const treeListNext = document.getElementById("treeListNext");
+            const treeListPageInfo = document.getElementById("treeListPageInfo");
+            let treeListEntries = [];
+            let treeListPage = 1;
+            const treeListPageSize = 10;
+
+            const setTreeListOpen = (open) => {
+                if (!treeListPanel) {
+                    return;
+                }
+                treeListPanel.classList.toggle("is-hidden", !open);
+                treeListPanel.setAttribute("aria-hidden", open ? "false" : "true");
+            };
+
+            const updatePaginationState = () => {
+                if (!treeListPagination || !treeListPrev || !treeListNext || !treeListPageInfo) {
+                    return;
+                }
+                const totalPages = Math.max(1, Math.ceil(treeListEntries.length / treeListPageSize));
+                const currentPage = Math.min(treeListPage, totalPages);
+                treeListPage = currentPage;
+                treeListPageInfo.textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
+                treeListPrev.disabled = currentPage <= 1;
+                treeListNext.disabled = currentPage >= totalPages;
+            };
+
             const renderTrees = (records) => {
                 graphicsLayer.removeAll();
+                const entries = [];
                 records.forEach((tree) => {
                     const latitude = parseNumber(tree.Latitude);
                     const longitude = parseNumber(tree.Longitude);
@@ -480,7 +657,16 @@
                         popupTemplate
                     });
                     graphicsLayer.add(graphic);
+                    entries.push({
+                        tree,
+                        graphic,
+                        latitude,
+                        longitude
+                    });
                 });
+                treeListEntries = entries;
+                treeListPage = 1;
+                return entries;
             };
 
             const citySelect = document.getElementById("filterCity");
@@ -493,6 +679,78 @@
             const circumferenceMinInput = document.getElementById("filterCircumferenceMin");
             const circumferenceMaxInput = document.getElementById("filterCircumferenceMax");
             const filterButton = document.getElementById("btnFilterApply");
+
+            const updateTreeList = (entries) => {
+                if (!treeListContent || !treeListCount) {
+                    return;
+                }
+                treeListContent.innerHTML = "";
+                treeListCount.textContent = `${entries.length} 筆`;
+
+                if (entries.length === 0) {
+                    const emptyState = document.createElement("div");
+                    emptyState.className = "map-note";
+                    emptyState.textContent = "目前篩選條件下沒有可顯示的樹籍資料。";
+                    treeListContent.appendChild(emptyState);
+                    if (treeListPagination) {
+                        treeListPagination.classList.add("is-hidden");
+                    }
+                    return;
+                }
+
+                if (treeListPagination) {
+                    treeListPagination.classList.remove("is-hidden");
+                }
+
+                const startIndex = (treeListPage - 1) * treeListPageSize;
+                const pageEntries = entries.slice(startIndex, startIndex + treeListPageSize);
+                const table = document.createElement("table");
+                table.className = "map-tree-table";
+                const thead = document.createElement("thead");
+                const headRow = document.createElement("tr");
+                ["樹籍編號", "縣市", "鄉鎮", "樹種", "定位"].forEach((label) => {
+                    const th = document.createElement("th");
+                    th.textContent = label;
+                    headRow.appendChild(th);
+                });
+                thead.appendChild(headRow);
+                table.appendChild(thead);
+
+                const tbody = document.createElement("tbody");
+                pageEntries.forEach((entry, index) => {
+                    const row = document.createElement("tr");
+
+                    const treeIdCell = document.createElement("td");
+                    treeIdCell.textContent = entry.tree.SystemTreeNo || "—";
+                    row.appendChild(treeIdCell);
+
+                    const cityCell = document.createElement("td");
+                    cityCell.textContent = entry.tree.City || "未知縣市";
+                    row.appendChild(cityCell);
+
+                    const areaCell = document.createElement("td");
+                    areaCell.textContent = entry.tree.Area || "未知鄉鎮區";
+                    row.appendChild(areaCell);
+
+                    const speciesCell = document.createElement("td");
+                    speciesCell.textContent = entry.tree.Species || "未知樹種";
+                    row.appendChild(speciesCell);
+
+                    const locateCell = document.createElement("td");
+                    const locateButton = document.createElement("button");
+                    locateButton.type = "button";
+                    locateButton.className = "btn btn-outline-primary btn-sm map-tree-locate";
+                    locateButton.textContent = "定位";
+                    locateButton.dataset.index = String(startIndex + index);
+                    locateCell.appendChild(locateButton);
+                    row.appendChild(locateCell);
+
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                treeListContent.appendChild(table);
+                updatePaginationState();
+            };
 
             const getDistinctValues = (records, selector) => {
                 const values = new Set();
@@ -574,7 +832,9 @@
                     return true;
                 });
 
-                renderTrees(filtered);
+                const entries = renderTrees(filtered);
+                updateTreeList(entries);
+                setTreeListOpen(true);
             };
 
             if (citySelect && areaSelect && speciesSelect) {
@@ -590,6 +850,47 @@
 
             if (filterButton) {
                 filterButton.addEventListener("click", applyFilters);
+            }
+
+            if (treeListContent) {
+                treeListContent.addEventListener("click", (event) => {
+                    const button = event.target.closest(".map-tree-locate");
+                    if (!button) {
+                        return;
+                    }
+                    const index = Number(button.dataset.index);
+                    const entry = treeListEntries[index];
+                    if (!entry) {
+                        return;
+                    }
+                    view.goTo({ center: [entry.longitude, entry.latitude], zoom: 16 });
+                    view.popup.open({
+                        features: [entry.graphic],
+                        location: { latitude: entry.latitude, longitude: entry.longitude }
+                    });
+                });
+            }
+
+            if (treeListPrev && treeListNext) {
+                treeListPrev.addEventListener("click", () => {
+                    if (treeListPage > 1) {
+                        treeListPage -= 1;
+                        updateTreeList(treeListEntries);
+                    }
+                });
+                treeListNext.addEventListener("click", () => {
+                    const totalPages = Math.max(1, Math.ceil(treeListEntries.length / treeListPageSize));
+                    if (treeListPage < totalPages) {
+                        treeListPage += 1;
+                        updateTreeList(treeListEntries);
+                    }
+                });
+            }
+
+            if (treeListClose) {
+                treeListClose.addEventListener("click", () => {
+                    setTreeListOpen(false);
+                });
             }
 
             renderTrees(treeData);
