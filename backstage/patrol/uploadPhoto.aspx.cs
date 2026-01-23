@@ -67,6 +67,10 @@ namespace protectTreesV2.backstage.patrol
             // 工作佇列：只有解析成功的項目會進入此清單往下跑
             List<TreeFileInfo> processQueue = new List<TreeFileInfo>();
 
+            //新增的草稿ID
+            HashSet<int> newlyCreatedIDs = new HashSet<int>();
+            List<int> idsToRollback = new List<int>();
+
             // =========================================================
             // 解析與格式驗證
             // =========================================================
@@ -184,14 +188,14 @@ namespace protectTreesV2.backstage.patrol
                     .Select(x => new TreeQueryKey { treeID = x.treeID, checkDate = x.checkDate })
                     .Distinct().ToList();
 
-                Dictionary<string, int> healthMap = system_batch.GetPatrolIDMap(queryKeys);
+                Dictionary<string, int> patrolMap = system_batch.GetPatrolIDMap(queryKeys);
 
                 foreach (var info in activeItems)
                 {
                     string key = $"{info.treeID}_{info.checkDate:yyyyMMdd}";
-                    if (healthMap.ContainsKey(key))
+                    if (patrolMap.ContainsKey(key))
                     {
-                        info.targetID = healthMap[key];
+                        info.targetID = patrolMap[key];
                     }
                 }
             }
@@ -226,6 +230,9 @@ namespace protectTreesV2.backstage.patrol
                                 // 成功新增
                                 info.targetID = newPatrolMap[key];
                                 info.log.resultMsg = "提醒：指定日期已自動新增健檢紀錄草稿";
+
+                                //加入白名單
+                                newlyCreatedIDs.Add(info.targetID);
                             }
                             else
                             {
@@ -330,7 +337,7 @@ namespace protectTreesV2.backstage.patrol
                         {
                             // 實體存檔就失敗，直接標記錯誤，不用進 DB
                             info.log.isSuccess = false;
-                            info.log.resultMsg = $"失敗：實體存檔錯誤 ({ex.Message})";
+                            info.log.resultMsg = $"失敗：實體存檔錯誤";
                         }
                     }
                     else
@@ -374,8 +381,21 @@ namespace protectTreesV2.backstage.patrol
                             item.infoRef.log.isSuccess = false;
                             item.infoRef.log.resultMsg = $"失敗：資料庫寫入錯誤";
                         }
+
+                        // 如果是剛新增的錯誤要刪除
+                        if (newlyCreatedIDs.Contains(pID))
+                        {
+                            idsToRollback.Add(pID);
+                        }
                     }
                 }
+            }
+
+            // 執行批次清理錯誤的草稿
+            if (idsToRollback.Count > 0)
+            {
+                try { system_batch.BatchDeletePatrolRecords(idsToRollback); }
+                catch { /* 清理失敗不影響主要結果，僅忽略 */ }
             }
 
             // =========================================================

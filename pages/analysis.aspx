@@ -30,7 +30,7 @@
             animation: morph 8s ease-in-out infinite;
             /*box-shadow: 0 10px 30px rgba(0,0,0,0.15);*/            
             text-align:center !important;
-                        transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .color2 {

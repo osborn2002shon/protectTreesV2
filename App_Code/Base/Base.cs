@@ -546,5 +546,23 @@ namespace protectTreesV2.Base
                 ddl.Items.Add(new ListItem(text, value));
             }
         }
+
+        /// <summary>
+        /// 綁定樹籍狀態
+        /// </summary>
+        /// <param name="cbl"></param>
+        public static void Bind_Checkbox_TreeStatus(ref CheckBoxList cbl)
+        {
+            cbl.Items.Clear();
+            foreach (TreeStatus status in Enum.GetValues(typeof(TreeStatus)))
+            {
+               
+                string text = TreeService.GetStatusText(status);
+
+                string value = ((int)status).ToString();
+
+                cbl.Items.Add(new ListItem(text, value));
+            }
+        }
     }
 }

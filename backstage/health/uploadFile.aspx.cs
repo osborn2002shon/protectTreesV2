@@ -72,6 +72,10 @@ namespace protectTreesV2.backstage.health
 
             HashSet<string> currentBatchKeys = new HashSet<string>();
 
+            //新增的草稿ID
+            HashSet<int> newlyCreatedIDs = new HashSet<int>();
+            List<int> idsToRollback = new List<int>();
+
             // =========================================================
             // 解析與格式驗證
             // =========================================================
@@ -244,6 +248,9 @@ namespace protectTreesV2.backstage.health
                                 // 成功新增
                                 info.targetID = newHealthMap[key];
                                 info.log.resultMsg = "提醒：指定日期已自動新增健檢紀錄草稿";
+
+                                //加入白名單
+                                newlyCreatedIDs.Add(info.targetID);
                             }
                             else
                             {
@@ -313,79 +320,123 @@ namespace protectTreesV2.backstage.health
             }
 
             // =========================================================
-            // 實體檔案存檔
+            // 實體檔案存檔 & 資料庫寫入
             // =========================================================
 
-            // 過濾出經過所有檢查，最終確定要寫入的項目
+            // 先過濾出要處理的項目
             var finalSaveList = processQueue.Where(x => x.isProcessing && x.targetID > 0).ToList();
-            List<TempFileData> batchInsertList = new List<TempFileData>();
 
-            foreach (var info in finalSaveList)
+            // 依照 ID 分組
+            var readyGroups = finalSaveList.GroupBy(x => x.targetID).ToList();
+
+            // 開始逐組處理
+            foreach (var group in readyGroups)
             {
-                try
+                int cID = group.Key; // 當前的 HealthID (TargetID)
+                List<TempFileData> batchInsertList = new List<TempFileData>();
+
+                // A. 實體存檔 (這一組的所有檔案)
+                foreach (var info in group)
                 {
-                    string virtualDir = $"~/_file/health/doc/{info.targetID}/";
-                    string physicalDir = Server.MapPath(virtualDir);
-
-                    if (!Directory.Exists(physicalDir)) Directory.CreateDirectory(physicalDir);
-
-                    // 檔名加上 Ticks 時間戳記，確保物理檔名唯一，不會跟舊檔名衝突
-                    string saveName = $"{DateTime.Now.Ticks}_{info.uploadedFile.FileName}";
-                    string fullPath = Path.Combine(physicalDir, saveName);
-
-                    // 執行實體存檔
-                    info.uploadedFile.SaveAs(fullPath);
-
-                    // 加入資料庫待寫入清單
-                    batchInsertList.Add(new TempFileData
+                    try
                     {
-                        targetID = info.targetID,
-                        originalFileName = info.uploadedFile.FileName,
-                        finalFileName = saveName,
-                        fullPhysicalPath = fullPath,
-                        virtualPath = virtualDir + saveName,
-                        infoRef = info,
-                        IsOverwriteAction = info.isOverwriteBehavior
-                    });
+                        string virtualDir = $"~/_file/health/doc/{cID}/";
+                        string physicalDir = Server.MapPath(virtualDir);
+
+                        if (!Directory.Exists(physicalDir)) Directory.CreateDirectory(physicalDir);
+
+                        // 加上時間戳記作為基底
+                        string baseFileName = $"{DateTime.Now.Ticks}_{info.uploadedFile.FileName}";
+                        string fullPath = Path.Combine(physicalDir, baseFileName);
+                        string finalSaveName = baseFileName;
+
+                        // 準備迴圈變數
+                        int counter = 1;
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(baseFileName);
+                        string fileExt = Path.GetExtension(baseFileName);
+
+                        // 檢查是否存在，若存在則自動改名
+                        while (File.Exists(fullPath))
+                        {
+                            finalSaveName = $"{fileNameWithoutExt}_({counter}){fileExt}";
+                            fullPath = Path.Combine(physicalDir, finalSaveName);
+                            counter++;
+                        }
+
+                        // 執行實體存檔 
+                        info.uploadedFile.SaveAs(fullPath);
+
+                        // 加入待寫入清單 (注意：這裡要存 finalSaveName)
+                        batchInsertList.Add(new TempFileData
+                        {
+                            targetID = cID,
+                            originalFileName = info.uploadedFile.FileName,
+                            finalFileName = finalSaveName, 
+                            fullPhysicalPath = fullPath,   
+                            virtualPath = virtualDir + finalSaveName,
+                            infoRef = info,
+                            isOverwriteAction = info.isOverwriteBehavior
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        info.isProcessing = false;
+                        info.log.isSuccess = false;
+                        info.log.resultMsg = $"失敗：實體存檔錯誤 ({ex.Message})";
+                    }
                 }
-                catch (Exception ex)
+
+                // B. 資料庫寫入 (針對這一組 ID)
+                if (batchInsertList.Any())
                 {
-                    info.isProcessing = false;
-                    info.log.isSuccess = false;
-                    info.log.resultMsg = $"失敗：實體存檔錯誤 ({ex.Message})";
+                    try
+                    {
+                        string clientIP = Request?.UserHostAddress ?? "";
+
+                        // 寫入資料
+                        system_batch.BatchReplaceHealthDocs(
+                            batchInsertList,
+                            clientIP,
+                            accountID,
+                            user?.account,
+                            user?.name,
+                            user?.unitName,
+                            isOverwriteExisting
+                        );
+
+                        // 寫入成功：更新 Log
+                        foreach (var item in batchInsertList)
+                        {
+                            item.infoRef.log.isSuccess = true;
+                        }
+                    }
+                    catch (Exception dbEx)
+                    {
+                        // --- 失敗回滾區 ---
+
+                        // 刪除剛剛存的實體檔案
+                        foreach (var item in batchInsertList)
+                        {
+                            try { if (File.Exists(item.fullPhysicalPath)) File.Delete(item.fullPhysicalPath); } catch { }
+
+                            item.infoRef.log.isSuccess = false;
+                            item.infoRef.log.resultMsg = $"失敗：資料庫寫入錯誤 ({dbEx.Message})";
+                        }
+
+                        if (newlyCreatedIDs.Contains(cID))
+                        {
+                            idsToRollback.Add(cID);
+                          
+                        }
+                    }
                 }
             }
 
-            if (batchInsertList.Any())
+            // 執行批次清理錯誤的草稿
+            if (idsToRollback.Count > 0)
             {
-                try
-                {
-                    string clientIP = Request?.UserHostAddress ?? "";
-
-                    // 批次寫入
-                    system_batch.BatchReplaceHealthDocs(batchInsertList, clientIP, accountID,user?.account, user?.name,user?.unitName, isOverwriteExisting);
-
-                    // 寫入成功：更新 Log 狀態
-                    foreach (var item in batchInsertList)
-                    {
-                        item.infoRef.log.isSuccess = true;
-                    }
-                }
-                catch (Exception dbEx)
-                {
-                    // 若資料庫寫入失敗 (已自動 Rollback)，手動刪除剛剛上傳的實體檔案
-                    foreach (var item in batchInsertList)
-                    {
-                        try
-                        {
-                            if (File.Exists(item.fullPhysicalPath)) File.Delete(item.fullPhysicalPath);
-                        }
-                        catch { /* 忽略刪檔錯誤 */ }
-
-                        item.infoRef.log.isSuccess = false;
-                        item.infoRef.log.resultMsg = $"失敗：資料庫寫入錯誤 ({dbEx.Message})";
-                    }
-                }
+                try { system_batch.BatchDeleteHealthRecords(idsToRollback); }
+                catch { /* 清理失敗不影響主要結果，僅忽略 */ }
             }
 
             // =========================================================

@@ -21,6 +21,7 @@
             width: 100%;
             height: calc(100vh - 170px);
             min-height: 560px;
+            margin:0;
         }
 
         .map-loading {

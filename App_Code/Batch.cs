@@ -86,9 +86,14 @@ namespace protectTreesV2.Batch
             public string fullPhysicalPath { get; set; }
             public string virtualPath { get; set; }
             public TreeFileInfo infoRef { get; set; }
-            public bool IsOverwriteAction { get; set; } = false;
+            public bool isOverwriteAction { get; set; } = false;
         }
-
+        public class LocalPhotoMeta
+        {
+            public string groupCode { get; set; } // 組別代號 (01, 02...)
+            public string itemName { get; set; }  // 項目名稱 (修剪, 施肥...)
+            public int type { get; set; }         // 1=前, 2=後
+        }
         /// <summary>
         /// 批次主表 Model
         /// </summary>
@@ -1114,7 +1119,7 @@ namespace protectTreesV2.Batch
         }
 
         /// <summary>
-        /// 批次新增健康紀錄
+        /// 批次新增健檢紀錄
         /// </summary>
         /// <param name="list">要新增的資料清單)</param>
         /// <param name="accountID">操作者 ID</param>
@@ -1788,7 +1793,7 @@ namespace protectTreesV2.Batch
                 rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Health.ToString();
                 rowLog["dataID"] = item.targetID;
                 rowLog["actionType"] = "批次上傳";
-                rowLog["memo"] = item.IsOverwriteAction ? "覆蓋附件" : "上傳附件";
+                rowLog["memo"] = item.isOverwriteAction ? "覆蓋附件" : "上傳附件";
                 rowLog["ipAddress"] = ipAddress;
                 rowLog["accountID"] = accountID;
                 rowLog["account"] = account;
@@ -1842,6 +1847,34 @@ namespace protectTreesV2.Batch
                     db.RollBack();
                     throw ex;
                 }
+            }
+        }
+        /// <summary>
+        /// 批次刪除健檢紀錄(硬刪除 - 用於回滾清理)
+        /// </summary>
+        public void BatchDeleteHealthRecords(List<int> healthIDs)
+        {
+            if (healthIDs == null || healthIDs.Count == 0) return;
+            string ids = string.Join(",", healthIDs);
+
+            string sql = $@"
+                DELETE FROM Tree_HealthRecord 
+                WHERE healthID IN ({ids}) 
+                  AND dataStatus = 0
+                  AND updateDateTime IS NULL
+                  AND COALESCE(
+                      memo, surveyor, 
+                      measureNote, pestOtherNote, 
+                      rootOtherNote, baseOtherNote, trunkOtherNote, 
+                      growthNote, siteOtherNote
+                  ) IS NULL
+                  AND treeHeight IS NULL
+                  AND diameter100 IS NULL
+            ";
+
+            using (var da = new MS_SQL())
+            {
+                da.ExcuteScalar(sql);
             }
         }
 
@@ -2429,12 +2462,12 @@ namespace protectTreesV2.Batch
                     da.ExecNonQuery(createTempSql);
 
                     // ===============================================
-                    // Step B: 批次寫入暫存表 - [保持不動]
+                    // Step B: 批次寫入暫存表
                     // ===============================================
                     da.BulkCopy("#TempCareUpdate", dt);
 
                     // ===============================================
-                    // Step C: 從暫存表更新主表 (列出所有欄位) - [保持不動]
+                    // Step C: 從暫存表更新主表 (列出所有欄位)
                     // ===============================================
                     string updateSql = @"
                     UPDATE T
@@ -2527,7 +2560,178 @@ namespace protectTreesV2.Batch
                 }
             }
         }
+        /// <summary>
+        /// 批次新增養護紀錄 (建立草稿)
+        /// </summary>
+        /// <param name="keys">要新增的鍵值 (TreeID + Date)</param>
+        /// <param name="accountID">建立者 ID</param>
+        /// <returns>Map: "treeID_yyyyMMdd" -> 新產生的 CareID</returns>
+        public Dictionary<string, int> BatchCreateCareRecords(List<TreeQueryKey> keys, int accountID)
+        {
+            Dictionary<string, int> newMap = new Dictionary<string, int>();
+            if (keys == null || keys.Count == 0) return newMap;
 
+            using (var da = new MS_SQL())
+            {
+                try
+                {
+                    // 開啟交易
+                    da.StartTransaction();
+
+                    string sql = @"
+                        INSERT INTO Tree_CareRecord 
+                        (
+                            treeID, careDate, dataStatus, 
+                            insertAccountID, insertDateTime
+                        ) 
+                        VALUES 
+                        (
+                            @tid, @cDate, 0,  /* 0:草稿  */
+                            @accID, GETDATE()
+                        );
+        
+                        /* 取回新 ID */
+                        SELECT CAST(SCOPE_IDENTITY() AS int); 
+                    ";
+
+                    foreach (var k in keys)
+                    {
+                        List<System.Data.SqlClient.SqlParameter> p = new List<System.Data.SqlClient.SqlParameter>();
+                        p.Add(new System.Data.SqlClient.SqlParameter("@tid", k.treeID));
+                        p.Add(new System.Data.SqlClient.SqlParameter("@cDate", k.checkDate)); 
+                        p.Add(new System.Data.SqlClient.SqlParameter("@accID", accountID));
+
+                        object result = da.ExcuteScalar(sql, p.ToArray());
+
+                        if (result != null && result != DBNull.Value)
+                        {
+                            int newID = Convert.ToInt32(result);
+
+                            // 組合 Key: TreeID_yyyyMMdd 
+                            string key = $"{k.treeID}_{k.checkDate:yyyyMMdd}";
+
+                            if (!newMap.ContainsKey(key))
+                            {
+                                newMap.Add(key, newID);
+                            }
+                        }
+                    }
+
+                    // 全部成功，提交交易
+                    da.Commit();
+                }
+                catch (Exception ex)
+                {
+                    // 發生錯誤，回滾
+                    da.RollBack();
+                    // 建議使用 throw; 保留原始錯誤堆疊，避免使用 throw ex;
+                    throw;
+                }
+            }
+
+            return newMap;
+        }
+
+        /// <summary>
+        /// 批次刪除養護紀錄(硬刪除 - 用於回滾清理)
+        /// </summary>
+        public void BatchDeleteCareRecords(List<int> careIDs)
+        {
+            if (careIDs == null || careIDs.Count == 0) return;
+            string ids = string.Join(",", careIDs);
+            string sql = $@"
+                DELETE FROM Tree_CareRecord 
+                WHERE careID IN ({ids}) 
+                  AND dataStatus = 0
+                  AND updateDateTime IS NULL
+                  AND COALESCE(
+                      recorder, reviewer,
+                      crownStatus, trunkStatus, rootStatus, envStatus, adjacentStatus,
+                      task1Status, task2Status, task3Status, task4Status, task5Status,
+                      crownOtherNote, trunkOtherNote, rootOtherNote, envOtherNote, adjacentOtherNote,
+                      task1Note, task2Note, task3Note, task4Note, task5Note
+                  ) IS NULL
+            ";
+
+            using (var da = new MS_SQL())
+            {
+                da.ExcuteScalar(sql);
+            }
+        }
+
+        /// <summary>
+        /// 批次取得指定養護紀錄的照片組數
+        /// </summary>
+        /// <param name="careIDs">養護紀錄 ID 清單</param>
+        /// <returns>Dictionary: Key=careID, Value=目前筆數</returns>
+        public Dictionary<int, int> GetBatchCareCounts(List<int> careIDs)
+        {
+            Dictionary<int, int> map = new Dictionary<int, int>();
+            if (careIDs == null || careIDs.Count == 0) return map;
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(@"
+                SELECT careID, COUNT(*) as Cnt 
+                FROM Tree_CarePhoto 
+                WHERE removeDateTime IS NULL 
+                  AND careID IN (
+            ");
+
+            List<SqlParameter> parameters = new List<SqlParameter>();
+            List<string> paramNames = new List<string>();
+
+            for (int i = 0; i < careIDs.Count; i++)
+            {
+                string pName = $"@p{i}";
+                paramNames.Add(pName);
+                parameters.Add(new SqlParameter(pName, careIDs[i]));
+            }
+
+            sb.Append(string.Join(",", paramNames));
+            sb.Append(") GROUP BY careID");
+
+            using (var da = new MS_SQL())
+            {
+                // 使用 GetDataTable 執行查詢
+                DataTable dt = da.GetDataTable(sb.ToString(), parameters.ToArray());
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    int cID = Convert.ToInt32(row["careID"]);
+                    int count = Convert.ToInt32(row["Cnt"]);
+
+                    if (!map.ContainsKey(cID))
+                    {
+                        map.Add(cID, count);
+                    }
+                }
+            }
+
+            return map;
+        }
+        /// <summary>
+        /// 批次刪除巡查紀錄(硬刪除 - 用於回滾清理)
+        /// </summary>
+        public void BatchDeletePatrolRecords(List<int> patrolIDs)
+        {
+            if (patrolIDs == null || patrolIDs.Count == 0) return;
+            string ids = string.Join(",", patrolIDs);
+
+            string sql = $@"
+                DELETE FROM Tree_PatrolRecord 
+                WHERE patrolID IN ({ids}) 
+                  AND dataStatus = 0
+                  AND updateDateTime IS NULL
+                  AND hasPublicSafetyRisk = 0 
+                  AND COALESCE(memo, patroller) IS NULL 
+            ";
+
+            using (var da = new MS_SQL())
+            {
+                da.ExcuteScalar(sql);
+            }
+        }
         /// <summary>
         /// 批次取得巡查流水號
         /// </summary>
@@ -2709,7 +2913,156 @@ namespace protectTreesV2.Batch
 
             return map;
         }
+        /// <summary>
+        /// 批次寫入養護照片紀錄
+        /// </summary>
+        public void BatchInsertCarePhotoRecords(
+            List<TempFileData> photos,Dictionary<string, LocalPhotoMeta> metaMap,
+            string ipAddress, int accountID, string account, string accountName, string accountUnit)
+        {
+            if (photos == null || photos.Count == 0) return;
 
+            DateTime now = DateTime.Now;
+
+            // ==========================================
+            // 準備照片 DataTable
+            // ==========================================
+            DataTable dtPhoto = new DataTable();
+            dtPhoto.Columns.Add("careID", typeof(int));
+            dtPhoto.Columns.Add("itemName", typeof(string));
+
+            // Before 欄位
+            dtPhoto.Columns.Add("beforeFileName", typeof(string));
+            dtPhoto.Columns.Add("beforeFilePath", typeof(string));
+            dtPhoto.Columns.Add("beforeFileSize", typeof(int));
+
+            // After 欄位
+            dtPhoto.Columns.Add("afterFileName", typeof(string));
+            dtPhoto.Columns.Add("afterFilePath", typeof(string));
+            dtPhoto.Columns.Add("afterFileSize", typeof(int));
+
+            dtPhoto.Columns.Add("insertAccountID", typeof(int));
+            dtPhoto.Columns.Add("insertDateTime", typeof(DateTime));
+
+
+            // ==========================================
+            // 「組裝」資料 (將 Before/After 合併為一列)
+            // ==========================================
+
+            // 依 CareID + ItemName 分組
+            var photoGroups = photos.GroupBy(p => new
+            {
+                CareID = p.targetID,
+                ItemName = metaMap[p.originalFileName].itemName
+            });
+
+            foreach (var group in photoGroups)
+            {
+                DataRow row = dtPhoto.NewRow();
+
+                // 基本資料
+                row["careID"] = group.Key.CareID;
+                row["itemName"] = group.Key.ItemName;
+                row["insertAccountID"] = accountID;
+                row["insertDateTime"] = now;
+                row["removeDateTime"] = DBNull.Value;
+                row["removeAccountID"] = DBNull.Value;
+
+                // 找 Before 檔 (Type = 1)
+                var fBefore = group.FirstOrDefault(x => metaMap[x.originalFileName].type == 1);
+                if (fBefore != null)
+                {
+                    row["beforeFileName"] = fBefore.finalFileName;
+                    row["beforeFilePath"] = fBefore.virtualPath;
+                    row["beforeFileSize"] = (fBefore.infoRef?.uploadedFile != null) ? fBefore.infoRef.uploadedFile.ContentLength : 0;
+                }
+                else
+                {
+                    row["beforeFileName"] = DBNull.Value;
+                    row["beforeFilePath"] = DBNull.Value;
+                    row["beforeFileSize"] = DBNull.Value;
+                }
+
+                // 找 After 檔 (Type = 2)
+                var fAfter = group.FirstOrDefault(x => metaMap[x.originalFileName].type == 2);
+                if (fAfter != null)
+                {
+                    row["afterFileName"] = fAfter.finalFileName;
+                    row["afterFilePath"] = fAfter.virtualPath;
+                    row["afterFileSize"] = (fAfter.infoRef?.uploadedFile != null) ? fAfter.infoRef.uploadedFile.ContentLength : 0;
+                }
+                else
+                {
+                    row["afterFileName"] = DBNull.Value;
+                    row["afterFilePath"] = DBNull.Value;
+                    row["afterFileSize"] = DBNull.Value;
+                }
+
+                dtPhoto.Rows.Add(row);
+            }
+
+            // ==========================================
+            // 準備 Log DataTable 
+            // ==========================================
+            DataTable dtLog = new DataTable();
+            dtLog.Columns.Add("functionType", typeof(string));
+            dtLog.Columns.Add("dataID", typeof(int));
+            dtLog.Columns.Add("actionType", typeof(string));
+            dtLog.Columns.Add("memo", typeof(string));
+            dtLog.Columns.Add("ipAddress", typeof(string));
+            dtLog.Columns.Add("accountID", typeof(int));
+            dtLog.Columns.Add("account", typeof(string));
+            dtLog.Columns.Add("accountName", typeof(string));
+            dtLog.Columns.Add("accountUnit", typeof(string));
+            dtLog.Columns.Add("logDateTime", typeof(DateTime));
+
+            var groupedByCareID = photos.GroupBy(p => p.targetID);
+            foreach (var group in groupedByCareID)
+            {
+                DataRow rowLog = dtLog.NewRow();
+                rowLog["functionType"] = protectTreesV2.TreeLog.LogFunctionTypes.Care; 
+                rowLog["dataID"] = group.Key;
+                rowLog["actionType"] = "批次上傳";
+                rowLog["memo"] = $"批次上傳 {group.Count()} 張照片"; 
+                rowLog["ipAddress"] = ipAddress;
+                rowLog["accountID"] = accountID;
+                rowLog["account"] = account;
+                rowLog["accountName"] = accountName;
+                rowLog["accountUnit"] = accountUnit;
+                rowLog["logDateTime"] = now;
+                dtLog.Rows.Add(rowLog);
+            }
+
+            // ==========================================
+            // 執行 BulkCopy
+            // ==========================================
+            using (var db = new MS_SQL())
+            {
+                try
+                {
+                    db.StartTransaction();
+
+                    // 批次寫入照片表
+                    if (dtPhoto.Rows.Count > 0)
+                    {
+                        db.BulkCopy("Tree_CarePhoto", dtPhoto);
+                    }
+
+                    // 批次寫入 Log 表
+                    if (dtLog.Rows.Count > 0)
+                    {
+                        db.BulkCopy("Tree_Log", dtLog);
+                    }
+
+                    db.Commit();
+                }
+                catch (Exception ex)
+                {
+                    db.RollBack();
+                    throw; // 拋出異常
+                }
+            }
+        }
         /// <summary>
         /// 批次寫入巡查照片紀錄
         /// </summary>
