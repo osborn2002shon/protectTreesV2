@@ -109,6 +109,7 @@ namespace protectTreesV2.Base
         /// </summary>
         public T GetState<T>() where T : class
         {
+            object debug = Session[PageStateInfo.sessionKey];
             if (Session[PageStateInfo.sessionKey] is PageStateInfo state)
             {
                 string currentPath = Request.Url.AbsolutePath;
@@ -123,7 +124,7 @@ namespace protectTreesV2.Base
                 {
                     // 路徑不對
                     Session.Remove(PageStateInfo.sessionKey);
-                    return null;
+                    return state.filterData as T;   // 不管路徑，這樣才可以從別的頁面傳遞查詢參數
                 }
             }
             return null;

@@ -236,6 +236,7 @@
     <Compile Include="App_Code\Health.cs" />
     <Compile Include="App_Code\OrgUnit.cs" />
     <Compile Include="App_Code\Patrol.cs" />
+    <Compile Include="App_Code\SystemManagement.cs" />
     <Compile Include="App_Code\TreeCatalog.cs" />
     <Compile Include="backstage\care\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>
