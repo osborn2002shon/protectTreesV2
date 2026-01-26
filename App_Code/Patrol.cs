@@ -84,7 +84,7 @@ namespace protectTreesV2.Patrol
             public string keyword { get; set; }
             public string sortExpression { get; set; }
             public string sortDirection { get; set; }
-            public TreeEditState? editState { get; set; }
+            public TreeEditState? dataState { get; set; }
         }
 
         public class PatrolRecordListResult

@@ -349,7 +349,7 @@ namespace protectTreesV2.Health
             public string manager { get; set; }
 
             public TreeStatus? treeStatus { get; set; }
-            public TreeEditState? editState { get; set; }
+            public TreeEditState? dataState { get; set; }
 
             public string treeStatusText => treeStatus.HasValue ? protectTreesV2.TreeCatalog.TreeService.GetStatusText(treeStatus.Value) : string.Empty;
 
