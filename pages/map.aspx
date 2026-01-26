@@ -281,6 +281,7 @@
             border: 1px solid rgba(148, 163, 184, 0.3);
             object-fit: cover;
             max-height: 120px;
+            cursor: zoom-in;
         }
 
         .map-tree-detail-photos {
@@ -358,6 +359,123 @@
             color: var(--map-muted);
         }
 
+        .photo-lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 50;
+            padding: 24px;
+        }
+
+        .photo-lightbox.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .photo-lightbox-dialog {
+            background: #0f172a;
+            border-radius: 16px;
+            width: min(900px, 100%);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.45);
+        }
+
+        .photo-lightbox-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .photo-lightbox-close {
+            border: none;
+            background: transparent;
+            color: #e2e8f0;
+            font-size: 1.2rem;
+        }
+
+        .photo-lightbox-body {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: #0f172a;
+        }
+
+        .photo-lightbox-image {
+            max-width: 100%;
+            max-height: 60vh;
+            border-radius: 12px;
+            object-fit: contain;
+            background: #1e293b;
+        }
+
+        .photo-lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(15, 23, 42, 0.6);
+            color: #e2e8f0;
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+        }
+
+        .photo-lightbox-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .photo-lightbox-nav.prev {
+            left: 16px;
+        }
+
+        .photo-lightbox-nav.next {
+            right: 16px;
+        }
+
+        .photo-lightbox-thumbs {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(80px, 1fr);
+            gap: 10px;
+            padding: 12px 16px 16px;
+            overflow-x: auto;
+            background: #111827;
+        }
+
+        .photo-lightbox-thumb {
+            border: 2px solid transparent;
+            border-radius: 10px;
+            overflow: hidden;
+            background: transparent;
+            padding: 0;
+        }
+
+        .photo-lightbox-thumb.is-active {
+            border-color: #38bdf8;
+        }
+
+        .photo-lightbox-thumb img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             #mapView {
                 height: calc(100vh - 200px);
@@ -374,6 +492,18 @@
                 left: 12px;
                 width: auto;
                 max-height: calc(100vh - 240px);
+            }
+
+            .photo-lightbox-dialog {
+                width: 100%;
+            }
+
+            .photo-lightbox-body {
+                padding: 12px;
+            }
+
+            .photo-lightbox-image {
+                max-height: 45vh;
             }
         }
     </style>
@@ -503,6 +633,26 @@
                 <button class="btn btn-outline-secondary btn-sm" type="button" id="treeListPrev">上一頁</button>
                 <span class="map-page-info" id="treeListPageInfo">第 1 頁 / 共 1 頁</span>
                 <button class="btn btn-outline-secondary btn-sm" type="button" id="treeListNext">下一頁</button>
+            </div>
+        </div>
+        <div id="photoLightbox" class="photo-lightbox" aria-hidden="true">
+            <div class="photo-lightbox-dialog" role="dialog" aria-modal="true" aria-label="照片相簿">
+                <div class="photo-lightbox-header">
+                    <span>照片相簿</span>
+                    <button class="photo-lightbox-close" type="button" id="photoLightboxClose" aria-label="關閉相簿">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="photo-lightbox-body">
+                    <button class="photo-lightbox-nav prev" type="button" id="photoLightboxPrev" aria-label="上一張">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <img class="photo-lightbox-image" id="photoLightboxImage" alt="照片預覽" />
+                    <button class="photo-lightbox-nav next" type="button" id="photoLightboxNext" aria-label="下一張">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="photo-lightbox-thumbs" id="photoLightboxThumbs"></div>
             </div>
         </div>
     </div>
@@ -693,9 +843,17 @@
             const treeListPrev = document.getElementById("treeListPrev");
             const treeListNext = document.getElementById("treeListNext");
             const treeListPageInfo = document.getElementById("treeListPageInfo");
+            const photoLightbox = document.getElementById("photoLightbox");
+            const photoLightboxImage = document.getElementById("photoLightboxImage");
+            const photoLightboxThumbs = document.getElementById("photoLightboxThumbs");
+            const photoLightboxClose = document.getElementById("photoLightboxClose");
+            const photoLightboxPrev = document.getElementById("photoLightboxPrev");
+            const photoLightboxNext = document.getElementById("photoLightboxNext");
             let treeListEntries = [];
             let treeListPage = 1;
             const treeListPageSize = 10;
+            let currentPhotoUrls = [];
+            let currentPhotoIndex = 0;
 
             const setTreeListOpen = (open) => {
                 if (!treeListPanel) {
@@ -737,6 +895,55 @@
                     .filter(Boolean)
                     .map((item) => normalizePhotoUrl(item))
                     .filter(Boolean);
+            };
+
+            const setLightboxOpen = (open) => {
+                if (!photoLightbox) {
+                    return;
+                }
+                photoLightbox.classList.toggle("is-open", open);
+                photoLightbox.setAttribute("aria-hidden", open ? "false" : "true");
+                if (!open && photoLightboxImage) {
+                    photoLightboxImage.src = "";
+                }
+            };
+
+            const updateLightboxView = (index) => {
+                if (!photoLightboxImage || !photoLightboxThumbs) {
+                    return;
+                }
+                if (currentPhotoUrls.length === 0) {
+                    return;
+                }
+                currentPhotoIndex = Math.max(0, Math.min(index, currentPhotoUrls.length - 1));
+                const currentUrl = currentPhotoUrls[currentPhotoIndex];
+                photoLightboxImage.src = currentUrl;
+                photoLightboxImage.alt = `照片 ${currentPhotoIndex + 1}`;
+                photoLightboxThumbs.innerHTML = currentPhotoUrls
+                    .map((url, idx) => {
+                        const activeClass = idx === currentPhotoIndex ? "is-active" : "";
+                        return `
+                            <button class="photo-lightbox-thumb ${activeClass}" type="button" data-index="${idx}">
+                                <img src="${url}" alt="縮圖 ${idx + 1}" loading="lazy" />
+                            </button>
+                        `;
+                    })
+                    .join("");
+                if (photoLightboxPrev) {
+                    photoLightboxPrev.disabled = currentPhotoIndex <= 0;
+                }
+                if (photoLightboxNext) {
+                    photoLightboxNext.disabled = currentPhotoIndex >= currentPhotoUrls.length - 1;
+                }
+            };
+
+            const openLightbox = (photoUrls, index) => {
+                if (!photoUrls || photoUrls.length === 0) {
+                    return;
+                }
+                currentPhotoUrls = photoUrls;
+                setLightboxOpen(true);
+                updateLightboxView(index);
             };
 
             const buildRecognitionList = (htmlContent) => {
@@ -917,9 +1124,11 @@
                 const diameterDisplay = tree.BreastHeightDiameter || "—";
                 const circumferenceDisplay = tree.BreastHeightCircumference || "—";
                 const photoUrls = parsePhotoUrls(tree.PhotoUrls || tree.PhotoUrl);
+                currentPhotoUrls = photoUrls;
+                currentPhotoIndex = 0;
                 const photoHtml = photoUrls.length
                     ? `<div class="map-tree-detail-photos">${photoUrls
-                        .map((url, index) => `<img class="map-tree-detail-photo" src="${url}" alt="${tree.SystemTreeNo || "樹木"} 照片 ${index + 1}" />`)
+                        .map((url, index) => `<img class="map-tree-detail-photo" src="${url}" alt="${tree.SystemTreeNo || "樹木"} 照片 ${index + 1}" loading="lazy" data-index="${index}" />`)
                         .join("")}</div>`
                     : "<div class=\"map-note\">無照片</div>";
 
@@ -1162,6 +1371,17 @@
                 });
             }
 
+            if (treeListContent) {
+                treeListContent.addEventListener("click", (event) => {
+                    const photo = event.target.closest(".map-tree-detail-photo");
+                    if (!photo) {
+                        return;
+                    }
+                    const index = Number(photo.dataset.index || 0);
+                    openLightbox(currentPhotoUrls, index);
+                });
+            }
+
             if (treeListPrev && treeListNext) {
                 treeListPrev.addEventListener("click", () => {
                     if (treeListPage > 1) {
@@ -1183,6 +1403,41 @@
                     setTreeListOpen(false);
                 });
             }
+
+            if (photoLightbox) {
+                photoLightbox.addEventListener("click", (event) => {
+                    const thumb = event.target.closest(".photo-lightbox-thumb");
+                    if (thumb && thumb.dataset.index) {
+                        updateLightboxView(Number(thumb.dataset.index));
+                        return;
+                    }
+                    if (event.target === photoLightbox) {
+                        setLightboxOpen(false);
+                    }
+                });
+            }
+
+            if (photoLightboxClose) {
+                photoLightboxClose.addEventListener("click", () => setLightboxOpen(false));
+            }
+
+            if (photoLightboxPrev) {
+                photoLightboxPrev.addEventListener("click", () => {
+                    updateLightboxView(currentPhotoIndex - 1);
+                });
+            }
+
+            if (photoLightboxNext) {
+                photoLightboxNext.addEventListener("click", () => {
+                    updateLightboxView(currentPhotoIndex + 1);
+                });
+            }
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && photoLightbox && photoLightbox.classList.contains("is-open")) {
+                    setLightboxOpen(false);
+                }
+            });
 
             renderTrees(treeData);
         });
