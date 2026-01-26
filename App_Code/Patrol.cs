@@ -745,11 +745,11 @@ SELECT SCOPE_IDENTITY();";
         public List<string> GetRiskNotificationEmails(int areaID)
         {
             const string sql = @"
-            select distinct System_UserAccount.email from System_UserAccount
-            inner join System_UnitCityMapping on System_UserAccount.unitID = System_UnitCityMapping.unitID
-            where (System_UserAccount.auTypeID = 4 or System_UserAccount.auTypeID = 1)
-            and System_UserAccount.isActive = 1
-            and System_UserAccount.removeDateTime is null
+            select distinct View_UserInfo.email from View_UserInfo
+            inner join System_UnitCityMapping on View_UserInfo.unitID = System_UnitCityMapping.unitID
+            where View_UserInfo.auTypeID = 4 
+            and View_UserInfo.isActive = 1 and ISNULL(VerifyStatus,0) = 1 and isAutoStopLogin = 0
+            and View_UserInfo.removeDateTime is null
             and System_UnitCityMapping.twID = @areaID";
 
             var emails = new List<string>();

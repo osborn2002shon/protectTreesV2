@@ -78,22 +78,22 @@ namespace protectTreesV2.backstage.statistics
         protected global::System.Web.UI.WebControls.LinkButton LinkButton_exportExcel;
 
         /// <summary>
-        /// GridView_SpeciesPivot 控制項。
+        /// GridView_speciesPivot 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView GridView_SpeciesPivot;
+        protected global::System.Web.UI.WebControls.GridView GridView_speciesPivot;
 
         /// <summary>
-        /// Lit_QueryTime 控制項。
+        /// Lit_queryTime 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Literal Lit_QueryTime;
+        protected global::System.Web.UI.WebControls.Literal Lit_queryTime;
 
         /// <summary>
         /// hf_ChartCategories 控制項。

@@ -344,6 +344,80 @@ namespace protectTreesV2.Base
 
     public static class DropdownBinder
     {
+        public enum RecordType
+        {
+            Health, // 健檢
+            Patrol, // 巡查
+            Care,   // 養護
+            All     
+        }
+        /// <summary>
+        /// 綁定年份下拉選單 (自動抓取資料庫最早年份)
+        /// </summary>
+        /// <param name="ddl">下拉選單控制項</param>
+        /// <param name="recordType">資料來源類型 (健檢/巡查/養護)</param>
+        /// <param name="showAll">是否顯示「年份不拘」，預設 true</param>
+        public static void Bind_DropDownList_Year(ref DropDownList ddl, RecordType recordType = RecordType.Health, bool showAll = true)
+        {
+            ddl.Items.Clear();
+
+            // 1. 是否加入「不拘」
+            if (showAll)
+            {
+                ddl.Items.Add(new ListItem("年份不拘*", string.Empty));
+            }
+
+            int minYear = DateTime.Now.Year;
+            int currentYear = DateTime.Now.Year;
+
+            // 共同條件: 排除刪除 (removeDateTime IS NULL) 且 定稿 (dataStatus = 1)
+            string sql = "";
+            string whereClause = " WHERE removeDateTime IS NULL AND dataStatus = 1 ";
+
+            switch (recordType)
+            {
+                case RecordType.Health:
+                    sql = "SELECT MIN(YEAR(surveyDate)) FROM Tree_HealthRecord" + whereClause;
+                    break;
+                case RecordType.Patrol:
+                    sql = "SELECT MIN(YEAR(patrolDate)) FROM Tree_PatrolRecord" + whereClause;
+                    break;
+                case RecordType.Care:
+                    sql = "SELECT MIN(YEAR(careDate)) FROM Tree_CareRecord" + whereClause;
+                    break;
+                case RecordType.All:
+                    sql = @"SELECT MIN(Y) FROM (
+                        SELECT YEAR(surveyDate) as Y FROM Tree_HealthRecord WHERE removeDateTime IS NULL AND dataStatus = 1
+                        UNION ALL
+                        SELECT YEAR(patrolDate) as Y FROM Tree_PatrolRecord WHERE removeDateTime IS NULL AND dataStatus = 1
+                        UNION ALL
+                        SELECT YEAR(careDate) as Y FROM Tree_CareRecord WHERE removeDateTime IS NULL AND dataStatus = 1
+                    ) as CombinedTable";
+                    break;
+            }
+
+            // 3. 執行查詢
+            using (var da = new DataAccess.MS_SQL())
+            {
+               
+                var dt = da.GetDataTable(sql);
+
+                if (dt.Rows.Count > 0 && dt.Rows[0][0] != DBNull.Value)
+                {
+                    // 取得資料庫裡最小年份
+                    minYear = Convert.ToInt32(dt.Rows[0][0]);
+                }
+            }
+
+            if (minYear > currentYear) minYear = currentYear;
+
+            // 產生年份選項 (從最早年份 ~ 今年)
+            for (int i = minYear; i <= currentYear; i++)
+            {
+                string yearStr = i.ToString();
+                ddl.Items.Add(new ListItem(yearStr + "年", yearStr));
+            }
+        }
         public static void Bind_DropDownList_LandType(ref DropDownList dropdownlist)
         {
             dropdownlist.Items.Clear();
@@ -356,6 +430,28 @@ namespace protectTreesV2.Base
             dropdownlist.Items.Add(new ListItem("無資料"));
         }
 
+        /// <summary>
+        /// 綁定月份下拉選單
+        /// </summary>
+        /// <param name="ddl">下拉選單控制項</param>
+        /// <param name="showAll">是否顯示「月份不拘」，預設 true</param>
+        public static void Bind_DropDownList_Month(ref DropDownList ddl, bool showAll = true)
+        {
+            ddl.Items.Clear();
+
+            if (showAll)
+            {
+                ddl.Items.Add(new ListItem("月份不拘*", string.Empty));
+            }
+
+            for (int i = 1; i <= 12; i++)
+            {
+                string monthVal = i.ToString("00"); 
+                string monthTxt = monthVal + "月";
+
+                ddl.Items.Add(new ListItem(monthTxt, monthVal));
+            }
+        }
         public static void Bind_DropDownList_Species(ref DropDownList dropdownlist)
         {
             dropdownlist.Items.Clear();

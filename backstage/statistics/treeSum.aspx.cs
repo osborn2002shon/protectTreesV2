@@ -19,6 +19,7 @@ namespace protectTreesV2.backstage.statistics
 {
     public partial class treeSum : BasePage
     {
+        #region ViewState 屬性 (查詢條件)
         /// <summary>
         /// [查詢條件] 統計項目
         /// "tw" = 依縣市 (預設)
@@ -65,6 +66,8 @@ namespace protectTreesV2.backstage.statistics
                 ViewState["ViewState_FilterTreeStatus"] = value;
             }
         }
+
+        #endregion
 
 
 
@@ -329,11 +332,11 @@ namespace protectTreesV2.backstage.statistics
             DataTable dtPivot = GetPivotDataTable(statType, cityId, statusNames);
 
             // 綁定 GridView
-            GridView_SpeciesPivot.DataSource = dtPivot;
-            GridView_SpeciesPivot.DataBind();
+            GridView_speciesPivot.DataSource = dtPivot;
+            GridView_speciesPivot.DataBind();
 
             // 更新查詢時間
-            Lit_QueryTime.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm");
+            Lit_queryTime.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm");
         }
 
 
@@ -481,13 +484,13 @@ namespace protectTreesV2.backstage.statistics
         protected void GridView_SpeciesPivot_PreRender(object sender, EventArgs e)
         {
             // 確保 GridView 有資料且有標題列
-            if (GridView_SpeciesPivot.Rows.Count > 0 && GridView_SpeciesPivot.HeaderRow != null)
+            if (GridView_speciesPivot.Rows.Count > 0 && GridView_speciesPivot.HeaderRow != null)
             {
                 // 產生 <thead> 標籤
-                GridView_SpeciesPivot.HeaderRow.TableSection = TableRowSection.TableHeader;
+                GridView_speciesPivot.HeaderRow.TableSection = TableRowSection.TableHeader;
 
                 // 確保標題儲存格是用 <th> 
-                GridView_SpeciesPivot.UseAccessibleHeader = true;
+                GridView_speciesPivot.UseAccessibleHeader = true;
             }
         }
 

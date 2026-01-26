@@ -6,7 +6,7 @@
     <style>
         /* 容器設定：限制高度並允許捲動 */
         .table-container {
-            max-height: 600px; /* 超過這個高度出現卷軸 */
+            max-height: 600px;
             overflow-y: auto;
             overflow-x: auto;
             border: 1px solid #dee2e6;
@@ -132,7 +132,7 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="table-container">
-                            <asp:GridView ID="GridView_SpeciesPivot" runat="server" 
+                            <asp:GridView ID="GridView_speciesPivot" runat="server" 
                                 CssClass="table table-hover tbSticky mb-0"
                                 AutoGenerateColumns="true" ShowHeaderWhenEmpty="true" OnRowDataBound="GridView_SpeciesPivot_RowDataBound"
                                 OnPreRender="GridView_SpeciesPivot_PreRender">
@@ -140,7 +140,7 @@
                         </div>
                     </div>
                     <div class="card-footer text-muted text-end">
-                        <small>統計查詢時間：<asp:Literal ID="Lit_QueryTime" runat="server"></asp:Literal></small>
+                        <small>統計查詢時間：<asp:Literal ID="Lit_queryTime" runat="server"></asp:Literal></small>
                     </div>
                 </div>
             </div>
@@ -169,7 +169,7 @@
             var rotation = isDense ? -90 : -45;
             // ------------------------------------
 
-            // 2. 初始化 Highcharts
+            // 初始化 Highcharts
             Highcharts.chart('treeChart', {
                 credits: { enabled: false },
 
@@ -206,7 +206,7 @@
                             fontSize: fontSize,       // 動態字體大小
                             fontFamily: 'Microsoft JhengHei' // 確保中文字體
                         },
-                        step: 1 //強制顯示每一個標籤 (避免 Highcharts 自動隱藏間隔的標籤)
+                        step: 1 //強制顯示每一個標籤 
                     }
                 },
 
@@ -218,7 +218,7 @@
                 },
                 tooltip: {
                     shared: true,
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} 棵</b> ({point.percentage:.1f}%)<br/>'
+                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} 株</b> ({point.percentage:.1f}%)<br/>'
                 },
                 plotOptions: {
                     column: {
@@ -229,7 +229,7 @@
                                 if (this.percentage > 0) {
                                     return this.percentage.toFixed(1) + '%';
                                 }
-                                // 如果是 0%，回傳 null，Highcharts 就不會畫出這個標籤
+                                // 如果是 0%，回傳 null
                                 return null;
                             },
                             style: {
