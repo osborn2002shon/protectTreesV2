@@ -44,16 +44,19 @@ SELECT r.treeID,
        areaInfo.area,
        species.commonName,
        species.scientificName,
-       photoInfo.photoUrl
+       photoInfo.photoUrls
 FROM Tree_Record r
 OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) cityInfo
 LEFT JOIN System_Taiwan areaInfo ON areaInfo.twID = r.areaID
 LEFT JOIN Tree_Species species ON species.speciesID = r.speciesID
 OUTER APPLY (
-    SELECT TOP 1 filePath AS photoUrl
-    FROM Tree_RecordPhoto
-    WHERE treeID = r.treeID AND removeDateTime IS NULL
-    ORDER BY CASE WHEN isCover = 1 THEN 0 ELSE 1 END, photoID
+    SELECT STUFF((
+        SELECT '|' + filePath
+        FROM Tree_RecordPhoto
+        WHERE treeID = r.treeID AND removeDateTime IS NULL
+        ORDER BY CASE WHEN isCover = 1 THEN 0 ELSE 1 END, photoID
+        FOR XML PATH(''), TYPE
+    ).value('.', 'nvarchar(max)'), 1, 1, '') AS photoUrls
 ) photoInfo
 WHERE r.editStatus = 1
   AND r.treeStatus = N'已公告列管'
@@ -97,7 +100,7 @@ WHERE r.editStatus = 1
                         RecognitionReasonsHtml = BuildRecognitionDisplay(recognitionCriteria, criteriaLookup),
                         CulturalHistoryIntro = DataRowHelper.GetString(row, "culturalHistoryIntro"),
                         TreeHeight = DataRowHelper.GetString(row, "treeHeight"),
-                        PhotoUrl = DataRowHelper.GetString(row, "photoUrl")
+                        PhotoUrls = DataRowHelper.GetString(row, "photoUrls")
                     });
                 }
 
@@ -180,7 +183,7 @@ WHERE r.editStatus = 1
             public string RecognitionReasonsHtml { get; set; }
             public string CulturalHistoryIntro { get; set; }
             public string TreeHeight { get; set; }
-            public string PhotoUrl { get; set; }
+            public string PhotoUrls { get; set; }
         }
     }
 }
