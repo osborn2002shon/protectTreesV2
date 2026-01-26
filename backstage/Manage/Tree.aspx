@@ -235,7 +235,7 @@
                     </div>
                     <div class="col">
                         <span>樹種</span>
-                        <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" />
+                        <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" data-combobox="species" data-combobox-placeholder="請輸入樹種" />
                     </div>
                 </div>
                 <div class="row mt-2">
