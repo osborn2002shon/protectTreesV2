@@ -387,6 +387,8 @@ namespace protectTreesV2.Health
 
             public string scope { get; set; } = "Unit";
 
+            public TreeEditState? dataStatus { get; set; }
+
             // [新增] 日期區間
             public DateTime? dateStart { get; set; }
             public DateTime? dateEnd { get; set; }
@@ -792,6 +794,12 @@ namespace protectTreesV2.Health
                 // 我的紀錄
                 // 只撈取 insertAccountID 等於自己的紀錄
                 whereClauses.Add("health.insertAccountID = @currentUserID");
+            }
+
+            if (filter.dataStatus.HasValue)
+            {
+                whereClauses.Add("health.dataStatus = @dataStatus");
+                parameters.Add(new SqlParameter("@dataStatus", (int)filter.dataStatus.Value));
             }
             
 

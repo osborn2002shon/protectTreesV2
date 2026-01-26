@@ -83,6 +83,7 @@ namespace protectTreesV2.Care
             public string sortExpression { get; set; }
             public string sortDirection { get; set; }
             public TreeEditState? dataState { get; set; }
+            public TreeEditState? dataStatus { get; set; }
         }
 
         public class CareRecordListResult
@@ -490,6 +491,12 @@ namespace protectTreesV2.Care
                 {
                     whereClauses.Add("care.insertAccountID = @userID");
                     parameters.Add(new SqlParameter("@userID", currentUserId));
+                }
+
+                if (filter.dataStatus.HasValue)
+                {
+                    whereClauses.Add("care.dataStatus = @dataStatus");
+                    parameters.Add(new SqlParameter("@dataStatus", (int)filter.dataStatus.Value));
                 }
 
                 if (filter.dateStart.HasValue)

@@ -1,10 +1,16 @@
 ﻿using System;
 using protectTreesV2;
+using protectTreesV2.Base;
 using protectTreesV2.Dashboard;
+using protectTreesV2.SystemManagement;
+using protectTreesV2.TreeCatalog;
+using static protectTreesV2.Care.Care;
+using static protectTreesV2.Health.Health;
+using static protectTreesV2.Patrol.Patrol;
 
 namespace protectTreesV2.backstage.dashboard
 {
-    public partial class sm : System.Web.UI.Page
+    public partial class sm : BasePage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -62,6 +68,81 @@ namespace protectTreesV2.backstage.dashboard
             ucSpeciesStatusChart.UnitId = unitId;
             ucHealthCompletionChart.UnitId = unitId;
             ucUserLoginChart.UnitId = unitId;
+        }
+
+        protected void BtnPendingAccounts_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new AccountManageFilter
+            {
+                verfiyStatus = AccountVerifyStatus.尚未審核
+            };
+            base.RedirectState("../../backstage/system/accountManage.aspx", currentFilter);
+        }
+
+        protected void BtnTreeRecordTotal_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new TreeFilter
+            {
+                EditStatus = TreeEditState.定稿
+            };
+            base.RedirectState("../../backstage/tree/query.aspx", currentFilter);
+        }
+
+        protected void BtnHealthRecordTotal_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new HealthRecordListFilter
+            {
+                dataStatus = TreeEditState.定稿
+            };
+            base.RedirectState("../../backstage/health/list.aspx", currentFilter);
+        }
+
+        protected void BtnPatrolRecordTotal_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new PatrolRecordListFilter
+            {
+                dataStatus = TreeEditState.定稿
+            };
+            base.RedirectState("../../backstage/patrol/list.aspx", currentFilter);
+        }
+
+        protected void BtnCareRecordTotal_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new CareRecordListFilter
+            {
+                dataStatus = TreeEditState.定稿
+            };
+            base.RedirectState("../../backstage/care/list.aspx", currentFilter);
+        }
+
+        protected void BtnTreeStatusAnnounced_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new TreeFilter
+            {
+                EditStatus = TreeEditState.定稿,
+                Status = TreeStatus.已公告列管
+            };
+            base.RedirectState("../../backstage/tree/query.aspx", currentFilter);
+        }
+
+        protected void BtnTreeStatusQualified_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new TreeFilter
+            {
+                EditStatus = TreeEditState.定稿,
+                Status = TreeStatus.符合標準
+            };
+            base.RedirectState("../../backstage/tree/query.aspx", currentFilter);
+        }
+
+        protected void BtnTreeStatusOther_Click(object sender, EventArgs e)
+        {
+            var currentFilter = new TreeFilter
+            {
+                EditStatus = TreeEditState.定稿,
+                Status = TreeStatus.其他
+            };
+            base.RedirectState("../../backstage/tree/query.aspx", currentFilter);
         }
     }
 }
