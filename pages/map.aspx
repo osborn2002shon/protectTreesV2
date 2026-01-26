@@ -561,7 +561,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label" for="filterSpecies">樹種</label>
-                                    <select id="filterSpecies" class="form-select"></select>
+                                    <select id="filterSpecies" class="form-select" data-combobox="species" data-combobox-placeholder="請輸入樹種"></select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">樹齡</label>

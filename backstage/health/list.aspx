@@ -57,7 +57,7 @@
                 </div>
                 <div class="col">
                     <asp:Label runat="server" AssociatedControlID="DropDownList_species" Text="樹種" />
-                    <asp:DropDownList ID="DropDownList_species" runat="server" CssClass="form-select" />
+                    <asp:DropDownList ID="DropDownList_species" runat="server" CssClass="form-select" data-combobox="species" data-combobox-placeholder="請輸入樹種" />
                 </div>
             </div>
 

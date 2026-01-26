@@ -34,7 +34,7 @@
                     </div>
                     <div class="col">
                         <asp:Label runat="server" AssociatedControlID="ddlSpecies" Text="樹種" />
-                        <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" />
+                        <asp:DropDownList ID="ddlSpecies" runat="server" CssClass="form-select" data-combobox="species" data-combobox-placeholder="請輸入樹種" />
                     </div>
                 </div>
                 <div class="row">

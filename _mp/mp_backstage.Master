@@ -119,6 +119,7 @@
             <i class="fa-solid fa-arrow-up"></i>
         </button>
         <script type="text/javascript" src="../../_js/mp_default.js"></script>
+        <script type="text/javascript" src="../../_js/combobox.js"></script>
     </form>    
 </body>
 </html>
