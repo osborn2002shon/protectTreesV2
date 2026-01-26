@@ -66,19 +66,59 @@ WHERE r.editStatus = 1
             {
                 DataTable dt = db.GetDataTable(sql);
                 var records = new List<TreeMapRecord>();
+                var photoLookup = new Dictionary<int, List<string>>();
 
                 var criteriaLookup = TreeService.GetRecognitionCriteria()
                     .GroupBy(c => c.Code)
                     .ToDictionary(g => g.Key, g => g.First().Name);
+
+                var treeIds = dt.AsEnumerable()
+                    .Select(row => DataRowHelper.GetNullableInt(row, "treeID"))
+                    .Where(id => id.HasValue)
+                    .Select(id => id.Value)
+                    .Distinct()
+                    .ToList();
+
+                if (treeIds.Count > 0)
+                {
+                    var photoSql = $@"
+SELECT treeID,
+       filePath
+FROM Tree_RecordPhoto
+WHERE removeDateTime IS NULL
+  AND treeID IN ({string.Join(",", treeIds)})
+ORDER BY treeID, CASE WHEN isCover = 1 THEN 0 ELSE 1 END, photoID";
+
+                    DataTable photoTable = db.GetDataTable(photoSql);
+                    foreach (DataRow row in photoTable.Rows)
+                    {
+                        var treeId = DataRowHelper.GetNullableInt(row, "treeID");
+                        var filePath = DataRowHelper.GetString(row, "filePath");
+                        if (!treeId.HasValue || string.IsNullOrWhiteSpace(filePath))
+                        {
+                            continue;
+                        }
+
+                        if (!photoLookup.TryGetValue(treeId.Value, out var list))
+                        {
+                            list = new List<string>();
+                            photoLookup[treeId.Value] = list;
+                        }
+
+                        list.Add(filePath);
+                    }
+                }
 
                 foreach (DataRow row in dt.Rows)
                 {
                     var estimatedAge = ParseEstimatedAge(DataRowHelper.GetString(row, "estimatedPlantingYear"));
                     var recognitionCriteria = DataRowHelper.GetString(row, "recognitionCriteria");
                     var announcementDate = DataRowHelper.GetNullableDateTime(row, "announcementDate");
+                    var treeIdValue = DataRowHelper.GetNullableInt(row, "treeID") ?? 0;
+                    photoLookup.TryGetValue(treeIdValue, out var photoUrls);
                     records.Add(new TreeMapRecord
                     {
-                        TreeId = DataRowHelper.GetNullableInt(row, "treeID") ?? 0,
+                        TreeId = treeIdValue,
                         SystemTreeNo = DataRowHelper.GetString(row, "systemTreeNo"),
                         City = DataRowHelper.GetString(row, "city"),
                         Area = DataRowHelper.GetString(row, "area"),
@@ -97,7 +137,8 @@ WHERE r.editStatus = 1
                         RecognitionReasonsHtml = BuildRecognitionDisplay(recognitionCriteria, criteriaLookup),
                         CulturalHistoryIntro = DataRowHelper.GetString(row, "culturalHistoryIntro"),
                         TreeHeight = DataRowHelper.GetString(row, "treeHeight"),
-                        PhotoUrl = DataRowHelper.GetString(row, "photoUrl")
+                        PhotoUrl = DataRowHelper.GetString(row, "photoUrl"),
+                        PhotoUrls = photoUrls ?? new List<string>()
                     });
                 }
 
@@ -181,6 +222,7 @@ WHERE r.editStatus = 1
             public string CulturalHistoryIntro { get; set; }
             public string TreeHeight { get; set; }
             public string PhotoUrl { get; set; }
+            public List<string> PhotoUrls { get; set; }
         }
     }
 }
