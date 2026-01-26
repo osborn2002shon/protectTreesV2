@@ -55,7 +55,9 @@
                         <div>
                             <div class="text-muted small">待審帳號</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litPendingAccounts" runat="server" />
+                                <asp:LinkButton ID="btnPendingAccounts" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnPendingAccounts_Click">
+                                    <asp:Literal ID="litPendingAccounts" runat="server" />
+                                </asp:LinkButton>
                             </div>
                             <div class="text-muted small">
                                 上月通過 <asp:Literal ID="litPendingApprovedLastMonth" runat="server" /> <br />本月通過 <asp:Literal ID="litPendingApprovedCurrentMonth" runat="server" />
@@ -73,7 +75,9 @@
                         <div>
                             <div class="text-muted small">全部樹籍資料</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litTreeRecordTotal" runat="server" />
+                                <asp:LinkButton ID="btnTreeRecordTotal" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnTreeRecordTotal_Click">
+                                    <asp:Literal ID="litTreeRecordTotal" runat="server" />
+                                </asp:LinkButton>
                             </div>
                             <div class="text-muted small">
                                 上月新增 <asp:Literal ID="litTreeRecordLastMonth" runat="server" />  <br /> 本月新增 <asp:Literal ID="litTreeRecordCurrentMonth" runat="server" />
@@ -91,7 +95,9 @@
                         <div>
                             <div class="text-muted small">全部健檢紀錄</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litHealthRecordTotal" runat="server" />
+                                <asp:LinkButton ID="btnHealthRecordTotal" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnHealthRecordTotal_Click">
+                                    <asp:Literal ID="litHealthRecordTotal" runat="server" />
+                                </asp:LinkButton>
                             </div>
                             <div class="text-muted small">
                                 上月新增 <asp:Literal ID="litHealthRecordLastMonth" runat="server" /> <br /> 本月新增 <asp:Literal ID="litHealthRecordCurrentMonth" runat="server" />
@@ -109,7 +115,9 @@
                         <div>
                             <div class="text-muted small">全部巡查紀錄</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litPatrolRecordTotal" runat="server" />
+                                <asp:LinkButton ID="btnPatrolRecordTotal" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnPatrolRecordTotal_Click">
+                                    <asp:Literal ID="litPatrolRecordTotal" runat="server" />
+                                </asp:LinkButton>
                             </div>
                             <div class="text-muted small">
                                 上月新增 <asp:Literal ID="litPatrolRecordLastMonth" runat="server" /> <br /> 本月新增 <asp:Literal ID="litPatrolRecordCurrentMonth" runat="server" />
@@ -127,7 +135,9 @@
                         <div>
                             <div class="text-muted small">全部養護紀錄</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litCareRecordTotal" runat="server" />
+                                <asp:LinkButton ID="btnCareRecordTotal" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnCareRecordTotal_Click">
+                                    <asp:Literal ID="litCareRecordTotal" runat="server" />
+                                </asp:LinkButton>
                             </div>
                             <div class="text-muted small">
                                 上月新增 <asp:Literal ID="litCareRecordLastMonth" runat="server" /> <br /> 本月新增 <asp:Literal ID="litCareRecordCurrentMonth" runat="server" />
@@ -148,7 +158,9 @@
                         <div>
                             <div class="text-muted small">公告列管</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litTreeStatusAnnounced" runat="server" />
+                                <asp:LinkButton ID="btnTreeStatusAnnounced" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnTreeStatusAnnounced_Click">
+                                    <asp:Literal ID="litTreeStatusAnnounced" runat="server" />
+                                </asp:LinkButton>
                             </div>
                         </div>
                     </div>
@@ -163,7 +175,9 @@
                         <div>
                             <div class="text-muted small">符合標準</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litTreeStatusQualified" runat="server" />
+                                <asp:LinkButton ID="btnTreeStatusQualified" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnTreeStatusQualified_Click">
+                                    <asp:Literal ID="litTreeStatusQualified" runat="server" />
+                                </asp:LinkButton>
                             </div>
                         </div>
                     </div>
@@ -178,7 +192,9 @@
                         <div>
                             <div class="text-muted small">其他</div>
                             <div class="fs-4 fw-bold">
-                                <asp:Literal ID="litTreeStatusOther" runat="server" />
+                                <asp:LinkButton ID="btnTreeStatusOther" runat="server" CssClass="text-decoration-none text-dark" OnClick="BtnTreeStatusOther_Click">
+                                    <asp:Literal ID="litTreeStatusOther" runat="server" />
+                                </asp:LinkButton>
                             </div>
                         </div>
                     </div>

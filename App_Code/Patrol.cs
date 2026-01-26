@@ -85,6 +85,7 @@ namespace protectTreesV2.Patrol
             public string sortExpression { get; set; }
             public string sortDirection { get; set; }
             public TreeEditState? dataState { get; set; }
+            public TreeEditState? dataStatus { get; set; }
         }
 
         public class PatrolRecordListResult
@@ -440,6 +441,12 @@ namespace protectTreesV2.Patrol
                 {
                     whereClauses.Add("patrol.insertAccountID = @userID");
                     parameters.Add(new SqlParameter("@userID", currentUserId));
+                }
+
+                if (filter.dataStatus.HasValue)
+                {
+                    whereClauses.Add("patrol.dataStatus = @dataStatus");
+                    parameters.Add(new SqlParameter("@dataStatus", (int)filter.dataStatus.Value));
                 }
 
                 if (filter.dateStart.HasValue)
