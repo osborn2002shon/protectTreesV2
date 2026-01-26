@@ -280,7 +280,17 @@
             border-radius: 12px;
             border: 1px solid rgba(148, 163, 184, 0.3);
             object-fit: cover;
-            max-height: 220px;
+            max-height: 120px;
+        }
+
+        .map-tree-detail-photos {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        }
+
+        .map-tree-detail-toggle {
+            border-radius: 999px;
         }
 
         .map-tree-detail-criteria {
@@ -549,6 +559,7 @@
                 view: view
             });
             view.ui.add(zoomWidget, "bottom-right");
+            view.popup.autoOpenEnabled = false;
 
             view.when(() => {
                 loadingElement.classList.add("is-hidden");
@@ -702,6 +713,18 @@
                     return url;
                 }
                 return `/${url}`;
+            };
+
+            const parsePhotoUrls = (rawUrls) => {
+                if (!rawUrls) {
+                    return [];
+                }
+                return String(rawUrls)
+                    .split(/[|,;\n]+/)
+                    .map((item) => item.trim())
+                    .filter(Boolean)
+                    .map((item) => normalizePhotoUrl(item))
+                    .filter(Boolean);
             };
 
             const buildRecognitionList = (htmlContent) => {
@@ -863,10 +886,19 @@
                 const heightDisplay = tree.TreeHeight || "—";
                 const diameterDisplay = tree.BreastHeightDiameter || "—";
                 const circumferenceDisplay = tree.BreastHeightCircumference || "—";
-                const photoUrl = normalizePhotoUrl(tree.PhotoUrl);
+                const photoUrls = parsePhotoUrls(tree.PhotoUrls || tree.PhotoUrl);
+                const photoHtml = photoUrls.length
+                    ? `<div class="map-tree-detail-photos">${photoUrls
+                        .map((url, index) => `<img class="map-tree-detail-photo" src="${url}" alt="${tree.SystemTreeNo || "樹木"} 照片 ${index + 1}" />`)
+                        .join("")}</div>`
+                    : "<div class=\"map-note\">無照片</div>";
 
                 treeListContent.innerHTML = `
                     <div class="map-tree-detail">
+                        <div class="map-tree-detail-section">
+                            <h4>照片</h4>
+                            ${photoHtml}
+                        </div>
                         <div class="map-tree-detail-section">
                             <h4>基本資訊</h4>
                             <dl class="map-tree-detail-grid">
@@ -890,48 +922,56 @@
                                     <dt>座標經緯度</dt>
                                     <dd>${latText}, ${lngText}</dd>
                                 </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>管理人</dt>
-                                    <dd>${managerDisplay}</dd>
-                                </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>樹籍狀態</dt>
-                                    <dd>${statusDisplay}</dd>
-                                </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>公告日期</dt>
-                                    <dd>${announcementDisplay}</dd>
-                                </div>
                             </dl>
                         </div>
-                        <div class="map-tree-detail-section">
-                            <h4>受保護認定理由</h4>
-                            ${buildRecognitionList(tree.RecognitionReasonsHtml)}
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary map-tree-detail-toggle" type="button" id="treeDetailToggle" data-expanded="false">
+                                顯示詳細資料
+                            </button>
                         </div>
-                        <div class="map-tree-detail-section">
-                            <h4>文化歷史價值介紹</h4>
-                            <div>${culturalDisplay}</div>
-                        </div>
-                        <div class="map-tree-detail-section">
-                            <h4>生長資訊</h4>
-                            <dl class="map-tree-detail-grid">
-                                <div class="map-tree-detail-item">
-                                    <dt>樹高</dt>
-                                    <dd>${heightDisplay}</dd>
-                                </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>胸高直徑</dt>
-                                    <dd>${diameterDisplay}</dd>
-                                </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>胸高樹圍</dt>
-                                    <dd>${circumferenceDisplay}</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <div class="map-tree-detail-section">
-                            <h4>照片</h4>
-                            ${photoUrl ? `<img class="map-tree-detail-photo" src="${photoUrl}" alt="${tree.SystemTreeNo || "樹木"}" />` : "<div class=\"map-note\">無照片</div>"}
+                        <div class="map-tree-detail-extra is-hidden">
+                            <div class="map-tree-detail-section">
+                                <h4>詳細資訊</h4>
+                                <dl class="map-tree-detail-grid">
+                                    <div class="map-tree-detail-item">
+                                        <dt>管理人</dt>
+                                        <dd>${managerDisplay}</dd>
+                                    </div>
+                                    <div class="map-tree-detail-item">
+                                        <dt>樹籍狀態</dt>
+                                        <dd>${statusDisplay}</dd>
+                                    </div>
+                                    <div class="map-tree-detail-item">
+                                        <dt>公告日期</dt>
+                                        <dd>${announcementDisplay}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <div class="map-tree-detail-section">
+                                <h4>受保護認定理由</h4>
+                                ${buildRecognitionList(tree.RecognitionReasonsHtml)}
+                            </div>
+                            <div class="map-tree-detail-section">
+                                <h4>文化歷史價值介紹</h4>
+                                <div>${culturalDisplay}</div>
+                            </div>
+                            <div class="map-tree-detail-section">
+                                <h4>生長資訊</h4>
+                                <dl class="map-tree-detail-grid">
+                                    <div class="map-tree-detail-item">
+                                        <dt>樹高</dt>
+                                        <dd>${heightDisplay}</dd>
+                                    </div>
+                                    <div class="map-tree-detail-item">
+                                        <dt>胸高直徑</dt>
+                                        <dd>${diameterDisplay}</dd>
+                                    </div>
+                                    <div class="map-tree-detail-item">
+                                        <dt>胸高樹圍</dt>
+                                        <dd>${circumferenceDisplay}</dd>
+                                    </div>
+                                </dl>
+                            </div>
                         </div>
                         <div class="d-grid">
                             <button class="btn btn-outline-primary" type="button" id="treeDetailBack">
@@ -1075,6 +1115,23 @@
                         return;
                     }
                     updateTreeList(treeListEntries);
+                });
+            }
+
+            if (treeListContent) {
+                treeListContent.addEventListener("click", (event) => {
+                    const toggleButton = event.target.closest("#treeDetailToggle");
+                    if (!toggleButton) {
+                        return;
+                    }
+                    const detailSection = treeListContent.querySelector(".map-tree-detail-extra");
+                    if (!detailSection) {
+                        return;
+                    }
+                    const isExpanded = toggleButton.dataset.expanded === "true";
+                    detailSection.classList.toggle("is-hidden", isExpanded);
+                    toggleButton.dataset.expanded = isExpanded ? "false" : "true";
+                    toggleButton.textContent = isExpanded ? "顯示詳細資料" : "收合詳細資料";
                 });
             }
 
