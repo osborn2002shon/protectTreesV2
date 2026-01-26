@@ -541,7 +541,9 @@
             });
 
             const graphicsLayer = new GraphicsLayer();
+            const highlightLayer = new GraphicsLayer();
             map.add(graphicsLayer);
+            map.add(highlightLayer);
 
             const view = new MapView({
                 container: "mapView",
@@ -635,6 +637,16 @@
                 url: "/_img/icon/pin.png",
                 width: "30px",
                 height: "30px"
+            };
+
+            const highlightSymbol = {
+                type: "simple-marker",
+                color: [0, 0, 0, 0],
+                size: 40,
+                outline: {
+                    color: [37, 99, 235, 0.9],
+                    width: 3
+                }
             };
 
             const popupTemplate = {
@@ -745,6 +757,7 @@
 
             const renderTrees = (records) => {
                 graphicsLayer.removeAll();
+                highlightLayer.removeAll();
                 const entries = [];
                 records.forEach((tree) => {
                     const latitude = parseNumber(tree.Latitude);
@@ -782,6 +795,23 @@
                 treeListEntries = entries;
                 treeListPage = 1;
                 return entries;
+            };
+
+            const highlightTree = (entry) => {
+                if (!entry) {
+                    highlightLayer.removeAll();
+                    return;
+                }
+                highlightLayer.removeAll();
+                const highlightGraphic = new Graphic({
+                    geometry: {
+                        type: "point",
+                        latitude: entry.latitude,
+                        longitude: entry.longitude
+                    },
+                    symbol: highlightSymbol
+                });
+                highlightLayer.add(highlightGraphic);
             };
 
             const citySelect = document.getElementById("filterCity");
@@ -1094,10 +1124,7 @@
                         return;
                     }
                     view.goTo({ center: [entry.longitude, entry.latitude], zoom: 16 });
-                    view.popup.open({
-                        features: [entry.graphic],
-                        location: { latitude: entry.latitude, longitude: entry.longitude }
-                    });
+                    highlightTree(entry);
                     renderTreeDetail(entry);
                     if (treeListCount) {
                         treeListCount.textContent = entry.tree.SystemTreeNo || "樹木資料";
