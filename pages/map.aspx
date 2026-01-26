@@ -2,6 +2,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_publicMap.Master" AutoEventWireup="true" CodeBehind="map.aspx.cs" Inherits="protectTreesV2.pages.map1" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
         :root {
             --map-panel-bg: rgba(255, 255, 255, 0.9);
@@ -283,6 +284,34 @@
             max-height: 220px;
         }
 
+        .map-tree-photo-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .map-tree-photo-thumb {
+            display: inline-flex;
+            width: 84px;
+            height: 64px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            overflow: hidden;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .map-tree-photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.2s ease;
+        }
+
+        .map-tree-photo-thumb:hover img {
+            transform: scale(1.05);
+        }
+
         .map-tree-detail-criteria {
             padding-left: 18px;
             margin: 0;
@@ -498,6 +527,7 @@
     </div>
     <asp:HiddenField ID="TreeDataJson" runat="server" />
 
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script>
         const loadingElement = document.getElementById("mapLoading");
         const treeDataInput = document.getElementById("<%= TreeDataJson.ClientID %>");
@@ -539,11 +569,13 @@
                 center: [120.9605, 23.6978],
                 zoom: 7,
                 ui: { components: ["attribution"] },
+                popupEnabled: false,
                 constraints: {
                     minZoom: 5,
                     maxZoom: 19
                 }
             });
+            view.popup.autoOpenEnabled = false;
 
             const zoomWidget = new Zoom({
                 view: view
@@ -625,20 +657,11 @@
                 width: "30px",
                 height: "30px"
             };
-
-            const popupTemplate = {
-                title: "{systemTreeNo}",
-                content: [{
-                    type: "fields",
-                    fieldInfos: [
-                        { fieldName: "species", label: "樹種" },
-                        { fieldName: "city", label: "縣市" },
-                        { fieldName: "area", label: "鄉鎮區" },
-                        { fieldName: "age", label: "樹齡", format: { digitSeparator: true } },
-                        { fieldName: "diameter", label: "胸高直徑 (cm)" },
-                        { fieldName: "circumference", label: "胸高樹圍 (cm)" }
-                    ]
-                }]
+            const highlightSymbol = {
+                type: "picture-marker",
+                url: "/_img/icon/pin.png",
+                width: "40px",
+                height: "40px"
             };
 
             const parseNumber = (value) => {
@@ -673,6 +696,8 @@
             let treeListEntries = [];
             let treeListPage = 1;
             const treeListPageSize = 10;
+            let highlightedGraphic = null;
+            let lightboxInstance = null;
 
             const setTreeListOpen = (open) => {
                 if (!treeListPanel) {
@@ -704,6 +729,32 @@
                 return `/${url}`;
             };
 
+            const normalizePhotoList = (tree) => {
+                if (!tree) {
+                    return [];
+                }
+                const rawList = Array.isArray(tree.PhotoUrls) && tree.PhotoUrls.length > 0
+                    ? tree.PhotoUrls
+                    : (tree.PhotoUrl ? [tree.PhotoUrl] : []);
+                return rawList
+                    .map((photo) => normalizePhotoUrl(photo))
+                    .filter((photo) => Boolean(photo));
+            };
+
+            const initLightbox = () => {
+                if (!window.GLightbox) {
+                    return;
+                }
+                if (lightboxInstance) {
+                    lightboxInstance.destroy();
+                }
+                lightboxInstance = GLightbox({
+                    selector: ".map-tree-lightbox",
+                    loop: true,
+                    touchNavigation: true
+                });
+            };
+
             const buildRecognitionList = (htmlContent) => {
                 if (!htmlContent) {
                     return "<span class=\"map-note\">無資料</span>";
@@ -722,6 +773,7 @@
 
             const renderTrees = (records) => {
                 graphicsLayer.removeAll();
+                highlightedGraphic = null;
                 const entries = [];
                 records.forEach((tree) => {
                     const latitude = parseNumber(tree.Latitude);
@@ -745,8 +797,7 @@
                             age: tree.Age ?? "—",
                             diameter: tree.BreastHeightDiameter || "—",
                             circumference: tree.BreastHeightCircumference || "—"
-                        },
-                        popupTemplate
+                        }
                     });
                     graphicsLayer.add(graphic);
                     entries.push({
@@ -844,6 +895,17 @@
                 updatePaginationState();
             };
 
+            const highlightTreeMarker = (entry) => {
+                if (!entry || !entry.graphic) {
+                    return;
+                }
+                if (highlightedGraphic && highlightedGraphic !== entry.graphic) {
+                    highlightedGraphic.symbol = treeSymbol;
+                }
+                entry.graphic.symbol = highlightSymbol;
+                highlightedGraphic = entry.graphic;
+            };
+
             const renderTreeDetail = (entry) => {
                 if (!treeListContent) {
                     return;
@@ -863,10 +925,24 @@
                 const heightDisplay = tree.TreeHeight || "—";
                 const diameterDisplay = tree.BreastHeightDiameter || "—";
                 const circumferenceDisplay = tree.BreastHeightCircumference || "—";
-                const photoUrl = normalizePhotoUrl(tree.PhotoUrl);
+                const photoList = normalizePhotoList(tree);
+                const photoGallery = photoList.length > 0
+                    ? `<div class="map-tree-photo-grid">
+                        ${photoList.map((photo, index) => {
+                            const title = tree.SystemTreeNo ? `${tree.SystemTreeNo} (${index + 1})` : `樹木照片 ${index + 1}`;
+                            return `<a href="${photo}" class="map-tree-photo-thumb map-tree-lightbox" data-gallery="tree-${tree.TreeId || "default"}" data-title="${title}">
+                                        <img src="${photo}" alt="${title}" />
+                                    </a>`;
+                        }).join("")}
+                    </div>`
+                    : "<div class=\"map-note\">無照片</div>";
 
                 treeListContent.innerHTML = `
                     <div class="map-tree-detail">
+                        <div class="map-tree-detail-section">
+                            <h4>照片</h4>
+                            ${photoGallery}
+                        </div>
                         <div class="map-tree-detail-section">
                             <h4>基本資訊</h4>
                             <dl class="map-tree-detail-grid">
@@ -890,6 +966,17 @@
                                     <dt>座標經緯度</dt>
                                     <dd>${latText}, ${lngText}</dd>
                                 </div>
+                            </dl>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" type="button" id="treeDetailToggle">
+                                顯示詳細資料
+                            </button>
+                        </div>
+                        <div class="map-tree-detail-extra is-hidden" id="treeDetailExtra">
+                            <div class="map-tree-detail-section">
+                                <h4>管理資訊</h4>
+                                <dl class="map-tree-detail-grid">
                                 <div class="map-tree-detail-item">
                                     <dt>管理人</dt>
                                     <dd>${managerDisplay}</dd>
@@ -903,35 +990,32 @@
                                     <dd>${announcementDisplay}</dd>
                                 </div>
                             </dl>
-                        </div>
-                        <div class="map-tree-detail-section">
-                            <h4>受保護認定理由</h4>
-                            ${buildRecognitionList(tree.RecognitionReasonsHtml)}
-                        </div>
-                        <div class="map-tree-detail-section">
-                            <h4>文化歷史價值介紹</h4>
-                            <div>${culturalDisplay}</div>
-                        </div>
-                        <div class="map-tree-detail-section">
-                            <h4>生長資訊</h4>
-                            <dl class="map-tree-detail-grid">
-                                <div class="map-tree-detail-item">
-                                    <dt>樹高</dt>
-                                    <dd>${heightDisplay}</dd>
-                                </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>胸高直徑</dt>
-                                    <dd>${diameterDisplay}</dd>
-                                </div>
-                                <div class="map-tree-detail-item">
-                                    <dt>胸高樹圍</dt>
-                                    <dd>${circumferenceDisplay}</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <div class="map-tree-detail-section">
-                            <h4>照片</h4>
-                            ${photoUrl ? `<img class="map-tree-detail-photo" src="${photoUrl}" alt="${tree.SystemTreeNo || "樹木"}" />` : "<div class=\"map-note\">無照片</div>"}
+                            </div>
+                            <div class="map-tree-detail-section">
+                                <h4>受保護認定理由</h4>
+                                ${buildRecognitionList(tree.RecognitionReasonsHtml)}
+                            </div>
+                            <div class="map-tree-detail-section">
+                                <h4>文化歷史價值介紹</h4>
+                                <div>${culturalDisplay}</div>
+                            </div>
+                            <div class="map-tree-detail-section">
+                                <h4>生長資訊</h4>
+                                <dl class="map-tree-detail-grid">
+                                    <div class="map-tree-detail-item">
+                                        <dt>樹高</dt>
+                                        <dd>${heightDisplay}</dd>
+                                    </div>
+                                    <div class="map-tree-detail-item">
+                                        <dt>胸高直徑</dt>
+                                        <dd>${diameterDisplay}</dd>
+                                    </div>
+                                    <div class="map-tree-detail-item">
+                                        <dt>胸高樹圍</dt>
+                                        <dd>${circumferenceDisplay}</dd>
+                                    </div>
+                                </dl>
+                            </div>
                         </div>
                         <div class="d-grid">
                             <button class="btn btn-outline-primary" type="button" id="treeDetailBack">
@@ -940,6 +1024,7 @@
                         </div>
                     </div>
                 `;
+                initLightbox();
             };
 
             const getDistinctValues = (records, selector) => {
@@ -1054,10 +1139,7 @@
                         return;
                     }
                     view.goTo({ center: [entry.longitude, entry.latitude], zoom: 16 });
-                    view.popup.open({
-                        features: [entry.graphic],
-                        location: { latitude: entry.latitude, longitude: entry.longitude }
-                    });
+                    highlightTreeMarker(entry);
                     renderTreeDetail(entry);
                     if (treeListCount) {
                         treeListCount.textContent = entry.tree.SystemTreeNo || "樹木資料";
@@ -1070,6 +1152,15 @@
 
             if (treeListContent) {
                 treeListContent.addEventListener("click", (event) => {
+                    const toggleButton = event.target.closest("#treeDetailToggle");
+                    if (toggleButton) {
+                        const extraSection = document.getElementById("treeDetailExtra");
+                        if (extraSection) {
+                            const isHidden = extraSection.classList.toggle("is-hidden");
+                            toggleButton.textContent = isHidden ? "顯示詳細資料" : "收合詳細資料";
+                        }
+                        return;
+                    }
                     const backButton = event.target.closest("#treeDetailBack");
                     if (!backButton) {
                         return;
