@@ -178,6 +178,15 @@ namespace protectTreesV2.Patrol
 
             whereClauses.Add("record.removeDateTime IS NULL");
             whereClauses.Add("record.editStatus = 1");
+            string unitLimitSql = @"
+                record.areaID IN (
+                    SELECT map.twID
+                    FROM System_UnitCityMapping map
+                    INNER JOIN System_UserAccount u ON u.unitID = map.unitID
+                    WHERE u.accountID = @currentUserId
+                )
+            ";
+            whereClauses.Add(unitLimitSql);
 
             if (filter != null)
             {
@@ -433,6 +442,16 @@ namespace protectTreesV2.Patrol
             whereClauses.Add("patrol.removeDateTime IS NULL");
             whereClauses.Add("record.removeDateTime IS NULL");
             whereClauses.Add("record.editStatus = 1");
+            string unitLimitSql = @"
+                record.areaID IN (
+                    SELECT map.twID
+                    FROM System_UnitCityMapping map
+                    INNER JOIN System_UserAccount u ON u.unitID = map.unitID
+                    WHERE u.accountID = @currentUserId
+                )
+            ";
+            whereClauses.Add(unitLimitSql);
+            parameters.Add(new SqlParameter("@currentUserId", currentUserId));
 
             if (filter != null)
             {
