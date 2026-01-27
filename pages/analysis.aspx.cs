@@ -59,7 +59,7 @@ ORDER BY r.cityID";
             using (var db = new MS_SQL())
             {
                 Literal_TotalProtected.Text = FormatNumber(GetScalarLong(db, @"
-SELECT SUM(r.treeCount)
+SELECT COUNT(1)
 FROM Tree_Record r
 WHERE r.editStatus = 1
   AND r.removeDateTime IS NULL
@@ -84,14 +84,14 @@ WHERE r.editStatus = 1
             const string sql = @"
 SELECT TOP (@top)
        ISNULL(s.commonName, N'未知') AS speciesName,
-       SUM(r.treeCount) AS treeCount
+       COUNT(1) AS treeCount
 FROM Tree_Record r
 LEFT JOIN Tree_Species s ON s.speciesID = r.speciesID
 WHERE r.editStatus = 1
   AND r.removeDateTime IS NULL
   AND r.treeStatus = @status
 GROUP BY s.commonName
-ORDER BY SUM(r.treeCount) {0}, s.commonName";
+ORDER BY COUNT(1) {0}, s.commonName";
 
             var most = db.GetDataTable(string.Format(sql, "DESC"),
                 new SqlParameter("@status", ProtectedStatus),
@@ -131,7 +131,7 @@ WHERE r.editStatus = 1
 SELECT r.cityID,
        cityInfo.city AS cityName,
        COUNT(DISTINCT r.speciesID) AS speciesCount,
-       SUM(r.treeCount) AS treeCount
+       COUNT(1) AS treeCount
 FROM Tree_Record r
 OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) cityInfo
 WHERE r.editStatus = 1
@@ -178,7 +178,7 @@ GROUP BY r.cityID, cityInfo.city";
             const string sql = @"
 SELECT r.cityID,
        cityInfo.city AS cityName,
-       SUM(r.treeCount) AS treeCount
+       COUNT(1) AS treeCount
 FROM Tree_Record r
 OUTER APPLY (SELECT TOP 1 city FROM System_Taiwan WHERE cityID = r.cityID) cityInfo
 WHERE r.editStatus = 1
@@ -225,7 +225,7 @@ GROUP BY r.cityID, cityInfo.city";
             const string sql = @"
 SELECT TOP (@top)
        ISNULL(s.commonName, N'未知') AS speciesName,
-       SUM(r.treeCount) AS treeCount,
+       COUNT(1) AS treeCount,
        areaInfo.areaList
 FROM Tree_Record r
 LEFT JOIN Tree_Species s ON s.speciesID = r.speciesID
@@ -248,7 +248,7 @@ WHERE r.editStatus = 1
   AND r.treeStatus = @status
   AND r.cityID = @cityID
 GROUP BY s.commonName, areaInfo.areaList
-ORDER BY SUM(r.treeCount) DESC, s.commonName";
+ORDER BY COUNT(1) DESC, s.commonName";
 
             using (var db = new MS_SQL())
             {
