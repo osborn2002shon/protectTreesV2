@@ -198,37 +198,105 @@
                 指定縣市受保護樹木分析
             </span>
         </div>
-        <div class="row">
-            <div class="col-12 col-md-6">
-                <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0" AutoPostBack="true" />
-            </div>
-            <div class="col-12 col-md-6">
+        <asp:UpdatePanel ID="UpdatePanel_cityAnalysis" runat="server" UpdateMode="Conditional">
+            <ContentTemplate>
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0" AutoPostBack="true" />
+                    </div>
+                    <div class="col-12 col-md-6">
 
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12 col-md-6">
-                <table class="tb">
-                    <tr>
-                        <th>樹種</th>
-                        <th>數量</th>
-                        <th>分布</th>
-                    </tr>
-                    <asp:Repeater ID="Repeater_citySpecies" runat="server">
-                        <ItemTemplate>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <table class="tb">
                             <tr>
-                                <td><%# Eval("SpeciesName") %></td>
-                                <td><%# Eval("TreeCount") %></td>
-                                <td><%# Eval("AreaNames") %></td>
+                                <th>樹種</th>
+                                <th>數量</th>
+                                <th>分布</th>
                             </tr>
-                        </ItemTemplate>
-                    </asp:Repeater>
-                </table>
-            </div>
-            <div class="col-12 col-md-6">
-                <div id="speciesChart"></div>
-            </div>
-        </div>
+                            <asp:Repeater ID="Repeater_citySpecies" runat="server">
+                                <ItemTemplate>
+                                    <tr>
+                                        <td><%# Eval("SpeciesName") %></td>
+                                        <td><%# Eval("TreeCount") %></td>
+                                        <td><%# Eval("AreaNames") %></td>
+                                    </tr>
+                                </ItemTemplate>
+                            </asp:Repeater>
+                        </table>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div id="speciesChart"></div>
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    const data2 = <%= SpeciesChartDataJson %>;
+
+                    Highcharts.chart('speciesChart', {
+                        credits: { enabled: false },
+                        exporting: { enabled: false },
+                        chart: {
+                            type: 'pie',
+                            backgroundColor: 'transparent',
+                            height: '100%'
+                        },
+                        title: {
+                            text: null
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
+                                    distance: 20,
+                                    style: {
+                                        fontSize: '16px'
+                                    }
+                                },
+                                showInLegend: true
+                            }
+                        },
+                        series: [{
+                            name: '受保護樹木數量',
+                            data: data2,
+                            //colors: ['rgba(102, 189, 189, 0.2)','rgba(29, 105, 196, 0.2)']
+                            //colors: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4', '#EA7CCC']
+                            colors: [
+                                'rgba(84, 112, 198, 0.5)',   // #5470C6
+                                'rgba(145, 204, 117, 0.5)',  // #91CC75
+                                'rgba(250, 200, 88, 0.5)',   // #FAC858
+                                'rgba(238, 102, 102, 0.5)',  // #EE6666
+                                'rgba(115, 192, 222, 0.5)',  // #73C0DE
+                                'rgba(59, 162, 114, 0.5)',   // #3BA272
+                                'rgba(252, 132, 82, 0.5)',   // #FC8452
+                                'rgba(154, 96, 180, 0.5)',   // #9A60B4
+                                'rgba(234, 124, 204, 0.5)'   // #EA7CCC
+                            ]
+                            //colors: ['#A8DADC', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#F07167', '#00AFB9', '#B5A6C9']
+                            //colors: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4', '#EA7CCC'],
+                        }],
+                        tooltip: {
+                            pointFormat: '<b>{point.percentage:.1f}%</b><br/>數量: <b>{point.y}</b> 棵'
+                        },
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        },
+                        credits: {
+                            enabled: false
+                        }
+                    });
+                </script>
+            </ContentTemplate>
+            <Triggers>
+                <asp:AsyncPostBackTrigger ControlID="DropDownList_city" EventName="SelectedIndexChanged" />
+            </Triggers>
+        </asp:UpdatePanel>
         
     </div>
     <script type="text/javascript">
@@ -290,64 +358,5 @@
             }
         });
 
-        const data2 = <%= SpeciesChartDataJson %>;
-
-        Highcharts.chart('speciesChart', {
-            credits: { enabled: false },
-            exporting: { enabled: false },
-            chart: {
-                type: 'pie',
-                backgroundColor: 'transparent',
-                height: '100%'
-            },
-            title: {
-                text: null
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
-                        distance: 20,
-                        style: {
-                            fontSize: '16px'
-                        }
-                    },
-                    showInLegend: true
-                }
-            },
-            series: [{
-                name: '受保護樹木數量',
-                data: data2,
-                //colors: ['rgba(102, 189, 189, 0.2)','rgba(29, 105, 196, 0.2)']
-                //colors: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4', '#EA7CCC']
-                colors: [
-                    'rgba(84, 112, 198, 0.5)',   // #5470C6
-                    'rgba(145, 204, 117, 0.5)',  // #91CC75
-                    'rgba(250, 200, 88, 0.5)',   // #FAC858
-                    'rgba(238, 102, 102, 0.5)',  // #EE6666
-                    'rgba(115, 192, 222, 0.5)',  // #73C0DE
-                    'rgba(59, 162, 114, 0.5)',   // #3BA272
-                    'rgba(252, 132, 82, 0.5)',   // #FC8452
-                    'rgba(154, 96, 180, 0.5)',   // #9A60B4
-                    'rgba(234, 124, 204, 0.5)'   // #EA7CCC
-                ]
-                //colors: ['#A8DADC', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#F07167', '#00AFB9', '#B5A6C9']
-                //colors: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4', '#EA7CCC'],
-            }],
-            tooltip: {
-                pointFormat: '<b>{point.percentage:.1f}%</b><br/>數量: <b>{point.y}</b> 棵'
-            },
-            legend: {
-                layout: 'horizontal',
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-            credits: {
-                enabled: false
-            }
-        });
     </script>
 </asp:Content>
