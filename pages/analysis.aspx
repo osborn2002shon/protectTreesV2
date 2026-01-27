@@ -185,9 +185,9 @@
             <span>各縣市受保護樹木數量</span>
         </div>
         <div class="mt-5 mb-5">
-            <asp:RadioButtonList ID="RadioButtonList_c1Type" runat="server" CssClass="rbl" RepeatDirection="Horizontal" RepeatLayout="Flow" AutoPostBack="true">
-                <asp:ListItem>依縣市順序排</asp:ListItem>
-                <asp:ListItem Selected="True">從多到少排</asp:ListItem>
+            <asp:RadioButtonList ID="RadioButtonList_c1Type" runat="server" CssClass="rbl" RepeatDirection="Horizontal" RepeatLayout="Flow">
+                <asp:ListItem Value="0">依縣市順序排</asp:ListItem>
+                <asp:ListItem Value="1" Selected="True">從多到少排</asp:ListItem>
             </asp:RadioButtonList>
         </div>
         <div id="cityChart"></div>
@@ -198,112 +198,155 @@
                 指定縣市受保護樹木分析
             </span>
         </div>
-        <asp:UpdatePanel ID="UpdatePanel_cityAnalysis" runat="server" UpdateMode="Conditional">
-            <ContentTemplate>
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0" AutoPostBack="true" />
-                    </div>
-                    <div class="col-12 col-md-6">
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0" />
+            </div>
+            <div class="col-12 col-md-6">
 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        <table class="tb">
-                            <tr>
-                                <th>樹種</th>
-                                <th>數量</th>
-                                <th>分布</th>
-                            </tr>
-                            <asp:Repeater ID="Repeater_citySpecies" runat="server">
-                                <ItemTemplate>
-                                    <tr>
-                                        <td><%# Eval("SpeciesName") %></td>
-                                        <td><%# Eval("TreeCount") %></td>
-                                        <td><%# Eval("AreaNames") %></td>
-                                    </tr>
-                                </ItemTemplate>
-                            </asp:Repeater>
-                        </table>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div id="speciesChart"></div>
-                    </div>
-                </div>
-                <script type="text/javascript">
-                    const data2 = <%= SpeciesChartDataJson %>;
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <table class="tb">
+                    <thead>
+                        <tr>
+                            <th>樹種</th>
+                            <th>數量</th>
+                            <th>分布</th>
+                        </tr>
+                    </thead>
+                    <tbody id="citySpeciesBody">
+                        <asp:Repeater ID="Repeater_citySpecies" runat="server">
+                            <ItemTemplate>
+                                <tr>
+                                    <td><%# Eval("SpeciesName") %></td>
+                                    <td><%# Eval("TreeCount") %></td>
+                                    <td><%# Eval("AreaNames") %></td>
+                                </tr>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-12 col-md-6">
+                <div id="speciesChart"></div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            const initialSpeciesData = <%= SpeciesChartDataJson %>;
+            let cityChart;
+            let speciesChart;
 
-                    Highcharts.chart('speciesChart', {
-                        credits: { enabled: false },
-                        exporting: { enabled: false },
-                        chart: {
-                            type: 'pie',
-                            backgroundColor: 'transparent',
-                            height: '100%'
-                        },
-                        title: {
-                            text: null
-                        },
-                        plotOptions: {
-                            pie: {
-                                allowPointSelect: true,
-                                cursor: 'pointer',
-                                dataLabels: {
-                                    enabled: true,
-                                    format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
-                                    distance: 20,
-                                    style: {
-                                        fontSize: '16px'
-                                    }
-                                },
-                                showInLegend: true
-                            }
-                        },
-                        series: [{
-                            name: '受保護樹木數量',
-                            data: data2,
-                            //colors: ['rgba(102, 189, 189, 0.2)','rgba(29, 105, 196, 0.2)']
-                            //colors: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4', '#EA7CCC']
-                            colors: [
-                                'rgba(84, 112, 198, 0.5)',   // #5470C6
-                                'rgba(145, 204, 117, 0.5)',  // #91CC75
-                                'rgba(250, 200, 88, 0.5)',   // #FAC858
-                                'rgba(238, 102, 102, 0.5)',  // #EE6666
-                                'rgba(115, 192, 222, 0.5)',  // #73C0DE
-                                'rgba(59, 162, 114, 0.5)',   // #3BA272
-                                'rgba(252, 132, 82, 0.5)',   // #FC8452
-                                'rgba(154, 96, 180, 0.5)',   // #9A60B4
-                                'rgba(234, 124, 204, 0.5)'   // #EA7CCC
-                            ]
-                            //colors: ['#A8DADC', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#F07167', '#00AFB9', '#B5A6C9']
-                            //colors: ['#5470C6', '#91CC75', '#FAC858', '#EE6666', '#73C0DE', '#3BA272', '#FC8452', '#9A60B4', '#EA7CCC'],
-                        }],
-                        tooltip: {
-                            pointFormat: '<b>{point.percentage:.1f}%</b><br/>數量: <b>{point.y}</b> 棵'
-                        },
-                        legend: {
-                            layout: 'horizontal',
-                            align: 'center',
-                            verticalAlign: 'bottom'
-                        },
-                        credits: {
-                            enabled: false
+            const seriesColors = [
+                'rgba(84, 112, 198, 0.5)',   // #5470C6
+                'rgba(145, 204, 117, 0.5)',  // #91CC75
+                'rgba(250, 200, 88, 0.5)',   // #FAC858
+                'rgba(238, 102, 102, 0.5)',  // #EE6666
+                'rgba(115, 192, 222, 0.5)',  // #73C0DE
+                'rgba(59, 162, 114, 0.5)',   // #3BA272
+                'rgba(252, 132, 82, 0.5)',   // #FC8452
+                'rgba(154, 96, 180, 0.5)',   // #9A60B4
+                'rgba(234, 124, 204, 0.5)'   // #EA7CCC
+            ];
+
+            const renderSpeciesChart = (data) => {
+                if (speciesChart) {
+                    speciesChart.series[0].setData(data, true);
+                    return;
+                }
+
+                speciesChart = Highcharts.chart('speciesChart', {
+                    credits: { enabled: false },
+                    exporting: { enabled: false },
+                    chart: {
+                        type: 'pie',
+                        backgroundColor: 'transparent',
+                        height: '100%'
+                    },
+                    title: {
+                        text: null
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
+                                distance: 20,
+                                style: {
+                                    fontSize: '16px'
+                                }
+                            },
+                            showInLegend: true
                         }
+                    },
+                    series: [{
+                        name: '受保護樹木數量',
+                        data: data,
+                        colors: seriesColors
+                    }],
+                    tooltip: {
+                        pointFormat: '<b>{point.percentage:.1f}%</b><br/>數量: <b>{point.y}</b> 棵'
+                    },
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom'
+                    },
+                    credits: {
+                        enabled: false
+                    }
+                });
+            };
+
+            const updateCitySpecies = (cityId) => {
+                PageMethods.GetCitySpeciesData(cityId, (response) => {
+                    const body = document.getElementById('citySpeciesBody');
+                    body.innerHTML = response.TableRows.map(row => `
+                        <tr>
+                            <td>${row.SpeciesName}</td>
+                            <td>${row.TreeCount}</td>
+                            <td>${row.AreaNames}</td>
+                        </tr>
+                    `).join('');
+                    renderSpeciesChart(response.ChartData);
+                }, (error) => {
+                    console.error(error.get_message());
+                });
+            };
+
+            const updateCityChart = (orderByCount) => {
+                PageMethods.GetCityChartData(orderByCount, (response) => {
+                    cityChart.series[0].setData(response.ChartData, true);
+                }, (error) => {
+                    console.error(error.get_message());
+                });
+            };
+
+            document.addEventListener('DOMContentLoaded', () => {
+                renderSpeciesChart(initialSpeciesData);
+
+                const citySelect = document.getElementById('<%= DropDownList_city.ClientID %>');
+                citySelect.addEventListener('change', () => {
+                    updateCitySpecies(citySelect.value);
+                });
+
+                document.querySelectorAll('input[name="<%= RadioButtonList_c1Type.UniqueID %>"]').forEach((input) => {
+                    input.addEventListener('change', () => {
+                        updateCityChart(input.value === '1');
                     });
-                </script>
-            </ContentTemplate>
-            <Triggers>
-                <asp:AsyncPostBackTrigger ControlID="DropDownList_city" EventName="SelectedIndexChanged" />
-            </Triggers>
-        </asp:UpdatePanel>
+                });
+            });
+        </script>
         
     </div>
     <script type="text/javascript">
         // 模擬老樹數量資料
         const data = <%= CityChartDataJson %>;
 
-        Highcharts.chart('cityChart', {
+        cityChart = Highcharts.chart('cityChart', {
             credits: { enabled: false },
             exporting: { enabled: false },
             chart: {
