@@ -95,7 +95,7 @@ ORDER BY COUNT(1) {0}, s.commonName";
 
             var most = db.GetDataTable(string.Format(sql, "DESC"),
                 new SqlParameter("@status", ProtectedStatus),
-                new SqlParameter("@top", 2));
+                new SqlParameter("@top", 1));
             var least = db.GetDataTable(string.Format(sql, "ASC"),
                 new SqlParameter("@status", ProtectedStatus),
                 new SqlParameter("@top", 1));
