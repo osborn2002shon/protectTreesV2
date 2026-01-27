@@ -198,8 +198,7 @@
                 指定縣市受保護樹木分析
             </span>
         </div>
-        <asp:UpdatePanel ID="UpdatePanel_cityAnalysis" runat="server" UpdateMode="Conditional">
-            <ContentTemplate>
+
                 <div class="row">
                     <div class="col-12 col-md-6">
                         <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0" AutoPostBack="true" />
@@ -292,11 +291,7 @@
                         }
                     });
                 </script>
-            </ContentTemplate>
-            <Triggers>
-                <asp:AsyncPostBackTrigger ControlID="DropDownList_city" EventName="SelectedIndexChanged" />
-            </Triggers>
-        </asp:UpdatePanel>
+
         
     </div>
     <script type="text/javascript">
