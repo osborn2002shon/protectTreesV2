@@ -4,6 +4,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web.Script.Serialization;
+using System.Web.Script.Services;
+using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using DataAccess;
@@ -175,6 +177,46 @@ GROUP BY r.cityID, cityInfo.city";
 
         private void LoadCityChartData()
         {
+            var orderByCount = RadioButtonList_c1Type.SelectedValue == "1";
+            var chartData = BuildCityChartData(orderByCount);
+            CityChartDataJson = new JavaScriptSerializer().Serialize(chartData);
+        }
+
+        private void LoadCitySpeciesData()
+        {
+            if (!int.TryParse(DropDownList_city.SelectedValue, out int cityId))
+            {
+                SpeciesChartDataJson = "[]";
+                Repeater_citySpecies.DataSource = null;
+                Repeater_citySpecies.DataBind();
+                return;
+            }
+
+            var result = BuildCitySpeciesResult(cityId);
+            Repeater_citySpecies.DataSource = result.TableRows;
+            Repeater_citySpecies.DataBind();
+            SpeciesChartDataJson = new JavaScriptSerializer().Serialize(result.ChartData);
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static CityChartResult GetCityChartData(bool orderByCount)
+        {
+            return new CityChartResult
+            {
+                ChartData = BuildCityChartData(orderByCount)
+            };
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static CitySpeciesResult GetCitySpeciesData(int cityId)
+        {
+            return BuildCitySpeciesResult(cityId);
+        }
+
+        private static List<object[]> BuildCityChartData(bool orderByCount)
+        {
             const string sql = @"
 SELECT r.cityID,
        cityInfo.city AS cityName,
@@ -197,7 +239,6 @@ GROUP BY r.cityID, cityInfo.city";
                     TreeCount = GetRowLong(row, "treeCount")
                 });
 
-                bool orderByCount = RadioButtonList_c1Type.SelectedIndex == 1;
                 var ordered = orderByCount
                     ? rows.OrderByDescending(r => r.TreeCount).ThenBy(r => r.CityId)
                     : rows.OrderBy(r => r.CityId);
@@ -208,18 +249,19 @@ GROUP BY r.cityID, cityInfo.city";
                     chartData.Add(new object[] { item.CityName, item.TreeCount });
                 }
 
-                CityChartDataJson = new JavaScriptSerializer().Serialize(chartData);
+                return chartData;
             }
         }
 
-        private void LoadCitySpeciesData()
+        private static CitySpeciesResult BuildCitySpeciesResult(int cityId)
         {
-            if (!int.TryParse(DropDownList_city.SelectedValue, out int cityId))
+            if (cityId <= 0)
             {
-                SpeciesChartDataJson = "[]";
-                Repeater_citySpecies.DataSource = null;
-                Repeater_citySpecies.DataBind();
-                return;
+                return new CitySpeciesResult
+                {
+                    TableRows = new List<CitySpeciesRow>(),
+                    ChartData = new List<ChartPoint>()
+                };
             }
 
             const string sql = @"
@@ -268,18 +310,19 @@ ORDER BY COUNT(1) DESC, s.commonName";
                     })
                     .ToList();
 
-                Repeater_citySpecies.DataSource = tableRows;
-                Repeater_citySpecies.DataBind();
-
                 var chartData = tableRows
-                    .Select(row => new
+                    .Select(row => new ChartPoint
                     {
                         name = row.SpeciesName,
                         y = ParseNumber(row.TreeCount)
                     })
                     .ToList();
 
-                SpeciesChartDataJson = new JavaScriptSerializer().Serialize(chartData);
+                return new CitySpeciesResult
+                {
+                    TableRows = tableRows,
+                    ChartData = chartData
+                };
             }
         }
 
@@ -332,11 +375,28 @@ ORDER BY COUNT(1) DESC, s.commonName";
             return int.TryParse(value.Replace(",", string.Empty), out int number) ? number : 0;
         }
 
-        private class CitySpeciesRow
+        public class CitySpeciesRow
         {
             public string SpeciesName { get; set; }
             public string TreeCount { get; set; }
             public string AreaNames { get; set; }
+        }
+
+        public class CityChartResult
+        {
+            public List<object[]> ChartData { get; set; }
+        }
+
+        public class CitySpeciesResult
+        {
+            public List<CitySpeciesRow> TableRows { get; set; }
+            public List<ChartPoint> ChartData { get; set; }
+        }
+
+        public class ChartPoint
+        {
+            public string name { get; set; }
+            public int y { get; set; }
         }
     }
 }
