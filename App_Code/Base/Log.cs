@@ -25,7 +25,8 @@ namespace protectTreesV2
         public enum enum_UserLogItem
         {
             登入, 登出, 
-            樹籍基本資料管理, 健檢紀錄管理, 巡查紀錄管理, 養護紀錄管理
+            樹籍基本資料管理, 健檢紀錄管理, 巡查紀錄管理, 養護紀錄管理,
+            系統帳號管理
         }
 
         /// <summary>
