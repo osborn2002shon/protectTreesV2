@@ -203,6 +203,7 @@
     <Content Include="_js\bootstrap-table_export.min.js" />
     <Content Include="_js\bootstrap-table_tableExport.min.js" />
     <Content Include="_js\bootstrap.bundle.js" />
+    <Content Include="_js\combobox.js" />
     <Content Include="_js\dragdrop-preview.js" />
     <Content Include="_js\highcharts.js" />
     <Content Include="_js\highcharts_export-data.js" />
