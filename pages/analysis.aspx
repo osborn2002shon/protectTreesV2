@@ -141,43 +141,43 @@
     <div class="stats-container">
         <div class="stat-card">
             <div class="stat-label">保護數量</div>
-            <div class="stat-number">1,847<span class="stat-unit">案</span></div>
+            <div class="stat-number"><asp:Literal ID="Literal_TotalProtected" runat="server" /><span class="stat-unit">案</span></div>
             <div class="stat-description">全台列管保護的珍貴樹木</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">樹木種類</div>
-            <div class="stat-number">156<span class="stat-unit">種</span></div>
+            <div class="stat-number"><asp:Literal ID="Literal_SpeciesCount" runat="server" /><span class="stat-unit">種</span></div>
             <div class="stat-description">包含台灣特有種與外來種</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">數量最多樹種</div>
-            <div class="stat-number">600<span class="stat-unit">案</span></div>
-            <div class="stat-description">榕樹、台灣肖楠</div>
+            <div class="stat-number"><asp:Literal ID="Literal_MostSpeciesCount" runat="server" /><span class="stat-unit">案</span></div>
+            <div class="stat-description"><asp:Literal ID="Literal_MostSpeciesName" runat="server" /></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">數量最少樹種</div>
-            <div class="stat-number">50<span class="stat-unit">案</span></div>
-            <div class="stat-description">大王椰子</div>
+            <div class="stat-number"><asp:Literal ID="Literal_LeastSpeciesCount" runat="server" /><span class="stat-unit">案</span></div>
+            <div class="stat-description"><asp:Literal ID="Literal_LeastSpeciesName" runat="server" /></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">涵蓋縣市</div>
-            <div class="stat-number">22<span class="stat-unit">個</span></div>
+            <div class="stat-number"><asp:Literal ID="Literal_CityCount" runat="server" /><span class="stat-unit">個</span></div>
             <div class="stat-description">遍布全台</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">涵蓋鄉鎮</div>
-            <div class="stat-number">368<span class="stat-unit">個</span></div>
+            <div class="stat-number"><asp:Literal ID="Literal_AreaCount" runat="server" /><span class="stat-unit">個</span></div>
             <div class="stat-description">深入鄉里</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">種類最豐富</div>
-            <div class="stat-number">12<span class="stat-unit">種</span></div>
-            <div class="stat-description">新北市、桃園市</div>
+            <div class="stat-number"><asp:Literal ID="Literal_MostSpeciesCityCount" runat="server" /><span class="stat-unit">種</span></div>
+            <div class="stat-description"><asp:Literal ID="Literal_MostSpeciesCityName" runat="server" /></div>
         </div>
         <div class="stat-card">
             <div class="stat-label">保護數量最多</div>
-            <div class="stat-number">108<span class="stat-unit">案</span></div>
-            <div class="stat-description">臺南市</div>
+            <div class="stat-number"><asp:Literal ID="Literal_MostProtectedCityCount" runat="server" /><span class="stat-unit">案</span></div>
+            <div class="stat-description"><asp:Literal ID="Literal_MostProtectedCityName" runat="server" /></div>
         </div>
     </div>
     <div class="chartBox">
@@ -185,7 +185,7 @@
             <span>各縣市受保護樹木數量</span>
         </div>
         <div class="mt-5 mb-5">
-            <asp:RadioButtonList ID="RadioButtonList_c1Type" runat="server" CssClass="rbl" RepeatDirection="Horizontal" RepeatLayout="Flow">
+            <asp:RadioButtonList ID="RadioButtonList_c1Type" runat="server" CssClass="rbl" RepeatDirection="Horizontal" RepeatLayout="Flow" AutoPostBack="true">
                 <asp:ListItem>依縣市順序排</asp:ListItem>
                 <asp:ListItem Selected="True">從多到少排</asp:ListItem>
             </asp:RadioButtonList>
@@ -200,9 +200,7 @@
         </div>
         <div class="row">
             <div class="col-12 col-md-6">
-                <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0">
-                    <asp:ListItem>臺北市</asp:ListItem>
-                </asp:DropDownList>
+                <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select m-0" AutoPostBack="true" />
             </div>
             <div class="col-12 col-md-6">
 
@@ -216,14 +214,15 @@
                         <th>數量</th>
                         <th>分布</th>
                     </tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
-                    <tr><td>榕樹</td><td>100</td><td>中正區、大安區</td></tr>
+                    <asp:Repeater ID="Repeater_citySpecies" runat="server">
+                        <ItemTemplate>
+                            <tr>
+                                <td><%# Eval("SpeciesName") %></td>
+                                <td><%# Eval("TreeCount") %></td>
+                                <td><%# Eval("AreaNames") %></td>
+                            </tr>
+                        </ItemTemplate>
+                    </asp:Repeater>
                 </table>
             </div>
             <div class="col-12 col-md-6">
@@ -234,30 +233,7 @@
     </div>
     <script type="text/javascript">
         // 模擬老樹數量資料
-        const data = [
-            ['臺北市', 120],
-            ['高雄市', 110],
-            ['新北市', 98],
-            ['台中市', 87],
-            ['台南市', 75],
-            ['屏東縣', 78],
-            ['彰化縣', 70],
-            ['桃園市', 65],
-            ['南投縣', 68],
-            ['雲林縣', 60],
-            ['苗栗縣', 55],
-            ['嘉義縣', 52],
-            ['新竹市', 50],
-            ['新竹縣', 45],
-            ['宜蘭縣', 44],
-            ['花蓮縣', 43],
-            ['台東縣', 40],
-            ['嘉義市', 35],
-            ['基隆市', 30],
-            ['澎湖縣', 28],
-            ['金門縣', 20],
-            ['連江縣', 12]
-        ];
+        const data = <%= CityChartDataJson %>;
 
         Highcharts.chart('cityChart', {
             credits: { enabled: false },
@@ -314,13 +290,7 @@
             }
         });
 
-        const data2 = [
-            { name: '榕樹', y: 120 },
-            { name: '相思樹', y: 95 },
-            { name: '茄苳', y: 80 },
-            { name: '龍眼', y: 60 },
-            { name: '樟樹', y: 45 }
-        ];
+        const data2 = <%= SpeciesChartDataJson %>;
 
         Highcharts.chart('speciesChart', {
             credits: { enabled: false },
