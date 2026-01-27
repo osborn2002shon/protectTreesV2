@@ -58,7 +58,7 @@ GO
 CREATE TABLE [dbo].[System_Unit](
 	[unitID] [int] IDENTITY(1,1) NOT NULL, -- 單位主鍵
 	[auTypeID] [int] NULL, -- 權限類型ID
-	[unitGroup] [nvarchar](max) NULL,
+	[unitGroup] [nvarchar](max) NULL, -- 權限類型名稱
 	[unitName] [nvarchar](max) NULL, -- 單位名稱
  CONSTRAINT [PK_System_Unit] PRIMARY KEY CLUSTERED 
 (
@@ -843,32 +843,41 @@ GO
 CREATE VIEW [dbo].[View_UserInfo]
 AS
 	select 
-		System_UserAccount.accountID,
-		System_UserAccount.accountType,
-		System_UserAccount.auTypeID,
-		System_UserAccount.unitID,
-		System_UserAccount.account,
-		System_UserAccount.password,
-		System_UserAccount.name,
-		System_UserAccount.email,
-		System_UserAccount.mobile,
-		System_UserAccount.memo,
-		System_UserAccount.verifyStatus,
-		System_UserAccount.isActive,
-		System_UserAccount.lastLoginDateTime,
-		System_UserAccount.lastUpdatePWDateTime,
+		System_UserAccount.accountID,　-- 帳號流水號
+		System_UserAccount.accountType, -- 帳號類型(default=一般使用者 / sso=單一登入使用者)
+		System_UserAccount.auTypeID, -- 系統權限別ID
+		System_UserAccount.unitID, -- 所屬單位ID
+		System_UserAccount.account, -- 帳號
+		System_UserAccount.password, -- 密碼(加密後)
+		System_UserAccount.name, -- 使用者姓名
+		System_UserAccount.email, -- 電子郵件
+		System_UserAccount.mobile, -- 行動電話
+		System_UserAccount.memo, -- 備註
+		System_UserAccount.verifyStatus, --	審核狀態(null=待審,1=通過, 0=駁回)
+		System_UserAccount.verifyDateTime, -- 審核時間
+		cast(
+			case 
+				when System_UserAccount.isActive = 1
+				 and GETDATE() >= DATEADD(DAY,181,CAST(System_UserAccount.lastLoginDateTime as date))
+				then 1
+				else 0
+			end 
+		as bit) as isActive,　-- 是否啟用(1=啟用,0=停用)
+		System_UserAccount.lastLoginDateTime, -- 最後登入時間
+		System_UserAccount.lastUpdatePWDateTime, - - 最後更新密碼時間
 		insertDateTime, insertAccountID, updateDateTime, updateAccountID, removeDateTime, removeAccountID,
-		APP_USER_NODE_UUID,
-		APP_COMPANY_UUID,
-		APP_COMPANY_UUID_n,
-		APP_DEPT_NODE_UUID,
-		APP_DEPT_NODE_UUID_n,
-		APP_USER_LOGIN_ID,
-		auTypeName, 
-		unitGroup, unitName,
-		cast(case when lastLoginDateTime is NULL then 1 else 0 end as bit) 'isFirstLogin',
-		cast(case when GETDATE() >= DATEADD(DAY,181,CAST(lastLoginDateTime as date)) then 1 else 0 end as bit) 'isAutoStopLogin',
-		cast(case when lastUpdatePWDateTime is null or GETDATE() >= DATEADD(DAY,181,CAST(lastUpdatePWDateTime as date)) then 1 else 0 end as bit) 'isNeedChangePW'
+		APP_USER_NODE_UUID, -- SSO使用者節點UUID
+		APP_COMPANY_UUID, -- SSO公司UUID
+		APP_COMPANY_UUID_n, -- SSO公司UUID(無連字號)
+		APP_DEPT_NODE_UUID, -- SSO部門節點UUID
+		APP_DEPT_NODE_UUID_n, -- SSO部門節點UUID(無連字號)
+		APP_USER_LOGIN_ID, -- SSO使用者登入ID
+		auTypeName,  -- 系統權限別名稱
+		unitGroup, -- 所屬單位群組
+		unitName, -- 所屬單位名稱
+		cast(case when lastLoginDateTime is NULL then 1 else 0 end as bit) 'isFirstLogin', -- 是否首次登入
+		cast(case when GETDATE() >= DATEADD(DAY,181,CAST(lastLoginDateTime as date)) then 1 else 0 end as bit) 'isAutoStopLogin', -- 是否自動停用登入(超過180天未登入)
+		cast(case when lastUpdatePWDateTime is null or GETDATE() >= DATEADD(DAY,181,CAST(lastUpdatePWDateTime as date)) then 1 else 0 end as bit) 'isNeedChangePW' -- 是否需要更改密碼(超過180天未更改密碼)
 	from System_UserAccount
 	left join System_UserAuType on System_UserAccount.auTypeID = System_UserAuType.auTypeID
 	left join System_Unit on System_UserAccount.unitID = System_Unit.unitID
