@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -13,6 +14,9 @@ namespace protectTreesV2._uc.dashboard
     public partial class uc_treeStatusChart : UserControl
     {
         public int UnitId { get; set; }
+
+        [Category("自訂屬性")]
+        public bool IsStatusTown { get; set; } = false;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -31,7 +35,21 @@ namespace protectTreesV2._uc.dashboard
             var statuses = new[] { "已公告列管", "符合標準", "其他" };
             var dataLookup = new Dictionary<(string City, string Status), int>();
 
-            const string sql = @"
+            string sql;
+            if (IsStatusTown)
+            {
+                sql = @"
+                SELECT t.city AS CityName, t.area AS AreaName, r.treeStatus, COUNT(*) AS TotalCount
+                FROM Tree_Record r
+                INNER JOIN System_Taiwan t ON r.areaID = t.twID
+                INNER JOIN System_UnitCityMapping map ON t.twID = map.twID AND map.unitID = @unitID
+                WHERE r.editStatus = 1 AND r.removeDateTime IS NULL
+                GROUP BY t.city, r.treeStatus, t.twID, t.area
+                ORDER BY t.city, t.twID";
+            }
+            else
+            {
+                sql = @"
                 SELECT t.city AS CityName, r.treeStatus, COUNT(*) AS TotalCount
                 FROM Tree_Record r
                 INNER JOIN System_Taiwan t ON r.areaID = t.twID
@@ -39,29 +57,41 @@ namespace protectTreesV2._uc.dashboard
                 WHERE r.editStatus = 1 AND r.removeDateTime IS NULL
                 GROUP BY t.city, r.treeStatus
                 ORDER BY t.city";
+            }
 
             using (var da = new MS_SQL())
             {
                 var dt = da.GetDataTable(sql, new SqlParameter("@unitID", UnitId));
                 foreach (DataRow row in dt.Rows)
                 {
-                    var city = row["CityName"].ToString();
+
+                    // 統計項目(X軸)
+                    var area = "";
+                    if (IsStatusTown)
+                    {
+                        area = row["AreaName"].ToString();
+                    }
+                    else
+                    {
+                        area = row["CityName"].ToString();
+                    }
+
                     var status = row["treeStatus"].ToString();
                     var count = row["TotalCount"] == DBNull.Value ? 0 : Convert.ToInt32(row["TotalCount"]);
 
-                    if (!categories.Contains(city))
+                    if (!categories.Contains(area))
                     {
-                        categories.Add(city);
+                        categories.Add(area);
                     }
 
-                    dataLookup[(city, status)] = count;
+                    dataLookup[(area, status)] = count;
                 }
             }
 
             var series = new List<object>();
             foreach (var status in statuses)
             {
-                var values = categories.Select(city => dataLookup.TryGetValue((city, status), out var count) ? count : 0).ToList();
+                var values = categories.Select(area => dataLookup.TryGetValue((area, status), out var count) ? count : 0).ToList();
                 series.Add(new
                 {
                     name = status,

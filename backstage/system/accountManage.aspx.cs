@@ -52,8 +52,8 @@ namespace protectTreesV2.backstage.system
                 case 1:
                     return new[] { 1, 2, 3, 4, 5 };
                 case 2:
-                    return new[] { 3, 5 };
-                case 3:
+                    return new[] { 4, 5 };
+                case 4:
                     return new[] { 5 };
                 default:
                     return Enumerable.Empty<int>();
@@ -216,7 +216,24 @@ namespace protectTreesV2.backstage.system
                 return new DataTable();
             }
 
-            var sql = new StringBuilder(@"
+            bool requiresManagedUnitFilter = CurrentUser != null && (CurrentUser.auTypeID == 2 || CurrentUser.auTypeID == 4);
+            var sql = new StringBuilder();
+
+            if (requiresManagedUnitFilter)
+            {
+                sql.Append(@"
+                WITH UnitHierarchy AS (
+                    SELECT unitID
+                    FROM System_UnitUnitMapping
+                    WHERE manageUnitID = @manageUnitID
+                    UNION ALL
+                    SELECT mapping.unitID
+                    FROM System_UnitUnitMapping mapping
+                    INNER JOIN UnitHierarchy ON mapping.manageUnitID = UnitHierarchy.unitID
+                )");
+            }
+
+            sql.Append(@"
                 SELECT accountID, accountType, account, name, email, mobile, auTypeID, auTypeName, unitGroup, unitName,
                        verifyStatus, isActive, lastLoginDateTime, lastUpdatePWDateTime
                 FROM View_UserInfo
@@ -245,9 +262,9 @@ namespace protectTreesV2.backstage.system
             }
             sql.Append($" AND auTypeID IN ({string.Join(", ", auTypeParameters)})");
 
-            if (CurrentUser != null && (CurrentUser.auTypeID == 2 || CurrentUser.auTypeID == 4))
+            if (requiresManagedUnitFilter)
             {
-                sql.Append(" AND unitID IN (SELECT unitID FROM System_UnitUnitMapping WHERE manageUnitID = @manageUnitID)");
+                sql.Append(" AND unitID IN (SELECT unitID FROM UnitHierarchy)");
                 parameters.Add(new SqlParameter("@manageUnitID", CurrentUser.unitID));
             }
 
@@ -291,7 +308,10 @@ namespace protectTreesV2.backstage.system
             sql.Append(@" ORDER BY 
                             CASE WHEN verifyStatus IS NULL THEN 0 WHEN verifyStatus = 1 THEN 1 ELSE 2 END,
                             account");
-
+            if (requiresManagedUnitFilter)
+            {
+                sql.Append(" OPTION (MAXRECURSION 0)");
+            }
             using (var da = new DataAccess.MS_SQL())
             {
                 return da.GetDataTable(sql.ToString(), parameters.ToArray());

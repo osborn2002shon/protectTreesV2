@@ -171,6 +171,94 @@ namespace protectTreesV2
         }
 
         /// <summary>
+        /// 取得帳號詳細資訊
+        /// </summary>
+        /// <param name="accountID">使用者ID</param>
+        /// <returns></returns>
+        public stru_accountInfo Get_AccountInfo(int accountID)
+        {
+            var result = new stru_accountInfo
+            {
+                isExist = false
+            };
+
+            string sqlString = @"
+            SELECT 
+                [accountID], [accountType], [account], [name], [email],
+                [verifyStatus], [isActive], 
+                [lastUpdatePWDateTime], [lastLoginDateTime],
+                [isFirstLogin], [isNeedChangePW], [isAutoStopLogin],
+                [auTypeID], [auTypeName], 
+                [unitID], [unitGroup], [unitName],
+                [APP_USER_NODE_UUID], [APP_COMPANY_UUID], [APP_COMPANY_UUID_n],
+                [APP_DEPT_NODE_UUID], [APP_DEPT_NODE_UUID_n], [APP_USER_LOGIN_ID]
+            FROM [View_UserInfo]
+            WHERE [accountID] = @accountID";
+
+            var para = new List<System.Data.SqlClient.SqlParameter>
+            {
+                new System.Data.SqlClient.SqlParameter("@accountID", accountID)
+            };
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                var dt = da.GetDataTable(sqlString, para.ToArray());
+
+                if (dt.Rows.Count == 0)
+                    return result;
+
+                var row = dt.Rows[0];
+                result.isExist = true;
+
+                // ===== 基本資料 =====
+                result.accountID = (int)row["accountID"];
+                result.accountType = row["accountType"].ToString();
+                result.account = row["account"].ToString();
+                result.name = row["name"] == DBNull.Value ? "" : row["name"].ToString();
+                result.email = row["email"] == DBNull.Value ? "" : row["email"].ToString();
+
+                // ===== 狀態 =====
+                result.verifyStatus = row["verifyStatus"] == DBNull.Value
+                    ? (bool?)null
+                    : (bool)row["verifyStatus"];
+
+                result.isActive = (bool)row["isActive"];
+
+                // ===== 時間欄位 =====
+                result.lastUpdatePWDateTime = row["lastUpdatePWDateTime"] == DBNull.Value
+                    ? (DateTime?)null
+                    : (DateTime)row["lastUpdatePWDateTime"];
+
+                result.lastLoginDateTime = row["lastLoginDateTime"] == DBNull.Value
+                    ? (DateTime?)null
+                    : (DateTime)row["lastLoginDateTime"];
+
+                // ===== 系統開關與標記 =====
+
+                result.isFirstLogin = (bool)row["isFirstLogin"];
+                result.isNeedChangePW = (bool)row["isNeedChangePW"];
+                result.isAutoStopLogin = (bool)row["isAutoStopLogin"];
+
+                // ===== 權限 / 單位 =====
+                result.auTypeID = (int)row["auTypeID"];
+                result.auTypeName = row["auTypeName"] == DBNull.Value ? "" : row["auTypeName"].ToString();
+                result.unitID = (int)row["unitID"];
+                result.unitGroup = row["unitGroup"] == DBNull.Value ? "" : row["unitGroup"].ToString();
+                result.unitName = row["unitName"] == DBNull.Value ? "" : row["unitName"].ToString();
+
+                // ===== SSO（可為NULL）=====
+                result.APP_USER_NODE_UUID = row["APP_USER_NODE_UUID"] == DBNull.Value ? null : row["APP_USER_NODE_UUID"].ToString();
+                result.APP_COMPANY_UUID = row["APP_COMPANY_UUID"] == DBNull.Value ? null : row["APP_COMPANY_UUID"].ToString();
+                result.APP_COMPANY_UUID_n = row["APP_COMPANY_UUID_n"] == DBNull.Value ? null : row["APP_COMPANY_UUID_n"].ToString();
+                result.APP_DEPT_NODE_UUID = row["APP_DEPT_NODE_UUID"] == DBNull.Value ? null : row["APP_DEPT_NODE_UUID"].ToString();
+                result.APP_DEPT_NODE_UUID_n = row["APP_DEPT_NODE_UUID_n"] == DBNull.Value ? null : row["APP_DEPT_NODE_UUID_n"].ToString();
+                result.APP_USER_LOGIN_ID = row["APP_USER_LOGIN_ID"] == DBNull.Value ? null : row["APP_USER_LOGIN_ID"].ToString();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// 取得使用者上級機關的mail清單
         /// </summary>
         /// <param name="userUnitID"></param>
@@ -223,6 +311,128 @@ namespace protectTreesV2
             }
         }
 
+        public bool CheckPasswordComplexity(string password)
+        {
+            // 基礎長度檢查
+            if (string.IsNullOrEmpty(password) || password.Length < 8) return false;
+
+            // 正規表達式
+            // Regex 說明：
+            // (?=.*[a-z])              : 必須包含小寫
+            // (?=.*[A-Z])              : 必須包含大寫
+            // (?=.*\d)                 : 必須包含數字
+            // (?=.*[!@#$%^&*_+=.?\-])  : 必須包含「指定的特殊符號」至少一個
+            // .{8,}                    : 長度 8 碼以上 (點號 . 代表接受任何字元，包含空格、中文等)
+
+            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_+=.?\-]).{8,}$";
+
+            return System.Text.RegularExpressions.Regex.IsMatch(password, pattern);
+        }
+
+        /// <summary>
+        /// 檢核是否與歷史密碼重複
+        /// </summary>
+        /// <param name="accountID">使用者ID</param>
+        /// <param name="newPassword">新密碼(明碼)</param>
+        /// <param name="checkCount">檢查前 N 次</param>
+        /// <returns>true=重複(檢核失敗), false=未重複(通過)</returns>
+        public bool CheckIsHistoryPassword(int accountID, string newPassword, int checkCount)
+        {
+            // 防呆：如果次數 <= 0，代表不檢查，直接回傳 false (通過)
+            if (checkCount <= 0) return false;
+
+            System.Data.DataTable dtHistory = new System.Data.DataTable();
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                // SQL: 抓取該 User 最近 N 筆密碼
+                string sql = @"
+                    SELECT TOP (@Limit) [password]
+                    FROM [System_UserAccountPWLog]
+                    WHERE [accountID] = @accountID
+                    ORDER BY [setPasswordTime] DESC";
+
+                var parameters = new System.Data.SqlClient.SqlParameter[]
+                {
+                    new System.Data.SqlClient.SqlParameter("@Limit", checkCount),
+                    new System.Data.SqlClient.SqlParameter("@accountID", accountID)
+                };
+
+                dtHistory = da.GetDataTable(sql, parameters);
+            }
+
+            string newPwdHash = Get_HashPassword(newPassword);
+            foreach (System.Data.DataRow row in dtHistory.Rows)
+            {
+                string oldHashedPassword = row["password"].ToString();
+                if (newPwdHash == oldHashedPassword)
+                {
+                    return true; // 發現重複
+                }
+            }
+
+            return false; 
+
+        }
+
+
+        /// <summary>
+        /// 更新使用者密碼
+        /// </summary>
+        /// <param name="accountID">使用者ID</param>
+        /// <param name="passwordHash">請傳入加密後的密碼字串</param>
+        /// <param name="isWriteToLog">是否寫入歷程紀錄 (true=寫入Log並更新時間)</param>
+        /// <returns>isSuccess 是否成功</returns>
+        public bool UpdatePassword(int accountID, string passwordHash, bool isWriteToLog)
+        {
+            try
+            {
+                string sql = "";
+
+                if (isWriteToLog)
+                {
+                    // 一般變更 (需紀錄歷程 + 更新最後變更時間)
+                    sql = @"
+                    /* 更新使用者主檔 */
+                    UPDATE [System_UserAccount]
+                    SET [password] = @pwd, 
+                        [lastUpdatePWDateTime] = GETDATE(),
+                        [isNeedChangePW] = 0
+                    WHERE [accountID] = @id;
+
+                     /* 寫入密碼歷程紀錄表 */
+                    INSERT INTO [System_UserAccountPWLog] ([accountID], [password], [setPasswordTime])
+                    VALUES (@id, @pwd, GETDATE());
+                ";
+                }
+                else
+                {
+                    // 情境：特殊變更 (只換密碼，不更新時間，不留紀錄)
+                    sql = @"
+                    UPDATE [System_UserAccount]
+                    SET [password] = @pwd
+                    WHERE [accountID] = @id;
+                ";
+                }
+
+                using (var da = new DataAccess.MS_SQL())
+                {
+                    var parameters = new System.Data.SqlClient.SqlParameter[]
+                    {
+                    new System.Data.SqlClient.SqlParameter("@id", accountID),
+                    new System.Data.SqlClient.SqlParameter("@pwd", passwordHash)
+                    };
+
+                    da.ExecNonQuery(sql, parameters);
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                return false;
+            }
+        }
     }
 
     public static class UserInfo
