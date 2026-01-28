@@ -1,5 +1,21 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/_mp/mp_backstage.Master" AutoEventWireup="true" CodeBehind="accountManage.aspx.cs" Inherits="protectTreesV2.backstage.system.accountManage" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
+    <script type="text/javascript">
+        function confirmVerifyStatusChange() {
+            var original = document.getElementById('<%= HiddenField_verifyStatusOriginal.ClientID %>').value;
+            var selected = document.querySelector('input[name="<%= RadioButtonList_verifyStatus.UniqueID %>"]:checked');
+            if (!selected) {
+                return true;
+            }
+
+            var current = selected.value;
+            if (original !== current) {
+                return confirm('審核狀態變更後會寄送通知信，確定要儲存嗎？');
+            }
+
+            return true;
+        }
+    </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
     系統帳號管理
@@ -132,16 +148,6 @@
                                         Text="啟用"
                                         CommandName="ToggleActive"
                                         CommandArgument='<%# Eval("accountID") %>' />
-                                    <asp:LinkButton ID="LinkButton_approve" runat="server"
-                                        CssClass="btn btn-sm btn-outline-success"
-                                        Text="審核通過"
-                                        CommandName="ApproveAccount"
-                                        CommandArgument='<%# Eval("accountID") %>' />
-                                    <asp:LinkButton ID="LinkButton_reject" runat="server"
-                                        CssClass="btn btn-sm btn-outline-danger"
-                                        Text="審核駁回"
-                                        CommandName="RejectAccount"
-                                        CommandArgument='<%# Eval("accountID") %>' />
                                 </div>
                             </ItemTemplate>
                         </asp:TemplateField>
@@ -163,6 +169,7 @@
                 <div class="queryBox-body">
                     <asp:HiddenField ID="HiddenField_accountId" runat="server" />
                     <asp:HiddenField ID="HiddenField_editMode" runat="server" />
+                    <asp:HiddenField ID="HiddenField_verifyStatusOriginal" runat="server" />
 
                     <div class="row mb-3">
                         <div class="col">
@@ -197,9 +204,20 @@
                         </div>
                     </div>
 
+                    <div class="row mb-3">
+                        <div class="col">
+                            <span class="contItem"><i class="fas fa-clipboard-check me-2"></i>審核狀態<span class="start">*</span></span>
+                            <asp:RadioButtonList ID="RadioButtonList_verifyStatus" runat="server" RepeatDirection="Horizontal">
+                                <asp:ListItem Text="審核通過" Value="1" />
+                                <asp:ListItem Text="審核駁回" Value="0" />
+                            </asp:RadioButtonList>
+                        </div>
+                    </div>
+
                     <div class="row mt-4">
                         <div class="col text-center">
-                            <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_save_Click">
+                            <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_save_Click"
+                                OnClientClick="return confirmVerifyStatusChange();">
                                 儲存
                             </asp:LinkButton>
                             <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn-outline-secondary ms-2" OnClick="LinkButton_cancel_Click">
