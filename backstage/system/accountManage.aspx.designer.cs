@@ -95,6 +95,11 @@ namespace protectTreesV2.backstage.system
         protected global::System.Web.UI.WebControls.HiddenField HiddenField_editMode;
 
         /// <summary>
+        /// HiddenField_verifyStatusOriginal 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.HiddenField HiddenField_verifyStatusOriginal;
+
+        /// <summary>
         /// TextBox_account 控制項。
         /// </summary>
         protected global::System.Web.UI.WebControls.TextBox TextBox_account;
@@ -123,6 +128,11 @@ namespace protectTreesV2.backstage.system
         /// TextBox_memo 控制項。
         /// </summary>
         protected global::System.Web.UI.WebControls.TextBox TextBox_memo;
+
+        /// <summary>
+        /// RadioButtonList_verifyStatus 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.RadioButtonList RadioButtonList_verifyStatus;
 
         /// <summary>
         /// LinkButton_save 控制項。
