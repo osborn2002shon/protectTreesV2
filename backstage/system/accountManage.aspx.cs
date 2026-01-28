@@ -1,4 +1,5 @@
-﻿using NPOI.SS.UserModel;
+﻿using NPOI.OpenXmlFormats.Dml;
+using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using protectTreesV2.Base;
 using protectTreesV2.SystemManagement;
@@ -51,8 +52,8 @@ namespace protectTreesV2.backstage.system
                 case 1:
                     return new[] { 1, 2, 3, 4, 5 };
                 case 2:
-                    return new[] { 4 };
-                case 4:
+                    return new[] { 3, 5 };
+                case 3:
                     return new[] { 5 };
                 default:
                     return Enumerable.Empty<int>();
