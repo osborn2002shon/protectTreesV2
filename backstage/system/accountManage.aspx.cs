@@ -229,20 +229,26 @@ namespace protectTreesV2.backstage.system
                 sql.Append(" AND accountType = 'default'");
             }
 
-            if (CurrentUser != null)
+            // 依使用者權限取得可管理的 AU 類型，避免在 SQL 中硬編碼。
+            var allowedAuTypes = GetAllowedManageAuTypes().ToList();
+            if (allowedAuTypes.Count == 0)
             {
-                if (CurrentUser.auTypeID == 2)
-                {
-                    sql.Append(@" AND auTypeID = 4
-                                  AND unitID IN (SELECT unitID FROM System_UnitUnitMapping WHERE manageUnitID = @manageUnitID)");
-                    parameters.Add(new SqlParameter("@manageUnitID", CurrentUser.unitID));
-                }
-                else if (CurrentUser.auTypeID == 4)
-                {
-                    sql.Append(@" AND auTypeID = 5
-                                  AND unitID IN (SELECT unitID FROM System_UnitUnitMapping WHERE manageUnitID = @manageUnitID)");
-                    parameters.Add(new SqlParameter("@manageUnitID", CurrentUser.unitID));
-                }
+                return new DataTable();
+            }
+
+            var auTypeParameters = new List<string>();
+            for (int i = 0; i < allowedAuTypes.Count; i++)
+            {
+                string parameterName = $"@allowedAuType{i}";
+                auTypeParameters.Add(parameterName);
+                parameters.Add(new SqlParameter(parameterName, allowedAuTypes[i]));
+            }
+            sql.Append($" AND auTypeID IN ({string.Join(", ", auTypeParameters)})");
+
+            if (CurrentUser != null && (CurrentUser.auTypeID == 2 || CurrentUser.auTypeID == 4))
+            {
+                sql.Append(" AND unitID IN (SELECT unitID FROM System_UnitUnitMapping WHERE manageUnitID = @manageUnitID)");
+                parameters.Add(new SqlParameter("@manageUnitID", CurrentUser.unitID));
             }
 
             string accountType = DropDownList_accountType.SelectedValue;
