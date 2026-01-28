@@ -352,41 +352,27 @@ namespace protectTreesV2.backstage.system
 
             var editButton = (LinkButton)e.Row.FindControl("LinkButton_edit");
             var toggleButton = (LinkButton)e.Row.FindControl("LinkButton_toggle");
-            var approveButton = (LinkButton)e.Row.FindControl("LinkButton_approve");
-            var rejectButton = (LinkButton)e.Row.FindControl("LinkButton_reject");
 
             bool canManageAccount = HasManagePermission() && (accountType != "sso" || IsSystemAdmin());
             bool canEdit = canManageAccount && accountType == "default";
 
+            bool isReviewed = verifyStatus != null;
             editButton.Visible = canEdit;
-            toggleButton.Visible = canManageAccount;
-            approveButton.Visible = canManageAccount;
-            rejectButton.Visible = canManageAccount;
+            toggleButton.Visible = canManageAccount && isReviewed;
+
+            if (editButton.Visible)
+            {
+                editButton.Text = isReviewed ? "編輯" : "審核";
+            }
 
             if (toggleButton.Visible)
             {
                 toggleButton.Text = isActive ? "停用" : "啟用";
                 toggleButton.CssClass = isActive ? "btn btn-sm btn-outline-secondary" : "btn btn-sm btn-outline-success";
-                string confirmMessage = isActive ? "確定要停用此帳號嗎？" : "確定要啟用此帳號嗎？";
-                if (!isActive && verifyStatus == null)
-                {
-                    confirmMessage = "啟用會將本帳號設定為審核通過，確定嗎？";
-                }
+                string confirmMessage = isActive
+                    ? "此動作會寄送通知信，確定要停用此帳號嗎？"
+                    : "此動作會寄送通知信，確定要啟用此帳號嗎？";
                 toggleButton.OnClientClick = $"return confirm('{confirmMessage}');";
-            }
-
-            if (approveButton.Visible)
-            {
-                approveButton.Enabled = verifyStatus != true;
-                approveButton.CssClass = verifyStatus == true ? "btn btn-sm btn-outline-success disabled" : "btn btn-sm btn-outline-success";
-                approveButton.OnClientClick = "return confirm('確定要將此帳號設定為審核通過嗎？');";
-            }
-
-            if (rejectButton.Visible)
-            {
-                rejectButton.Enabled = verifyStatus != false;
-                rejectButton.CssClass = verifyStatus == false ? "btn btn-sm btn-outline-danger disabled" : "btn btn-sm btn-outline-danger";
-                rejectButton.OnClientClick = "return confirm('確定要將此帳號設定為審核駁回嗎？');";
             }
         }
 
@@ -410,12 +396,6 @@ namespace protectTreesV2.backstage.system
                     break;
                 case "ToggleActive":
                     ToggleAccountStatus(accountId);
-                    break;
-                case "ApproveAccount":
-                    UpdateAccountVerifyStatus(accountId, true);
-                    break;
-                case "RejectAccount":
-                    UpdateAccountVerifyStatus(accountId, false);
                     break;
             }
         }
@@ -460,10 +440,17 @@ namespace protectTreesV2.backstage.system
             string name = TextBox_name.Text.Trim();
             string mobile = TextBox_mobile.Text.Trim();
             string memo = TextBox_memo.Text.Trim();
+            string verifyStatusValue = RadioButtonList_verifyStatus.SelectedValue;
 
             if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(mobile))
             {
                 ShowMessage("提示", "請確認必填欄位皆已填寫。", "warning");
+                return;
+            }
+
+            if (verifyStatusValue != "1" && verifyStatusValue != "0")
+            {
+                ShowMessage("提示", "請選擇審核狀態。", "warning");
                 return;
             }
 
@@ -486,6 +473,10 @@ namespace protectTreesV2.backstage.system
                 return;
             }
 
+            bool newVerifyStatus = verifyStatusValue == "1";
+            bool? originalVerifyStatus = ParseVerifyStatus(HiddenField_verifyStatusOriginal.Value);
+            bool verifyStatusChanged = originalVerifyStatus == null || originalVerifyStatus.Value != newVerifyStatus;
+
             if (mode == "add")
             {
                 if (Account.Check_IsAccountExist(account))
@@ -494,7 +485,7 @@ namespace protectTreesV2.backstage.system
                     return;
                 }
 
-                InsertAccount(account, name, mobile, memo, auTypeId, unitId);
+                InsertAccount(account, name, mobile, memo, auTypeId, unitId, newVerifyStatus);
                 ShowMessage("完成", "帳號新增成功。", "success");
             }
             else if (mode == "edit")
@@ -504,8 +495,15 @@ namespace protectTreesV2.backstage.system
                     return;
                 }
 
-                UpdateAccount(accountId, name, mobile, memo, auTypeId, unitId);
+                UpdateAccount(accountId, name, mobile, memo, auTypeId, unitId, newVerifyStatus, verifyStatusChanged);
                 ShowMessage("完成", "帳號資料已更新。", "success");
+
+                if (verifyStatusChanged)
+                {
+                    var accountInfo = GetAccountInfo(accountId);
+                    string resultText = newVerifyStatus ? "審核通過" : "審核駁回";
+                    SendAccountNotification(accountInfo, $"帳號{resultText}");
+                }
             }
 
             MultiView_main.SetActiveView(View_list);
@@ -519,6 +517,8 @@ namespace protectTreesV2.backstage.system
             TextBox_name.Text = string.Empty;
             TextBox_mobile.Text = string.Empty;
             TextBox_memo.Text = string.Empty;
+            HiddenField_verifyStatusOriginal.Value = string.Empty;
+            RadioButtonList_verifyStatus.ClearSelection();
 
             BindUnitGroupDropdown();
             SetEditFieldAccessibility(isEditMode: false);
@@ -545,6 +545,12 @@ namespace protectTreesV2.backstage.system
             TextBox_name.Text = accountInfo.name;
             TextBox_mobile.Text = accountInfo.mobile;
             TextBox_memo.Text = accountInfo.memo ?? string.Empty;
+            HiddenField_verifyStatusOriginal.Value = SerializeVerifyStatus(accountInfo.verifyStatus);
+            RadioButtonList_verifyStatus.ClearSelection();
+            if (accountInfo.verifyStatus != null)
+            {
+                RadioButtonList_verifyStatus.SelectedValue = accountInfo.verifyStatus.Value ? "1" : "0";
+            }
 
             BindUnitGroupDropdown();
             DropDownList_unitGroup.SelectedValue = accountInfo.auTypeID.ToString();
@@ -563,7 +569,7 @@ namespace protectTreesV2.backstage.system
             DropDownList_unitName.Enabled = allowUnitChange;
         }
 
-        private void InsertAccount(string account, string name, string mobile, string memo, int auTypeId, int unitId)
+        private void InsertAccount(string account, string name, string mobile, string memo, int auTypeId, int unitId, bool verifyStatus)
         {
             const string sql = @"
                 INSERT INTO System_UserAccount
@@ -582,9 +588,9 @@ namespace protectTreesV2.backstage.system
                     new SqlParameter("@email", account),
                     new SqlParameter("@mobile", mobile),
                     new SqlParameter("@memo", string.IsNullOrWhiteSpace(memo) ? (object)DBNull.Value : memo),
-                    new SqlParameter("@verifyStatus", true),
+                    new SqlParameter("@verifyStatus", verifyStatus),
                     new SqlParameter("@verifyDateTime", DateTime.Now),
-                    new SqlParameter("@isActive", true),
+                    new SqlParameter("@isActive", verifyStatus),
                     new SqlParameter("@insertDateTime", DateTime.Now),
                     new SqlParameter("@insertAccountID", CurrentUser?.accountID ?? -1));
             }
@@ -592,7 +598,7 @@ namespace protectTreesV2.backstage.system
             UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.新增, $"新增帳號：{account}");
         }
 
-        private void UpdateAccount(int accountId, string name, string mobile, string memo, int auTypeId, int unitId)
+        private void UpdateAccount(int accountId, string name, string mobile, string memo, int auTypeId, int unitId, bool verifyStatus, bool verifyStatusChanged)
         {
             var sql = new StringBuilder(@"
                 UPDATE System_UserAccount
@@ -618,6 +624,13 @@ namespace protectTreesV2.backstage.system
                 parameters.Add(new SqlParameter("@unitID", unitId));
             }
 
+            if (verifyStatusChanged)
+            {
+                sql.Append(", verifyStatus = @verifyStatus, verifyDateTime = GETDATE(), isActive = @isActive");
+                parameters.Add(new SqlParameter("@verifyStatus", verifyStatus));
+                parameters.Add(new SqlParameter("@isActive", verifyStatus));
+            }
+
             sql.Append(" WHERE accountID = @accountID");
 
             using (var da = new DataAccess.MS_SQL())
@@ -626,6 +639,12 @@ namespace protectTreesV2.backstage.system
             }
 
             UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.修改, $"更新帳號資料：{accountId}");
+
+            if (verifyStatusChanged)
+            {
+                string resultText = verifyStatus ? "審核通過" : "審核駁回";
+                UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.修改, $"{resultText}：{accountId}");
+            }
         }
 
         private void ToggleAccountStatus(int accountId)
@@ -679,47 +698,6 @@ namespace protectTreesV2.backstage.system
             SendAccountNotification(accountInfo, enable ? "帳號已啟用" : "帳號已停用");
 
             ShowMessage("完成", $"帳號已{statusText}。", "success");
-            BindAccountList();
-        }
-
-        private void UpdateAccountVerifyStatus(int accountId, bool verifyStatus)
-        {
-            var accountInfo = GetAccountInfo(accountId);
-            if (accountInfo == null)
-            {
-                ShowMessage("提示", "找不到指定帳號。", "warning");
-                return;
-            }
-
-            if (accountInfo.accountType == "sso" && !IsSystemAdmin())
-            {
-                ShowMessage("權限不足", "SSO帳號需由系統管理權限進行審核與管理。", "warning");
-                return;
-            }
-
-            const string sql = @"
-                UPDATE System_UserAccount
-                SET verifyStatus = @verifyStatus,
-                    verifyDateTime = GETDATE(),
-                    isActive = CASE WHEN @verifyStatus = 1 THEN 1 ELSE 0 END,
-                    updateDateTime = GETDATE(),
-                    updateAccountID = @updateAccountID
-                WHERE accountID = @accountID";
-
-            using (var da = new DataAccess.MS_SQL())
-            {
-                da.ExecNonQuery(sql,
-                    new SqlParameter("@verifyStatus", verifyStatus),
-                    new SqlParameter("@updateAccountID", CurrentUser?.accountID ?? -1),
-                    new SqlParameter("@accountID", accountId));
-            }
-
-            string resultText = verifyStatus ? "審核通過" : "審核駁回";
-            UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.修改, $"{resultText}：{accountInfo.account}");
-
-            SendAccountNotification(accountInfo, $"帳號{resultText}");
-
-            ShowMessage("完成", $"已更新審核狀態為{resultText}。", "success");
             BindAccountList();
         }
 
@@ -863,6 +841,31 @@ namespace protectTreesV2.backstage.system
             }
 
             return dateValue.ToString();
+        }
+
+        private static bool? ParseVerifyStatus(string value)
+        {
+            if (value == "1")
+            {
+                return true;
+            }
+
+            if (value == "0")
+            {
+                return false;
+            }
+
+            return null;
+        }
+
+        private static string SerializeVerifyStatus(bool? verifyStatus)
+        {
+            if (verifyStatus == null)
+            {
+                return string.Empty;
+            }
+
+            return verifyStatus.Value ? "1" : "0";
         }
 
         private class AccountEntry
