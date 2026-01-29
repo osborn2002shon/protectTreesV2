@@ -85,6 +85,10 @@ namespace protectTreesV2.backstage.patrol
             Base.DropdownBinder.Bind_DropDownList_City(ref DropDownList_city);
             Base.DropdownBinder.Bind_DropDownList_Area(ref DropDownList_area, DropDownList_city.SelectedValue);
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
+            DropDownList_editStatus.Items.Clear();
+            DropDownList_editStatus.Items.Add(new ListItem("不拘", string.Empty));
+            DropDownList_editStatus.Items.Add(new ListItem("定稿", ((int)TreeEditState.定稿).ToString()));
+            DropDownList_editStatus.Items.Add(new ListItem("草稿", ((int)TreeEditState.草稿).ToString()));
         }
 
         private void CollectFilterFromUI()
@@ -103,6 +107,9 @@ namespace protectTreesV2.backstage.patrol
 
             if (int.TryParse(DropDownList_species.SelectedValue, out int species))
                 filter.speciesID = species;
+
+            if (int.TryParse(DropDownList_editStatus.SelectedValue, out int dataStatus))
+                filter.dataStatus = (TreeEditState)dataStatus;
 
             if (DateTime.TryParse(TextBox_dateStart.Text, out DateTime start))
                 filter.dateStart = start;
@@ -150,6 +157,15 @@ namespace protectTreesV2.backstage.patrol
                 if (DropDownList_species.Items.FindByValue(speciesVal) != null)
                 {
                     DropDownList_species.SelectedValue = speciesVal;
+                }
+            }
+
+            if (filter.dataStatus.HasValue)
+            {
+                string statusVal = ((int)filter.dataStatus.Value).ToString();
+                if (DropDownList_editStatus.Items.FindByValue(statusVal) != null)
+                {
+                    DropDownList_editStatus.SelectedValue = statusVal;
                 }
             }
 
