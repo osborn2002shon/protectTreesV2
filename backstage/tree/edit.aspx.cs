@@ -360,7 +360,7 @@ namespace protectTreesV2.backstage.tree
             record.CulturalHistoryIntro = txtCulturalHistory.Text.Trim();
             record.HealthCondition = txtHealth.Text.Trim();
 
-            if (state == TreeEditState.定稿 && string.IsNullOrWhiteSpace(record.SystemTreeNo))
+            if (string.IsNullOrWhiteSpace(record.SystemTreeNo))
             {
                 record.SystemTreeNo = TreeService.GenerateSystemTreeNo(record.CityID, record.AreaID, record.AnnouncementDate ?? record.SurveyDate ?? DateTime.Today);
             }
