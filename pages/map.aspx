@@ -184,8 +184,10 @@
 
             const graphicsLayer = new GraphicsLayer();
             const highlightLayer = new GraphicsLayer();
+            const locationLayer = new GraphicsLayer();
             map.add(graphicsLayer);
             map.add(highlightLayer);
+            map.add(locationLayer);
 
             const view = new MapView({
                 container: "mapView",
@@ -216,6 +218,31 @@
             const latInput = document.getElementById("inputLat");
             const lngInput = document.getElementById("inputLng");
 
+            const TOWNSHIP_ZOOM = 12;
+
+            const locationSymbol = {
+                type: "simple-marker",
+                color: [16, 185, 129, 0.9],
+                size: 16,
+                outline: {
+                    color: [255, 255, 255, 0.95],
+                    width: 2
+                }
+            };
+
+            const showLocationPoint = (lat, lng) => {
+                locationLayer.removeAll();
+                const locationGraphic = new Graphic({
+                    geometry: {
+                        type: "point",
+                        latitude: lat,
+                        longitude: lng
+                    },
+                    symbol: locationSymbol
+                });
+                locationLayer.add(locationGraphic);
+            };
+
             locateButton.addEventListener("click", () => {
                 const lat = parseFloat(latInput.value);
                 const lng = parseFloat(lngInput.value);
@@ -225,9 +252,10 @@
                     return;
                 }
 
+                showLocationPoint(lat, lng);
                 view.goTo({
                     center: [lng, lat],
-                    zoom: 14
+                    zoom: TOWNSHIP_ZOOM
                 });
             });
 
@@ -243,7 +271,8 @@
                         const lng = Number(position.coords.longitude.toFixed(6));
                         latInput.value = lat;
                         lngInput.value = lng;
-                        view.goTo({ center: [lng, lat], zoom: 15 });
+                        showLocationPoint(lat, lng);
+                        view.goTo({ center: [lng, lat], zoom: TOWNSHIP_ZOOM });
                     },
                     (error) => {
                         alert("無法取得目前位置：" + error.message);
@@ -517,7 +546,7 @@
                 if (!entry) {
                     return;
                 }
-                const { shouldGoTo = true, zoom = 16 } = options;
+                const { shouldGoTo = true, zoom = TOWNSHIP_ZOOM } = options;
                 if (shouldGoTo) {
                     view.goTo({ center: [entry.longitude, entry.latitude], zoom });
                 }
@@ -843,7 +872,7 @@
                     if (!entry) {
                         return;
                     }
-                    showTreeDetail(entry, { shouldGoTo: true, zoom: 16 });
+                    showTreeDetail(entry, { shouldGoTo: true, zoom: TOWNSHIP_ZOOM });
                 });
             }
 
@@ -952,7 +981,7 @@
                     if (!entry) {
                         return;
                     }
-                    showTreeDetail(entry, { shouldGoTo: false });
+                    showTreeDetail(entry, { shouldGoTo: true, zoom: TOWNSHIP_ZOOM });
                 });
             });
 
