@@ -215,6 +215,7 @@
             const geoButton = document.getElementById("btnGeolocate");
             const latInput = document.getElementById("inputLat");
             const lngInput = document.getElementById("inputLng");
+            const townZoomLevel = 13;
 
             locateButton.addEventListener("click", () => {
                 const lat = parseFloat(latInput.value);
@@ -227,7 +228,7 @@
 
                 view.goTo({
                     center: [lng, lat],
-                    zoom: 14
+                    zoom: townZoomLevel
                 });
             });
 
@@ -243,7 +244,7 @@
                         const lng = Number(position.coords.longitude.toFixed(6));
                         latInput.value = lat;
                         lngInput.value = lng;
-                        view.goTo({ center: [lng, lat], zoom: 15 });
+                        view.goTo({ center: [lng, lat], zoom: townZoomLevel });
                     },
                     (error) => {
                         alert("無法取得目前位置：" + error.message);
