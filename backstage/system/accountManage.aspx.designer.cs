@@ -100,6 +100,11 @@ namespace protectTreesV2.backstage.system
         protected global::System.Web.UI.WebControls.HiddenField HiddenField_verifyStatusOriginal;
 
         /// <summary>
+        /// Label_account 控制項。
+        /// </summary>
+        protected global::System.Web.UI.WebControls.Label Label_account;
+
+        /// <summary>
         /// TextBox_account 控制項。
         /// </summary>
         protected global::System.Web.UI.WebControls.TextBox TextBox_account;

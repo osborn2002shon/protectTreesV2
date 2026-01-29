@@ -68,6 +68,35 @@ namespace protectTreesV2
         }
 
         /// <summary>
+        /// 產生臨時密碼
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string GenerateTemporaryPassword(int length = 10)
+        {
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+            if (length < 6)
+            {
+                length = 6;
+            }
+
+            var buffer = new byte[length];
+            char[] result = new char[length];
+
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(buffer);
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = chars[buffer[i] % chars.Length];
+            }
+
+            return new string(result);
+        }
+
+        /// <summary>
         /// 取得一般帳號狀態資訊（用於登入前檢查）
         /// </summary>
         /// <param name="account"></param>
