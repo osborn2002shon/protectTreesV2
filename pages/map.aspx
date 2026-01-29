@@ -513,6 +513,25 @@
                 highlightLayer.add(highlightGraphic);
             };
 
+            const showTreeDetail = (entry, options = {}) => {
+                if (!entry) {
+                    return;
+                }
+                const { shouldGoTo = true, zoom = 16 } = options;
+                if (shouldGoTo) {
+                    view.goTo({ center: [entry.longitude, entry.latitude], zoom });
+                }
+                highlightTree(entry);
+                renderTreeDetail(entry);
+                if (treeListCount) {
+                    treeListCount.textContent = entry.tree.SystemTreeNo || "樹木資料";
+                }
+                if (treeListPagination) {
+                    treeListPagination.classList.add("is-hidden");
+                }
+                setTreeListOpen(true);
+            };
+
             const citySelect = document.getElementById("filterCity");
             const areaSelect = document.getElementById("filterArea");
             const speciesSelect = document.getElementById("filterSpecies");
@@ -824,15 +843,7 @@
                     if (!entry) {
                         return;
                     }
-                    view.goTo({ center: [entry.longitude, entry.latitude], zoom: 16 });
-                    highlightTree(entry);
-                    renderTreeDetail(entry);
-                    if (treeListCount) {
-                        treeListCount.textContent = entry.tree.SystemTreeNo || "樹木資料";
-                    }
-                    if (treeListPagination) {
-                        treeListPagination.classList.add("is-hidden");
-                    }
+                    showTreeDetail(entry, { shouldGoTo: true, zoom: 16 });
                 });
             }
 
@@ -929,6 +940,20 @@
                 if (event.key === "Escape" && photoLightbox && photoLightbox.classList.contains("is-open")) {
                     setLightboxOpen(false);
                 }
+            });
+
+            view.on("click", (event) => {
+                view.hitTest(event).then((response) => {
+                    const hit = response.results.find((result) => result.graphic && result.graphic.layer === graphicsLayer);
+                    if (!hit) {
+                        return;
+                    }
+                    const entry = treeListEntries.find((item) => item.graphic === hit.graphic);
+                    if (!entry) {
+                        return;
+                    }
+                    showTreeDetail(entry, { shouldGoTo: false });
+                });
             });
 
             renderTrees(treeData);
