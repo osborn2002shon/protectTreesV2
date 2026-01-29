@@ -179,9 +179,11 @@
     <Content Include="_css\bootstrap-table.css" />
     <Content Include="_css\bootstrap.css" />
     <Content Include="_css\mp_backstage_control.css" />
+    <Content Include="_css\mp_backstage_sm.css" />
     <Content Include="_css\mp_public_control.css" />
     <Content Include="_css\mp_public_default.css" />
     <Content Include="_css\mp_public_main.css" />
+    <Content Include="_css\mp_public_map.css" />
     <Content Include="_css\mp_public_menu.css" />
     <Content Include="_css\fontawesome-all.css" />
     <Content Include="_css\mp_backstage_main.css" />
@@ -192,6 +194,7 @@
     <Content Include="_img\icon\analysis.png" />
     <Content Include="_img\icon\faq.png" />
     <Content Include="_img\icon\forest2.png" />
+    <Content Include="_img\icon\pin.png" />
     <Content Include="_img\icon\search.png" />
     <Content Include="_img\icon\street-map.png" />
     <Content Include="_img\icon\tree.png" />
@@ -224,21 +227,21 @@
     <Content Include="_uc\TreePhotoAlbum.ascx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Code\Base\Base.cs">
+    <Compile Include="Lib\Base\Base.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="App_Code\Base\DataAccess_MS_SQL.cs" />
-    <Compile Include="App_Code\Base\Log.cs" />
-    <Compile Include="App_Code\Base\Mail.cs" />
-    <Compile Include="App_Code\Base\User.cs" />
-    <Compile Include="App_Code\Batch.cs" />
-    <Compile Include="App_Code\Care.cs" />
-    <Compile Include="App_Code\DashboardService.cs" />
-    <Compile Include="App_Code\Health.cs" />
-    <Compile Include="App_Code\OrgUnit.cs" />
-    <Compile Include="App_Code\Patrol.cs" />
-    <Compile Include="App_Code\SystemManagement.cs" />
-    <Compile Include="App_Code\TreeCatalog.cs" />
+    <Compile Include="Lib\Base\DataAccess_MS_SQL.cs" />
+    <Compile Include="Lib\Base\Log.cs" />
+    <Compile Include="Lib\Base\Mail.cs" />
+    <Compile Include="Lib\Base\User.cs" />
+    <Compile Include="Lib\Batch.cs" />
+    <Compile Include="Lib\Care.cs" />
+    <Compile Include="Lib\DashboardService.cs" />
+    <Compile Include="Lib\Health.cs" />
+    <Compile Include="Lib\OrgUnit.cs" />
+    <Compile Include="Lib\Patrol.cs" />
+    <Compile Include="Lib\SystemManagement.cs" />
+    <Compile Include="Lib\TreeCatalog.cs" />
     <Compile Include="backstage\care\edit.aspx.cs">
       <DependentUpon>edit.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

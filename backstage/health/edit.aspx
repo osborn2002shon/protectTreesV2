@@ -118,7 +118,7 @@
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    健檢資料管理 / 健檢紀錄 / <asp:Literal ID="Literal_pathAction" runat="server"></asp:Literal>
+    健檢資料管理：<asp:Literal ID="Literal_pathAction" runat="server"></asp:Literal>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     <asp:Literal ID="Literal_title" runat="server"></asp:Literal>
@@ -173,6 +173,7 @@
                 </div>
             </div>
         </div>
+        <div class="card-footer"></div>
     </div>
 
     <ul class="nav nav-tabs mb-4" id="healthEditTabs" role="tablist">
@@ -202,8 +203,7 @@
         </li>
     </ul>
 
-    <div class="tab-content" id="healthEditTabContent">
-    
+    <div class="tab-content" id="healthEditTabContent">    
         <div class="tab-pane fade show active" id="pane-general" role="tabpanel" aria-labelledby="tab-general">
             <div class="formCard card mb-4 shadow-sm">
                 <div class="card-header">一般調查資料</div>
@@ -285,6 +285,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -450,6 +451,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -648,6 +650,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -716,6 +719,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -792,6 +796,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -832,6 +837,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -919,28 +925,22 @@
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="form-check">
-                <%-- 定稿勾選框 --%>
-                <asp:CheckBox ID="CheckBox_dataStatus" runat="server"  />
-                <label class="form-check-label fw-bold" for="<%= CheckBox_dataStatus.ClientID %>">
-                    是否定稿
-                </label>
-                
-            </div>
-        </div>
-    </div>
-
     <div class="text-center mb-5">
+        <%-- 定稿勾選框 --%>
+        <asp:CheckBox ID="CheckBox_dataStatus" runat="server"  />
+        <label class="form-check-label" for="<%= CheckBox_dataStatus.ClientID %>">
+            儲存為定稿
+        </label>
+        <br />
+        定稿視為正式資料，無法退回草稿狀態，並將開放後台使用者查詢檢視
+        <br />
         <%-- 儲存/新增按鈕 --%>
-        <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_save_Click">
-            <asp:Literal ID="Literal_btnSaveText" runat="server" Text="新增"></asp:Literal>
+        <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn_main" OnClick="LinkButton_save_Click">
+            <i class="fa-solid fa-floppy-disk me-1"></i><asp:Literal ID="Literal_btnSaveText" runat="server" Text="新增"></asp:Literal>
         </asp:LinkButton>
-
         <%-- 取消按鈕 --%>
-        <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn-secondary" OnClick="LinkButton_cancel_Click">
-            取消
+        <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn_main_line" OnClick="LinkButton_cancel_Click">
+            <i class="fa-solid fa-xmark me-1"></i>取消
         </asp:LinkButton>
     </div>
 
@@ -950,7 +950,7 @@
                     <div class="formCard card">
                         <div class="card-header">編輯紀錄</div>
                         <div class="card-body">
-                            <asp:GridView ID="GridView_logs" runat="server" AutoGenerateColumns="false" CssClass="gv" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging"  ShowHeaderWhenEmpty="true" >
+                            <asp:GridView ID="GridView_logs" runat="server" AutoGenerateColumns="false" CssClass="tb" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging"  ShowHeaderWhenEmpty="true" >
                                 <PagerSettings Mode="Numeric" />
                                 <Columns>
                                     <asp:BoundField DataField="ActionType" HeaderText="動作" />
@@ -969,6 +969,7 @@
                                  </EmptyDataTemplate>
                             </asp:GridView>
                         </div>
+                        <div class="card-footer"></div>
                     </div>
                 </div>
             </div>

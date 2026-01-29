@@ -108,8 +108,8 @@
             </div>
         </div>
         <div class="card-footer text-center">
-            <asp:LinkButton ID="LinkButton_changePassword" runat="server" CssClass="btn btn-warning" OnClick="LinkButton_changePassword_Click">
-                <i class="fas fa-save me-1"></i>變更密碼
+            <asp:LinkButton ID="LinkButton_changePassword" runat="server" CssClass="btn btn-danger" OnClick="LinkButton_changePassword_Click">
+                <i class="fas fa-key me-1"></i>變更密碼
             </asp:LinkButton>
         </div>
     </asp:Panel>

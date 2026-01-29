@@ -12,7 +12,7 @@
         top: 60%; /* 或者你想要的位置,例如 40% */
         left: 0%; /* 靠左,距離左邊 0% */
         transform: translateY(-50%); /* 只垂直置中 */
-        width: 750px; /* 或調整成你想要的寬度,例如 50% */
+        /*width: 750px;*/ /* 或調整成你想要的寬度,例如 50% */
         background-color: rgba(255, 255, 255, 0.9);
         border: 1px solid #517c4e;
         border-left: none;

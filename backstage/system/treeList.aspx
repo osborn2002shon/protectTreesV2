@@ -20,9 +20,13 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col">
-                    <asp:Button ID="btnSearch" runat="server" Text="查詢" OnClick="btnSearch_Click" CssClass="btn btn-primary" />
-                    <asp:Button ID="btnReset" runat="server" Text="清除條件" OnClick="btnReset_Click" CssClass="btn btn-primary" />
+                <div class="col text-center">
+                    <asp:LinkButton ID="LinkButton_Search" runat="server" OnClick="btnSearch_Click" CssClass="btn btn_main">
+                        <i class="fas fa-search me-1"></i>查詢
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="LinkButton_Reset" runat="server" OnClick="btnReset_Click" CssClass="btn btn_main_line" Visible="false">
+                        <i class="fas fa-xmark me-1"></i>清除條件
+                    </asp:LinkButton>
                 </div>
             </div>
         </div>
@@ -37,18 +41,18 @@
         <div class="table-responsive">
             <asp:GridView ID="gvSpecies" runat="server" CssClass="gv" AutoGenerateColumns="false" AllowPaging="true" PageSize="10" PagerSettings-Mode="Numeric" PageButtonCount="10" OnPageIndexChanging="gvSpecies_PageIndexChanging">
                 <Columns>
-                    <asp:BoundField DataField="commonName" ItemStyle-HorizontalAlign="Center" HeaderText="樹種名稱" />
-                    <asp:TemplateField HeaderText="學名">
-                        <ItemTemplate>
-                            <asp:Literal ID="litScientificName" runat="server" Text='<%# FormatScientificName(Eval("scientificName") as string) %>' />
-                        </ItemTemplate>
-                    </asp:TemplateField>
-                    <asp:TemplateField HeaderText="是否為原生種">
+                    <asp:TemplateField HeaderText="原生種" ItemStyle-Width="100px">
                         <ItemTemplate>
                             <asp:Literal ID="litIsNative" runat="server" Text='<%# FormatNative(Eval("isNative")) %>' />
                         </ItemTemplate>
                     </asp:TemplateField>
-                    <asp:BoundField DataField="memo" ItemStyle-HorizontalAlign="Center" HeaderText="備註" />
+                    <asp:BoundField DataField="commonName" HeaderText="中文" ItemStyle-Width="250px" />
+                    <asp:TemplateField HeaderText="學名" ItemStyle-Width="400px">
+                        <ItemTemplate>
+                            <asp:Literal ID="litScientificName" runat="server" Text='<%# FormatScientificName(Eval("scientificName") as string) %>' />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:BoundField DataField="memo" HeaderText="備註" />
                 </Columns>
             </asp:GridView>
         </div>

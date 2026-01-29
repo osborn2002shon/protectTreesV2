@@ -42,13 +42,13 @@ namespace protectTreesV2._mp
         protected global::System.Web.UI.ScriptManager ScriptManager_main;
 
         /// <summary>
-        /// Label_msg 控制項。
+        /// Label_userName 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label Label_msg;
+        protected global::System.Web.UI.WebControls.Label Label_userName;
 
         /// <summary>
         /// LinkButton_userName 控制項。
@@ -76,15 +76,6 @@ namespace protectTreesV2._mp
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_path;
-
-        /// <summary>
-        /// ContentPlaceHolder_title 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_title;
 
         /// <summary>
         /// ContentPlaceHolder_content 控制項。
@@ -139,5 +130,14 @@ namespace protectTreesV2._mp
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel Panel_closeModal;
+
+        /// <summary>
+        /// ContentPlaceHolder_title 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder ContentPlaceHolder_title;
     }
 }

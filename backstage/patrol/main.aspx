@@ -2,21 +2,21 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    巡查資料管理 / 巡查紀錄
+    巡查資料管理：巡查作業
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
-    巡查紀錄
+    巡查作業
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
     <nav class="nav nav-tabs mb-4">
-        <a class="nav-link active" href="main.aspx">巡查管理</a>
+        <a class="nav-link active" href="main.aspx">巡查作業</a>
         <a class="nav-link text-dark" href="list.aspx">異動管理</a>
         <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆巡查照片</a>
     </nav>
 
     <div class="queryBox">
         <div class="queryBox-header">
-            查詢條件
+            樹籍查詢
         </div>
         <div class="queryBox-body">
             <div class="row">
@@ -52,7 +52,9 @@
 
             <div class="row">
                 <div class="col text-center">
-                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_search_Click">查詢</asp:LinkButton>
+                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn_main" OnClick="LinkButton_search_Click">
+                        <i class="fas fa-search me-1"></i>查詢
+                    </asp:LinkButton>
                 </div>
             </div>
         </div>
@@ -88,7 +90,7 @@
                 </asp:TemplateField>
 
                 <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" SortExpression="systemTreeNo" HtmlEncode="false" />
-                <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />
+                <%--<asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />--%>
 
                 <asp:TemplateField HeaderText="縣市鄉鎮" SortExpression="areaID">
                     <ItemTemplate>
@@ -116,26 +118,25 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="250px">
+                <asp:TemplateField HeaderText="操作" ItemStyle-Width="200px">
                     <ItemTemplate>
                         <div class="d-flex gap-1 justify-content-center">
                             <asp:LinkButton ID="LinkButton_addRecord" runat="server"
-                                CssClass="btn btn-sm btn-success"
-                                Text="新增紀錄"
+                                CssClass="btn btn-sm btn-primary"
+                                Text="新增"
                                 CommandName="_AddRecord"
                                 CommandArgument='<%# Eval("treeID") %>' />
-
+                            <asp:LinkButton ID="LinkButton_viewRecord" runat="server"
+                                CssClass="btn btn-sm btn-outline-primary"
+                                Text="查詢"
+                                CommandName="_ViewRecord"
+                                CommandArgument='<%# Eval("treeID") %>' />
                             <asp:LinkButton ID="LinkButton_viewTree" runat="server"
-                                CssClass="btn btn-sm btn-info text-white"
-                                Text="檢視樹籍"
+                                CssClass="btn btn-sm btn-outline-warning"
+                                Text="樹籍"
                                 CommandName="_ViewTree"
                                 CommandArgument='<%# Eval("treeID") %>' />
 
-                            <asp:LinkButton ID="LinkButton_viewRecord" runat="server"
-                                CssClass="btn btn-sm btn-primary"
-                                Text="檢視紀錄"
-                                CommandName="_ViewRecord"
-                                CommandArgument='<%# Eval("treeID") %>' />
                         </div>
                     </ItemTemplate>
                 </asp:TemplateField>
@@ -165,16 +166,16 @@
         <asp:GridView ID="GridView_selectedList" runat="server" CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" OnRowCommand="GridView_selectedList_RowCommand">
             <Columns>
                 <asp:BoundField HtmlEncode="false" DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" />
-                <asp:BoundField HtmlEncode="false" DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" />
+                <%--<asp:BoundField HtmlEncode="false" DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" />--%>
                 <asp:BoundField DataField="cityName" HeaderText="縣市" />
                 <asp:BoundField DataField="areaName" HeaderText="鄉鎮" />
                 <asp:BoundField DataField="speciesName" HeaderText="樹種" />
                 <asp:BoundField DataField="manager" HeaderText="管理人" />
-                <asp:BoundField DataField="patrolDate" HeaderText="最後巡查" DataFormatString="{0:yyyy/MM/dd}" />
-                <asp:BoundField DataField="patroller" HeaderText="巡查人" />
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="80px" ItemStyle-HorizontalAlign="Center">
+                <%--<asp:BoundField DataField="patrolDate" HeaderText="最後巡查" DataFormatString="{0:yyyy/MM/dd}" />--%>
+                <%--<asp:BoundField DataField="patroller" HeaderText="巡查人" />--%>
+                <asp:TemplateField HeaderText="動作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center">
                     <ItemTemplate>
-                        <asp:LinkButton ID="LinkButton_remove" runat="server" CssClass="btn btn-sm btn-outline-danger"
+                        <asp:LinkButton ID="LinkButton_remove" runat="server" CssClass="btn btn-sm btn-danger"
                             CommandName="_Remove" CommandArgument='<%# Eval("treeID") %>'>
                             移除
                         </asp:LinkButton>

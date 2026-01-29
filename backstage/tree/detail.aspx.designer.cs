@@ -420,15 +420,6 @@ namespace protectTreesV2.backstage.tree
         protected global::protectTreesV2._uc.TreePhotoAlbum patrolPhotoAlbum;
 
         /// <summary>
-        /// pnlPatrolFilters 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlPatrolFilters;
-
-        /// <summary>
         /// pnlPatrolRecordEmpty 控制項。
         /// </summary>
         /// <remarks>
@@ -436,6 +427,15 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlPatrolRecordEmpty;
+
+        /// <summary>
+        /// pnlPatrolFilters 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlPatrolFilters;
 
         /// <summary>
         /// ddlPatrolYear 控制項。
@@ -492,15 +492,6 @@ namespace protectTreesV2.backstage.tree
         protected global::protectTreesV2._uc.TreePhotoAlbum carePhotoAlbum;
 
         /// <summary>
-        /// pnlCareFilters 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlCareFilters;
-
-        /// <summary>
         /// pnlCareRecordEmpty 控制項。
         /// </summary>
         /// <remarks>
@@ -508,6 +499,15 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlCareRecordEmpty;
+
+        /// <summary>
+        /// pnlCareFilters 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlCareFilters;
 
         /// <summary>
         /// ddlCareYear 控制項。
@@ -553,15 +553,6 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvCareRecords;
-
-        /// <summary>
-        /// lnkBackToList 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkBackToList;
 
         /// <summary>
         /// ltlRecordModalTitle 控制項。

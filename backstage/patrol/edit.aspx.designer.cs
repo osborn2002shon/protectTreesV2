@@ -132,24 +132,6 @@ namespace protectTreesV2.backstage.patrol
         protected global::System.Web.UI.WebControls.TextBox TextBox_memo;
 
         /// <summary>
-        /// CheckBox_isFinal 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox CheckBox_isFinal;
-
-        /// <summary>
-        /// CheckBox_hasPublicSafetyRisk 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox CheckBox_hasPublicSafetyRisk;
-
-        /// <summary>
         /// HiddenField_existingPhotosData 控制項。
         /// </summary>
         /// <remarks>
@@ -184,6 +166,24 @@ namespace protectTreesV2.backstage.patrol
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.FileUpload FileUpload_pendingPhotos;
+
+        /// <summary>
+        /// CheckBox_isFinal 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox CheckBox_isFinal;
+
+        /// <summary>
+        /// CheckBox_hasPublicSafetyRisk 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox CheckBox_hasPublicSafetyRisk;
 
         /// <summary>
         /// LinkButton_save 控制項。

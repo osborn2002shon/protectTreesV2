@@ -46,14 +46,14 @@
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    巡查資料管理 / 巡查紀錄
+    巡查資料管理：上傳多筆巡查照片
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     上傳多筆巡查照片
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
       <nav class="nav nav-tabs mb-4">
-          <a class="nav-link text-dark" href="main.aspx">巡查管理</a>
+          <a class="nav-link text-dark" href="main.aspx">巡查作業</a>
           <a class="nav-link text-dark" href="list.aspx">異動管理</a>
           <a class="nav-link active " href="uploadPhoto.aspx">上傳多筆巡查照片</a>
       </nav>

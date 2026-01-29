@@ -77,7 +77,7 @@
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    養護資料管理 / 養護紀錄 / <asp:Literal ID="Literal_pathAction" runat="server"></asp:Literal>
+    養護資料管理：<asp:Literal ID="Literal_pathAction" runat="server"></asp:Literal>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     <asp:Literal ID="Literal_title" runat="server"></asp:Literal>
@@ -490,29 +490,24 @@
                     <asp:Button ID="Button_addCarePhotoBlock" runat="server" Text="新增照片區塊" CssClass="btn btn-outline-primary" OnClick="Button_addCarePhotoBlock_Click" />
                 </div>
             </div>
-
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="form-check">
-                        <asp:CheckBox ID="CheckBox_isFinal" runat="server" />
-                        <label class="form-check-label fw-bold" for="<%= CheckBox_isFinal.ClientID %>">
-                            是否定稿
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn-primary me-2" OnClick="LinkButton_save_Click">
-                    <asp:Literal ID="Literal_btnSaveText" runat="server" Text="儲存"></asp:Literal>
-                </asp:LinkButton>
-                <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn-secondary" OnClick="LinkButton_cancel_Click">
-                    取消
-                </asp:LinkButton>
-            </div>
         </div>
+        <div class="card-footer"></div>
     </div>
-
+    <div class="text-center mb-5">
+        <asp:CheckBox ID="CheckBox_isFinal" runat="server" />
+        <label class="form-check-label" for="<%= CheckBox_isFinal.ClientID %>">
+            儲存為定稿
+        </label>
+        <br />
+        定稿視為正式資料，無法退回草稿狀態，並將開放後台使用者查詢檢視
+        <br />
+        <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn_main" OnClick="LinkButton_save_Click">
+            <i class="fa-solid fa-floppy-disk me-1"></i><asp:Literal ID="Literal_btnSaveText" runat="server" Text="儲存"></asp:Literal>
+        </asp:LinkButton>
+        <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn_main_line" OnClick="LinkButton_cancel_Click">
+            <i class="fa-solid fa-xmark me-1"></i>取消
+        </asp:LinkButton>
+    </div>
     <asp:Panel ID="pnlLogs" runat="server" Visible="false">
     <div class="row mt-4">
         <div class="col">
@@ -520,7 +515,7 @@
                 <div class="card-header">編輯紀錄</div>
                 <div class="card-body">
                     <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
-                    <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="gv" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging">
+                    <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="tb" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging">
                         <PagerSettings Mode="Numeric" />
                         <Columns>
                             <asp:BoundField DataField="ActionType" HeaderText="動作" />
@@ -534,6 +529,7 @@
                         </Columns>
                     </asp:GridView>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
     </div>

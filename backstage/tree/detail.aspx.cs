@@ -856,7 +856,7 @@ namespace protectTreesV2.backstage.tree
             var selectionHint = e.Item.FindControl("lblHealthSelectionHint") as System.Web.UI.WebControls.Label;
             if (selectionHint != null && viewModel.IsSelected)
             {
-                selectionHint.Text = "檢視";
+                selectionHint.Text = "檢視中";
                 selectionHint.CssClass = "text-success fw-semibold small";
             }
 
@@ -896,7 +896,7 @@ namespace protectTreesV2.backstage.tree
             {
                 if (viewModel.IsSelected)
                 {
-                    photoButton.Text = "檢視";
+                    photoButton.Text = "目前";
                     photoButton.CssClass = "btn btn-sm btn-danger";
                     e.Row.CssClass = $"{e.Row.CssClass} patrol-record-row is-selected";
                 }
@@ -926,7 +926,7 @@ namespace protectTreesV2.backstage.tree
             {
                 if (viewModel.IsSelected)
                 {
-                    photoButton.Text = "檢視";
+                    photoButton.Text = "目前";
                     photoButton.CssClass = "btn btn-sm btn-danger";
                     e.Row.CssClass = $"{e.Row.CssClass} care-record-row is-selected";
                 }

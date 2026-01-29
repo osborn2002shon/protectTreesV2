@@ -57,14 +57,12 @@
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    樹籍管理 / 樹籍檢視
+    樹籍資料管理：檢視樹籍
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
-    樹籍檢視
+    樹籍資料管理：檢視樹籍
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
-
-
             <asp:HiddenField ID="hfTreeID" runat="server" />
             <asp:HiddenField ID="hfSelectedHealthId" runat="server" />
             <asp:HiddenField ID="hfSelectedPatrolId" runat="server" />
@@ -85,6 +83,7 @@
             </ul>
 
             <div class="tab-content" id="treeDetailTabContent">
+                <%-- 樹籍資料 --%>
                 <div class="tab-pane show active" id="pane-tree" role="tabpanel" aria-labelledby="tree-detail-tab">
                     <div class="row g-4">
                         <div class="col-lg-5">
@@ -304,7 +303,7 @@
                         </div>
                     </div>
                 </div>
-
+                <%-- 健檢資料 --%>
                 <div class="tab-pane" id="pane-health" role="tabpanel" aria-labelledby="tree-health-tab">
                     <div class="row g-4">
                         <div class="col-lg-5">
@@ -333,7 +332,7 @@
                                                 <asp:LinkButton ID="btnSelectHealth" runat="server" CssClass="fw-semibold text-decoration-none" CommandName="SelectHealth" CommandArgument='<%# Eval("HealthId") %>'>
                                                     <%# Eval("SurveyDateDisplay") %>
                                                 </asp:LinkButton>
-                                                <asp:Label ID="lblHealthSelectionHint" runat="server" CssClass="text-muted small" Text="點選切換照片" />
+                                                <asp:Label ID="lblHealthSelectionHint" runat="server" CssClass="text-muted small" Text="選擇" />
                                             </div>
                                             <div class="card-body">
                                                 <div class="row g-3">
@@ -350,7 +349,7 @@
                                                         <div class="fw-semibold"><%# Eval("TreatmentDescriptionDisplay") %></div>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                                <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
                                                     <asp:LinkButton ID="btnViewReport" runat="server" CssClass="btn btn-sm btn-primary" CommandName="ViewReport" CommandArgument='<%# Eval("HealthId") %>' Text="檢視報告" />
                                                     <div class="dropdown">
                                                         <button id="btnAttachmentToggle" runat="server" type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">附件下載</button>
@@ -381,6 +380,7 @@
                         </div>
                     </div>
                 </div>
+                <%-- 巡查資料 --%>
                 <div class="tab-pane" id="pane-patrol" role="tabpanel" aria-labelledby="tree-patrol-tab">
                     <div class="row g-4">
                         <div class="col-lg-5">
@@ -420,7 +420,7 @@
                                     </div>
                                 </div>
                             </asp:Panel>
-                            <asp:GridView ID="gvPatrolRecords" runat="server" CssClass="table table-bordered align-middle" AutoGenerateColumns="false" OnRowCommand="gvPatrolRecords_RowCommand" OnRowDataBound="gvPatrolRecords_RowDataBound">
+                            <asp:GridView ID="gvPatrolRecords" runat="server" CssClass="gv" AutoGenerateColumns="false" OnRowCommand="gvPatrolRecords_RowCommand" OnRowDataBound="gvPatrolRecords_RowDataBound">
                                 <Columns>
                                     <asp:TemplateField HeaderText="巡查日期">
                                         <ItemTemplate>
@@ -452,6 +452,7 @@
                         </div>
                     </div>
                 </div>
+                <%-- 養護資料 --%>
                 <div class="tab-pane" id="pane-care" role="tabpanel" aria-labelledby="tree-care-tab">
                     <div class="row g-4">
                         <div class="col-lg-5">
@@ -491,7 +492,7 @@
                                     </div>
                                 </div>
                             </asp:Panel>
-                            <asp:GridView ID="gvCareRecords" runat="server" CssClass="table table-bordered align-middle" AutoGenerateColumns="false" OnRowCommand="gvCareRecords_RowCommand" OnRowDataBound="gvCareRecords_RowDataBound">
+                            <asp:GridView ID="gvCareRecords" runat="server" CssClass="gv" AutoGenerateColumns="false" OnRowCommand="gvCareRecords_RowCommand" OnRowDataBound="gvCareRecords_RowDataBound">
                                 <Columns>
                                     <asp:TemplateField HeaderText="養護日期">
                                         <ItemTemplate>
@@ -533,8 +534,8 @@
             </div>
 
             <div class="row mt-4">
-                <div class="col">
-                    <asp:HyperLink ID="lnkBackToList" runat="server" Text="返回列表" NavigateUrl="query.aspx" CssClass="btn btn-outline-secondary" />
+                <div class="col text-center">
+                    <a class="btn btn_main_line" href="query.aspx"><i class="fa-solid fa-arrow-left me-1"></i>返回列表</a>
                 </div>
             </div>
 
@@ -603,8 +604,6 @@
                     </div>
                 </div>
             </div>
-
-
 
     <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
     <script type="text/javascript">

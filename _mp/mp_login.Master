@@ -61,6 +61,10 @@
                 var md = new bootstrap.Modal(document.getElementById('divMSG'));
                 md.show();
             }
+            //div載入動畫
+            $(window).on('load', function () {
+                $('.login-card').hide().fadeIn(800);
+            });
         </script>
     </form>
 </body>

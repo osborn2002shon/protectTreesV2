@@ -1,24 +1,29 @@
-﻿/** 查詢條件樣式 **/
+﻿/* 查詢樣式 */
 .queryBox {
-    /*border: 1px solid black;*/
-    border-radius: 5px 5px;
-    background: linear-gradient(135deg, #0f2350, #1a3b6b);
+    border-radius: 8px 8px;
+    background-color: #e5f0ec;
     padding-bottom: 10px;
     margin-bottom: 30px;
     box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
 }
 
 .queryBox-header {
-    color: white;
+    color: #467273;
     padding: 20px 20px;
     font-size: 1.25rem;
     font-weight: 500;
+    border-bottom: 2px solid rgba(0, 105, 72,0.5);
 }
+    .queryBox-header div {
+        font-size:1rem;
+        color:dimgray;
+        font-weight:400;
+    }
 
-.queryBox-body {
-    background-color: white;
-    padding: 0px 0px;
-}
+    .queryBox-body {
+        background-color: white;
+        padding: 0px 0px;
+    }
     .queryBox-body .row {
         margin: 0px 0px;
         padding: 10px 5px;
@@ -27,7 +32,7 @@
             font-weight: 500;
         }
 
-/** 列表樣式 **/
+/* 列表樣式 */
 
 /*應對GV自動多生出外面的DIV導致卷軸失效*/
 .table-responsive.gv-tb > div {
@@ -37,57 +42,69 @@
 }
 
 .gv-tb {
+    border-radius: 8px;
     box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-    padding:0px;
+    padding: 0px;
 }
 
 .gv {
-    min-width:100%;    
-    background-color:white;
-    border:none;
+    min-width: 100%;
+    background-color: white;
+    border: none;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
     .gv tr th {
-        min-width:50px;
-        background: #d3d3d3;
-        /*color: #0f2350;*/
+        min-width: 50px;
+        background-color: #e5f0ec;
+        border-bottom: 2px solid rgba(0, 105, 72,0.5);
         font-size: 1rem;
         font-weight: 600;
-        border: none;
-        padding: 15px 10px;
-        /*white-space: nowrap;*/
+        padding: 15px 20px;
+        color: #467273;
     }
 
-    .gv tr td {
-        padding: 10px 10px;
-    }
+        .gv tr th a {
+            color: #467273;
+        }
+
+        .gv tr td {
+            padding: 10px 20px;
+        }
 
     .gv tr {
         border-bottom: 1px solid #e1e1e1;
     }
-    .gv tr:first-child {
-        border-bottom: none;
-    }
-    .gv tr:last-child {
-        border-bottom: none;
-    }
 
-        .gv tr td table {
-            margin:0 auto;
+        .gv tr:first-child {
+            border-bottom: none;
         }
 
-/** 填寫表單樣式 **/
+        .gv tr:last-child {
+            border-bottom: none;
+        }
+
+        .gv tr td table {
+            margin: 0 auto;
+        }
+
+/* 表單樣式 */
 .formCard {
     box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
-    margin-bottom:15px;
+    margin-bottom: 15px;
+    border:none;
 }
 
     .formCard .card-header {
-        background: linear-gradient(135deg, #0f2350, #1a3b6b);
-        color: white;
+        background-color: #e5f0ec;
+        color: #467273;
         padding: 20px;
         font-size: 1.25rem;
         font-weight: 600;
+        border-bottom: 2px solid rgba(0, 105, 72, 0.5);
     }
 
     .formCard .card-body {
@@ -133,7 +150,7 @@
         background: linear-gradient(135deg, #9e3d3f, #b7282e);
     }
 
-/*表格樣式*/
+/* 表格樣式 */
 .tb {
     width:100%;
     border:none;
@@ -151,7 +168,7 @@
         background-color: #f8f9fa;
     }
 
-/*文字樣式*/
+/* 文字樣式 */
 .text_info {
     font-size: 0.85rem;
     color: gray;
@@ -175,7 +192,7 @@
     }
 
 
-/*標籤樣式*/
+/* 標籤樣式 */
 .tag_red {
     padding: 5px 10px;
     border-radius: 5px;
@@ -184,7 +201,6 @@
     box-shadow: 0 2px 4px rgba(201, 42, 42, 0.3);
     display: inline-block;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
 }
 
@@ -196,7 +212,6 @@
     box-shadow: 0 2px 4px rgba(25, 113, 194, 0.3);
     display: inline-block;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
 }
 
@@ -208,7 +223,6 @@
     box-shadow: 0 2px 4px rgba(43, 138, 62, 0.3);
     display: inline-block;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
 }
 
@@ -220,7 +234,6 @@
     box-shadow: 0 2px 4px rgba(232, 89, 12, 0.3);
     display: inline-block;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
 }
 
@@ -232,6 +245,142 @@
     box-shadow: 0 2px 4px rgba(156, 54, 181, 0.3);
     display: inline-block;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s ease;
+}
+
+/* 按鈕樣式 */
+
+.btn_main {
+    background: #467273;
+    background: linear-gradient(125deg,rgba(70, 114, 115, 1) 50%, rgba(109, 140, 140, 1) 100%);
+    border: 1px solid #467273;
+    color: white;
+    transition: transform 0.5s ease, opacity 0.5s linear;
+}
+
+    .btn_main:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(15, 35, 80, 0.3);
+    }
+
+.btn_main_line {
+    background: #FFFFFF;
+    border: 1px solid #467273;
+    color: #467273;
+    transition: transform 0.5s ease, opacity 0.5s linear;
+}
+
+    .btn_main_line:hover {
+        background: #FFFFFF;
+        border: 1px solid #467273;
+        color: #467273;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(15, 35, 80, 0.3);
+    }
+
+
+/* 圓形按鈕 */
+.btn_circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 1px solid #FFFFFF;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+}
+
+    .btn_circle:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+    }
+
+
+/* BS Tab樣式 */
+
+.nav-tabs {
+    border-bottom: 1px solid #FFFFFF;
+    display: flex; /*改為置中*/
+    justify-content: center; /*改為置中*/
+}
+    .nav-tabs .nav-item {
+        /*background-color: rgba(255, 255, 255, 0.5);*/
+        margin: 0px 10px;
+        border-radius: 8px 8px 0px 0px;
+    }
+        .nav-tabs .nav-item .nav-link, 
+        .nav-tabs .nav-link {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #467273 !important;
+            border: 1px solid #FFFFFF;
+            border-radius: 8px 8px 0px 0px;
+        }
+
+    .nav-tabs > .nav-link {
+        margin: 0px 10px;
+        border-bottom:none;
+    }
+
+            .nav-tabs .nav-item .nav-link:focus, 
+            .nav-tabs > .nav-link:focus {
+                color: #467273 !important;
+            }
+
+        .nav-tabs .nav-item .nav-link.active,
+        .nav-tabs > .nav-link.active {
+            background-color: rgba(255, 255, 255, 1);
+            font-weight: 500;
+        }
+
+/* HR樣式 */
+
+hr {
+    color:#FFFFFF;
+}
+
+/* 手風琴 */
+.accordion-button:not(.collapsed) {
+    color: #467273;
+    background-color: #e5f0ec;
+}
+
+    .accordion-button:not(.collapsed)::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+
+.accordion-button.collapsed {
+    color: #467273;
+    background-color: #e5f0ec;
+}
+
+    .accordion-button.collapsed::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+
+.accordion-body {
+    /*font-size: 1.25rem;*/
+}
+
+.accordion-button {
+    font-weight: 500;
+    /*font-size: 1.5rem;
+    padding: 30px 20px;*/
+}
+
+    .accordion-button:focus {
+        box-shadow: none !important;
+        border-color: transparent !important;
+    }
+
+
+/* BS CARD */
+
+.card-header a {
+    color: #467273;
 }

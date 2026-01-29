@@ -13,80 +13,76 @@
     <link href="../_css/fontawesome-all.css" rel="stylesheet" />
     <link href="../_css/mp_backstage_main.css" rel="stylesheet" />
     <link href="../_css/mp_backstage_control.css" rel="stylesheet" />
+    <link href="../_css/mp_backstage_sm.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="ContentPlaceHolder_head" runat="server"></asp:ContentPlaceHolder>
 </head>
 <body>
     <form id="form1" runat="server">
         <asp:ScriptManager ID="ScriptManager_main" runat="server"></asp:ScriptManager>
-        <asp:Label ID="Label_msg" runat="server"></asp:Label>
         <div class="layout-container">
-            <!-- 側邊欄 -->
-            <div class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <div class="sidebar-logo">
-                        <img src="../../_img/logo.png" />
-                    </div>
-                    <h4 class="sidebar-title">受保護樹木管理系統</h4>
-                    <p class="sidebar-subtitle">Protected Trees Management System</p>
+            <%-- 功能目錄區塊 --%>
+            <div class="div_menu" id="sidebar">
+                <%-- LOGO --%>
+                <div class="div_menu-header">
+                    <div class="div_menu-logo"><img src="../../_img/logo.png" /></div>
+                    <h4 class="div_menu-title">受保護樹木管理系統</h4>
+                    <p class="div_menu-subtitle">Protected Trees Management System</p>
+                    <%-- 手機關閉按鈕 --%>
                     <button type="button" class="mobile-close-btn" id="mobileCloseBtn">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-               <nav class="nav flex-column">
+                <%-- 使用者資訊 --%>
+                <div class="div_user">
+                    <div class="userName"> <%--title='<%= protectTreesV2.UserInfo.UserName %>'--%>
+                        <asp:Label ID="Label_userName" runat="server"></asp:Label>
+                        <asp:LinkButton ID="LinkButton_userName" runat="server" CssClass="btn_circle" PostBackUrl="~/backstage/system/profile.aspx" ToolTip="編輯帳號資料">
+                            <i class="fa-solid fa-user-pen"></i>
+                        </asp:LinkButton>
+                        <asp:LinkButton ID="LinkButton_logout" runat="server" CssClass="btn_circle" OnClick="LinkButton_logout_Click" ToolTip="登出系統">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </asp:LinkButton>     
+                    </div>                                          
+                </div>
+                <%-- 目錄 --%>
+                <nav class="nav flex-column">
                     <div class="nav-section">
                         <%= menuStr_def %>
                     </div>
                 </nav>
-               <%--<div class="mt-2 text-center">
-                   <a class="link" href="../../_doc/study_20251125.pdf" target="_blank"><i class="fa-solid fa-download me-1"></i>授課簡報251125</a>
-               </div>
-               <div class="mt-2 text-center">
-                   <a class="link" href="../../_doc/study_20251125.zip" target="_blank"><i class="fa-solid fa-download me-1"></i>授課影片251125</a>
-               </div>--%>
             </div>
 
-            <!-- 主要內容區域 -->
-            <div class="main-content" id="mainContent">
-                <!-- 頂部導航欄 -->
-                <nav class="navbar navbar-expand-lg top-navbar">
+            <%-- 主要內容區塊 --%>
+            <div class="div_body" id="mainContent">
+
+                <%-- 功能標題區塊 --%>
+                <nav class="div_header navbar">
                     <div class="container-fluid">
+                        <%-- 手機漢堡按鈕 --%>
                         <button type="button" class="mobile-menu-btn" id="mobileMenuBtn">
                             <i class="fas fa-bars"></i>
                         </button>
-
-                        <span class="navbar-brand">受保護樹木管理系統</span>
-
-                        <div class="user-info">
-                            <asp:LinkButton ID="LinkButton_userName" runat="server" CssClass="user-name" PostBackUrl="~/pages/System/MyAccount.aspx" Text="">
-                            </asp:LinkButton>
-                            <asp:LinkButton ID="LinkButton_logout" runat="server" CssClass="btn btn-logout" OnClick="LinkButton_logout_Click">
-                                <i class="fas fa-sign-out-alt me-1"></i>登出
-                            </asp:LinkButton>                           
-                        </div>
+                        <%-- 功能標題 --%>
+                        <span class="title">
+                            <asp:ContentPlaceHolder ID="ContentPlaceHolder_path" runat="server"></asp:ContentPlaceHolder>
+                        </span>
                     </div>
                 </nav>
 
-                <!-- 路徑導航 -->
-                <div class="breadcrumb-container">
-                    <asp:ContentPlaceHolder ID="ContentPlaceHolder_path" runat="server"></asp:ContentPlaceHolder>
-                </div>
-
-                <!-- 內容區域 -->
-                <div class="content-area fade-in">
-                    <h1 class="page-title">
-                        <asp:ContentPlaceHolder ID="ContentPlaceHolder_title" runat="server"></asp:ContentPlaceHolder>
-                    </h1>
+                <%-- 內容區塊 --%>
+                <div class="div_content">
                     <asp:ContentPlaceHolder ID="ContentPlaceHolder_content" runat="server"></asp:ContentPlaceHolder>
                 </div>
 
-                <!-- Footer -->
-                <footer class="footer">
+                <%-- 版權區塊 --%>
+                <div class="div_footer">
                     <p class="mb-0">Copyright © 2025 Forestry and Nature Conservation Agency<br />
                         農業部林業及自然保育署(02)2351-5441 || 大武科技(02)2781-5085</p>
-                </footer>
+                </div>
             </div>
         </div>
 
+        <%-- 燈箱 --%>
         <div class="modal fade" id="divMSG" tabindex="-1" role="dialog" aria-labelledby="divMSGTitle" aria-hidden="true" '<%= modalStatic %>'>
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
                 <div class="modal-content">
@@ -111,13 +107,18 @@
             </div>
         </div>   
 
-        <!-- Overlay for mobile -->
+        <%-- 目錄背景遮罩 --%>
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
        
-        <!-- 回到頂部按鈕 -->
+        <%-- 回到上方按鈕 --%>
         <button class="back-to-top" id="backToTop">
             <i class="fa-solid fa-arrow-up"></i>
         </button>
+
+        <%-- 待刪除 --%>
+        <div style="display:none"><asp:ContentPlaceHolder ID="ContentPlaceHolder_title" runat="server"></asp:ContentPlaceHolder></div>
+
+        <%-- JS --%>
         <script type="text/javascript" src="../../_js/mp_default.js"></script>
         <script type="text/javascript" src="../../_js/combobox.js"></script>
     </form>    

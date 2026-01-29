@@ -76,31 +76,29 @@
                         </div>
                     </div>
 
-                    <div class="row mt-4">
+                    <div class="row">
                         <div class="col text-center">
-                            <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_search_Click">
-                                查詢
-                            </asp:LinkButton>
-                            <asp:LinkButton ID="LinkButton_add" runat="server" CssClass="btn btn-outline-secondary ms-2" OnClick="LinkButton_add_Click">
-                                新增帳號
+                            <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn_main" OnClick="LinkButton_search_Click">
+                                <i class="fas fa-search me-1"></i>查詢
                             </asp:LinkButton>
                         </div>
                     </div>
                 </div>
                 <div class="queryBox-footer"></div>
             </div>
-
-            <div class="row m-0 mt-3 mb-3 align-items-center">
-                <div class="col p-0">
-                    <asp:LinkButton ID="LinkButton_exportExcel" runat="server" CssClass="btn btn-outline-success btn-sm" OnClick="LinkButton_exportExcel_Click">
-                        <i class="fas fa-file-excel"></i> 匯出 Excel
+            <div class="row d-flex align-items-center mt-2 mb-2">
+                <div class="col-12 col-md-6 text-center text-md-start">
+                    <asp:LinkButton ID="LinkButton_add" runat="server" CssClass="btn btn_main" OnClick="LinkButton_add_Click">
+                        <i class="fas fa-file-circle-plus me-1"></i>新增帳號
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="LinkButton_exportExcel" runat="server" CssClass="btn btn_main_line" OnClick="LinkButton_exportExcel_Click">
+                        <i class="fas fa-file-arrow-down"></i>下載列表
                     </asp:LinkButton>
                 </div>
-                <div class="col p-0 text-end">
-                    共 <asp:Label ID="Label_recordCount" runat="server" Text="0"></asp:Label> 筆紀錄
+                <div class="col-12 col-md-6 text-center text-md-end">
+                    共 <asp:Label ID="Label_recordCount" runat="server" Text="0"></asp:Label> 個帳號
                 </div>
             </div>
-
             <div class="table-responsive gv-tb">
                 <asp:GridView ID="GridView_accountList" runat="server"
                     CssClass="gv" AutoGenerateColumns="false" AllowPaging="true" PageSize="10"
@@ -135,20 +133,18 @@
                                 <%# FormatDateTime(Eval("lastLoginDateTime")) %>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:TemplateField HeaderText="動作" ItemStyle-Width="260px" ItemStyle-HorizontalAlign="Center">
+                        <asp:TemplateField HeaderText="動作" ItemStyle-Width="150px">
                             <ItemTemplate>
-                                <div class="d-flex gap-2 justify-content-center flex-wrap">
-                                    <asp:LinkButton ID="LinkButton_edit" runat="server"
-                                        CssClass="btn btn-sm btn-outline-primary"
-                                        Text="編輯"
-                                        CommandName="EditAccount"
-                                        CommandArgument='<%# Eval("accountID") %>' />
-                                    <asp:LinkButton ID="LinkButton_toggle" runat="server"
-                                        CssClass="btn btn-sm btn-outline-secondary"
-                                        Text="啟用"
-                                        CommandName="ToggleActive"
-                                        CommandArgument='<%# Eval("accountID") %>' />
-                                </div>
+                                <asp:LinkButton ID="LinkButton_edit" runat="server"
+                                    CssClass="btn btn-sm btn-primary"
+                                    Text="編輯"
+                                    CommandName="EditAccount"
+                                    CommandArgument='<%# Eval("accountID") %>' />
+                                <asp:LinkButton ID="LinkButton_toggle" runat="server"
+                                    CssClass="btn btn-sm btn-danger"
+                                    Text="啟用"
+                                    CommandName="ToggleActive"
+                                    CommandArgument='<%# Eval("accountID") %>' />
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>

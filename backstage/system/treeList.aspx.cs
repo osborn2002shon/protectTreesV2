@@ -86,7 +86,7 @@ namespace protectTreesV2.backstage.system
                 return "--";
             }
 
-            return Convert.ToBoolean(value) ? "是" : "否";
+            return Convert.ToBoolean(value) ? "v" : "";
         }
 
         protected void gvSpecies_PageIndexChanging(object sender, GridViewPageEventArgs e)

@@ -30,7 +30,7 @@
         <asp:Image ID="Image_Captcha" runat="server" ImageUrl="~/_uc/captcha.ashx" Height="38" CssClass="captcha-image"/>                    
     </div>
 
-    <asp:Button ID="Button_login" runat="server" CssClass="btn-login mb-3" Text="登入" OnClick="Button_login_Click" />
+    <asp:Button ID="Button_login" runat="server" CssClass="btn-def btn-login mb-3" Text="登入" OnClick="Button_login_Click" />
     <div class="text-center">
         <a href="reg.aspx" class="link me-3"><i class="fa-solid fa-registered me-1"></i>帳號申請</a>
         <a href="fpw.aspx" class="link me-3"><i class="fa-solid fa-key me-1"></i>忘記密碼*</a>
@@ -80,10 +80,5 @@
                 }
             });
         });
-        
-        //頁面載入動畫
-        //$(window).on('load', function() {
-        //    $('.login-card').hide().fadeIn(800);
-        //});
     </script>
 </asp:Content>

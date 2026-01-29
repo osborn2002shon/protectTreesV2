@@ -1,0 +1,125 @@
+﻿/* 漢堡按鈕樣式 */
+.mobile-menu-btn {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    padding: 10px;
+}
+
+/* 關閉按鈕樣式 */
+.mobile-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    z-index: 1060;
+}
+    .mobile-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+/* 桌面版 */
+@media (min-width: 769px) {
+    /*隱藏漢堡按鈕*/
+    .mobile-menu-btn {
+        display: none;
+    }
+
+    /*隱藏關閉按鈕*/
+    .mobile-close-btn {
+        display: none;
+    }
+}
+
+
+/* 手機版 */
+@media (max-width: 768px) {
+    /*顯示漢堡按鈕*/
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    /*顯示關閉按鈕*/
+    .mobile-close-btn {
+        display: block;
+    }
+
+    .layout-container {
+        flex-direction: column;
+        position: relative;
+    }
+
+    /* 左邊區塊：目錄 */
+    .div_menu {
+        width: 100%;
+        min-height: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+        .div_menu.show {
+            transform: translateX(0);
+        }
+
+    /* 右邊區塊 */
+    .div_body {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .div_content {
+        /*padding: 20px 15px !important;*/
+    }
+
+    /* 目錄展開時的背景遮罩 */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1040;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+}
+
+/* 針對1920x1080 + 100% */
+@media (min-width: 1920px) and (resolution: 1dppx) {
+    html {
+        font-size: 20px;
+    }
+
+    .div_menu {
+        width: 350px;
+    }
+        .div_menu .div_menu-header .div_menu-subtitle {
+            font-size: 0.7rem;
+        }
+
+    .div_body {
+        width: calc(100vw - 350px); /*避免被內容撐開導致MENU縮減*/
+    }
+
+}

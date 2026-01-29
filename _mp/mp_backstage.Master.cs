@@ -232,6 +232,8 @@ namespace protectTreesV2._mp
 
             if (!IsPostBack)
             {
+                var ui = UserInfo.GetCurrentUser;
+                Label_userName.Text = ui.name;
 
                 // 目前頁面路徑
                 string currentPage = NormalizePath(Request.Path);

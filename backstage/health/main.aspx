@@ -2,14 +2,14 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder_head" runat="server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    健檢資料管理 / 健檢紀錄
+    健檢資料管理：健檢作業
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     健檢紀錄
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
     <nav class="nav nav-tabs mb-4">
-        <a class="nav-link active" href="main.aspx">健檢紀錄</a>
+        <a class="nav-link active" href="main.aspx">健檢作業</a>
         <a class="nav-link text-dark" href="list.aspx">異動管理</a>
         <a class="nav-link text-dark" href="upload.aspx">上傳多筆健檢紀錄</a>
         <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆健檢照片</a>
@@ -17,7 +17,7 @@
     </nav>
     <div class="queryBox">
         <div class="queryBox-header">
-            查詢條件
+            樹籍查詢
         </div>
         <div class="queryBox-body">
             <div class="row">
@@ -57,7 +57,7 @@
 
             <div class="row">
                 <div class="col text-center">
-                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_search_Click">查詢</asp:LinkButton>
+                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn_main" OnClick="LinkButton_search_Click"><i class="fas fa-search me-1"></i>查詢</asp:LinkButton>
                 </div>
             </div>
         </div>
@@ -75,11 +75,11 @@
             OnSorting="GridView_list_Sorting">
             <Columns>
                 <%-- 1. 上傳檔案製作 --%>
-                <asp:TemplateField HeaderText="上傳<br/>檔案製作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center" >
+                <asp:TemplateField HeaderText="上傳檔<br/>案製作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center" >
                     <ItemTemplate>
                         <%-- 情境 A: 還沒加入 (顯示按鈕) --%>
                         <asp:LinkButton ID="LinkButton_addToUpload" runat="server" 
-                            CssClass="btn btn-secondary" 
+                            CssClass="btn btn-sm btn-outline-secondary" 
                             CommandName="_AddToUpload" 
                             CommandArgument='<%# Eval("treeID") %>'
                             Visible='<%# !(bool)Eval("isAdded") %>' > 
@@ -98,7 +98,7 @@
                 <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" SortExpression="systemTreeNo" HtmlEncode="false" />
             
                 <%-- 3. 機關樹木編號 --%>
-                <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />
+                <%--<asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />--%>
             
                 <%-- 4. 縣市鄉鎮 --%>
                 <asp:TemplateField HeaderText="縣市鄉鎮" SortExpression="areaID">
@@ -143,28 +143,26 @@
                 </asp:TemplateField>
 
                 <%-- 11. 動作區塊 --%>
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="250px">
+                <asp:TemplateField HeaderText="操作" ItemStyle-Width="200px">
                     <ItemTemplate>
                         <div class="d-flex gap-1 justify-content-center">
                             <%-- (A) 新增紀錄 --%>
                             <asp:LinkButton ID="LinkButton_addRecord" runat="server" 
-                                CssClass="btn btn-sm btn-success" 
-                                Text="新增紀錄"
+                                CssClass="btn btn-sm btn-primary" 
+                                Text="新增"
                                 CommandName="_AddRecord" 
                                 CommandArgument='<%# Eval("treeID") %>' />
-
-                            <%-- (B) 檢視樹籍 --%>
-                            <asp:LinkButton ID="LinkButton_viewTree" runat="server" 
-                                CssClass="btn btn-sm btn-info text-white" 
-                                Text="檢視樹籍"
-                                CommandName="_ViewTree" 
-                                CommandArgument='<%# Eval("treeID") %>' />
-
                             <%-- (C) 檢視紀錄 --%>
                             <asp:LinkButton ID="LinkButton_viewRecord" runat="server" 
-                                CssClass="btn btn-sm btn-primary" 
-                                Text="檢視紀錄"
+                                CssClass="btn btn-sm btn-outline-primary" 
+                                Text="查詢"
                                 CommandName="_ViewRecord" 
+                                CommandArgument='<%# Eval("treeID") %>' />
+                            <%-- (B) 檢視樹籍 --%>
+                            <asp:LinkButton ID="LinkButton_viewTree" runat="server" 
+                                CssClass="btn btn-sm btn-outline-warning" 
+                                Text="樹籍"
+                                CommandName="_ViewTree" 
                                 CommandArgument='<%# Eval("treeID") %>' />
                         </div>
                     </ItemTemplate>
@@ -182,14 +180,14 @@
     <div class="row mt-3">
         <div class="col text-center">
             <%-- 產製 Excel 按鈕 --%>
-        <asp:LinkButton ID="LinkButton_generateExcel" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_generateExcel_Click">
-           產製多筆上傳Excel
+        <asp:LinkButton ID="LinkButton_generateExcel" runat="server" CssClass="btn btn_main" OnClick="LinkButton_generateExcel_Click">
+           <i class="fa-solid fa-file-arrow-down me-1"></i>產製多筆上傳Excel
         </asp:LinkButton>
 
         <%-- 清空列表 按鈕 --%>
         <asp:LinkButton ID="LinkButton_clearList" runat="server" 
-            CssClass="btn btn-outline-danger" OnClientClick="return confirm('確定要清空所有已加入的樹籍嗎？');" OnClick="LinkButton_clearList_Click">
-            清空列表
+            CssClass="btn btn_main_line" OnClientClick="return confirm('確定要清空所有已加入的樹籍嗎？');" OnClick="LinkButton_clearList_Click">
+            <i class="fa-solid fa-xmark"></i>清空列表
         </asp:LinkButton>
         </div>
     </div>
@@ -197,26 +195,17 @@
     <div class="table-responsive gv-tb mt-3">
         <asp:GridView ID="GridView_selectedList" runat="server" CssClass="gv" AutoGenerateColumns="false" ShowHeaderWhenEmpty="true" OnRowCommand="GridView_selectedList_RowCommand">
             <Columns>
-                <%-- 1. 系統樹籍編號 --%>
-            <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br>樹籍編號" HtmlEncode="false" />
-
-                <%-- 2. 機關樹木編號 --%>
-                <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br>樹木編號" HtmlEncode="false" />
-
-                <%-- 3. 機關管轄編號 --%>
-                <asp:BoundField DataField="agencyJurisdictionCode" HeaderText="機關<br>管轄編號" HtmlEncode="false" />
-
-                <%-- 4. 樹種 --%>
+                <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br>樹籍編號" HtmlEncode="false" />
+                <%--<asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br>樹木編號" HtmlEncode="false" />--%>
+                <%--<asp:BoundField DataField="agencyJurisdictionCode" HeaderText="機關<br>管轄編號" HtmlEncode="false" />--%>
+                <asp:BoundField DataField="cityName" HeaderText="縣市" />
+                <asp:BoundField DataField="areaName" HeaderText="鄉鎮" />
                 <asp:BoundField DataField="speciesName" HeaderText="樹種" />
-
-                <%-- 5. 管理人 --%>
                 <asp:BoundField DataField="manager" HeaderText="管理人" />
-
-                <%-- 6. 動作 (移除按鈕) --%>
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center">
+                <asp:TemplateField HeaderText="操作" ItemStyle-Width="100px" ItemStyle-HorizontalAlign="Center">
                     <ItemTemplate>
                         <asp:LinkButton ID="LinkButton_remove" runat="server" 
-                            CssClass="btn btn-danger" 
+                            CssClass="btn btn-sm btn-danger" 
                             Text="移除" 
                             CommandName="_Remove" 
                             CommandArgument='<%# Eval("treeID") %>' />

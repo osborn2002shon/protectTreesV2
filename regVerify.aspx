@@ -13,7 +13,7 @@
                 <asp:Label ID="Label_email" runat="server"  CssClass="start"></asp:Label><br />
                 驗證結果為<span class="start">通過</span><br />
                 待管理者審核通過即可使用本系統<br />
-                <a href="login.aspx" class="btn-cancel mt-2" title="返回登入">返回登入</a>
+                <a href="login.aspx" class="btn-def btn-cancel mt-2" title="返回登入">返回登入</a>
             </div>
         </asp:View>
         <asp:View ID="View_err" runat="server">

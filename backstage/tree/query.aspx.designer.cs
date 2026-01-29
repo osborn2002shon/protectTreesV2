@@ -105,22 +105,40 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtKeyword;
 
         /// <summary>
-        /// btnSearch 控制項。
+        /// LinkButton_Search 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSearch;
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_Search;
 
         /// <summary>
-        /// btnReset 控制項。
+        /// LinkButton_Reset 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnReset;
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_Reset;
+
+        /// <summary>
+        /// LinkButton_btnAdd 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_btnAdd;
+
+        /// <summary>
+        /// LinkButton_btnExport 控制項。
+        /// </summary>
+        /// <remarks>
+        /// 自動產生的欄位。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_btnExport;
 
         /// <summary>
         /// lblCount 控制項。
@@ -130,24 +148,6 @@ namespace protectTreesV2.backstage.tree
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblCount;
-
-        /// <summary>
-        /// btnExport 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnExport;
-
-        /// <summary>
-        /// btnAdd 控制項。
-        /// </summary>
-        /// <remarks>
-        /// 自動產生的欄位。
-        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAdd;
 
         /// <summary>
         /// gvTrees 控制項。
@@ -177,12 +177,12 @@ namespace protectTreesV2.backstage.tree
         protected global::System.Web.UI.WebControls.TextBox txtBulkAnnouncement;
 
         /// <summary>
-        /// btnApplyStatus 控制項。
+        /// LinkButton_btnApplyStatus 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
         /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnApplyStatus;
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_btnApplyStatus;
     }
 }

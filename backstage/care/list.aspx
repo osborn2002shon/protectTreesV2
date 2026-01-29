@@ -12,14 +12,14 @@
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    養護資料管理 / 養護紀錄
+    養護資料管理：異動管理
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     異動管理
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
     <nav class="nav nav-tabs mb-4">
-        <a class="nav-link text-dark" href="main.aspx">養護管理</a>
+        <a class="nav-link text-dark" href="main.aspx">養護作業</a>
         <a class="nav-link active" href="list.aspx">異動管理</a>
         <a class="nav-link text-dark" href="upload.aspx">上傳多筆養護紀錄</a>
         <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆養護照片</a>
@@ -32,7 +32,7 @@
         <div class="queryBox-body">
             <div class="row mb-3">
                 <div class="col">
-                    <asp:Label runat="server" AssociatedControlID="RadioButtonList_scope" Text="快速查詢" CssClass="form-label fw-bold" />
+                    <asp:Label runat="server" AssociatedControlID="RadioButtonList_scope" Text="快速查詢" CssClass="form-label" />
                     <div class="d-flex align-items-center">
                         <asp:RadioButtonList ID="RadioButtonList_scope" runat="server"
                             RepeatDirection="Horizontal" RepeatLayout="Flow"
@@ -75,8 +75,8 @@
 
             <div class="row mt-4">
                 <div class="col text-center">
-                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_search_Click">
-                         查詢
+                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn_main" OnClick="LinkButton_search_Click">
+                         <i class="fas fa-search me-1"></i>查詢
                     </asp:LinkButton>
                 </div>
             </div>
@@ -99,7 +99,7 @@
 
             <Columns>
                 <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" SortExpression="systemTreeNo" HtmlEncode="false" />
-                <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />
+                <%--<asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />--%>
 
                 <asp:TemplateField HeaderText="縣市鄉鎮" SortExpression="areaID">
                     <ItemTemplate>
@@ -121,11 +121,11 @@
                     </ItemTemplate>
                 </asp:TemplateField>
 
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="180px" ItemStyle-HorizontalAlign="Center">
+                <asp:TemplateField HeaderText="操作" ItemStyle-Width="200px" ItemStyle-HorizontalAlign="Center">
                     <ItemTemplate>
                         <div class="d-flex gap-2 justify-content-center">
                             <asp:LinkButton ID="LinkButton_view" runat="server"
-                                CssClass="btn btn-sm btn-info text-white"
+                                CssClass="btn btn-sm btn-outline-primary"
                                 Text="檢視"
                                 CommandName="_ViewCare"
                                 CommandArgument='<%# Eval("careID") %>' />
@@ -138,7 +138,7 @@
                                 Text="刪除"
                                 CommandName="_DeleteCare"
                                 CommandArgument='<%# Eval("careID") %>'
-                                CssClass='<%# Convert.ToInt32(Eval("dataStatus")) == 0 ? "btn btn-sm btn-danger" : "btn btn-sm btn-secondary disabled" %>'
+                                CssClass='<%# Convert.ToInt32(Eval("dataStatus")) == 0 ? "btn btn-sm btn-danger" : "btn btn-sm btn-outline-secondary disabled" %>'
                                 Enabled='<%# Convert.ToInt32(Eval("dataStatus")) == 0 %>'
                                 OnClientClick="return confirm('確認刪除草稿紀錄？');" />
                         </div>

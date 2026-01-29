@@ -47,8 +47,8 @@
             <div class="info">若您為樹木權管、養護單位或廠商，建議補充說明</div>
         </div>
         <div class="form-floating">
-            <asp:Button ID="Button_submitCheck" runat="server" Text="送出申請" CssClass="btn-login mb-2" OnClick="Button_submitCheck_Click" />
-            <a href="login.aspx" class="btn-cancel" title="返回登入">返回登入</a>
+            <asp:Button ID="Button_submitCheck" runat="server" Text="送出申請" CssClass="btn-def btn-login mb-2" OnClick="Button_submitCheck_Click" />
+            <a href="login.aspx" class="btn-def btn-cancel" title="返回登入">返回登入</a>
         </div>
     </div>
 </asp:Content>

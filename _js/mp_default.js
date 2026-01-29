@@ -89,6 +89,7 @@ window.addEventListener('scroll', function () {
         backToTopBtn.classList.remove('show');
     }
 });
+
 backToTopBtn.addEventListener('click', function () {
     //點擊按鈕回到頂部
     window.scrollTo({

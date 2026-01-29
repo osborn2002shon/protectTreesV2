@@ -13,49 +13,49 @@ namespace protectTreesV2.backstage.system
 
     public partial class treeList
     {
-        
+
         /// <summary>
         /// txtKeyword 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
-        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtKeyword;
-        
+
         /// <summary>
-        /// btnSearch 控制項。
+        /// LinkButton_Search 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
-        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSearch;
-        
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_Search;
+
         /// <summary>
-        /// btnReset 控制項。
+        /// LinkButton_Reset 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
-        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnReset;
-        
+        protected global::System.Web.UI.WebControls.LinkButton LinkButton_Reset;
+
         /// <summary>
         /// lblCount 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
-        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblCount;
-        
+
         /// <summary>
         /// gvSpecies 控制項。
         /// </summary>
         /// <remarks>
         /// 自動產生的欄位。
-        /// 若要進行修改，請將欄位宣告移至程式碼後置檔案。
+        /// 若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvSpecies;
     }

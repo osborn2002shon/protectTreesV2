@@ -368,7 +368,7 @@ namespace protectTreesV2.backstage.system
             if (toggleButton.Visible)
             {
                 toggleButton.Text = isActive ? "停用" : "啟用";
-                toggleButton.CssClass = isActive ? "btn btn-sm btn-outline-secondary" : "btn btn-sm btn-outline-success";
+                toggleButton.CssClass = isActive ? "btn btn-sm btn-outline-danger" : "btn btn-sm btn-outline-success";
                 bool requiresApproval = !isActive && (verifyStatus == null || verifyStatus == false);
                 string confirmMessage = isActive
                     ? "此動作會寄送通知信，確定要停用此帳號嗎？"

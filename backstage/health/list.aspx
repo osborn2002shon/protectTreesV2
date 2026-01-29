@@ -12,14 +12,14 @@
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    健檢資料管理 / 健檢紀錄
+    健檢資料管理：異動管理
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     異動管理
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
     <nav class="nav nav-tabs mb-4">
-        <a class="nav-link text-dark" href="main.aspx">健檢紀錄</a>
+        <a class="nav-link text-dark" href="main.aspx">健檢作業</a>
         <a class="nav-link active" href="list.aspx">異動管理</a>
         <a class="nav-link text-dark" href="upload.aspx">上傳多筆健檢紀錄</a>
         <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆健檢照片</a>
@@ -28,13 +28,13 @@
 
     <div class="queryBox">
         <div class="queryBox-header">
-            查詢條件
+            紀錄查詢
         </div>
         <div class="queryBox-body">
             <%-- 第一列：快速查詢 (我的紀錄 / 單位全部) --%>
             <div class="row mb-3">
                 <div class="col">
-                    <asp:Label runat="server" AssociatedControlID="RadioButtonList_scope" Text="快速查詢" class="form-label fw-bold" />
+                    <asp:Label runat="server" AssociatedControlID="RadioButtonList_scope" Text="快速查詢" class="form-label" />
                     <div class="d-flex align-items-center">
                         <asp:RadioButtonList ID="RadioButtonList_scope" runat="server" 
                             RepeatDirection="Horizontal" RepeatLayout="Flow" 
@@ -79,8 +79,8 @@
 
             <div class="row mt-4">
                 <div class="col text-center">
-                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn-primary" OnClick="LinkButton_search_Click">
-                         查詢
+                    <asp:LinkButton ID="LinkButton_search" runat="server" CssClass="btn btn_main" OnClick="LinkButton_search_Click">
+                         <i class="fas fa-search me-1"></i>查詢
                     </asp:LinkButton>
                 </div>
             </div>
@@ -91,7 +91,7 @@
     <%-- 統計筆數 --%>
     <div class="row m-0 mt-3 mb-3 align-items-center">
           <div class="col p-0 text-end">
-              共 <asp:Label ID="Label_recordCount" runat="server" Text="0"></asp:Label> 筆紀錄
+              共 <asp:Label ID="Label_recordCount" runat="server" Text="0"></asp:Label> 筆健檢紀錄
           </div>
     </div>
 
@@ -108,7 +108,7 @@
                 <asp:BoundField DataField="systemTreeNo" HeaderText="系統<br/>樹籍編號" SortExpression="systemTreeNo" HtmlEncode="false" />
             
                 <%-- 2. 機關樹木編號 --%>
-                <asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />
+                <%--<asp:BoundField DataField="agencyTreeNo" HeaderText="機關<br/>樹木編號" SortExpression="agencyTreeNo" HtmlEncode="false" />--%>
             
                 <%-- 3. 縣市鄉鎮 --%>
                 <asp:TemplateField HeaderText="縣市鄉鎮" SortExpression="areaID">
@@ -140,29 +140,27 @@
                 </asp:TemplateField>
 
                 <%-- 8. 動作區塊 (針對 healthID 操作) --%>
-                <asp:TemplateField HeaderText="動作" ItemStyle-Width="180px" ItemStyle-HorizontalAlign="Center">
+                <asp:TemplateField HeaderText="操作" ItemStyle-Width="200px" ItemStyle-HorizontalAlign="Center">
                     <ItemTemplate>
                         <div class="d-flex gap-2 justify-content-center">
                             <%-- (A) 檢視 --%>
                             <asp:LinkButton ID="LinkButton_view" runat="server" 
-                                CssClass="btn btn-sm btn-info text-white" 
+                                CssClass="btn btn-sm btn-outline-primary" 
                                 Text="檢視"
                                 CommandName="_ViewHealth" 
                                 CommandArgument='<%# Eval("healthID") %>' />
-
                             <%-- (B) 編輯 --%>
                             <asp:LinkButton ID="LinkButton_edit" runat="server" 
                                 CssClass="btn btn-sm btn-primary" 
                                 Text="編輯"
                                 CommandName="_EditHealth" 
                                 CommandArgument='<%# Eval("healthID") %>' />
-
                             <%-- (C) 刪除 --%>
                             <asp:LinkButton ID="LinkButton_del" runat="server" 
                                 Text="刪除"
                                 CommandName="_DeleteHealth" 
                                 CommandArgument='<%# Eval("healthID") %>'
-                                CssClass='<%# Convert.ToInt32(Eval("dataStatus")) == 0 ? "btn btn-sm btn-danger" : "btn btn-sm btn-secondary disabled" %>'
+                                CssClass='<%# Convert.ToInt32(Eval("dataStatus")) == 0 ? "btn btn-sm btn-danger" : "btn btn-sm btn-outline-secondary disabled" %>'
                                 Enabled='<%# Convert.ToInt32(Eval("dataStatus")) == 0 %>'
                                 OnClientClick="return confirm('確定要刪除這筆健檢紀錄嗎？\n此動作無法復原。');" />
                         </div>

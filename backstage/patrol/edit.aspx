@@ -65,17 +65,17 @@
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder_path" runat="server">
-    巡查資料管理 / 巡查紀錄 / <asp:Literal ID="Literal_pathAction" runat="server"></asp:Literal>
+    巡查資料管理：<asp:Literal ID="Literal_pathAction" runat="server"></asp:Literal>
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder_title" runat="server">
     <asp:Literal ID="Literal_title" runat="server"></asp:Literal>
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ContentPlaceHolder_content" runat="server">
-    <nav class="nav nav-tabs mb-4">
-        <a class="nav-link text-dark" href="main.aspx">巡查管理</a>
+    <%--<nav class="nav nav-tabs mb-4">
+        <a class="nav-link text-dark" href="main.aspx">巡查作業</a>
         <a class="nav-link text-dark" href="list.aspx">異動管理</a>
         <a class="nav-link text-dark" href="uploadPhoto.aspx">上傳多筆巡查照片</a>
-    </nav>
+    </nav>--%>
 
     <asp:HiddenField ID="HiddenField_treeId" runat="server" />
     <asp:HiddenField ID="HiddenField_patrolId" runat="server" />
@@ -124,6 +124,7 @@
                 </div>
             </div>
         </div>
+        <div class="card-footer"></div>
     </div>
 
     <ul class="nav nav-tabs mb-4" id="patrolEditTabs" role="tablist">
@@ -155,26 +156,8 @@
                         <label class="form-label">巡查備註</label>
                         <asp:TextBox ID="TextBox_memo" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="請輸入巡查備註" />
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_isFinal" runat="server" />
-                                <label class="form-check-label fw-bold" for="<%= CheckBox_isFinal.ClientID %>">
-                                    是否定稿
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <div class="form-check">
-                                <asp:CheckBox ID="CheckBox_hasPublicSafetyRisk" runat="server" />
-                                <label class="form-check-label fw-bold" for="<%= CheckBox_hasPublicSafetyRisk.ClientID %>">
-                                    是否有危害公共安全風險或緊急狀況
-                                </label>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
 
@@ -198,17 +181,29 @@
 
                     <div id="photoList" class="photo-list"></div>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
     </div>
 
     <div class="text-center mb-5">
-        <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn-primary me-2" OnClick="LinkButton_save_Click">
-            <asp:Literal ID="Literal_btnSaveText" runat="server" Text="新增"></asp:Literal>
+        <asp:CheckBox ID="CheckBox_isFinal" runat="server" />
+        <label class="form-check-label" for="<%= CheckBox_isFinal.ClientID %>">
+            儲存為定稿
+        </label>
+        <asp:CheckBox ID="CheckBox_hasPublicSafetyRisk" runat="server" />
+        <label class="form-check-label" for="<%= CheckBox_hasPublicSafetyRisk.ClientID %>">
+            是否有危害公共安全風險或緊急狀況
+        </label>
+        <br />
+        定稿視為正式資料，無法退回草稿狀態，並將開放後台使用者查詢檢視
+        <br />
+        <asp:LinkButton ID="LinkButton_save" runat="server" CssClass="btn btn_main" OnClick="LinkButton_save_Click">
+            <i class="fa-solid fa-floppy-disk me-1"></i><asp:Literal ID="Literal_btnSaveText" runat="server" Text="新增"></asp:Literal>
         </asp:LinkButton>
 
-        <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn-secondary" OnClick="LinkButton_cancel_Click">
-            取消
+        <asp:LinkButton ID="LinkButton_cancel" runat="server" CssClass="btn btn_main_line" OnClick="LinkButton_cancel_Click">
+            <i class="fa-solid fa-xmark me-1"></i>取消
         </asp:LinkButton>
     </div>
 
@@ -219,7 +214,7 @@
                 <div class="card-header">編輯紀錄</div>
                 <div class="card-body">
                     <asp:Label ID="lblLogEmpty" runat="server" Text="尚無編輯紀錄" Visible="false" />
-                    <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="gv" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging">
+                    <asp:GridView ID="gvLogs" runat="server" AutoGenerateColumns="false" CssClass="tb" AllowPaging="true" PageSize="5" OnPageIndexChanging="gvLogs_PageIndexChanging">
                         <PagerSettings Mode="Numeric" />
                         <Columns>
                             <asp:BoundField DataField="ActionType" HeaderText="動作" />
@@ -233,6 +228,7 @@
                         </Columns>
                     </asp:GridView>
                 </div>
+                <div class="card-footer"></div>
             </div>
         </div>
     </div>

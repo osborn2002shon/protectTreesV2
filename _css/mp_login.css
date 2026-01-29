@@ -3,7 +3,9 @@
 }
 
 body {
-    background: linear-gradient(180deg, #006948 0%, #54917f 50%, #79c06e 100%);
+    /*background: linear-gradient(180deg, #006948 0%, #54917f 50%, #79c06e 100%);*/
+    background: #dbf0c0;
+    background: linear-gradient(180deg,rgba(219, 240, 192, 1) 0%, rgba(79, 191, 157, 1) 50%, rgba(102, 189, 189, 1) 100%);
     min-height: 100vh;
 }
 
@@ -27,7 +29,8 @@ body {
 }
 
 .login-header {
-    background: linear-gradient(135deg, #006948, #54917f);
+    /*background: linear-gradient(135deg, #006948, #54917f);*/
+    background-color: #467273;
     color: white;
     padding: 15px;
     text-align: center;
@@ -78,7 +81,7 @@ body {
         font-size: 1.5rem;
         font-weight: 500;
         text-align: center;
-        color: #006948;
+        color: #467273;
     }
 
 .form-floating {
@@ -100,7 +103,7 @@ body {
     }
 
     .form-control:focus {
-        border-color: #006948;
+        border-color: #467273;
         box-shadow: 0 0 0 0.2rem rgba(15, 35, 80, 0.15);
         background: white;
     }
@@ -131,69 +134,47 @@ body {
     margin-bottom:2px;
 }
 
-.btn-login {
-    background: #54917F;
-    background: linear-gradient(135deg, #006948 0%, #54917f 100%);
-    border: none;
+.btn-def {
     border-radius: 10px;
     padding: 12px;
     font-size: 1rem;
     font-weight: 500;
-    color: white;
     width: 100%;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(15, 35, 80, 0.3);
+    transition: transform 0.5s ease, opacity 0.5s linear;
+    display:inline-block;
+    text-align:center;
+    text-decoration:none;
 }
 
-    .btn-login:hover {
+    .btn-def:hover {
         transform: translateY(-2px);
-        background: #54917F;
-        background: linear-gradient(135deg, rgba(84, 145, 127, 1) 0%, rgba(121, 192, 110, 1) 100%);
-        /*color: #fef263*/
+        box-shadow: 0 4px 15px rgba(15, 35, 80, 0.3);
     }
 
-    .btn-login:active {
-        color: #fef263;
+    .btn-def:active {
         transform: translateY(0);
     }
+
+.btn-login {
+    background: #467273;
+    background: linear-gradient(125deg,rgba(70, 114, 115, 1) 50%, rgba(109, 140, 140, 1) 100%);
+    border: none;
+    color: white;
+}
 
 .btn-cancel {
-    background: #b0b0b0;
-    background: linear-gradient(135deg,rgba(176, 176, 176, 1) 0%, rgba(207, 204, 204, 1) 100%);
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
-    font-size: 1rem;
-    font-weight: 500;
-    color: white;
-    width: 100%;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(15, 35, 80, 0.3);
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
+    border: 1px solid #467273;
+    color: #467273;
 }
 
-    .btn-cancel:hover {
-        transform: translateY(-2px);
-        background: #B0B0B0;
-        background: linear-gradient(135deg, rgba(207, 204, 204, 1) 0%, rgba(176, 176, 176, 1) 100%);
-    }
-
-    .btn-cancel:active {
-        color: #999999;
-        transform: translateY(0);
-    }
 
 .link {
-    color: #006948;
+    color: #579DAB;
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
 }
 
     .link:hover {
-        color: #54917f;
+        font-weight: 500;
         text-decoration: underline;
     }
 
@@ -213,12 +194,12 @@ body {
 }
 
     .password-toggle:hover {
-        color: #006948;
+        color: #467273;
     }
 
     .password-toggle:focus {
         outline: none;
-        color: #006948;
+        color: #467273;
     }
 
 .start {
