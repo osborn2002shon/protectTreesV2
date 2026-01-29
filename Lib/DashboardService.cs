@@ -40,7 +40,7 @@ namespace protectTreesV2.Dashboard
                     SUM(CASE WHEN v.verifyStatus = 1 AND v.verifyDateTime >= @currentMonthStart THEN 1 ELSE 0 END) AS CurrentMonthApproved
                 FROM View_UserInfo v
                 INNER JOIN System_UnitUnitMapping m ON v.unitID = m.unitID
-                WHERE m.manageUnitID = @unitID";
+                --WHERE m.manageUnitID = @unitID";
 
             using (var da = new MS_SQL())
             {
