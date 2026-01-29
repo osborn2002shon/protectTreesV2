@@ -46,16 +46,20 @@
                 </div>
             </div>
 
-            <%-- 第二列：一般查詢 (縣市鄉鎮、樹種) --%>
+            <%-- 第二列：一般查詢 (縣市鄉鎮、編輯狀態、樹種) --%>
             <div class="row mb-2">
-                <div class="col">
+                <div class="col-md-4">
                     <asp:Label runat="server" AssociatedControlID="DropDownList_city" Text="縣市鄉鎮" />
                     <div class="d-flex gap-2">
                         <asp:DropDownList ID="DropDownList_city" runat="server" CssClass="form-select flex-fill" AutoPostBack="true" OnSelectedIndexChanged="DropDownList_city_SelectedIndexChanged" />
                         <asp:DropDownList ID="DropDownList_area" runat="server" CssClass="form-select flex-fill" />
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-md-4">
+                    <asp:Label runat="server" AssociatedControlID="DropDownList_editStatus" Text="編輯狀態" />
+                    <asp:DropDownList ID="DropDownList_editStatus" runat="server" CssClass="form-select" />
+                </div>
+                <div class="col-md-4">
                     <asp:Label runat="server" AssociatedControlID="DropDownList_species" Text="樹種" />
                     <asp:DropDownList ID="DropDownList_species" runat="server" CssClass="form-select" data-combobox="species" data-combobox-placeholder="請輸入樹種" />
                 </div>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using protectTreesV2.TreeCatalog;
 using static protectTreesV2.Health.Health;
 
 namespace protectTreesV2.backstage.health
@@ -109,6 +110,11 @@ namespace protectTreesV2.backstage.health
 
             //樹種
             Base.DropdownBinder.Bind_DropDownList_Species(ref DropDownList_species);
+
+            DropDownList_editStatus.Items.Clear();
+            DropDownList_editStatus.Items.Add(new ListItem("不拘", string.Empty));
+            DropDownList_editStatus.Items.Add(new ListItem("定稿", ((int)TreeEditState.定稿).ToString()));
+            DropDownList_editStatus.Items.Add(new ListItem("草稿", ((int)TreeEditState.草稿).ToString()));
         }
 
         /// <summary>
@@ -150,6 +156,14 @@ namespace protectTreesV2.backstage.health
                     DropDownList_species.SelectedValue = speciesVal;
             }
 
+            // 編輯狀態
+            if (filter.dataStatus.HasValue)
+            {
+                string statusVal = ((int)filter.dataStatus.Value).ToString();
+                if (DropDownList_editStatus.Items.FindByValue(statusVal) != null)
+                    DropDownList_editStatus.SelectedValue = statusVal;
+            }
+
             // 日期區間
             if (filter.dateStart.HasValue)
                 TextBox_dateStart.Text = filter.dateStart.Value.ToString("yyyy-MM-dd");
@@ -171,6 +185,8 @@ namespace protectTreesV2.backstage.health
             if (int.TryParse(DropDownList_city.SelectedValue, out int city)) filter.cityID = city;
             if (int.TryParse(DropDownList_area.SelectedValue, out int area)) filter.areaID = area;
             if (int.TryParse(DropDownList_species.SelectedValue, out int species)) filter.speciesID = species;
+            if (int.TryParse(DropDownList_editStatus.SelectedValue, out int dataStatus))
+                filter.dataStatus = (TreeEditState)dataStatus;
 
             // 3. 日期區間
             if (DateTime.TryParse(TextBox_dateStart.Text, out DateTime start)) filter.dateStart = start;
