@@ -165,6 +165,7 @@
     <Content Include="backstage\tree\edit.aspx" />
     <Content Include="backstage\tree\edit_photos.aspx" />
     <Content Include="backstage\tree\query.aspx" />
+    <Content Include="backstage\tree\view.aspx" />
     <Content Include="default.aspx" />
     <Content Include="login.aspx" />
     <Content Include="pages\about.aspx" />
@@ -227,6 +228,13 @@
     <Content Include="_uc\TreePhotoAlbum.ascx" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="backstage\tree\view.aspx.cs">
+      <DependentUpon>view.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="backstage\tree\view.aspx.designer.cs">
+      <DependentUpon>view.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Lib\Base\Base.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
