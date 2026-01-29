@@ -109,6 +109,7 @@ namespace protectTreesV2._uc.dashboard
             script.AppendLine($"Highcharts.chart('{containerId}', {{");
             script.AppendLine("chart: { type: 'column' },");
             script.AppendLine("title: { text: null },");
+            script.AppendLine("credits: { enabled: false }, exporting: { enabled: false },");
             script.AppendLine($"xAxis: {{ categories: {categoriesJson} }},");
             script.AppendLine("yAxis: { min: 0, title: { text: '數量' }, stackLabels: { enabled: true } },");
             script.AppendLine("legend: { align: 'center', verticalAlign: 'bottom' },");

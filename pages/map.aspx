@@ -98,9 +98,6 @@
                     </h2>
                     <div id="collapseBasemap" class="accordion-collapse collapse" aria-labelledby="headingBasemap" data-bs-parent="#mapToolsAccordion">
                         <div class="accordion-body">
-                            <div class="mb-3">
-                                <span class="map-pill"><i class="fa-solid fa-map"></i> 目前底圖</span>
-                            </div>
                             <select id="basemapSelect" class="form-select mb-3">
                                 <option value="NLSC_1">臺灣通用版電子地圖</option>
                                 <option value="NLSC_3">臺灣通用版正射影像</option>

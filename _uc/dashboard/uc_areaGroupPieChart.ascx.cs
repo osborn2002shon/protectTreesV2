@@ -59,6 +59,7 @@ namespace protectTreesV2._uc.dashboard
             script.AppendLine($"Highcharts.chart('{containerId}', {{");
             script.AppendLine("chart: { type: 'pie' },");
             script.AppendLine("title: { text: null },");
+            script.AppendLine("credits: { enabled: false }, exporting: { enabled: false },");
             script.AppendLine("tooltip: { pointFormat: '{series.name}: <b>{point.y}</b>' },");
             script.AppendLine("plotOptions: { pie: { allowPointSelect: true, cursor: 'pointer', dataLabels: { enabled: true } } },");
             script.AppendLine($"series: [{{ name: '數量', colorByPoint: true, data: {dataJson} }}]");
