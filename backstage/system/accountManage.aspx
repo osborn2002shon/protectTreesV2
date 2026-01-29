@@ -174,6 +174,7 @@
                     <div class="row mb-3">
                         <div class="col">
                             <span class="contItem"><i class="fas fa-envelope me-2"></i>電子信箱<span class="start">*</span></span>
+                            <asp:Label ID="Label_account" runat="server" CssClass="form-control-plaintext" />
                             <asp:TextBox ID="TextBox_account" runat="server" CssClass="form-control" placeholder="請輸入電子信箱作為登入帳號" autocomplete="off"></asp:TextBox>
                         </div>
                         <div class="col">

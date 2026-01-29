@@ -349,9 +349,12 @@ namespace protectTreesV2.backstage.system
             {
                 toggleButton.Text = isActive ? "停用" : "啟用";
                 toggleButton.CssClass = isActive ? "btn btn-sm btn-outline-secondary" : "btn btn-sm btn-outline-success";
+                bool requiresApproval = !isActive && (verifyStatus == null || verifyStatus == false);
                 string confirmMessage = isActive
                     ? "此動作會寄送通知信，確定要停用此帳號嗎？"
-                    : "此動作會寄送通知信，確定要啟用此帳號嗎？";
+                    : (requiresApproval
+                        ? "啟用會將本帳號設定為審核通過，確定嗎？"
+                        : "此動作會寄送通知信，確定要啟用此帳號嗎？");
                 toggleButton.OnClientClick = $"return confirm('{confirmMessage}');";
             }
         }
@@ -416,13 +419,14 @@ namespace protectTreesV2.backstage.system
             }
 
             string mode = HiddenField_editMode.Value;
-            string account = TextBox_account.Text.Trim();
+            string account = mode == "edit" ? Label_account.Text.Trim() : TextBox_account.Text.Trim();
             string name = TextBox_name.Text.Trim();
             string mobile = TextBox_mobile.Text.Trim();
             string memo = TextBox_memo.Text.Trim();
             string verifyStatusValue = RadioButtonList_verifyStatus.SelectedValue;
 
-            if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(mobile))
+            bool requireAccount = mode == "add";
+            if ((requireAccount && string.IsNullOrWhiteSpace(account)) || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(mobile))
             {
                 ShowMessage("提示", "請確認必填欄位皆已填寫。", "warning");
                 return;
@@ -465,7 +469,13 @@ namespace protectTreesV2.backstage.system
                     return;
                 }
 
-                InsertAccount(account, name, mobile, memo, auTypeId, unitId, newVerifyStatus);
+                int accountId = InsertAccount(account, name, mobile, memo, auTypeId, unitId, newVerifyStatus);
+                if (newVerifyStatus)
+                {
+                    var accountInfo = GetAccountInfo(accountId);
+                    string generatedPassword = EnsureTemporaryPassword(accountId);
+                    SendApprovalNotification(accountInfo, generatedPassword);
+                }
                 ShowMessage("完成", "帳號新增成功。", "success");
             }
             else if (mode == "edit")
@@ -481,8 +491,15 @@ namespace protectTreesV2.backstage.system
                 if (verifyStatusChanged)
                 {
                     var accountInfo = GetAccountInfo(accountId);
-                    string resultText = newVerifyStatus ? "審核通過" : "審核駁回";
-                    SendAccountNotification(accountInfo, $"帳號{resultText}");
+                    if (newVerifyStatus)
+                    {
+                        string generatedPassword = EnsureTemporaryPassword(accountId);
+                        SendApprovalNotification(accountInfo, generatedPassword);
+                    }
+                    else
+                    {
+                        SendAccountNotification(accountInfo, "帳號審核駁回");
+                    }
                 }
             }
 
@@ -494,6 +511,7 @@ namespace protectTreesV2.backstage.system
         {
             HiddenField_accountId.Value = string.Empty;
             TextBox_account.Text = string.Empty;
+            Label_account.Text = string.Empty;
             TextBox_name.Text = string.Empty;
             TextBox_mobile.Text = string.Empty;
             TextBox_memo.Text = string.Empty;
@@ -522,6 +540,7 @@ namespace protectTreesV2.backstage.system
             HiddenField_accountId.Value = accountId.ToString();
             HiddenField_editMode.Value = "edit";
             TextBox_account.Text = accountInfo.account;
+            Label_account.Text = accountInfo.account;
             TextBox_name.Text = accountInfo.name;
             TextBox_mobile.Text = accountInfo.mobile;
             TextBox_memo.Text = accountInfo.memo ?? string.Empty;
@@ -543,23 +562,25 @@ namespace protectTreesV2.backstage.system
 
         private void SetEditFieldAccessibility(bool isEditMode)
         {
-            TextBox_account.ReadOnly = isEditMode;
+            TextBox_account.Visible = !isEditMode;
+            Label_account.Visible = isEditMode;
             bool allowUnitChange = IsSystemAdmin() || !isEditMode;
             DropDownList_unitGroup.Enabled = allowUnitChange;
             DropDownList_unitName.Enabled = allowUnitChange;
         }
 
-        private void InsertAccount(string account, string name, string mobile, string memo, int auTypeId, int unitId, bool verifyStatus)
+        private int InsertAccount(string account, string name, string mobile, string memo, int auTypeId, int unitId, bool verifyStatus)
         {
             const string sql = @"
                 INSERT INTO System_UserAccount
                 (accountType, auTypeID, unitID, account, password, name, email, mobile, memo, verifyStatus, verifyDateTime, isActive, insertDateTime, insertAccountID)
                 VALUES
-                (@accountType, @auTypeID, @unitID, @account, NULL, @name, @email, @mobile, @memo, @verifyStatus, @verifyDateTime, @isActive, @insertDateTime, @insertAccountID)";
+                (@accountType, @auTypeID, @unitID, @account, NULL, @name, @email, @mobile, @memo, @verifyStatus, @verifyDateTime, @isActive, @insertDateTime, @insertAccountID);
+                SELECT SCOPE_IDENTITY();";
 
             using (var da = new DataAccess.MS_SQL())
             {
-                da.ExecNonQuery(sql,
+                object result = da.ExcuteScalar(sql,
                     new SqlParameter("@accountType", "default"),
                     new SqlParameter("@auTypeID", auTypeId),
                     new SqlParameter("@unitID", unitId),
@@ -573,9 +594,11 @@ namespace protectTreesV2.backstage.system
                     new SqlParameter("@isActive", verifyStatus),
                     new SqlParameter("@insertDateTime", DateTime.Now),
                     new SqlParameter("@insertAccountID", CurrentUser?.accountID ?? -1));
-            }
 
-            UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.新增, $"新增帳號：{account}");
+                int accountId = result == null ? 0 : Convert.ToInt32(result);
+                UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.新增, $"新增帳號：{account}");
+                return accountId;
+            }
         }
 
         private void UpdateAccount(int accountId, string name, string mobile, string memo, int auTypeId, int unitId, bool verifyStatus, bool verifyStatusChanged)
@@ -643,6 +666,7 @@ namespace protectTreesV2.backstage.system
             }
 
             bool enable = !accountInfo.isActive;
+            bool requiresApproval = enable && (accountInfo.verifyStatus == null || accountInfo.verifyStatus == false);
             var sql = new StringBuilder(@"
                 UPDATE System_UserAccount
                 SET isActive = @isActive,
@@ -656,13 +680,9 @@ namespace protectTreesV2.backstage.system
                 new SqlParameter("@accountID", accountId)
             };
 
-            if (enable)
+            if (requiresApproval)
             {
-                sql.Append(", lastUpdatePWDateTime = GETDATE()");
-                if (accountInfo.verifyStatus == null)
-                {
-                    sql.Append(", verifyStatus = 1, verifyDateTime = GETDATE()");
-                }
+                sql.Append(", verifyStatus = 1, verifyDateTime = GETDATE()");
             }
 
             sql.Append(" WHERE accountID = @accountID");
@@ -675,7 +695,15 @@ namespace protectTreesV2.backstage.system
             string statusText = enable ? "啟用" : "停用";
             UserLog.Insert_UserLog(CurrentUser?.accountID ?? -1, UserLog.enum_UserLogItem.系統帳號管理, UserLog.enum_UserLogType.修改, $"帳號{statusText}：{accountInfo.account}");
 
-            SendAccountNotification(accountInfo, enable ? "帳號已啟用" : "帳號已停用");
+            if (requiresApproval)
+            {
+                string generatedPassword = EnsureTemporaryPassword(accountId);
+                SendApprovalNotification(accountInfo, generatedPassword);
+            }
+            else
+            {
+                SendAccountNotification(accountInfo, enable ? "帳號已啟用" : "帳號已停用");
+            }
 
             ShowMessage("完成", $"帳號已{statusText}。", "success");
             BindAccountList();
@@ -732,6 +760,64 @@ namespace protectTreesV2.backstage.system
                 actionText);
 
             Mail.SendMail(mailTo, subject, body);
+        }
+
+        private void SendApprovalNotification(AccountEntry accountInfo, string generatedPassword)
+        {
+            if (accountInfo == null || string.IsNullOrWhiteSpace(accountInfo.email))
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(generatedPassword))
+            {
+                SendAccountNotification(accountInfo, "帳號審核通過");
+                return;
+            }
+
+            var mailTo = new List<MailAddress> { new MailAddress(accountInfo.email, accountInfo.name) };
+            string subject = "[受保護樹木管理系統] 帳號審核通過通知";
+            string body = string.Format(
+                "{0} 您好，您的帳號（{1}）已審核通過。<br><br>" +
+                "系統已為您產生登入密碼：<strong>{2}</strong><br>" +
+                "請您登入後立即變更密碼，以確保帳號安全。<br><br>" +
+                "此為系統自動發送之信件，請勿回覆。若有疑問請洽系統管理者。",
+                accountInfo.name,
+                accountInfo.account,
+                generatedPassword);
+
+            Mail.SendMail(mailTo, subject, body);
+        }
+
+        private string EnsureTemporaryPassword(int accountId)
+        {
+            const string selectSql = "SELECT password FROM System_UserAccount WHERE accountID = @accountID";
+            using (var da = new DataAccess.MS_SQL())
+            {
+                object current = da.ExcuteScalar(selectSql, new SqlParameter("@accountID", accountId));
+                if (current != null && current != DBNull.Value && !string.IsNullOrWhiteSpace(current.ToString()))
+                {
+                    return null;
+                }
+
+                string tempPassword = Account.GenerateTemporaryPassword();
+                string hashPassword = Account.Get_HashPassword(tempPassword);
+
+                const string updateSql = @"
+                    UPDATE System_UserAccount
+                    SET password = @password,
+                        lastUpdatePWDateTime = GETDATE(),
+                        updateDateTime = GETDATE(),
+                        updateAccountID = @updateAccountID
+                    WHERE accountID = @accountID";
+
+                da.ExecNonQuery(updateSql,
+                    new SqlParameter("@password", hashPassword),
+                    new SqlParameter("@updateAccountID", CurrentUser?.accountID ?? -1),
+                    new SqlParameter("@accountID", accountId));
+
+                return tempPassword;
+            }
         }
 
         protected void LinkButton_exportExcel_Click(object sender, EventArgs e)
