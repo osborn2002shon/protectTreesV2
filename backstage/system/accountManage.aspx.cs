@@ -349,6 +349,7 @@ namespace protectTreesV2.backstage.system
             string accountType = dataRow["accountType"].ToString();
             bool isActive = dataRow["isActive"] != DBNull.Value && (bool)dataRow["isActive"];
             bool? verifyStatus = dataRow["verifyStatus"] == DBNull.Value ? (bool?)null : (bool)dataRow["verifyStatus"];
+            bool hasLastLogin = dataRow["lastLoginDateTime"] != DBNull.Value;
 
             var editButton = (LinkButton)e.Row.FindControl("LinkButton_edit");
             var toggleButton = (LinkButton)e.Row.FindControl("LinkButton_toggle");
@@ -358,7 +359,7 @@ namespace protectTreesV2.backstage.system
 
             bool isReviewed = verifyStatus != null;
             editButton.Visible = canEdit;
-            toggleButton.Visible = canManageAccount && isReviewed;
+            toggleButton.Visible = canManageAccount && isReviewed && (isActive || hasLastLogin);
 
             if (editButton.Visible)
             {
@@ -918,7 +919,7 @@ namespace protectTreesV2.backstage.system
         {
             if (dateValue == DBNull.Value || dateValue == null)
             {
-                return string.Empty;
+                return "（尚未進行初次登入）";
             }
 
             if (dateValue is DateTime dt)
