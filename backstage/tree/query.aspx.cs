@@ -27,6 +27,13 @@ namespace protectTreesV2.backstage.tree
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsEditorAccount())
+            {
+                var savedFilter = base.GetState<TreeFilter>();
+                base.RedirectState("view.aspx", savedFilter);
+                return;
+            }
+
             if (!IsPostBack)
             {
                 BindDropdowns();
@@ -194,6 +201,8 @@ namespace protectTreesV2.backstage.tree
         {
             var filter = CurrentFilter;
             var records = TreeService.SearchTrees(filter) ?? new List<TreeRecord>();
+            var managedAreas = GetManagedAreaIds();
+            records = ApplyVisibilityFilter(records, managedAreas);
 
             var sortExpression = ViewState[SortExpressionKey] as string;
             var sortDirection = ViewState[SortDirectionKey] as string ?? "ASC";
@@ -203,7 +212,7 @@ namespace protectTreesV2.backstage.tree
             gvTrees.DataSource = records;
             gvTrees.DataBind();
 
-            var total = TreeService.SearchTrees(null)?.Count ?? 0;
+            var total = ApplyVisibilityFilter(TreeService.SearchTrees(null) ?? new List<TreeRecord>(), managedAreas).Count;
             lblCount.Text = $"資料總筆數：{total}／查詢結果：{records.Count}";
         }
 
@@ -231,6 +240,48 @@ namespace protectTreesV2.backstage.tree
             return string.Equals(direction, "DESC", StringComparison.OrdinalIgnoreCase)
                 ? source.OrderByDescending(keySelector).ToList()
                 : source.OrderBy(keySelector).ToList();
+        }
+
+        private static List<TreeRecord> ApplyVisibilityFilter(IEnumerable<TreeRecord> source, HashSet<int> managedAreas)
+        {
+            if (source == null) return new List<TreeRecord>();
+            managedAreas ??= new HashSet<int>();
+            return source
+                .Where(record => record != null && (IsManagedTree(record, managedAreas) || record.EditStatus == TreeEditState.定稿))
+                .ToList();
+        }
+
+        private static bool IsManagedTree(TreeRecord record, HashSet<int> managedAreas)
+        {
+            if (record?.AreaID == null) return false;
+            return managedAreas != null && managedAreas.Contains(record.AreaID.Value);
+        }
+
+        private HashSet<int> GetManagedAreaIds()
+        {
+            var user = UserInfo.GetCurrentUser;
+            if (user == null) return new HashSet<int>();
+
+            using (var da = new DataAccess.MS_SQL())
+            {
+                const string sql = "SELECT twID FROM System_UnitCityMapping WHERE unitID=@unitID";
+                var dt = da.GetDataTable(sql, new System.Data.SqlClient.SqlParameter("@unitID", user.unitID));
+                var managedAreas = new HashSet<int>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    if (int.TryParse(row["twID"]?.ToString(), out int twId))
+                    {
+                        managedAreas.Add(twId);
+                    }
+                }
+                return managedAreas;
+            }
+        }
+
+        private static bool IsEditorAccount()
+        {
+            var user = UserInfo.GetCurrentUser;
+            return user != null && (user.auTypeID == 1 || user.auTypeID == 4);
         }
 
         protected void ddlCity_SelectedIndexChanged(object sender, EventArgs e)
