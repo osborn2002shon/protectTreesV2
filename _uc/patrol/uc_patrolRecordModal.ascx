@@ -36,8 +36,8 @@
                     </HeaderTemplate>
                     <ItemTemplate>
                         <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-                            <a href='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "#" : ResolveUrl(Eval("FilePath").ToString()) %>' target="_blank" rel="noopener">
-                                <img src='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" : ResolveUrl(Eval("FilePath").ToString()) %>' alt='<%# Eval("FileName") %>' class="img-fluid rounded border shadow-sm" />
+                            <a href='<%# ResolvePhotoUrl(Eval("FilePath")) %>' target="_blank" rel="noopener">
+                                <img src='<%# ResolvePhotoPreview(Eval("FilePath")) %>' alt='<%# Eval("FileName") %>' class="img-fluid rounded border shadow-sm" />
                             </a>
                             <div class="small text-muted mt-2 text-truncate" title='<%# Eval("FileName") %>'><%# Eval("FileName") %></div>
                         </div>

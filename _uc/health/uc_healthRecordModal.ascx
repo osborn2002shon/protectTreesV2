@@ -256,7 +256,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <li class="mb-1">
-                                <a href='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "#" : ResolveUrl(Eval("FilePath").ToString()) %>' target="_blank" rel="noopener">
+                                <a href='<%# ResolvePhotoUrl(Eval("FilePath")) %>' target="_blank" rel="noopener">
                                     <i class="fas fa-paperclip me-1"></i> <%# Eval("FileName") %>
                                 </a>
                             </li>
@@ -282,8 +282,8 @@
                         <ItemTemplate>
                             <div class="col-lg-3 col-md-4 col-sm-6 col-12">
                                 <%-- 1. 圖片--%>
-                                <a href='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "#" : ResolveUrl(Eval("FilePath").ToString()) %>' target="_blank" rel="noopener">
-                                    <img src='<%# string.IsNullOrEmpty(Eval("FilePath") as string) ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" : ResolveUrl(Eval("FilePath").ToString()) %>' 
+                                <a href='<%# ResolvePhotoUrl(Eval("FilePath")) %>' target="_blank" rel="noopener">
+                                    <img src='<%# ResolvePhotoPreview(Eval("FilePath")) %>' 
                                          alt='<%# Eval("FileName") %>' 
                                          class="img-fluid rounded border shadow-sm" />
                                 </a>

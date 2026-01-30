@@ -1,4 +1,5 @@
-﻿using protectTreesV2.Patrol;
+﻿using protectTreesV2.Base;
+using protectTreesV2.Patrol;
 using System.Collections.Generic;
 
 namespace protectTreesV2._uc.patrol
@@ -50,6 +51,22 @@ namespace protectTreesV2._uc.patrol
         private static string FormatText(string value)
         {
             return string.IsNullOrWhiteSpace(value) ? "--" : value.Trim();
+        }
+
+        protected string ResolvePhotoUrl(object pathObj)
+        {
+            var path = pathObj as string;
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath) ? "#" : ResolveUrl(resolvedPath);
+        }
+
+        protected string ResolvePhotoPreview(object pathObj)
+        {
+            var path = pathObj as string;
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath)
+                ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                : ResolveUrl(resolvedPath);
         }
 
     }

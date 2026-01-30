@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
+using protectTreesV2.Base;
 using protectTreesV2.TreeCatalog;
 
 namespace protectTreesV2._uc
@@ -36,13 +37,14 @@ namespace protectTreesV2._uc
 
             if (coverPhoto != null)
             {
+                var coverPhotoPath = VirtualPathHelper.ApplyVirtualName(coverPhoto.FilePath);
                 imgCover.ImageUrl = TransparentPixel;
                 imgCover.AlternateText = BuildLightboxTitle(coverPhoto);
                 imgCover.Attributes["loading"] = "lazy";
                 imgCover.Attributes["decoding"] = "async";
-                imgCover.Attributes["data-src"] = coverPhoto.FilePath;
+                imgCover.Attributes["data-src"] = coverPhotoPath;
 
-                lnkCoverLightbox.HRef = coverPhoto.FilePath;
+                lnkCoverLightbox.HRef = coverPhotoPath;
                 lnkCoverLightbox.Attributes["data-gallery"] = GalleryNameValue;
                 lnkCoverLightbox.Attributes["data-title"] = BuildLightboxTitle(coverPhoto);
                 lnkCoverLightbox.Attributes["data-description"] = BuildLightboxDescriptionAttribute(coverPhoto);
@@ -100,6 +102,12 @@ namespace protectTreesV2._uc
         protected string BuildLightboxDescriptionAttributeFromData(object dataItem)
         {
             return BuildLightboxDescriptionAttribute(dataItem as TreePhoto);
+        }
+
+        protected string ResolvePhotoPath(object pathObj)
+        {
+            var path = pathObj as string;
+            return VirtualPathHelper.ApplyVirtualName(path);
         }
     }
 }

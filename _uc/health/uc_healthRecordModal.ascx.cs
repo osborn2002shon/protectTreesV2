@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web;
+using protectTreesV2.Base;
 using static protectTreesV2.Health.Health;
 
 namespace protectTreesV2._uc.health
@@ -436,6 +437,22 @@ namespace protectTreesV2._uc.health
             rptPhotos.DataSource = photos;
             rptPhotos.DataBind();
             phPhotoEmpty.Visible = photos.Count == 0;
+        }
+
+        protected string ResolvePhotoUrl(object pathObj)
+        {
+            var path = pathObj as string;
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath) ? "#" : ResolveUrl(resolvedPath);
+        }
+
+        protected string ResolvePhotoPreview(object pathObj)
+        {
+            var path = pathObj as string;
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath)
+                ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                : ResolveUrl(resolvedPath);
         }
 
         private static void AppendIfNotEmpty(ICollection<string> target, string label, string value)

@@ -144,5 +144,12 @@ namespace protectTreesV2.backstage.tree
         {
             Response.Redirect("edit.aspx");
         }
+
+        protected string ResolvePhotoPath(object pathObj)
+        {
+            var path = pathObj as string;
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath) ? "#" : ResolveUrl(resolvedPath);
+        }
     }
 }

@@ -36,7 +36,7 @@
                 <ItemTemplate>
                     <div class="row">
                         <div class="col">
-                            <asp:Image runat="server" ImageUrl='<%# Eval("FilePath") %>' Width="150" />
+                            <asp:Image runat="server" ImageUrl='<%# ResolvePhotoPath(Eval("FilePath")) %>' Width="150" />
                         </div>
                         <div class="col">
                             <asp:Label runat="server" Text='<%# Eval("Caption") %>' />

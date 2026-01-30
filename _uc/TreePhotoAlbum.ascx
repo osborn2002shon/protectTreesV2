@@ -118,14 +118,14 @@
                 </HeaderTemplate>
                 <ItemTemplate>
                     <div class="tree-gallery-thumb">
-                        <a href='<%# Eval("FilePath") %>' class="tree-lightbox d-block" data-gallery='<%# GalleryNameValue %>' data-title='<%# BuildLightboxTitleFromData(Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttributeFromData(Container.DataItem) %>'>
+                        <a href='<%# ResolvePhotoPath(Eval("FilePath")) %>' class="tree-lightbox d-block" data-gallery='<%# GalleryNameValue %>' data-title='<%# BuildLightboxTitleFromData(Container.DataItem) %>' data-description='<%# BuildLightboxDescriptionAttributeFromData(Container.DataItem) %>'>
                             <div class="ratio ratio-4x3 overflow-hidden bg-light image-wrapper is-loading" style="min-height:100px;">
                                 <div class="loading-indicator" >
                                     <div class="spinner-border spinner-border-sm text-success" role="status">
                                         <span class="visually-hidden">圖片載入中</span>
                                     </div>
                                 </div>
-                                <img data-src='<%# Eval("FilePath") %>' src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" loading="lazy" decoding="async" class="w-100 h-100 lazy-image" alt='<%# BuildLightboxTitleFromData(Container.DataItem) %>' />
+                                <img data-src='<%# ResolvePhotoPath(Eval("FilePath")) %>' src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" loading="lazy" decoding="async" class="w-100 h-100 lazy-image" alt='<%# BuildLightboxTitleFromData(Container.DataItem) %>' />
                             </div>
                         </a>
                     </div>
