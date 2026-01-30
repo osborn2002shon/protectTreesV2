@@ -209,7 +209,7 @@
                         step: 1 //強制顯示每一個標籤 
                     }
                 },
-
+                credits: { enabled: false }, exporting: { enabled: false },
                 yAxis: {
                     min: 0,
                     max: 100,
@@ -218,7 +218,7 @@
                 },
                 tooltip: {
                     shared: true,
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} 株</b> ({point.percentage:.1f}%)<br/>'
+                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y} 案</b> ({point.percentage:.1f}%)<br/>'
                 },
                 plotOptions: {
                     column: {
