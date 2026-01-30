@@ -67,6 +67,7 @@ namespace protectTreesV2._uc.dashboard
             script.AppendLine($"xAxis: {{ categories: {categoriesJson}, labels: {{ rotation: -45 }} }},");
             script.AppendLine("yAxis: { min: 0, title: { text: '次數' } },");
             script.AppendLine("legend: { enabled: false },");
+            script.AppendLine("plotOptions: { series: { dataLabels: { enabled: true } } },");
             script.AppendLine($"series: {seriesJson}");
             script.AppendLine("});");
             script.AppendLine("});");
