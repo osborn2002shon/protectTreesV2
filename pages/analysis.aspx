@@ -288,7 +288,7 @@
                         colors: seriesColors
                     }],
                     tooltip: {
-                        pointFormat: '<b>{point.percentage:.1f}%</b><br/>數量: <b>{point.y}</b> 棵'
+                        pointFormat: '<b>{point.percentage:.1f}%</b><br/>數量: <b>{point.y}</b> 案'
                     },
                     legend: {
                         layout: 'horizontal',
@@ -394,7 +394,7 @@
                 }
             }],
             tooltip: {
-                pointFormat: '<b>{point.y}</b> 棵樹'
+                pointFormat: '<b>{point.y}</b> 案'
             },
             legend: {
                 enabled: false
