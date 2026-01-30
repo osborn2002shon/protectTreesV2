@@ -245,7 +245,8 @@ namespace protectTreesV2.backstage.tree
         private static List<TreeRecord> ApplyVisibilityFilter(IEnumerable<TreeRecord> source, HashSet<int> managedAreas)
         {
             if (source == null) return new List<TreeRecord>();
-            managedAreas ??= new HashSet<int>();
+            if (managedAreas == null)
+                managedAreas = new HashSet<int>();
             return source
                 .Where(record => record != null && (IsManagedTree(record, managedAreas) || record.EditStatus == TreeEditState.定稿))
                 .ToList();
