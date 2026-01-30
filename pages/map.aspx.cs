@@ -87,8 +87,8 @@ WHERE r.editStatus = 1
                         Area = DataRowHelper.GetString(row, "area"),
                         Species = DataRowHelper.GetString(row, "commonName"),
                         SpeciesScientificName = DataRowHelper.GetString(row, "scientificName"),
-                        Latitude = DataRowHelper.GetString(row, "latitude"),
-                        Longitude = DataRowHelper.GetString(row, "longitude"),
+                        Latitude = FormatCoordinate(DataRowHelper.GetString(row, "latitude")),
+                        Longitude = FormatCoordinate(DataRowHelper.GetString(row, "longitude")),
                         Age = estimatedAge,
                         BreastHeightDiameter = DataRowHelper.GetString(row, "breastHeightDiameter"),
                         BreastHeightCircumference = DataRowHelper.GetString(row, "breastHeightCircumference"),
@@ -100,7 +100,7 @@ WHERE r.editStatus = 1
                         RecognitionReasonsHtml = BuildRecognitionDisplay(recognitionCriteria, criteriaLookup),
                         CulturalHistoryIntro = DataRowHelper.GetString(row, "culturalHistoryIntro"),
                         TreeHeight = DataRowHelper.GetString(row, "treeHeight"),
-                        PhotoUrls = DataRowHelper.GetString(row, "photoUrls")
+                        PhotoUrls = ApplyVirtualNameToPhotoUrls(DataRowHelper.GetString(row, "photoUrls"))
                     });
                 }
 
@@ -129,6 +129,21 @@ WHERE r.editStatus = 1
             int currentYear = DateTime.Now.Year;
             int age = currentYear - year;
             return age >= 0 ? (int?)age : null;
+        }
+
+        private static string FormatCoordinate(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            if (decimal.TryParse(value, out var coordinate))
+            {
+                return coordinate.ToString("0.#####");
+            }
+
+            return value;
         }
 
         private static string BuildRecognitionDisplay(string criteriaRaw, IDictionary<string, string> criteriaLookup)
@@ -160,6 +175,22 @@ WHERE r.editStatus = 1
             }
 
             return HttpUtility.HtmlEncode(string.Join(",", codes));
+        }
+
+        private static string ApplyVirtualNameToPhotoUrls(string photoUrls)
+        {
+            if (string.IsNullOrWhiteSpace(photoUrls))
+            {
+                return photoUrls;
+            }
+
+            var resolvedPaths = photoUrls
+                .Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(path => VirtualPathHelper.ApplyVirtualName(path.Trim()))
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .ToArray();
+
+            return resolvedPaths.Length > 0 ? string.Join("|", resolvedPaths) : string.Empty;
         }
 
         private class TreeMapRecord
