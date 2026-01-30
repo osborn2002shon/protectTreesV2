@@ -76,11 +76,11 @@
                             <div class="row align-items-end">
                                 <div class="col">
                                     <asp:Label runat="server" AssociatedControlID="txtLatitude" Text="座標(WGS84) 緯度(N)" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
-                                    <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" Step="0.000001" CssClass="form-control" placeholder="25.032969" />
+                                    <asp:TextBox ID="txtLatitude" runat="server" TextMode="Number" Step="0.00001" CssClass="form-control" placeholder="25.03297" />
                                 </div>
                                 <div class="col">
                                     <asp:Label runat="server" AssociatedControlID="txtLongitude" Text="座標(WGS84) 經度(E)" /><span class="text-danger required-marker required-final">*</span><i class="fa-solid fa-eye"></i>
-                                    <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number" Step="0.000001" CssClass="form-control" placeholder="121.565418" />
+                                    <asp:TextBox ID="txtLongitude" runat="server" TextMode="Number" Step="0.00001" CssClass="form-control" placeholder="121.56542" />
                                 </div>
                                 <div class="col">
                                     <asp:Label runat="server" AssociatedControlID="btnCoordinateTool" Text="座標轉換" />
@@ -89,7 +89,7 @@
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <small class="form-text text-muted">請輸入精度最多至第六位的經緯度座標</small>
+                                    <small class="form-text text-muted">請輸入精度最多至第五位的經緯度座標</small>
                                 </div>
                             </div>
                             <div class="row">
