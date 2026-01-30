@@ -23,7 +23,7 @@
                     </div>
 
                 </div>
-                <div class="col">
+                <div class="col" runat="server" id="editStatusColumn" visible="false">
                     <asp:Label runat="server" AssociatedControlID="ddlEditStatus" Text="編輯狀態" />
                     <asp:DropDownList ID="ddlEditStatus" runat="server" CssClass="form-select" />
                 </div>

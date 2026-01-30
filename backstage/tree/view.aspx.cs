@@ -58,6 +58,7 @@ namespace protectTreesV2.backstage.tree
             ddlEditStatus.Items.Add(new ListItem("不拘", string.Empty));
             ddlEditStatus.Items.Add(new ListItem("草稿", ((int)TreeEditState.草稿).ToString()));
             ddlEditStatus.Items.Add(new ListItem("定稿", ((int)TreeEditState.定稿).ToString()));
+            ddlEditStatus.SelectedValue = ((int)TreeEditState.定稿).ToString();
 
             ddlTreeStatus.Items.Clear();
             ddlTreeStatus.Items.Add(new ListItem("不拘", string.Empty));
@@ -90,7 +91,7 @@ namespace protectTreesV2.backstage.tree
             {
                 CityID = string.IsNullOrWhiteSpace(ddlCity.SelectedValue) ? (int?)null : Convert.ToInt32(ddlCity.SelectedValue),
                 AreaID = string.IsNullOrWhiteSpace(ddlArea.SelectedValue) ? (int?)null : Convert.ToInt32(ddlArea.SelectedValue),
-                EditStatus = string.IsNullOrWhiteSpace(ddlEditStatus.SelectedValue) ? (TreeEditState?)null : (TreeEditState)Convert.ToInt32(ddlEditStatus.SelectedValue),
+                EditStatus = TreeEditState.定稿,
                 Status = string.IsNullOrWhiteSpace(ddlTreeStatus.SelectedValue) ? (TreeStatus?)null : (TreeStatus)Convert.ToInt32(ddlTreeStatus.SelectedValue),
                 SpeciesID = string.IsNullOrWhiteSpace(ddlSpecies.SelectedValue) ? (int?)null : Convert.ToInt32(ddlSpecies.SelectedValue),
                 SurveyDateStart = ParseDate(txtSurveyStart.Text),
@@ -129,14 +130,7 @@ namespace protectTreesV2.backstage.tree
                 }
             }
 
-            if (filter.EditStatus.HasValue)
-            {
-                var editStatusVal = ((int)filter.EditStatus.Value).ToString();
-                if (ddlEditStatus.Items.FindByValue(editStatusVal) != null)
-                {
-                    ddlEditStatus.SelectedValue = editStatusVal;
-                }
-            }
+            ddlEditStatus.SelectedValue = ((int)TreeEditState.定稿).ToString();
 
             if (filter.Status.HasValue)
             {
@@ -184,8 +178,7 @@ namespace protectTreesV2.backstage.tree
         {
             var filter = CurrentFilter;
             var records = TreeService.SearchTrees(filter) ?? new List<TreeRecord>();
-            var managedAreas = GetManagedAreaIds();
-            records = ApplyVisibilityFilter(records, managedAreas);
+            records = ApplyVisibilityFilter(records);
 
             var sortExpression = ViewState[SortExpressionKey] as string;
             var sortDirection = ViewState[SortDirectionKey] as string ?? "ASC";
@@ -195,7 +188,7 @@ namespace protectTreesV2.backstage.tree
             gvTrees.DataSource = records;
             gvTrees.DataBind();
 
-            var total = ApplyVisibilityFilter(TreeService.SearchTrees(null) ?? new List<TreeRecord>(), managedAreas).Count;
+            var total = ApplyVisibilityFilter(TreeService.SearchTrees(null) ?? new List<TreeRecord>()).Count;
             lblCount.Text = $"資料總筆數：{total}／查詢結果：{records.Count}";
         }
 
@@ -225,40 +218,12 @@ namespace protectTreesV2.backstage.tree
                 : source.OrderBy(keySelector).ToList();
         }
 
-        private static List<TreeRecord> ApplyVisibilityFilter(IEnumerable<TreeRecord> source, HashSet<int> managedAreas)
+        private static List<TreeRecord> ApplyVisibilityFilter(IEnumerable<TreeRecord> source)
         {
             if (source == null) return new List<TreeRecord>();
-            managedAreas ??= new HashSet<int>();
             return source
-                .Where(record => record != null && (IsManagedTree(record, managedAreas) || record.EditStatus == TreeEditState.定稿))
+                .Where(record => record != null && record.EditStatus == TreeEditState.定稿)
                 .ToList();
-        }
-
-        private static bool IsManagedTree(TreeRecord record, HashSet<int> managedAreas)
-        {
-            if (record?.AreaID == null) return false;
-            return managedAreas != null && managedAreas.Contains(record.AreaID.Value);
-        }
-
-        private HashSet<int> GetManagedAreaIds()
-        {
-            var user = UserInfo.GetCurrentUser;
-            if (user == null) return new HashSet<int>();
-
-            using (var da = new DataAccess.MS_SQL())
-            {
-                const string sql = "SELECT twID FROM System_UnitCityMapping WHERE unitID=@unitID";
-                var dt = da.GetDataTable(sql, new System.Data.SqlClient.SqlParameter("@unitID", user.unitID));
-                var managedAreas = new HashSet<int>();
-                foreach (DataRow row in dt.Rows)
-                {
-                    if (int.TryParse(row["twID"]?.ToString(), out int twId))
-                    {
-                        managedAreas.Add(twId);
-                    }
-                }
-                return managedAreas;
-            }
         }
 
         protected void ddlCity_SelectedIndexChanged(object sender, EventArgs e)
