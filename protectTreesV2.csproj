@@ -238,6 +238,7 @@
     <Compile Include="Lib\Base\Base.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Lib\Base\VirtualPathHelper.cs" />
     <Compile Include="Lib\Base\DataAccess_MS_SQL.cs" />
     <Compile Include="Lib\Base\Log.cs" />
     <Compile Include="Lib\Base\Mail.cs" />

@@ -585,7 +585,7 @@
                     <asp:Repeater ID="rptPhotos" runat="server" OnItemCommand="rptPhotos_ItemCommand" OnItemDataBound="rptPhotos_ItemDataBound">
                         <ItemTemplate>
                             <div class="photo-card">
-                                <img src='<%# ResolveUrl(Eval("FilePath").ToString()) %>' alt='<%# Eval("Caption") %>' />
+                                <img src='<%# ResolvePhotoPath(Eval("FilePath")) %>' alt='<%# Eval("Caption") %>' />
                                 <div class="mt-2"><%# Eval("Caption") %></div>
                                 <asp:HiddenField ID="hfPhotoCaption" runat="server" Value='<%# Eval("Caption") %>' />
                                 <asp:Panel ID="pnlCover" runat="server" Visible='<%# Convert.ToBoolean(Eval("IsCover")) %>'>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using protectTreesV2.Base;
 using protectTreesV2.Care;
 
 namespace protectTreesV2._uc.care
@@ -87,13 +88,15 @@ namespace protectTreesV2._uc.care
         protected string ResolvePhotoUrl(object pathObj)
         {
             var path = pathObj as string;
-            return string.IsNullOrWhiteSpace(path) ? "#" : ResolveUrl(path);
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath) ? "#" : ResolveUrl(resolvedPath);
         }
 
         protected string ResolvePhotoPreview(object pathObj)
         {
             var path = pathObj as string;
-            return string.IsNullOrWhiteSpace(path) ? EmptyImage : ResolveUrl(path);
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath) ? EmptyImage : ResolveUrl(resolvedPath);
         }
 
         protected string FormatText(string value)

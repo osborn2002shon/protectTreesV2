@@ -1298,5 +1298,12 @@ namespace protectTreesV2.backstage.Manage
             lnkReturnToDetail.Enabled = lnkHealth.Enabled = lnkPatrol.Enabled = lnkCare.Enabled = treeId.HasValue;
             pnlDetailNavigation.Visible = treeId.HasValue;
         }
+
+        protected string ResolvePhotoPath(object pathObj)
+        {
+            var path = pathObj as string;
+            var resolvedPath = VirtualPathHelper.ApplyVirtualName(path);
+            return string.IsNullOrWhiteSpace(resolvedPath) ? "#" : ResolveUrl(resolvedPath);
+        }
     }
 }
